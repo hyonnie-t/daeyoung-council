@@ -1068,7 +1068,6 @@ document.addEventListener('click', function(e) {
     else { tCS = tCS === date ? null : date; renderCal('t'); }
     return;
   }
-  }
 
   // data-action (동적 카드 내부)
   const el = e.target.closest('[data-action]');
@@ -1128,20 +1127,10 @@ function goHome(){
   document.getElementById('teacherView').style.display='none';
 }
 
-// 초기화
-document.addEventListener('DOMContentLoaded', function() {
-  fillAllSels();
-  buildCoworkList('');
-  bindAll();
-});
-// script가 body 끝에 있어서 DOM이 이미 로드된 경우 대비
-if (document.readyState === 'loading') {
-  // DOMContentLoaded에서 처리됨
-} else {
-  fillAllSels();
-  buildCoworkList('');
-  bindAll();
-}
+// 초기화 - script는 body 끝에 위치하므로 DOM이 항상 로드된 상태
+fillAllSels();
+buildCoworkList('');
+bindAll();
 </script>
 </body>
 </html>
