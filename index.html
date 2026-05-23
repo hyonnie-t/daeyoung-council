@@ -42,7 +42,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .bs{padding:12px;background:var(--accent);border:none;color:#fff;border-radius:10px;font-size:14px;font-weight:700;transition:all .2s;flex:2}
 
 /* 모드 선택 */
-#modeSelect{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 24px}#myArea .empty,#manArea .empty{padding:20px 24px};gap:32px;background:linear-gradient(135deg,#f8f9fa,#e9ecef)}
+#modeSelect{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 24px;gap:32px;background:linear-gradient(135deg,#f8f9fa,#e9ecef)}
 .logo-s{font-size:11px;color:var(--text3);letter-spacing:3px;font-family:'Space Mono',monospace;margin-bottom:8px}
 .logo-t{font-size:32px;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.2}
 .logo-sub{font-size:13px;color:var(--text2);margin-top:8px}
@@ -53,7 +53,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .mc-i{font-size:28px;margin-bottom:12px}.mc-t{font-size:18px;font-weight:700;margin-bottom:4px}.mc-d{font-size:13px;color:var(--text2);line-height:1.6}
 
 /* 비밀번호 화면 */
-#pwScreen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 24px}#myArea .empty,#manArea .empty{padding:20px 24px};background:linear-gradient(135deg,#f8f9fa,#e9ecef)}
+#pwScreen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 24px;background:linear-gradient(135deg,#f8f9fa,#e9ecef)}
 .pw-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:32px 24px;width:100%;max-width:320px;box-shadow:var(--sh2);text-align:center}
 .pw-title{font-size:18px;font-weight:700;margin-bottom:6px}
 .pw-sub{font-size:13px;color:var(--text2);margin-bottom:24px}
@@ -257,7 +257,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .sc3:hover{color:var(--text)}
 
 /* 빈 상태 */
-.empty{text-align:center;padding:40px 24px}#myArea .empty,#manArea .empty{padding:20px 24px};color:var(--text3)}
+.empty{text-align:center;padding:40px 24px;color:var(--text3)}
 .empty .ei{font-size:36px;margin-bottom:12px}
 .empty p{font-size:13px;line-height:1.8}
 
@@ -312,7 +312,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
   <div class="tp active" id="sP0">
     <div id="unNotice"></div>
     <div class="nw"><label>내 이름</label><select id="s0Name"></select></div>
-    <div id="myArea"><div class="empty"><div class="ei">👆</div><p>이름을 선택하면<br>내 업무가 나타나요</p><img src="illust-student.png" alt="" style="width:100%;max-width:260px;margin-top:20px;border-radius:16px;opacity:0.9"></div></div>
+    <div id="myArea"><div class="empty" style="padding:20px 24px"><div class="ei">👆</div><p>이름을 선택하면<br>내 업무가 나타나요</p><img src="illust-student.png" alt="" style="width:100%;max-width:260px;margin-top:20px;border-radius:16px;opacity:0.9"></div></div>
   </div>
   <div class="tp" id="sP1">
     <div class="nw"><label>내 이름 <span class="req">*</span></label><select id="s1Name"></select></div>
@@ -335,7 +335,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
   </div>
   <div class="tp" id="sP2">
     <div class="nw"><label>내 이름</label><select id="s2Name"></select></div>
-  <div id="manArea"><div class="empty"><div class="ei">👆</div><p>이름을 선택해주세요</p><img src="illust-student.png" alt="" style="width:100%;max-width:260px;margin-top:20px;border-radius:16px;opacity:0.9"></div></div>
+  <div id="manArea"><div class="empty" style="padding:20px 24px"><div class="ei">👆</div><p>이름을 선택해주세요</p><img src="illust-student.png" alt="" style="width:100%;max-width:260px;margin-top:20px;border-radius:16px;opacity:0.9"></div></div>
   </div>
   <div class="tp" id="sP3">
     <div class="ch"><button type="button" class="cn" id="sCP">‹</button><div class="ct" id="sCT"></div><button type="button" class="cn" id="sCN">›</button></div>
