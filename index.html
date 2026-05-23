@@ -260,7 +260,8 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .empty{text-align:center;padding:40px 24px;color:var(--text3)}
 .empty .ei{font-size:36px;margin-bottom:12px}
 .empty p{font-size:13px;line-height:1.8}
-
+@media(max-width:480px){#myArea .empty,#manArea .empty{padding:8px 24px}}
+  
 /* 토스트 */
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--text);color:var(--bg);padding:12px 24px;border-radius:20px;font-size:13px;font-weight:500;transition:transform .3s;z-index:9999;white-space:nowrap;box-shadow:var(--sh2)}
 #toast.show{transform:translateX(-50%) translateY(0)}
