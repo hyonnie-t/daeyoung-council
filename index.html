@@ -335,7 +335,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
   </div>
   <div class="tp" id="sP2">
     <div class="nw"><label>내 이름</label><select id="s2Name"></select></div>
-    <div id="manArea"><div class="empty"><div class="ei">👆</div><p>이름을 선택해주세요</p></div></div>
+  <div id="manArea"><div class="empty"><div class="ei">👆</div><p>이름을 선택해주세요</p><img src="illust-student.png" alt="" style="width:100%;max-width:260px;margin-top:20px;border-radius:16px;opacity:0.9"></div></div>
   </div>
   <div class="tp" id="sP3">
     <div class="ch"><button type="button" class="cn" id="sCP">‹</button><div class="ct" id="sCT"></div><button type="button" class="cn" id="sCN">›</button></div>
@@ -792,7 +792,7 @@ function submitTask(){
 function renderManage(){
   const name=document.getElementById('s2Name').value;
   const area=document.getElementById('manArea');
-  if(!name){area.innerHTML='<div class="empty"><div class="ei">👆</div><p>이름을 선택해주세요</p></div>';return;}
+  if(!name){area.innerHTML='<div class="empty"><div class="ei">👆</div><p>이름을 선택해주세요<img src="illust-student.png" alt="" style="width:100%;max-width:260px;margin-top:20px;border-radius:16px;opacity:0.9"></p></div>';return;}
   const all=tasks.filter(t=>(t.assignees||[t.assignee]).includes(name));
   if(!all.length){area.innerHTML='<div class="empty"><div class="ei">📝</div><p>등록된 업무가 없어요</p></div>';return;}
   const opts={showSB:true,showEB:true,showDel:true};
