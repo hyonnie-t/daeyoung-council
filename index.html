@@ -1150,6 +1150,199 @@ document.addEventListener('click',function(e){
   if(action==='rmSub'){if(document.querySelectorAll('.sir').length<=1){toast('최소 1개 필요');return;}el.closest('.sir').remove();return;}
 });
 
+// =================================================================
+// 📊 [교사 모드] 출석 관리 시스템 고도화 가젯 (기존 UI & 클릭 이벤트 100% 안전 보존형)
+// =================================================================
+
+// 1. CSV 기반 고정 활동 날짜 명부 및 초기값
+let attDatesList = ['2026-03-19', '2026-03-27', '2026-04-06', '2026-04-08', '2026-04-20', '2026-05-14', '2026-06-10', '2026-07-10'];
+let currentAttDate = attDatesList[0];
+
+// 2. 대시보드(tP0) 하단에 출석 관리 섹션 안전하게 주입 (기존 이벤트 실행 흐름 방해 금지)
+function injectAttendanceGadget() {
+  const tp0 = document.getElementById('tP0');
+  if (tp0 && !document.getElementById('tAttGadgetWrap')) {
+    const wrapper = document.createElement('div');
+    wrapper.id = 'tAttGadgetWrap';
+    wrapper.innerHTML = `
+      <div class="stl" style="margin-top:28px; color:var(--accent3);">📅 [고도화] 학생회 출석 관리부</div>
+      <div id="tAttPanelContainer"></div>
+    `;
+    tp0.appendChild(wrapper);
+    
+    // 주입 직후 첫 렌더링 실행
+    renderAttendanceContent();
+  }
+}
+
+// 3. 학생별 개별 출석 상태 원격 Firebase 저장 엔진
+async function saveSingleAttendance(name, status) {
+  try {
+    await fetch(`${FB}/attendance/${currentAttDate}/${name}.json`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: status, timestamp: new Date().toISOString() })
+    });
+    toast(`${name}: ${status} 변경 완료`);
+  } catch(e) {
+    toast('서버 동기화 중 오류가 발생했습니다.');
+  }
+}
+
+// 4. [⚡ 일괄 처리] 전원 출석 등록 트랜잭션
+async function saveAllAttendanceAsPresent() {
+  if (!confirm(`${currentAttDate} 활동의 모든 임원을 '출석'으로 일괄 변경하시겠습니까?`)) return;
+  
+  toast('전원 출석 처리 중...');
+  const promises = MEMBERS.map(m => {
+    return fetch(`${FB}/attendance/${currentAttDate}/${m.name}.json`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: '출석', timestamp: new Date().toISOString() })
+    });
+  });
+  
+  try {
+    await Promise.all(promises);
+    toast('🎉 전원 출석 처리가 완료되었습니다!');
+    renderAttendanceContent();
+  } catch(e) {
+    toast('일괄 저장 처리 중 실패 항목이 있습니다.');
+  }
+}
+
+// 5. [➕ 무제한 확장] 미래/과거 활동 날짜 추가 기능
+function addNewAttendanceDate() {
+  const dateIpt = document.getElementById('newAttDateIpt');
+  const newD = dateIpt ? dateIpt.value : '';
+  if (!newD) { toast('추가할 날짜를 올바르게 선택해 주세요.'); return; }
+  if (attDatesList.includes(newD)) { toast('이미 목록에 존재하는 활동 일자입니다.'); return; }
+  
+  attDatesList.push(newD);
+  attDatesList.sort();
+  currentAttDate = newD;
+  toast(`📅 [${newD}] 활동일이 명부에 추가되었습니다.`);
+  renderAttendanceContent();
+}
+
+// 6. [📊 실시간 집계 및 대시보드 뷰 렌더러]
+async function renderAttendanceContent() {
+  const area = document.getElementById('tAttPanelContainer');
+  if (!area) return;
+  
+  let fullAttMap = {};
+  try {
+    const res = await fetch(`${FB}/attendance.json`);
+    fullAttMap = await res.json() || {};
+  } catch(e) {}
+  
+  const currentMap = fullAttMap[currentAttDate] || {};
+
+  // 아코디언 형태의 누적 참여 통계 가젯 생성
+  let statsHtml = `
+    <div class="ds" style="margin-bottom:12px; padding:12px; background:var(--surface);">
+      <div onclick="const s=this.nextElementSibling; s.style.display=s.style.display==='none'?'block':'none';" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+        <strong style="font-size:13px; color:var(--accent);">📊 임원별 누적 출결 통계판 (클릭하여 열기) ▼</strong>
+      </div>
+      <div style="display:none; margin-top:10px; max-height:160px; overflow-y:auto; border-top:1px solid var(--border); padding-top:8px; font-size:11px; line-height:1.6;">
+  `;
+  
+  MEMBERS.forEach(m => {
+    let p = 0, l = 0, a = 0;
+    Object.keys(fullAttMap).forEach(d => {
+      const st = fullAttMap[d]?.[m.name]?.status;
+      if (st === '출석') p++;
+      if (st === '지각') l++;
+      if (st === '결석') a++;
+    });
+    statsHtml += `
+      <div style="display:flex; justify-content:space-between; padding:3px 0; border-bottom:1px solid var(--surface2);">
+        <span><strong>${m.name}</strong> (${m.dept})</span>
+        <span style="font-family:monospace; font-weight:700;">
+          <span style="color:var(--accent3)">출석 ${p}회</span> | 
+          <span style="color:var(--warn)">지각 ${l}회</span> | 
+          <span style="color:var(--danger)">결석 ${a}회</span>
+        </span>
+      </div>`;
+  });
+  statsHtml += `</div></div>`;
+
+  // 메인 마크업 렌더링 (원본 CSS 클래스 컴포넌트 완벽 재사용)
+  let html = `
+    <div style="display:flex; flex-direction:column; gap:12px; margin-top:4px;">
+      
+      <div class="ds" style="padding:12px; margin-bottom:0;">
+        <label style="font-size:12px; font-weight:700; display:block; margin-bottom:6px; color:var(--text2);">📅 출석체크 대상 활동일 선택</label>
+        <select onchange="currentAttDate=this.value; renderAttendanceContent();" class="sel" style="font-weight:700; margin-bottom:8px;">
+          ${attDatesList.map(d => `<option value="${d}" ${d===currentAttDate?'selected':''}>${d.split('-')[1]}월 ${d.split('-')[2]}일 학생회 활동</option>`).join('')}
+        </select>
+        <div style="display:flex; gap:6px;">
+          <input type="date" id="newAttDateIpt" class="ipt" style="padding:6px 10px; font-size:13px; flex:1; height:34px;">
+          <button type="button" onclick="addNewAttendanceDate()" class="fc active" style="border-radius:8px; font-size:12px; padding:0 12px; height:34px;">➕ 활동일 추가</button>
+        </div>
+      </div>
+
+      ${statsHtml}
+
+      <div class="ds" style="padding:0; overflow:hidden; margin-bottom:0;">
+        <div style="padding:12px 14px; background:var(--surface2); display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border);">
+          <strong style="font-size:13px; color:var(--text2);">${currentAttDate} 실시간 명부</strong>
+          <button type="button" onclick="saveAllAttendanceAsPresent()" class="fc active" style="background:var(--accent3); border-radius:6px; font-size:11px; padding:4px 10px;">⚡ 전원 출석 처리</button>
+        </div>
+        <div style="max-height:320px; overflow-y:auto;">
+  `;
+
+  MEMBERS.forEach(m => {
+    const currentStatus = currentMap[m.name]?.status || '미체크';
+    html += `
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid var(--surface2);">
+        <div>
+          <strong style="font-size:13px; color:var(--text);">${m.name}</strong>
+          <span style="font-size:11px; color:var(--text3); margin-left:4px;">${m.dept}</span>
+        </div>
+        <div style="display:flex; gap:4px;">
+          ${['출석', '지각', '결석'].map(st => {
+            const isChecked = currentStatus === st;
+            let bg = 'var(--surface2)', co = 'var(--text2)';
+            if (isChecked) {
+              if (st==='출석') { bg='var(--accent3)'; co='#fff'; }
+              if (st==='지각') { bg='var(--warn)'; co='#fff'; }
+              if (st==='결석') { bg='var(--danger)'; co='#fff'; }
+            }
+            return `
+              <button type="button" 
+                onclick="saveSingleAttendance('${m.name}', '${st}'); this.parentElement.querySelectorAll('button').forEach(b=>{b.style.background='var(--surface2)';b.style.color='var(--text2)'}); this.style.background='${st==='출석'?'var(--accent3)':st==='지각'?'var(--warn)':'var(--danger)'}'; this.style.color='#fff';" 
+                style="padding:4px 8px; font-size:11px; border:none; border-radius:4px; background:${bg}; color:${co}; font-weight:700; cursor:pointer; transition:all 0.1s;">
+                ${st}
+              </button>`;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  });
+
+  html += '</div></div></div>';
+  area.innerHTML = html;
+}
+
+// 7. 시스템 초기 로드 대기 및 안전 인터셉터 실행 인터벌 안정장치
+(function initAttendanceSystem() {
+  const checkInterval = setInterval(() => {
+    if (document.getElementById('tP0')) {
+      clearInterval(checkInterval);
+      injectAttendanceGadget();
+      
+      if (typeof tFns !== 'undefined' && tFns[0]) {
+        const originDash = tFns[0];
+        tFns[0] = function() {
+          originDash();
+          renderAttendanceContent();
+        };
+      }
+    }
+  }, 200);
+})();
+  
 // 이름 change
 document.addEventListener('change',function(e){
   if(['s0Name','s1Name','s2Name'].includes(e.target.id)){
@@ -1356,201 +1549,6 @@ initTasks();
 fillAllSels();
 buildCWList('');
 bindStatic();
-
-  // =================================================================
-// ⚡ [교사 모드] 출석 관리 시스템 고도화 및 무제한 확장 스크립트 (기존 UI 완전 보존)
-// =================================================================
-
-// 1. 기본 제공되는 고정 활동 날짜 배열 및 초기 선택값
-let attDatesList = ['2026-03-19', '2026-03-27', '2026-04-06', '2026-04-08', '2026-04-20', '2026-05-14', '2026-06-10', '2026-07-10'];
-let currentAttDate = attDatesList[0];
-
-// 2. 교사 모드 내비게이션 바에 '출석 관리' 전용 6번째 탭 버튼 및 패널 동적 추가 (디자인 싱크 100%)
-(function injectAttendanceDOM() {
-  const tnav = document.getElementById('tTnav');
-  if (tnav && !document.getElementById('tAttHeaderBtn')) {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'ti';
-    btn.id = 'tAttHeaderBtn';
-    btn.setAttribute('data-tab', '5');
-    btn.innerHTML = '출석 관리';
-    tnav.appendChild(btn);
-    
-    const tView = document.getElementById('tView');
-    if (tView && !document.getElementById('tP5')) {
-      const panel = document.createElement('div');
-      panel.className = 'tp';
-      panel.id = 'tP5';
-      panel.innerHTML = '<div id="tAttPanelContainer"></div>';
-      tView.appendChild(panel);
-    }
-  }
-})();
-
-// 3. 학생별 단일 출석 상태 실시간 Firebase 변경 및 저장
-async function saveSingleAttendance(name, status) {
-  try {
-    await fetch(`${FB}/attendance/${currentAttDate}/${name}.json`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: status, timestamp: new Date().toISOString() })
-    });
-    toast(`${name}: ${status} 저장`);
-  } catch(e) {
-    toast('서버 동기화 중 오류가 발생했습니다.');
-  }
-}
-
-// 4. [⚡ 일괄 기능] 해당 날짜 전원 출석 처리 (Promise.all 트랜잭션 안전 처리)
-async function saveAllAttendanceAsPresent() {
-  if (!confirm(`${currentAttDate} 활동의 모든 임원을 '출석'으로 일괄 변경하시겠습니까?`)) return;
-  
-  toast('전원 출석 처리 중...');
-  const promises = MEMBERS.map(m => {
-    return fetch(`${FB}/attendance/${currentAttDate}/${m.name}.json`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: '출석', timestamp: new Date().toISOString() })
-    });
-  });
-  
-  try {
-    await Promise.all(promises);
-    toast('🎉 전원 출석 처리가 완료되었습니다!');
-    renderAttendanceTabContent();
-  } catch(e) {
-    toast('일괄 저장 처리 중 실패 항목이 있습니다.');
-  }
-}
-
-// 5. [➕ 미래/과거 날짜 유연 추가] 입력된 데이터 명부 확장 기능
-function addNewAttendanceDate() {
-  const dateIpt = document.getElementById('newAttDateIpt');
-  const newD = dateIpt ? dateIpt.value : '';
-  if (!newD) { toast('추가할 날짜를 올바르게 선택해 주세요.'); return; }
-  if (attDatesList.includes(newD)) { toast('이미 목록에 존재하는 활동 일자입니다.'); return; }
-  
-  attDatesList.push(newD);
-  attDatesList.sort(); // 날짜 순 정렬
-  currentAttDate = newD;
-  toast(`📅 [${newD}] 활동일이 추가 및 선택되었습니다.`);
-  renderAttendanceTabContent();
-}
-
-// 6. [📊 실시간 집계 및 렌더링 코어] 출석 관리 탭 활성화 뷰 엔진
-async function renderAttendanceTabContent() {
-  const area = document.getElementById('tAttPanelContainer');
-  if (!area) return;
-  
-  // 전체 원격 출석 원장 데이터 한 번에 호출
-  let fullAttMap = {};
-  try {
-    const res = await fetch(`${FB}/attendance.json`);
-    fullAttMap = await res.json() || {};
-  } catch(e) {}
-  
-  const currentMap = fullAttMap[currentAttDate] || {};
-
-  // 가독성 좋은 아코디언 형태의 실시간 통계판 렌더링
-  let statsHtml = `
-    <div class="ds" style="margin-bottom:12px; padding:12px;">
-      <div onclick="const s=this.nextElementSibling; s.style.display=s.style.display==='none'?'block':'none';" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
-        <strong style="font-size:13px; color:var(--accent);">📊 임원별 누적 참여 통계 (클릭하여 열기) ▼</strong>
-      </div>
-      <div style="display:none; margin-top:10px; max-height:160px; overflow-y:auto; border-top:1px solid var(--border); padding-top:8px; font-size:11px; line-height:1.6;">
-  `;
-  
-  MEMBERS.forEach(m => {
-    let p = 0, l = 0, a = 0;
-    Object.keys(fullAttMap).forEach(d => {
-      const st = fullAttMap[d]?.[m.name]?.status;
-      if (st === '출석') p++;
-      if (st === '지각') l++;
-      if (st === '결석') a++;
-    });
-    statsHtml += `
-      <div style="display:flex; justify-content:space-between; padding:3px 0; border-bottom:1px solid var(--surface2);">
-        <span><strong>${m.name}</strong> (${m.dept})</span>
-        <span style="font-family:monospace; font-weight:700;">
-          <span style="color:var(--accent3)">출석 ${p}회</span> | 
-          <span style="color:var(--warn)">지각 ${l}회</span> | 
-          <span style="color:var(--danger)">결석 ${a}회</span>
-        </span>
-      </div>`;
-  });
-  statsHtml += `</div></div>`;
-
-  // 메인 마크업 구성 (기존 CSS 컴포넌트 클래스 완벽 재사용)
-  let html = `
-    <div style="padding:16px; display:flex; flex-direction:column; gap:12px;">
-      
-      <div class="ds" style="padding:12px; margin-bottom:0;">
-        <label style="font-size:12px; font-weight:700; display:block; margin-bottom:6px; color:var(--text2);">📅 관리 대상 활동 일자 선택</label>
-        <select onchange="currentAttDate=this.value; renderAttendanceTabContent();" class="sel" style="font-weight:700; margin-bottom:8px;">
-          ${attDatesList.map(d => `<option value="${d}" ${d===currentAttDate?'selected':''}>${d.split('-')[1]}월 ${d.split('-')[2]}일 학생회 활동</option>`).join('')}
-        </select>
-        <div style="display:flex; gap:6px;">
-          <input type="date" id="newAttDateIpt" class="ipt" style="padding:6px 10px; font-size:13px; flex:1;">
-          <button type="button" onclick="addNewAttendanceDate()" class="fc active" style="border-radius:8px; font-size:12px;">➕ 날짜 추가</button>
-        </div>
-      </div>
-
-      ${statsHtml}
-
-      <div class="ds" style="padding:0; overflow:hidden; margin-bottom:0;">
-        <div style="padding:12px 14px; background:var(--surface2); display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border);">
-          <strong style="font-size:13px; color:var(--text2);">${currentAttDate} 명부 체크</strong>
-          <button type="button" onclick="saveAllAttendanceAsPresent()" class="fc active" style="background:var(--accent3); border-radius:6px; font-size:11px; padding:4px 10px;">⚡ 전원 출석 처리</button>
-        </div>
-  `;
-
-  MEMBERS.forEach(m => {
-    const currentStatus = currentMap[m.name]?.status || '미체크';
-    html += `
-      <div style="display:flex; justify-content:space-between; align-items:center; padding:11px 14px; border-bottom:1px solid var(--surface2);">
-        <div>
-          <strong style="font-size:14px; color:var(--text);">${m.name}</strong>
-          <span style="font-size:11px; color:var(--text3); margin-left:4px;">${m.dept}부 | ${m.role||'임원'}</span>
-        </div>
-        <div style="display:flex; gap:4px;">
-          ${['출석', '지각', '결석'].map(st => {
-            const isChecked = currentStatus === st;
-            let bg = 'var(--surface2)', co = 'var(--text2)';
-            if (isChecked) {
-              if (st==='출석') { bg='var(--accent3)'; co='#fff'; }
-              if (st==='지각') { bg='var(--warn)'; co='#fff'; }
-              if (st==='결석') { bg='var(--danger)'; co='#fff'; }
-            }
-            return `
-              <button type="button" 
-                onclick="saveSingleAttendance('${m.name}', '${st}'); this.parentElement.querySelectorAll('button').forEach(b=>{b.style.background='var(--surface2)';b.style.color='var(--text2)'}); this.style.background='${isChecked?'var(--surface2)':st==='출석'?'var(--accent3)':st==='지각'?'var(--warn)':'var(--danger)'}'; this.style.color='#fff';" 
-                style="padding:5px 9px; font-size:11px; border:none; border-radius:4px; background:${bg}; color:${co}; font-weight:700; cursor:pointer; transition:all 0.1s;">
-                ${st}
-              </button>`;
-          }).join('')}
-        </div>
-      </div>
-    `;
-  });
-
-  html += '</div></div>';
-  area.innerHTML = html;
-}
-
-// 7. 교사 전역 라우팅 테이블 인터셉터 우회 결합
-tFns[5] = renderAttendanceTabContent;
-
-// 8. 기존 tTnav 내비게이션 탭 이벤트 가로채기 재바인딩
-setTimeout(() => {
-  document.querySelectorAll('#tTnav .ti').forEach(ti => {
-    const freshTi = ti.cloneNode(true);
-    ti.parentNode.replaceChild(freshTi, ti);
-    freshTi.addEventListener('click', () => {
-      swTab('tTnav', ['tP0', 'tP1', 'tP2', 'tP3', 'tP4', 'tP5'], parseInt(freshTi.dataset.tab), tFns);
-    });
-  });
-}, 300);
 </script>
 </body>
 </html>
