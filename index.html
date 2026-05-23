@@ -6,398 +6,687 @@
 <title>대영중 학생회</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&display=swap');
-:root{\n  --bg:#f8f9fa;--surface:#fff;--surface2:#f1f3f5;--border:#dee2e6;\n  --accent:#6c63ff;--accent2:#ff6b9d;--accent3:#2f9e44;\n  --warn:#e67700;--danger:#c92a2a;--info:#1971c2;\n  --text:#212529;--text2:#495057;--text3:#adb5bd;--r:12px;\n  --sh:0 1px 3px rgba(0,0,0,.08);--sh2:0 4px 12px rgba(0,0,0,.1);\n}
+:root{
+  --bg:#f8f9fa;--surface:#fff;--surface2:#f1f3f5;--border:#dee2e6;
+  --accent:#6c63ff;--accent2:#ff6b9d;--accent3:#2f9e44;
+  --warn:#e67700;--danger:#c92a2a;--info:#1971c2;
+  --text:#212529;--text2:#495057;--text3:#adb5bd;--r:12px;
+  --sh:0 1px 3px rgba(0,0,0,.08);--sh2:0 4px 12px rgba(0,0,0,.1);
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;-webkit-text-size-adjust:none}
-button,input,select,textarea{font-family:inherit;color:inherit;font-size:inherit}
-.app{max-width:480px;margin:0 auto;background:var(--surface);min-height:100vh;display:flex;flex-direction:column;position:relative;box-shadow:0 0 20px rgba(0,0,0,.03)}
-.p{display:flex;flex-direction:column;flex:1;padding:16px;animation:fade .2s ease}
-@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
-h2{font-size:18px;font-weight:700;letter-spacing:-0.5px}
-.sg{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
-.sc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;gap:8px;box-shadow:var(--sh)}
-.sc:active{transform:scale(.98);background:var(--surface2)}
-.sc .si{font-size:24px}
-.sc .st{font-weight:700;font-size:15px}
-.sc .sd{font-size:12px;color:var(--text3);line-height:1.4}
-.ah{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
-.back-btn,.lock-btn{background:none;border:none;font-size:16px;cursor:pointer;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%}
-.back-btn:active,.lock-btn:active{background:var(--surface2)}
-.snav,.tnav{display:flex;background:var(--surface2);padding:4px;border-radius:10px;margin:0 16px 12px 16px;gap:2px}
-.ti{flex:1;text-align:center;background:none;border:none;padding:8px 0;font-size:11px;font-weight:500;color:var(--text2);border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
-.ti.active{background:var(--surface);color:var(--accent);font-weight:700;box-shadow:var(--sh)}
-.ti .tn{font-size:9px;color:var(--text3);display:block;transform:scale(0.9)}
-.ti.active .tn{color:var(--accent);font-weight:700}
-.sp,.tp{display:none;flex:1;flex-direction:column}
-.sp.active,.tp.active{display:flex}
-.f-group{margin-bottom:14px}
-.f-group label{display:block;font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px;margin-left:2px}
-.ipt,.sel,.txt{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);font-size:14px;transition:border-color .2s}
-.ipt:focus,.sel:focus,.txt:focus{outline:none;border-color:var(--accent)}
-.txt{height:90px;resize:none}
-.btn-m{width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;transition:opacity .2s;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 2px 6px rgba(108,99,255,.2)}
-.btn-m:active{opacity:0.9}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;box-shadow:var(--sh);position:relative;display:flex;flex-direction:column;gap:8px}
-.ch{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
-.ctitle{font-weight:700;font-size:14px;line-height:1.4;flex:1}
-.cchips{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
-.chip{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;text-transform:uppercase}
-.chip-d{background:#fff0f6;color:var(--accent2)}
-.chip-i{background:#e8f4fd;color:var(--info)}
-.chip-w{background:#fff9db;color:var(--warn)}
-.chip-v{background:#ebfbee;color:var(--accent3)}
-.chip-u{background:#f1f3f5;color:var(--text2)}
-.db{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;color:#fff}
-.db-기획{background:#4dabf7}
-.db-홍보{background:#ff8787}
-.db-서기{background:#94d82d}
-.db-총무{background:#fcc419}
-.db-복지{background:#da77f2}
-.cmemo{font-size:12px;color:var(--text2);background:var(--surface2);padding:8px 10px;border-radius:6px;line-height:1.4;white-space:pre-wrap}
-.subs-box{display:flex;flex-direction:column;gap:5px;background:var(--bg);padding:8px;border-radius:8px;border:1px solid var(--border)}
-.sub-i{display:flex;align-items:center;gap:8px;cursor:pointer;padding:2px 0}
-.chk{width:16px;height:16px;border-radius:4px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;background:#fff;font-size:10px;color:#fff;transition:all .1s}
-.sub-i.done .chk{background:var(--accent3);border-color:var(--accent3)}
-.sub-t{font-size:12px;flex:1}
-.sub-i.done .sub-t{text-decoration:line-through;color:var(--text3)}
-.cfoot{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text3);margin-top:4px}
-.cops{display:flex;gap:12px}
-.cop{cursor:pointer;color:var(--text3);font-weight:500;display:flex;align-items:center;gap:2px}
-.cop:hover{color:var(--text2)}
-.cop-d{color:var(--danger)}
-.cop-d:hover{color:#b01e1e}
-.sir{display:flex;gap:6px;margin-bottom:6px}
-.empty{text-align:center;padding:40px 16px;color:var(--text3)}
-.empty .ei{font-size:32px;margin-bottom:8px}
-.mov{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:100;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(2px)}
-.mov-c{background:var(--surface);width:100%;max-width:480px;border-top-left-radius:16px;border-top-right-radius:16px;padding:20px;max-height:85vh;overflow-y:auto;box-shadow:var(--sh2);animation:slideUp .25s ease}
-@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.mh{display:flex;justify-content:between;align-items:center;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:10px}
-.mh h3{font-size:16px;font-weight:700}
-.mcl{background:none;border:none;font-size:20px;cursor:pointer;color:var(--text3)}
-.mcl:active{color:var(--text)}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(33,37,41,0.9);color:#fff;padding:10px 18px;border-radius:20px;font-size:12px;font-weight:500;z-index:1000;box-shadow:var(--sh2);opacity:0;transition:opacity .2s;pointer-events:none}
-.ds{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px;box-shadow:var(--sh)}
-.dh{display:flex;justify-content:between;align-items:center;margin-bottom:8px}
-.dp{height:6px;background:var(--surface2);border-radius:3px;margin-bottom:12px;overflow:hidden}
-.dpf{height:100%;transition:width .3s}
-.done-sec{margin-top:10px;border-top:1px solid var(--border);padding-top:8px}
-.dtog{font-size:11px;color:var(--text3);cursor:pointer;display:inline-flex;align-items:center;gap:4px;font-weight:500}
-.dlist{margin-top:8px;display:none}
-.sc2{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px;box-shadow:var(--sh);text-align:center}
-.sc2 .sn{font-size:20px;font-weight:900;font-family:'Space Mono',monospace;margin-bottom:2px}
-.sc2 .sl2{font-size:11px;color:var(--text2);font-weight:500}
-.c1 .sn{color:var(--accent)}.c2 .sn{color:var(--accent3)}.c3 .sn{color:var(--warn)}.c4 .sn{color:var(--danger)}
-.stl{font-size:12px;font-weight:700;color:var(--text2);margin:14px 2px 6px 2px;display:flex;align-items:center;gap:4px}
-.ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:0 4px}
-.ct{font-size:15px;font-weight:700;font-family:'Space Mono',monospace}
-.cn{background:none;border:none;font-size:18px;cursor:pointer;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:50%}
-.cn:active{background:var(--surface2)}
-.cg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
-.cw{font-size:10px;font-weight:700;color:var(--text3);padding:4px 0}
-.cd{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px;font-size:12px;font-weight:500;position:relative;cursor:pointer}
-.cd:active{background:var(--surface2)}
-.cd.other{color:var(--text3);opacity:0.4}
-.cd.today{background:var(--text);color:#fff;font-weight:700}
-.cd.sel-d{border:2px solid var(--accent)}
-.cdot{width:4px;height:4px;border-radius:50%;background:var(--accent);position:absolute;bottom:4px}
-.cd.today .cdot{background:#fff}
-.cbar{display:flex;flex-direction:column;gap:2px;width:100%;padding:0 2px;margin-top:2px;overflow:hidden}
-.cb{height:3px;border-radius:1px}
-.sw{display:flex;align-items:center;background:var(--surface2);border-radius:8px;padding:4px 10px;margin-bottom:10px;gap:6px}
-.sw input{background:none;border:none;flex:1;font-size:13px;padding:6px 0}
-.sw input:focus{outline:none}
-.si2{color:var(--text3);font-size:14px}
-.sc3{background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:2px}
-.fb{display:flex;gap:4px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;-webkit-overflow-scrolling:touch}
-.fb::-webkit-scrollbar{display:none}
-.fc{background:var(--surface2);border:none;padding:5px 12px;border-radius:14px;font-size:11px;font-weight:500;color:var(--text2);cursor:pointer;white-space:nowrap}
-.fc.active{background:var(--accent);color:#fff;font-weight:700}
-.stu-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;display:flex;justify-content:between;align-items:center;box-shadow:var(--sh);cursor:pointer}
-.stu-row:active{background:var(--surface2)}
-.badge{font-size:10px;font-weight:700;padding:2px 6px;border-radius:8px}
-.sb-group{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--surface2);padding:4px;border-radius:8px}
-.sb-btn{border:none;background:none;padding:8px;font-size:12px;font-weight:700;color:var(--text2);border-radius:6px;cursor:pointer;text-align:center}
-.sb-btn.a-진행중{background:#fff;color:var(--warn);box-shadow:var(--sh)}
-.sb-btn.a-피드백{background:#fff;color:var(--accent);box-shadow:var(--sh)}
-.sb-btn.a-완료{background:#fff;color:var(--accent3);box-shadow:var(--sh)}
-.m-as-list{max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:4px}
-.m-as-item{display:flex;align-items:center;justify-content:between;padding:8px;border-bottom:1px solid var(--surface2);cursor:pointer}
-.m-as-item:last-child{border:0}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+button{cursor:pointer;font-family:inherit;border:none;outline:none;-webkit-tap-highlight-color:transparent}
+input,select,textarea{font-family:inherit;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:10px 14px;width:100%;font-size:14px;outline:none;transition:border .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(108,99,255,.1)}
+select option,optgroup{background:var(--surface)}
+input[type=date]{color-scheme:light}
+input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
+
+.tag{display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.tag-예정{background:#e7f5ff;color:#1971c2}
+.tag-진행중{background:#fff3bf;color:#946900}
+.tag-완료{background:#ebfbee;color:#2f9e44}
+.tag-보류{background:#fff4e6;color:#e67700}
+
+.db{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600}
+.db-회장단{background:#f3f0ff;color:#7048e8}
+.db-알림부{background:#e3fafc;color:#0c8599}
+.db-행사진행부{background:#ebfbee;color:#2f9e44}
+.db-홍보기획부{background:#fff9db;color:#e67700}
+.db-자율질서부{background:#fff0f6;color:#c2255c}
+
+/* 버튼 */
+.bp{background:var(--accent);color:#fff;padding:12px;border-radius:10px;font-size:14px;font-weight:700;width:100%;display:block;text-align:center;box-shadow:var(--sh);transition:all .2s}
+.bp:hover{background:#5a52d5}
+.bc{padding:12px;background:var(--surface2);border:1px solid var(--border);color:var(--text2);border-radius:10px;font-size:14px;font-weight:600;transition:all .2s;flex:1}
+.bs{padding:12px;background:var(--accent);border:none;color:#fff;border-radius:10px;font-size:14px;font-weight:700;transition:all .2s;flex:2}
+
+/* 모드 선택 */
+#modeSelect{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 24px;gap:32px;background:linear-gradient(135deg,#f8f9fa,#e9ecef)}
+.logo-s{font-size:11px;color:var(--text3);letter-spacing:3px;font-family:'Space Mono',monospace;margin-bottom:8px}
+.logo-t{font-size:32px;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.2}
+.logo-sub{font-size:13px;color:var(--text2);margin-top:8px}
+.mode-wrap{display:flex;flex-direction:column;gap:16px;width:100%;max-width:360px}
+.mc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:24px;cursor:pointer;transition:all .25s;text-align:left;width:100%;box-shadow:var(--sh)}
+.mc:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:var(--sh2)}
+.mc.t:hover{border-color:var(--accent2)}
+.mc-i{font-size:28px;margin-bottom:12px}.mc-t{font-size:18px;font-weight:700;margin-bottom:4px}.mc-d{font-size:13px;color:var(--text2);line-height:1.6}
+
+/* 비밀번호 화면 */
+#pwScreen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 24px;background:linear-gradient(135deg,#f8f9fa,#e9ecef)}
+.pw-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:32px 24px;width:100%;max-width:320px;box-shadow:var(--sh2);text-align:center}
+.pw-title{font-size:18px;font-weight:700;margin-bottom:6px}
+.pw-sub{font-size:13px;color:var(--text2);margin-bottom:24px}
+#pwInput{text-align:center;font-size:24px;letter-spacing:8px;font-family:'Space Mono',monospace;margin-bottom:8px}
+.pw-err{font-size:12px;color:var(--danger);margin-bottom:12px;min-height:18px}
+.pw-back{font-size:13px;color:var(--text3);background:none;border:none;cursor:pointer;margin-top:8px;font-family:inherit;display:block;width:100%;text-align:center}
+
+/* 앱 헤더 */
+.ah{display:flex;align-items:center;gap:12px;padding:14px 20px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:var(--sh)}
+.back-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text2);width:36px;height:36px;border-radius:8px;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;flex-shrink:0}
+.back-btn:hover{border-color:var(--accent);color:var(--accent)}
+.ah h2{font-size:16px;font-weight:700;flex:1}
+.hbadge{font-family:'Space Mono',monospace;font-size:11px;color:var(--text3)}
+.lock-btn{font-size:12px;color:var(--text3);background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;font-family:inherit;transition:all .2s}
+.lock-btn:hover{border-color:var(--danger);color:var(--danger)}
+
+/* 탭 */
+.tnav{display:flex;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;box-shadow:var(--sh)}
+.ti{flex:1;min-width:60px;padding:12px 6px;text-align:center;font-size:12px;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;font-weight:500;background:none;-webkit-tap-highlight-color:transparent}
+.ti.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:700}
+.ti .tn{display:block;font-family:'Space Mono',monospace;font-size:10px;margin-bottom:2px;opacity:.7}
+.tp{display:none;padding:20px}.tp.active{display:block}
+
+/* 이름 선택 */
+.nw{margin-bottom:20px}.nw label{font-size:12px;color:var(--text2);margin-bottom:6px;display:block;font-weight:500}
+
+/* 업무 카드 */
+.tc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:10px;box-shadow:var(--sh)}
+.tc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px}
+.tc-ti{font-size:14px;font-weight:600;line-height:1.4;flex:1}
+.tc-r{display:flex;gap:6px;align-items:center;flex-shrink:0;flex-wrap:wrap}
+.tc-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:4px}
+.tc-date{font-size:11px;color:var(--text2);font-family:'Space Mono',monospace}
+.tc-date.urg{color:var(--danger);font-weight:700}
+.shared-b{font-size:10px;padding:2px 7px;border-radius:4px;background:#f3f0ff;color:var(--accent);font-weight:700}
+
+/* 세부 태스크 */
+.sl{margin-top:8px}
+.si{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)}
+.si:last-child{border-bottom:none}
+.sc{width:20px;height:20px;border:2px solid var(--border);border-radius:5px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;background:var(--surface)}
+.sc.done{background:var(--accent3);border-color:var(--accent3)}
+.sc.done::after{content:'✓';font-size:12px;color:#fff;font-weight:900}
+.st2{font-size:13px;flex:1}.st2.done{text-decoration:line-through;color:var(--text3)}
+.sd2{font-size:11px;color:var(--text2);font-family:'Space Mono',monospace;cursor:pointer;padding:2px 6px;border-radius:4px;border:1px solid transparent;transition:all .15s;white-space:nowrap}
+.sd2:hover{border-color:var(--border);background:var(--surface2)}
+.sdel2{background:none;border:none;color:var(--text3);font-size:14px;cursor:pointer;padding:0 2px;flex-shrink:0}
+.sdel2:hover{color:var(--danger)}
+.add-si{display:flex;gap:8px;margin-top:8px;padding-top:8px;border-top:1px dashed var(--border)}
+.add-si input{flex:1;font-size:12px;padding:6px 10px;height:32px}
+.add-si .dm{width:110px;flex-shrink:0;font-size:12px;padding:6px 8px;height:32px}
+.add-si button{background:var(--accent);color:#fff;border:none;border-radius:7px;padding:0 12px;height:32px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0}
+
+/* 진행바 */
+.pw2{margin:6px 0 4px}
+.pl{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:4px}
+.pb{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.pf{height:100%;border-radius:3px;transition:width .3s}
+
+/* 마감 칩 */
+.chip{font-size:10px;padding:2px 7px;border-radius:4px;font-family:'Space Mono',monospace;font-weight:700}
+.chip-over{background:#ffe3e3;color:var(--danger);animation:pulse 1.5s infinite}
+.chip-today{background:#fff3bf;color:var(--warn)}
+.chip-soon{background:#fff9db;color:var(--warn)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* 상태바 */
+.sb{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.sb-btn{padding:5px 12px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;border:1px solid var(--border);background:var(--surface2);color:var(--text2);transition:all .15s}
+.sb-btn.a-예정{background:#e7f5ff;color:#1971c2;border-color:#74c0fc}
+.sb-btn.a-진행중{background:#fff3bf;color:#946900;border-color:#ffd43b}
+.sb-btn.a-완료{background:#ebfbee;color:#2f9e44;border-color:#8ce99a}
+.sb-btn.a-보류{background:#fff4e6;color:#e67700;border-color:#ffa94d}
+
+/* 편집/삭제 버튼 */
+.eb{background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:3px 9px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s}
+.eb:hover{border-color:var(--accent);color:var(--accent);background:#f3f0ff}
+.del-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text3);padding:3px 9px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s}
+.del-btn:hover{border-color:var(--danger);color:var(--danger);background:#ffe3e3}
+
+/* 완료 토글 */
+.dt{display:flex;align-items:center;gap:8px;padding:10px 0 12px;cursor:pointer;color:var(--text3);font-size:12px;border-top:1px solid var(--border);margin-top:6px;user-select:none;-webkit-tap-highlight-color:transparent}
+.dt:hover{color:var(--text2)}
+.dt .arr{transition:transform .2s;font-size:10px;display:inline-block}
+.dt.open .arr{transform:rotate(90deg)}
+.dl{display:none}.dl.open{display:block}
+
+/* 시간대 그룹 */
+.tg{margin-bottom:20px}
+.tgl{font-size:11px;font-weight:700;letter-spacing:1px;font-family:'Space Mono',monospace;padding:4px 0 10px;border-bottom:1px solid var(--border);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.tgd{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.tg-ov{color:var(--danger)}.tg-td{color:var(--warn)}.tg-wk{color:var(--info)}.tg-lt{color:var(--text2)}.tg-nd{color:var(--text3)}
+
+/* 통계 카드 */
+.sg{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px}
+.sc2{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;text-align:center;box-shadow:var(--sh)}
+.sn{font-size:32px;font-weight:900;font-family:'Space Mono',monospace;line-height:1;margin-bottom:4px}
+.sl2{font-size:12px;color:var(--text2)}
+.sc2.c1 .sn{color:var(--accent)}.sc2.c2 .sn{color:var(--accent3)}.sc2.c3 .sn{color:var(--warn)}.sc2.c4 .sn{color:var(--danger)}
+
+/* 섹션 타이틀 */
+.stl{font-size:12px;font-weight:700;color:var(--text2);letter-spacing:1px;font-family:'Space Mono',monospace;padding:4px 0 10px;margin-top:20px;border-bottom:1px solid var(--border);margin-bottom:12px}
+
+/* 피드 */
+.feed-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.feed-item:last-child{border-bottom:none}
+.feed-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.feed-info{flex:1}.feed-nm{font-size:12px;font-weight:600;margin-bottom:2px}
+.feed-tk{font-size:13px}.feed-tm{font-size:11px;color:var(--text3);font-family:'Space Mono',monospace;white-space:nowrap}
+
+/* 달력 */
+.ch{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.cn{background:var(--surface);border:1px solid var(--border);color:var(--text);width:32px;height:32px;border-radius:8px;font-size:16px;cursor:pointer;transition:all .2s;box-shadow:var(--sh)}
+.cn:hover{border-color:var(--accent);color:var(--accent)}
+.ct{font-size:15px;font-weight:700}
+.cg{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cdow{text-align:center;font-size:10px;color:var(--text3);padding:6px 0;font-family:'Space Mono',monospace;font-weight:600}
+.cday{aspect-ratio:1;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:3px 2px;cursor:pointer;background:var(--surface);border:1px solid transparent;min-height:38px;overflow:hidden;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.cday:hover{border-color:var(--border);background:var(--surface2)}
+.cday.today{border-color:var(--accent);background:#f3f0ff}
+.cday.other{opacity:.35}.cday.sel{background:#f3f0ff;border-color:var(--accent)}
+.dnum{font-size:11px;font-family:'Space Mono',monospace;line-height:1;margin-bottom:2px}
+.cday.today .dnum{color:var(--accent);font-weight:700}
+.ddots{display:flex;gap:2px;flex-wrap:wrap;justify-content:center}
+.ddot{width:4px;height:4px;border-radius:50%}
+.cdet{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-top:12px;box-shadow:var(--sh)}
+.cdet-d{font-size:12px;color:var(--text2);margin-bottom:12px;font-family:'Space Mono',monospace;font-weight:600}
+.ctr{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.ctr:last-child{border-bottom:none}
+.cbar{width:4px;height:36px;border-radius:2px;flex-shrink:0}
+
+/* 부서 */
+.ds{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:14px;box-shadow:var(--sh)}
+.dh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.dp{height:5px;background:var(--surface2);border-radius:3px;margin-bottom:12px;overflow:hidden}
+.dpf{height:100%;border-radius:3px;transition:width .5s}
+
+/* 학생 행 */
+.sr{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.sr:last-child{border-bottom:none}
+.sr:hover{background:var(--surface2);margin:0 -16px;padding:12px 16px;border-radius:8px}
+.sav{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.mb{width:80px;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;margin-top:4px}
+.mf{height:100%;border-radius:3px}
+
+/* 필터 */
+.fb{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px}
+.fc{padding:6px 14px;border-radius:20px;font-size:12px;background:var(--surface);border:1px solid var(--border);color:var(--text2);cursor:pointer;white-space:nowrap;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.fc.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* 폼 */
+.fg{margin-bottom:16px}
+.fg label{font-size:12px;color:var(--text2);margin-bottom:6px;display:block;font-weight:500}
+.req{color:var(--accent2);margin-left:2px}
+.hint{font-size:11px;color:var(--text3);margin-top:5px;line-height:1.6}
+.sir{display:flex;gap:8px;margin-bottom:8px;align-items:center}
+.sir input{flex:1}
+.dm{width:130px;flex-shrink:0}
+.sdel{background:var(--surface2);border:1px solid var(--border);color:var(--text3);width:32px;height:38px;border-radius:8px;font-size:14px;flex-shrink:0;cursor:pointer;transition:all .2s}
+.sdel:hover{border-color:var(--danger);color:var(--danger)}
+.asb{background:var(--surface2);border:1px dashed var(--border);color:var(--text2);padding:10px;border-radius:8px;width:100%;font-size:13px;cursor:pointer;font-family:inherit;margin-top:4px;transition:all .2s}
+.asb:hover{border-color:var(--accent);color:var(--accent)}
+
+/* 모달 */
+.mov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:500;align-items:flex-end;justify-content:center}
+.mov.open{display:flex}
+.ms{background:var(--surface);border-radius:20px 20px 0 0;padding:20px 20px 36px;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;animation:su .25s ease;box-shadow:0 -4px 24px rgba(0,0,0,.12)}
+@keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.mh{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px}
+.mt{font-size:15px;font-weight:700;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.ma{display:flex;gap:8px;margin-top:20px}
+
+/* 체크박스 그룹 */
+.cb-group{display:flex;flex-direction:column}
+.cb-dh{font-size:12px;font-weight:700;color:var(--text2);padding:10px 0 6px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cb-dh:hover{color:var(--text)}
+.cb-item{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--border)}
+.cb-item:last-child{border-bottom:none}
+.cb-item label{font-size:13px;cursor:pointer;flex:1}
+
+/* 미배정 */
+.ua{background:#fff9db;border:1px solid #ffd43b;border-radius:var(--r);padding:14px;margin-bottom:10px}
+.ua-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px}
+.ua-ti{font-size:13px;font-weight:600;flex:1;line-height:1.4}
+.ua-btns{display:flex;gap:6px;flex-shrink:0}
+.abtn{background:var(--accent);color:#fff;padding:4px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;border:none;white-space:nowrap}
+
+/* 미배정 공지 (학생) */
+.un-notice{background:#fff9db;border:1px solid #ffd43b;border-radius:var(--r);padding:14px;margin-bottom:16px}
+.un-hd{font-size:12px;font-weight:700;color:var(--warn);margin-bottom:8px}
+.un-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #ffe066;font-size:13px}
+.un-item:last-child{border-bottom:none}
+.un-item .un-name{flex:1;font-weight:600}
+.self-btn{background:var(--accent);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0}
+
+/* 검색 */
+.sw{position:relative;margin-bottom:16px}
+.sw input{padding-left:36px}
+.si2{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px;pointer-events:none}
+.sc3{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--text3);cursor:pointer;font-size:16px;background:none;border:none;padding:0}
+.sc3:hover{color:var(--text)}
+
+/* 빈 상태 */
+.empty{text-align:center;padding:40px 24px;color:var(--text3)}
+.empty .ei{font-size:36px;margin-bottom:12px}
+.empty p{font-size:13px;line-height:1.8}
+@media(max-width:480px){#myArea .empty,#manArea .empty{padding:8px 24px}}
+  
+/* 토스트 */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--text);color:var(--bg);padding:12px 24px;border-radius:20px;font-size:13px;font-weight:500;transition:transform .3s;z-index:9999;white-space:nowrap;box-shadow:var(--sh2)}
+#toast.show{transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
-<div class="app">
-  <div class="p" id="pHome">
-    <div style="text-align:center;margin-top:40px;margin-bottom:30px">
-      <h1 style="font-size:24px;font-weight:900;letter-spacing:-1px;color:var(--text)">대영중학교 학생회</h1>
-      <p style="font-size:13px;color:var(--text3);margin-top:4px;font-weight:500">업무 관리 및 실시간 협업 시스템</p>
-    </div>
-    <div class="sg">
-      <div class="sc" id="btnS"><div class="si">🙋‍♂️</div><div class="st">학생 모드</div><div class="sd">내 업무 확인 및 진행 상황 상신</div></div>
-      <div class="sc" id="btnT"><div class="si">⚡</div><div class="st">교사 모드</div><div class="sd">전체 현황 모니터링 및 출석부 관리</div></div>
-    </div>
-    <div style="margin-top:auto;text-align:center;padding:20px 0;font-size:11px;color:var(--text3);font-family:'Space Mono',monospace;font-weight:500">2026 DAEYOUNG STUDENT COUNCIL</div>
+
+<!-- 모드 선택 -->
+<div id="modeSelect">
+  <div style="text-align:center">
+    <img src="hero-banner.png" alt="대영중 학생회" 
+         style="width:100%;max-width:360px;border-radius:16px;margin-bottom:8px;display:block;margin-left:auto;margin-right:auto">
+    <div class="logo-s">Daeyoung Middle School</div>
+    <div class="logo-t">학생회<br>업무 시스템</div>
+    <div class="logo-sub">2026학년도 대영중학교</div>
   </div>
-
-  <div class="p" id="pPw" style="display:none">
-    <div class="ah" style="border:0;padding-left:0;padding-right:0"><button type="button" class="back-btn" id="pwBack">←</button><h2>교사 인증</h2><div style="width:36px"></div></div>
-    <div style="margin-top:20px" class="f-group">
-      <label for="pwInput">관리자 비밀번호</label>
-      <input type="password" id="pwInput" class="ipt" placeholder="비밀번호를 입력하세요" inputmode="numeric" pattern="[0-9]*">
-    </div>
-    <button type="button" class="btn-m" id="pwOK" style="margin-top:10px">확인</button>
-  </div>
-
-  <div class="p" id="pStudent" style="display:none;padding-left:0;padding-right:0;padding-bottom:0">
-    <div class="ah"><button type="button" class="back-btn" id="sBack">←</button><h2>학생 모드</h2><div style="width:36px"></div></div>
-    <div class="snav" id="sTnav">
-      <button type="button" class="ti active" data-tab="0"><span class="tn">STEP1</span>해야할 일</button>
-      <button type="button" class="ti" data-tab="1"><span class="tn">STEP2</span>업무 등록</button>
-      <button type="button" class="ti" data-tab="2"><span class="tn">STEP3</span>업무 관리</button>
-      <button type="button" class="ti" data-tab="3"><span class="tn">📅</span>달력</button>
-      <button type="button" class="ti" data-tab="4"><span class="tn">👥</span>부서 현황</button>
-    </div>
-    <div id="sView" style="flex:1;display:flex;flex-direction:column;overflow-y:auto;padding-bottom:20px">
-      <div class="sp active" id="sP0">
-        <div style="padding:0 16px 10px 16px"><select id="s0Name" class="sel" style="font-weight:700;border-color:var(--accent)"></select></div>
-        <div id="myArea"></div>
-      </div>
-      <div class="sp" id="sP1" style="padding:0 16px">
-        <div class="f-group"><label>업무명</label><input type="text" id="tTitle" class="ipt" placeholder="예: 축제 카드뉴스 제작"></div>
-        <div class="f-group"><label>담당 부서</label><select id="tDept" class="sel"></select></div>
-        <div class="f-group"><label>공동 담당자 지정 (다중 선택 가능)</label>
-          <div id="tAsArea" style="max-height:120px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:6px;background:#fff;display:flex;flex-direction:column;gap:4px"></div>
-        </div>
-        <div class="grid-2">
-          <div class="f-group"><label>마감일</label><input type="date" id="tDeadline" class="ipt"></div>
-          <div class="f-group"><label>우선순위</label><select id="tPri" class="sel"><option value="보통">보통</option><option value="긴급">🔴 긴급</option></select></div>
-        </div>
-        <div class="f-group"><label>상세 내용 / 메모</label><textarea id="tMemo" class="txt" placeholder="세부 조율 사항 기재"></textarea></div>
-        <div class="f-group"><label>세부 체크리스트 (선택)</label>
-          <div id="subRows">
-            <div class="sir"><input type="text" class="ipt sub-ipt" placeholder="예: 시안 확정" style="padding:8px 10px;font-size:13px"><button type="button" class="sc3" data-action="rmSub">×</button></div>
-          </div>
-          <button type="button" id="addSubBtn" style="background:none;border:1px dashed var(--border);width:100%;padding:8px;font-size:12px;border-radius:6px;cursor:pointer;color:var(--text2);margin-top:4px">+ 세부 항목 추가</button>
-        </div>
-        <button type="button" class="btn-m" id="submitBtn" style="margin-top:10px">🚀 업무 등록하기</button>
-      </div>
-      <div class="sp" id="sP2">
-        <div style="padding:0 16px 10px 16px"><select id="s2Name" class="sel" style="font-weight:700;border-color:var(--accent)"></select></div>
-        <div id="manArea"></div>
-      </div>
-      <div class="sp" id="sP3" style="padding:0 16px">
-        <div class="ch"><button type="button" class="cn" id="sCP">‹</button><div class="ct" id="sCT"></div><button type="button" class="cn" id="sCN">›</button></div>
-        <div class="cg" id="sCG"></div><div id="sCD" style="margin-top:14px"></div>
-      </div>
-      <div class="sp" id="sP4">
-        <div id="sDept"></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="p" id="pTeacher" style="display:none;padding-left:0;padding-right:0;padding-bottom:0">
-    <div class="ah"><button type="button" class="back-btn" id="tBack">←</button><h2>전체 현황</h2><button type="button" class="lock-btn" id="lockBtn">🔒 잠금</button></div>
-    <div class="tnav" id="tTnav">
-      <button type="button" class="ti active" data-tab="0">대시보드</button>
-      <button type="button" class="ti" data-tab="1">달력</button>
-      <button type="button" class="ti" data-tab="2">부서별</button>
-      <button type="button" class="ti" data-tab="3">학생별</button>
-      <button type="button" class="ti" data-tab="4">전체 업무</button>
-    </div>
-    <div id="tView" style="flex:1;display:flex;flex-direction:column;overflow-y:auto;padding-bottom:20px">
-      <div class="tp active" id="tP0">
-        <div class="sg" style="padding:0 16px">
-          <div class="sc2 c1"><div class="sn" id="stT">0</div><div class="sl2">전체 업무</div></div>
-          <div class="sc2 c2"><div class="sn" id="stD">0</div><div class="sl2">완료</div></div>
-          <div class="sc2 c3"><div class="sn" id="stI">0</div><div class="sl2">진행중</div></div>
-          <div class="sc2 c4"><div class="sn" id="stU">0</div><div class="sl2">마감 임박</div></div>
-        </div>
-        <div style="padding:0 16px">
-          <div class="stl">⚠️ 담당자 미배정</div><div id="uaArea"></div>
-          <div class="stl">🔴 마감 임박</div><div id="urgArea"></div>
-          <div class="stl">✅ 최근 완료</div><div id="feedArea"></div>
-          <div class="stl">📊 부서별 진행률</div><div id="dSum"></div>
-        </div>
-      </div>
-      <div class="tp" id="tP1" style="padding:0 16px">
-        <div class="ch"><button type="button" class="cn" id="tCP">‹</button><div class="ct" id="tCT"></div><button type="button" class="cn" id="tCN">›</button></div>
-        <div class="cg" id="tCG"></div><div id="tCD" style="margin-top:14px"></div>
-      </div>
-      <div class="tp" id="tP2"><div id="tDept"></div></div>
-      <div class="tp" id="tP3"><div id="tStu"></div></div>
-      <div class="tp" id="tP4" style="padding:0 16px">
-        <div class="sw"><span class="si2">🔍</span><input type="text" id="searchInput" placeholder="업무명, 담당자, 부서 검색..."><button type="button" class="sc3" id="searchClear">×</button></div>
-        <div class="fb" id="filterBar">
-          <button type="button" class="fc active" data-filter="전체">전체</button>
-          <button type="button" class="fc" data-filter="진행중">진행중</button>
-          <button type="button" class="fc" data-filter="피드백">피드백</button>
-          <button type="button" class="fc" data-filter="완료">완료</button>
-        </div>
-        <div id="allArea"></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="toast" id="toast"></div>
-
-  <div class="mov" id="editMov">
-    <div class="mov-c">
-      <div class="mh"><h3>🛠️ 업무 내용 편집</h3><button type="button" class="mcl" id="editCancel">×</button></div>
-      <div class="f-group"><label>업무명</label><input type="text" id="mTitle" class="ipt"></div>
-      <div class="grid-2">
-        <div class="f-group"><label>마감일</label><input type="date" id="mDeadline" class="ipt"></div>
-        <div class="f-group"><label>우선순위</label><select id="mPri" class="sel"><option value="보통">보통</option><option value="긴급">🔴 긴급</option></select></div>
-      </div>
-      <div class="f-group"><label>메모</label><textarea id="mMemo" class="txt"></textarea></div>
-      <div class="f-group">
-        <label>상태 제어</label>
-        <div class="sb-group" id="mStBtns">
-          <button type="button" class="sb-btn" data-status="진행중">진행중</button>
-          <button type="button" class="sb-btn" data-status="피드백">피드백</button>
-          <button type="button" class="sb-btn" data-status="완료">완료</button>
-        </div>
-      </div>
-      <button type="button" class="btn-m" id="editSave" style="margin-top:10px">저장하기</button>
-    </div>
-  </div>
-
-  <div class="mov" id="assignMov">
-    <div class="mov-c">
-      <div class="mh"><h3>👥 담당자 지정</h3><button type="button" class="mcl" id="assignCancel">×</button></div>
-      <p style="font-size:12px;color:var(--text2);margin-bottom:10px">* 해당 업무를 공동으로 수행할 학생들을 체크하세요.</p>
-      <div class="m-as-list" id="assignList"></div>
-      <button type="button" class="btn-m" id="assignSave" style="margin-top:14px">배정 완료</button>
-    </div>
-  </div>
-
-  <div class="mov" id="stuMov">
-    <div class="mov-c" style="max-height:80vh">
-      <div class="mh"><h3 id="stuMTitle">학생 정보</h3><button type="button" class="mcl" id="stuClose">×</button></div>
-      <div id="stuArea" style="display:flex;flex-direction:column;gap:10px"></div>
-    </div>
-  </div>
-
-  <div class="mov" id="delMov" style="align-items:center">
-    <div class="mov-c" style="width:90%;border-radius:16px;text-align:center">
-      <div style="font-size:36px;margin-bottom:10px">🗑️</div>
-      <h3 style="font-size:16px;font-weight:700;margin-bottom:8px">업무를 삭제하시겠습니까?</h3>
-      <p style="font-size:12px;color:var(--text3);margin-bottom:20px">이 작업은 되돌릴 수 없으며 복구가 불가능합니다.</p>
-      <div class="grid-2">
-        <button type="button" class="btn-m" id="delCancel" style="background:var(--surface2);color:var(--text2);box-shadow:none">취소</button>
-        <button type="button" class="btn-m" id="delOK" style="background:var(--danger);box-shadow:none">영구 삭제</button>
-      </div>
-    </div>
+  <div class="mode-wrap">
+    <button type="button" class="mc" id="btnS"><div class="mc-i">✋</div><div class="mc-t">학생 모드</div><div class="mc-d">업무 등록 · 진행 체크 · 일정 확인</div></button>
+    <button type="button" class="mc t" id="btnT"><div class="mc-i">📋</div><div class="mc-t">선생님 모드</div><div class="mc-d">전체 현황 · 업무 배정 · 완료 피드</div></button>
   </div>
 </div>
 
+<!-- 비밀번호 -->
+<div id="pwScreen" style="display:none">
+  <div class="pw-box">
+    <div class="pw-title">🔒 선생님 모드</div>
+    <div class="pw-sub">비밀번호를 입력하세요</div>
+    <input type="password" id="pwInput" maxlength="6" placeholder="••••">
+    <div class="pw-err" id="pwErr"></div>
+    <button type="button" class="bp" id="pwOK" style="margin-top:4px">확인</button>
+    <button type="button" class="pw-back" id="pwBack">← 돌아가기</button>
+  </div>
+</div>
+
+<!-- 학생 화면 -->
+<div id="sView" style="display:none">
+  <div class="ah">
+    <button type="button" class="back-btn" id="sBack">←</button>
+    <h2 id="sHdr">학생 모드</h2>
+    <span class="hbadge" id="sBadge"></span>
+  </div>
+  <div class="tnav" id="sTnav">
+    <button type="button" class="ti active" data-tab="0"><span class="tn">STEP1</span>해야할 일</button>
+    <button type="button" class="ti" data-tab="1"><span class="tn">STEP2</span>업무 등록</button>
+    <button type="button" class="ti" data-tab="2"><span class="tn">STEP3</span>업무 관리</button>
+    <button type="button" class="ti" data-tab="3"><span class="tn">📅</span>달력</button>
+    <button type="button" class="ti" data-tab="4"><span class="tn">🏢</span>부서 현황</button>
+  </div>
+  <div class="tp active" id="sP0">
+    <div id="unNotice"></div>
+    <div class="nw"><label>내 이름</label><select id="s0Name"></select></div>
+    <div id="myArea"><div class="empty" style="padding:20px 24px"><div class="ei">👆</div><p>이름을 선택하면<br>내 업무가 나타나요</p><img src="illust-student.png" alt="" style="width:100%;max-width:260px;margin-top:20px;border-radius:16px;opacity:0.9"></div></div>
+  </div>
+  <div class="tp" id="sP1">
+    <div class="nw"><label>내 이름 <span class="req">*</span></label><select id="s1Name"></select></div>
+    <div class="fg"><label>업무명 <span class="req">*</span></label><input type="text" id="fTitle" placeholder="예: 환경의 날 행사 계획서 작성"></div>
+    <div class="fg"><label>카테고리</label><input type="text" id="fCat" placeholder="예: 환경의 날 행사"></div>
+    <div class="fg"><label>행사일 <span style="font-size:11px;color:var(--text3)">(행사가 진행되는 날)</span></label><input type="date" id="fDate"></div>
+    <div class="fg"><label>준비 마감일 <span style="font-size:11px;color:var(--text3)">(업무 완료 기한)</span></label><input type="date" id="fDeadline"></div>
+    <div class="fg">
+      <label>같이 할 사람 <span style="font-size:11px;color:var(--text3)">(공유 업무)</span></label>
+      <div id="cwList" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px;max-height:200px;overflow-y:auto"></div>
+    </div>
+    <div class="fg">
+      <label>세부 할 일 <span class="req">*</span></label>
+      <div id="subList"><div class="sir"><input type="text" placeholder="예: 행사 장소 섭외" class="st"><input type="date" class="dm sd"><button type="button" class="sdel" data-action="rmSub">×</button></div></div>
+      <button type="button" class="asb" id="addSubBtn">+ 세부 할 일 추가</button>
+      <div class="hint">💡 업무를 3~5단계로 쪼개면 진행 상태가 잘 보여요</div>
+    </div>
+    <div class="fg"><label>메모</label><textarea id="fMemo" rows="3" placeholder="참고사항"></textarea></div>
+    <button type="button" class="bp" id="submitBtn">업무 등록하기</button>
+  </div>
+  <div class="tp" id="sP2">
+    <div class="nw"><label>내 이름</label><select id="s2Name"></select></div>
+  <div id="manArea"><div class="empty" style="padding:20px 24px"><div class="ei">👆</div><p>이름을 선택해주세요</p><img src="illust-student.png" alt="" style="width:100%;max-width:260px;margin-top:20px;border-radius:16px;opacity:0.9"></div></div>
+  </div>
+  <div class="tp" id="sP3">
+    <div class="ch"><button type="button" class="cn" id="sCP">‹</button><div class="ct" id="sCT"></div><button type="button" class="cn" id="sCN">›</button></div>
+    <div class="cg" id="sCG"></div><div id="sCD"></div>
+  </div>
+  <div class="tp" id="sP4"><div id="sDept"></div></div>
+</div>
+
+<!-- 교사 화면 -->
+<div id="tView" style="display:none">
+  <div class="ah">
+    <button type="button" class="back-btn" id="tBack">←</button>
+    <h2>전체 현황</h2>
+    <button type="button" class="lock-btn" id="lockBtn">🔒 잠금</button>
+  </div>
+  <div class="tnav" id="tTnav">
+    <button type="button" class="ti active" data-tab="0">대시보드</button>
+    <button type="button" class="ti" data-tab="1">달력</button>
+    <button type="button" class="ti" data-tab="2">부서별</button>
+    <button type="button" class="ti" data-tab="3">학생별</button>
+    <button type="button" class="ti" data-tab="4">전체 업무</button>
+  </div>
+  <div class="tp active" id="tP0">
+    <div class="sg">
+      <div class="sc2 c1"><div class="sn" id="stT">0</div><div class="sl2">전체 업무</div></div>
+      <div class="sc2 c2"><div class="sn" id="stD">0</div><div class="sl2">완료</div></div>
+      <div class="sc2 c3"><div class="sn" id="stI">0</div><div class="sl2">진행중</div></div>
+      <div class="sc2 c4"><div class="sn" id="stU">0</div><div class="sl2">마감 임박</div></div>
+    </div>
+    <div class="stl">⚠️ 담당자 미배정</div><div id="uaArea"></div>
+    <div class="stl">🔴 마감 임박</div><div id="urgArea"></div>
+    <div class="stl">✅ 최근 완료</div><div id="feedArea"></div>
+    <div class="stl">📊 부서별 진행률</div><div id="dSum"></div>
+  </div>
+  <div class="tp" id="tP1">
+    <div class="ch"><button type="button" class="cn" id="tCP">‹</button><div class="ct" id="tCT"></div><button type="button" class="cn" id="tCN">›</button></div>
+    <div class="cg" id="tCG"></div><div id="tCD"></div>
+  </div>
+  <div class="tp" id="tP2"><div id="tDept"></div></div>
+  <div class="tp" id="tP3"><div id="tStu"></div></div>
+  <div class="tp" id="tP4">
+    <div class="sw"><span class="si2">🔍</span><input type="text" id="searchInput" placeholder="업무명, 담당자, 카테고리 검색..."><button type="button" class="sc3" id="searchClear">×</button></div>
+    <div class="fb" id="filterBar">
+      <button type="button" class="fc active" data-filter="전체">전체</button>
+      <button type="button" class="fc" data-filter="예정">예정</button>
+      <button type="button" class="fc" data-filter="진행중">진행중</button>
+      <button type="button" class="fc" data-filter="완료">완료</button>
+      <button type="button" class="fc" data-filter="보류">보류</button>
+    </div>
+    <div id="allArea"></div>
+  </div>
+</div>
+
+<!-- 편집 모달 -->
+<div class="mov" id="editMov">
+  <div class="ms">
+    <div class="mh"></div><div class="mt">업무 수정</div>
+    <div class="fg"><label>업무명</label><input type="text" id="mTi"></div>
+    <div class="fg"><label>카테고리</label><input type="text" id="mCat"></div>
+    <div class="fg"><label>행사일</label><input type="date" id="mDate"></div>
+    <div class="fg"><label>준비 마감일</label><input type="date" id="mDead"></div>
+    <div class="fg">
+      <label>상태</label>
+      <div class="sb" id="mStBtns">
+        <button type="button" class="sb-btn" data-status="예정">예정</button>
+        <button type="button" class="sb-btn" data-status="진행중">진행중</button>
+        <button type="button" class="sb-btn" data-status="완료">완료</button>
+        <button type="button" class="sb-btn" data-status="보류">보류</button>
+      </div>
+    </div>
+    <div class="fg">
+      <label>담당자</label>
+      <div id="mAssigneeWrap" style="border:1px solid var(--border);border-radius:8px;overflow:hidden">
+        <div id="mAssigneeToggle" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;background:var(--surface2)">
+          <span style="font-size:13px" id="mAssigneeCur">-</span>
+          <span style="font-size:11px;color:var(--accent);font-weight:700" id="mAssigneeArrow">변경하기 ▼</span>
+        </div>
+        <div id="mAssigneePanel" style="display:none;padding:8px;max-height:200px;overflow-y:auto;background:var(--surface2)">
+          <div class="cb-group" id="mAssigneeCBs"></div>
+        </div>
+      </div>
+    </div>
+    <div class="fg"><label>메모</label><textarea id="mMemo" rows="2"></textarea></div>
+    <div class="ma"><button type="button" class="bc" id="editCancel">취소</button><button type="button" class="bs" id="editSave">저장</button></div>
+  </div>
+</div>
+
+<!-- 배정 모달 -->
+<div class="mov" id="assignMov">
+  <div class="ms">
+    <div class="mh"></div><div class="mt" id="assignTitle">담당자 배정</div>
+    <div class="fg">
+      <label>담당자 선택 <span style="font-size:11px;color:var(--text3)">(부서명 클릭 시 전원 선택)</span></label>
+      <div class="cb-group" id="assignCBs"></div>
+    </div>
+    <div class="ma"><button type="button" class="bc" id="assignCancel">취소</button><button type="button" class="bs" id="assignSave">배정</button></div>
+  </div>
+</div>
+
+<!-- 학생 상세 모달 -->
+<div class="mov" id="stuMov">
+  <div class="ms">
+    <div class="mh"></div><div class="mt" id="stuTitle"></div>
+    <div id="stuBody"></div>
+    <div style="margin-top:20px"><button type="button" class="bc" style="width:100%" id="stuClose">닫기</button></div>
+  </div>
+</div>
+
+<!-- 삭제 확인 모달 -->
+<div class="mov" id="delMov">
+  <div class="ms">
+    <div class="mh"></div><div class="mt">업무 삭제</div>
+    <p style="font-size:14px;color:var(--text2);margin-bottom:8px">정말 삭제할까요?</p>
+    <p id="delTitle" style="font-size:15px;font-weight:700;margin-bottom:4px"></p>
+    <p style="font-size:12px;color:var(--danger)">삭제된 업무는 복구되지 않아요</p>
+    <div class="ma"><button type="button" class="bc" id="delCancel">취소</button><button type="button" class="bs" style="background:var(--danger)" id="delOK">삭제</button></div>
+  </div>
+</div>
+
+<div id="toast"></div>
 <script>
-// ── 시스템 글로벌 설정 및 백엔드 파이어베이스 주소 ──
-const FB = "https://daeyoung-council-default-rtdb.firebaseio.com";
-const DEPTS = ["기획","홍보","서기","총무","복지"];
-const DC = {"기획":"#4dabf7","홍보":"#ff8787","서기":"#94d82d","총무":"#fcc419","복지":"#da77f2"};
-const MEMBERS = [
-  {name:"변유빈",dept:"기획",role:"회장"},{name:"박건우",dept:"기획",role:"부회장"},{name:"이예은",dept:"기획",role:"부회장"},
-  {name:"이윤서",dept:"기획",role:"부장"},{name:"엄희승",dept:"기획",role:"차장"},{name:"김태희",dept:"기획"},
-  {name:"정윤지",dept:"기획"},{name:"조하윤",dept:"기획"},{name:"윤서인",dept:"홍보",role:"부장"},
-  {name:"정지우",dept:"홍보",role:"차장"},{name:"송채윤",dept:"홍보"},{name:"오수아",dept:"홍보"},
-  {name:"차윤아",dept:"홍보"},{name:"이채민",dept:"서기",role:"부장"},{name:"김나영",dept:"서기",role:"차장"},
-  {name:"박민서",dept:"서기"},{name:"박한별",dept:"서기"},{name:"최유정",dept:"서기"},
-  {name:"이정안",dept:"총무",role:"부장"},{name:"권민서",dept:"총무",role:"차장"},{name:"한은서",dept:"총무"},
-  {name:"허은결",dept:"총무"},{name:"박서연",dept:"복지",role:"부장"},{name:"심수정",dept:"복지",role:"차장"},
-  {name:"남예지",dept:"복지"},{name:"유하은",dept:"복지"},{name:"조민성",dept:"복지"}
+// ── 상수 ──
+const MEMBERS=[
+  {name:'변유빈',dept:'회장단',role:'학생회장'},
+  {name:'박건우',dept:'회장단',role:'부회장'},
+  {name:'이예은',dept:'회장단',role:'부회장'},
+  {name:'이윤서',dept:'알림부',role:'부장'},
+  {name:'엄희승',dept:'알림부',role:'차장'},
+  {name:'윤아인',dept:'알림부',role:'임원'},
+  {name:'조혜리',dept:'알림부',role:'임원'},
+  {name:'서가윤',dept:'행사진행부',role:'부장'},
+  {name:'이지호',dept:'행사진행부',role:'차장'},
+  {name:'백서진',dept:'행사진행부',role:'임원'},
+  {name:'임다경',dept:'행사진행부',role:'임원'},
+  {name:'김아민',dept:'행사진행부',role:'임원'},
+  {name:'김나현',dept:'홍보기획부',role:'부장'},
+  {name:'김유주',dept:'홍보기획부',role:'차장'},
+  {name:'김하윤',dept:'홍보기획부',role:'임원'},
+  {name:'지윤정',dept:'홍보기획부',role:'임원'},
+  {name:'양소율',dept:'홍보기획부',role:'임원'},
+  {name:'윤강민',dept:'자율질서부',role:'부장'},
+  {name:'김지운',dept:'자율질서부',role:'차장'},
+  {name:'강제윤',dept:'자율질서부',role:'임원'},
+  {name:'동윤지',dept:'자율질서부',role:'임원'},
 ];
+const DEPTS=['회장단','알림부','행사진행부','홍보기획부','자율질서부'];
+const DC={'회장단':'#7048e8','알림부':'#0c8599','행사진행부':'#2f9e44','홍보기획부':'#e67700','자율질서부':'#c2255c'};
+const DKO=['일','월','화','수','목','금','토'];
+const SK='daeyoung_v8';
+const PW='0616';
+const FB='https://daeyoung-council-default-rtdb.firebaseio.com';
+const GAS='https://script.google.com/macros/s/AKfycbzcmOgxrmciJN7Uw6Flq7U6KtlP8vtDiI5bexcDmEzYHw8_y129BAiPGZI_NenJfhcE/exec';
+const SEED=[{"id":"1001","assignee":"박건우","allAssignees":["박건우","이예은","변유빈"],"dept":"회장단","title":"회의안건 제작","category":"학생회 정기회의","date":"","deadline":"2026-03-09","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1002","assignee":"변유빈","allAssignees":["변유빈","박건우","이예은","이윤서","엄희승","서가윤","이지호","강제윤","김지운"],"dept":"회장단","title":"업무 배정 최종 논의","category":"집행단 회의","date":"","deadline":"","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1003","assignee":"미지정","allAssignees":[""],"dept":"전체","title":"홍기부 - 부장,차장 선생님에게로","category":"집행단 회의","date":"","deadline":"2026-03-11","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1004","assignee":"이지호","allAssignees":["이지호","김아민","임다경","백서진"],"dept":"행사진행부","title":"연락처 교환 및 친목도모","category":"행진부-방송부 만남","date":"","deadline":"2026-03-12","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1005","assignee":"변유빈","allAssignees":["변유빈","박건우","이예은"],"dept":"회장단","title":"회의 진행 준비","category":"동아리","date":"","deadline":"","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1006","assignee":"이예은","allAssignees":["이예은"],"dept":"회장단","title":"회의록 정리","category":"학생회 정기회의","date":"2026-03-09","deadline":"2026-03-13","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1007","assignee":"이예은","allAssignees":["이예은"],"dept":"회장단","title":"회의록 정리","category":"집행단 회의","date":"","deadline":"2026-03-13","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1008","assignee":"이예은","allAssignees":["이예은"],"dept":"회장단","title":"회의록 정리","category":"동아리","date":"","deadline":"","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1009","assignee":"미지정","allAssignees":[""],"dept":"전체","title":"상장 정리","category":"임명장 수여식","date":"","deadline":"2026-03-16","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1010","assignee":"김나현","allAssignees":["김나현","김유주","김하윤","지윤정","양소율"],"dept":"홍보기획부","title":"학급 회의 운영 영상 선정","category":"학급자치 회의","date":"","deadline":"2026-03-16","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1011","assignee":"변유빈","allAssignees":["변유빈","박건우","이예은","이윤서","서가윤","김나현","윤강민"],"dept":"회장단","title":"교장 선생님께 드릴 안건 정리","category":"학교장 간담회","date":"","deadline":"2026-03-17","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1012","assignee":"이지호","allAssignees":["이지호"],"dept":"홍보기획부","title":"학급회장단 명단 - 연락처용 제작","category":"리더십 캠프","date":"","deadline":"","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1013","assignee":"변유빈","allAssignees":["변유빈"],"dept":"회장단","title":"학급회장단 단톡 개설","category":"리더십 캠프","date":"","deadline":"","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1015","assignee":"이예은","allAssignees":["이예은"],"dept":"회장단","title":"간담회 안건 정리(학생회 전체 공유)","category":"학교장 간담회","date":"","deadline":"2026-03-17","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1016","assignee":"변유빈","allAssignees":["변유빈","박건우","이예은"],"dept":"회장단","title":"리더십 캠프 준비","category":"동아리(5-7)","date":"2026-03-19","deadline":"2026-05-14","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1017","assignee":"이예은","allAssignees":["이예은"],"dept":"회장단","title":"회의록 정리","category":"동아리(5-7)","date":"","deadline":"2026-05-14","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1018","assignee":"변유빈","allAssignees":["변유빈","서가윤","동윤지","백서진"],"dept":"회장단","title":"계획서 수립 필요","category":"꿈꾸는 디케 프로젝트","date":"","deadline":"2026-03-20","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1019","assignee":"양소율","allAssignees":["양소율"],"dept":"홍보기획부","title":"리더십 캠프 1학기 포스터 제작","category":"리더십 캠프","date":"","deadline":"2026-03-20","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1020","assignee":"미지정","allAssignees":[""],"dept":"전체","title":"리더십 캠프 예행연습","category":"리더십 캠프 예행연습","date":"","deadline":"2026-03-25","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1022","assignee":"이예은","allAssignees":["이예은"],"dept":"회장단","title":"1회 회의록 - 리더십캠프 건의사항 정리","category":"학급자치 회의","date":"","deadline":"2026-03-26","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1023","assignee":"미지정","allAssignees":[""],"dept":"전체","title":"학생회실 내PC 지키미 실행","category":"학급자치 회의","date":"","deadline":"2026-03-26","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1024","assignee":"김나현","allAssignees":["김나현","김유주","김하윤","양소율","지윤정"],"dept":"홍보기획부","title":"포스터 부착","category":"리더십 캠프","date":"","deadline":"2026-03-24","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1026","assignee":"변유빈","allAssignees":["변유빈","박건우"],"dept":"회장단","title":"캠프 진행 멘트 제작 완료","category":"리더십 캠프","date":"","deadline":"2026-03-26","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1027","assignee":"미지정","allAssignees":[""],"dept":"홍보기획부","title":"포스터 내용 수정","category":"리더십 캠프","date":"","deadline":"2026-03-26","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1028","assignee":"서가윤","allAssignees":["서가윤","김나현","김아민","이예은","윤아인","조혜리","양소율"],"dept":"자율질서부","title":"양심생리대 구비","category":"리더십 캠프","date":"","deadline":"2026-03-26","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1029","assignee":"서가윤","allAssignees":["서가윤"],"dept":"행사진행부","title":"디케 초상권 동의서 수합","category":"꿈꾸는 디케 프로젝트","date":"","deadline":"2026-03-31","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1030","assignee":"미지정","allAssignees":[""],"dept":"전체","title":"임원수련회 가정통신문 수합","category":"임원수련회","date":"","deadline":"2026-04-02","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1031","assignee":"변유빈","allAssignees":["변유빈","박건우","이예은","엄희승","이윤서","윤아인","조혜리","서가윤","백서진","이지호","김유주","김하윤","김나현","양소율","윤강민","강제윤","동윤지"],"dept":"회장단","title":"영등포구의회 대본 작성","category":"동아리(4-6)","date":"","deadline":"2026-04-01","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1032","assignee":"이윤서","allAssignees":["이윤서","엄희승"],"dept":"알림부","title":"대영알리미 내용 준비(선생님에게 확인 필요)","category":"대영알리미","date":"","deadline":"2026-03-29","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1033","assignee":"이윤서","allAssignees":["이윤서","엄희승"],"dept":"알림부","title":"대영알리미 내용 최종본 제출","category":"대영알리미","date":"","deadline":"2026-04-01","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1034","assignee":"김아민","allAssignees":["김아민"],"dept":"행사진행부","title":"2회 건의사항 내용 정리","category":"학급자치 회의","date":"","deadline":"2026-04-02","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1036","assignee":"미지정","allAssignees":[""],"dept":"알림부","title":"간담회 내용 피드백 준비(대영알리미)","category":"학교장 간담회","date":"","deadline":"","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1037","assignee":"김나현","allAssignees":["김나현","김유주","김하윤","양소율","지윤정"],"dept":"홍보기획부","title":"포스터 제거","category":"리더십 캠프","date":"","deadline":"2026-03-30","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1038","assignee":"미지정","allAssignees":[""],"dept":"전체","title":"간식비(20만원) - 이마트","category":"동아리","date":"","deadline":"","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1048","assignee":"윤강민","allAssignees":["윤강민"],"dept":"자율질서부","title":"우산대여 사업 관련 회의 - 결과 선생님에게","category":"동아리","date":"","deadline":"2026-04-10","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1055","assignee":"박건우","allAssignees":["박건우"],"dept":"회장단","title":"내피시지킴이 실행","category":"동아리","date":"","deadline":"2026-04-15","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1056","assignee":"변유빈","allAssignees":["변유빈","박건우"],"dept":"회장단","title":"사복데이 실행 논의","category":"교장선생님 간담회(사복데이)","date":"","deadline":"2026-04-20","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1057","assignee":"미지정","allAssignees":[""],"dept":"전체","title":"세월호 추모 행사 공간 정리\n(우천시 실내 공간만 정리)","category":"교장선생님 간담회(사복데이)","date":"","deadline":"2026-04-20","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1058","assignee":"미지정","allAssignees":[""],"dept":"전체","title":"세월호 추모 행사 관련 피드백 및 학생회 운영 관련 회의","category":"세월호 행사 피드백","date":"","deadline":"2026-04-20","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1062","assignee":"변유빈","allAssignees":["변유빈","이예은"],"dept":"알림부","title":"대영알리미 대본 작성 및 PPT 준비","category":"5월 대영알리미","date":"","deadline":"2026-04-27","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1063","assignee":"변유빈","allAssignees":["변유빈","박건우","이예은"],"dept":"회장단","title":"스승의 날 준비(계획 수립)","category":"5월 대영알리미","date":"","deadline":"2026-04-30","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1066","assignee":"미지정","allAssignees":[""],"dept":"알림부","title":"이색 상장 학급 별 선생님 배정","category":"5월 대영알리미","date":"","deadline":"2026-04-30","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1067","assignee":"변유빈","allAssignees":["변유빈"],"dept":"회장단","title":"남부학생정례회 참여","category":"5월 대영알리미","date":"2026-05-06","deadline":"","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1068","assignee":"변유빈","allAssignees":["변유빈"],"dept":"회장단","title":"학생의견 급식 간담회 준비","category":"영양사 선생님과 간담회","date":"2026-05-08","deadline":"2026-05-07","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1069","assignee":"양소율","allAssignees":["양소율"],"dept":"홍보기획부","title":"롤링페이퍼 디자인","category":"스승의 날 행사 준비","date":"","deadline":"","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1070","assignee":"박건우","allAssignees":["박건우","변유빈","이예은"],"dept":"회장단","title":"학생 의견 전달","category":"영양사 선생님과 간담회","date":"2026-05-08","deadline":"","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1071","assignee":"이윤서","allAssignees":["이윤서","엄희승"],"dept":"알림부","title":"대의원회(학급 반장 공지)","category":"대의원회","date":"2026-05-08","deadline":"","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1072","assignee":"박건우","allAssignees":["박건우","지윤정","김유주","동윤지","윤아인"],"dept":"회장단","title":"스승의 날 쿠키 제작 및 포장","category":"스승의 날 행사 준비","date":"2026-05-13","deadline":"2026-05-13","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1073","assignee":"미지정","allAssignees":[""],"dept":"전체","title":"이색 상장 준비","category":"스승의 날 행사 준비","date":"2026-05-12","deadline":"","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1077","assignee":"김지운","allAssignees":["김지운","강제윤"],"dept":"자율질서부","title":"우산대여사업","category":"스승의 날 행사 준비","date":"","deadline":"","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1078","assignee":"이예은","allAssignees":["이예은"],"dept":"회장단","title":"회의록 정리","category":"세월호 행사 피드백","date":"2026-04-20","deadline":"","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1079","assignee":"윤아인","allAssignees":["윤아인"],"dept":"알림부","title":"리더십캠프 상품 지급","category":"세월호 행사 피드백","date":"","deadline":"","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1080","assignee":"김하윤","allAssignees":["김하윤"],"dept":"홍보기획부","title":"사복데이 포스터","category":"사복데이 운영","date":"2026-05-14","deadline":"2026-05-11","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1081","assignee":"백서진","allAssignees":["백서진"],"dept":"행사진행부","title":"쿠키 홍보 포스터","category":"스승의 날 행사 준비","date":"2026-05-12","deadline":"2026-05-11","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1082","assignee":"지윤정","allAssignees":["지윤정"],"dept":"홍보기획부","title":"쿠키 라벨지","category":"스승의 날 행사 준비","date":"2026-05-12","deadline":"2026-05-11","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1085","assignee":"미지정","allAssignees":[""],"dept":"전체","title":"양심생리대 사업 실시 여부 결정","category":"동아리(5-7)","date":"2026-05-14","deadline":"","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1086","assignee":"윤강민","allAssignees":["윤강민","김지운","강제윤","동윤지"],"dept":"자율질서부","title":"사복데이 관련 질서유지 도움(복장 준수 확인)","category":"사복데이 운영","date":"2026-05-14","deadline":"","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1087","assignee":"박건우","allAssignees":["박건우"],"dept":"회장단","title":"내피씨지킴이 실행","category":"사복데이 운영","date":"","deadline":"2026-05-22","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1088","assignee":"김지운","allAssignees":["김지운"],"dept":"자율질서부","title":"금연캠페인 업무 배정","category":"금연캠페인","date":"2026-06-01","deadline":"","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1089","assignee":"변유빈","allAssignees":["변유빈"],"dept":"회장단","title":"기말고사 시간표 의견 수렴","category":"금연캠페인","date":"","deadline":"2026-05-21","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1090","assignee":"김나현","allAssignees":["김나현"],"dept":"홍보기획부","title":"금연 캠페인 포스터 제작","category":"금연캠페인","date":"2026-06-01","deadline":"","memo":"","status":"보류","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1091","assignee":"서가윤","allAssignees":["서가윤"],"dept":"행사진행부","title":"환경의 날 행사 계획","category":"환경의 날 행사","date":"2026-06-09","deadline":"2026-05-22","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1092","assignee":"서가윤","allAssignees":["서가윤"],"dept":"행사진행부","title":"환경의 날 행사 회의 - 점심시간, 방과후","category":"환경의 날 행사","date":"2026-06-09","deadline":"2026-05-22","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1093","assignee":"변유빈","allAssignees":["변유빈","박건우","이예은"],"dept":"회장단","title":"고사 관련 회의 - 점심시간","category":"환경의 날 행사","date":"2026-05-26","deadline":"","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1094","assignee":"서가윤","allAssignees":["서가윤"],"dept":"행사진행부","title":"양심생리대 채우기 총괄","category":"양심생리대","date":"2026-05-27","deadline":"","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1095","assignee":"이예은","allAssignees":["이예은"],"dept":"회장단","title":"모의선거 공약 정리","category":"모의선거 공약 발표","date":"2026-06-01","deadline":"2026-05-26","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1096","assignee":"박건우","allAssignees":["박건우"],"dept":"회장단","title":"모의선거 포스터 제작 총괄","category":"모의선거 공약 발표","date":"2026-06-01","deadline":"2026-05-27","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1097","assignee":"이윤서","allAssignees":["이윤서","양소율","김아민"],"dept":"알림부","title":"대영알리미 준비","category":"대영알리미 (6월)","date":"2026-05-29","deadline":"2026-05-27","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1099","assignee":"변유빈","allAssignees":["변유빈"],"dept":"회장단","title":"선거관리위원회 모집","category":"모의선거 공약 발표","date":"2026-06-01","deadline":"2026-05-27","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1100","assignee":"이윤서","allAssignees":["이윤서","양소율","김아민"],"dept":"알림부","title":"6월 대영알리미 일정 정하기\n- 대영알리미에 들어가야할 내용 전달함","category":"모의선거 공약 발표","date":"","deadline":"","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1101","assignee":"변유빈","allAssignees":["변유빈","박건우","이예은"],"dept":"회장단","title":"6월 지방선거 계획 수립\n- 일정 확인","category":"모의선거 공약 발표","date":"","deadline":"","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1102","assignee":"미지정","allAssignees":[""],"dept":"알림부","title":"스승의 날 상장 작성 방법 공유","category":"스승의 날 행사 준비","date":"2026-05-12","deadline":"2026-05-06","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1103","assignee":"서가윤","allAssignees":["서가윤"],"dept":"행사진행부","title":"디케 1회기 활동 기록","category":"스승의 날 행사 준비","date":"","deadline":"","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1104","assignee":"미지정","allAssignees":[""],"dept":"홍보기획부","title":"영상 제작","category":"환경의 날 행사","date":"2026-06-09","deadline":"","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1108","assignee":"김나현","allAssignees":["김나현"],"dept":"홍보기획부","title":"급식캠페인 피켓","category":"환경의 날 행사","date":"2026-06-09","deadline":"","memo":"","status":"보류","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true}];
 
-let tasks = [];
-let _editId = null, _editStatus = null, _delId = null, _assignId = null;
-let sq = '', allFilt = '전체';
-let sCY = 2026, sCM = 2; let tCY = 2026, tCM = 2; // 3월 초기화 (index 2)
-let sCS = null, tCS = null;
+// ── 상태 ──
+let tasks=[];
+let sCY=new Date().getFullYear(),sCM=new Date().getMonth(),sCS=null;
+let tCY=new Date().getFullYear(),tCM=new Date().getMonth(),tCS=null;
+let allFilt='전체',sq='';
+let _editId=null,_editStatus=null,_assignId=null,_delId=null;
 
-// ── 공통 유틸리티 ──
-function toast(m){const t=document.getElementById('toast');t.textContent=m;t.style.opacity=1;setTimeout(()=>{t.style.opacity=0},2000)}
-function dU(d){if(!d)return null;const t=new Date(d+'T00:00:00'),n=new Date();n.setHours(0,0,0,0);return Math.ceil((t-n)/(1000*60*60*24))}
-function dc(dp){return DC[dp]||'#666'}
-function isUA(t){return !t.assignees || t.assignees.length===0}
+// ── 유틸 ──
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+function dU(ds){if(!ds)return null;const d=new Date(ds),n=new Date();n.setHours(0,0,0,0);return Math.floor((d-n)/86400000);}
+function fD(ds){if(!ds)return '';const d=new Date(ds);return `${d.getMonth()+1}/${d.getDate()} (${DKO[d.getDay()]})`;}
+function dc(dept){return DC[dept]||'#868e96';}
+function gm(name){return MEMBERS.find(m=>m.name===name)||{};}
+function gd(name){return gm(name).dept||'';}
+function chip(ds,st){
+  if(!ds||st==='완료')return '';
+  const d=dU(ds);
+  if(d<0)return '<span class="chip chip-over">기한 초과</span>';
+  if(d===0)return '<span class="chip chip-today">오늘 마감</span>';
+  if(d<=3)return `<span class="chip chip-soon">D-${d}</span>`;
+  return '';
+}
+function isUA(t){return !t.assignee||t.assignee===''||t.assignee==='미지정'||!t.assignees||t.assignees.length===0;}
+function migrate(t){if(!t.assignees){t.assignees=t.allAssignees&&t.allAssignees.length&&t.allAssignees[0]?t.allAssignees:(t.assignee&&t.assignee!=='미지정'?[t.assignee]:[]);}return t;}
 
-// ── 데이터베이스 연동 패치 엔진 ──
-async function initTasks(){
-  try {
-    const r = await fetch(`${FB}/tasks.json`);
-    const d = await r.json();
-    tasks = [];
-    if(d) { Object.keys(d).forEach(k=>{ if(d[k]) { d[k].id=k; tasks.push(d[k]); } })}
-    tasks.sort((a,b)=>new Date(a.deadline||'9999-12-31')-new Date(b.deadline||'9999-12-31'));
-    refreshViews();
-  } catch(e) { toast('실시간 동기화 지연 발생'); }
+// ── 로컬 저장 ──
+function saveLocal(){localStorage.setItem(SK,JSON.stringify(tasks));}
+
+// ── Firebase ──
+async function fbLoad(){
+  try{
+    const r=await fetch(FB+'/tasks.json');
+    if(!r.ok)return false;
+    const data=await r.json();
+    if(!data)return false;
+    const fbArr=Object.values(data).filter(t=>t&&t.id);
+    if(!fbArr.length)return false;
+    tasks=fbArr.map(migrate);
+    saveLocal();
+    return true;
+  }catch(e){console.warn('FB load 실패:',e);return false;}
+}
+async function fbPut(t){
+  try{
+    await fetch(FB+'/tasks/'+t.id+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(t)});
+  }catch(e){console.warn('FB put 실패:',e);}
+}
+async function fbPutAll(){
+  try{
+    const obj={};tasks.forEach(t=>{obj[t.id]=t;});
+    await fetch(FB+'/tasks.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(obj)});
+  }catch(e){console.warn('FB putAll 실패:',e);}
+}
+async function fbDel(id){
+  try{await fetch(FB+'/tasks/'+id+'.json',{method:'DELETE'});}catch(e){}
+}
+function gasLog(t){
+  if(!GAS||t.status!=='완료')return;
+  fetch(GAS,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'updateTask',task:t})}).catch(()=>{});
 }
 
-function refreshViews(){
-  const sTab = document.querySelector('#sTnav .ti.active');
-  const tTab = document.querySelector('#tTnav .ti.active');
-  if(sTab) sFns[parseInt(sTab.dataset.tab)]();
-  if(tTab) tFns[parseInt(tTab.dataset.tab)]();
+// ── 초기화: 로컬 캐시로 먼저 표시, Firebase로 갱신 ──
+function initTasks(){
+  const local=JSON.parse(localStorage.getItem(SK)||'null');
+  if(local&&local.length){
+    tasks=local.map(migrate);
+  } else {
+    tasks=SEED.map(t=>({...t})).map(migrate);
+    saveLocal();
+  }
 }
 
-// ── 화면 제어 ──
-function goHome(){
-  document.getElementById('pHome').style.display='flex';
-  ['pPw','pStudent','pTeacher'].forEach(id=>{document.getElementById(id).style.display='none'});
+// ── 이름 셀렉트 ──
+function fillSel(id){
+  const el=document.getElementById(id);if(!el)return;
+  const cur=el.value;
+  el.innerHTML='<option value="">-- 이름 선택 --</option>';
+  DEPTS.forEach(dept=>{
+    const og=document.createElement('optgroup');og.label=dept;
+    MEMBERS.filter(m=>m.dept===dept).forEach(m=>{
+      const o=document.createElement('option');o.value=m.name;o.textContent=m.name;og.appendChild(o);
+    });
+    el.appendChild(og);
+  });
+  if(cur)el.value=cur;
 }
-function enterStudent(){
-  document.getElementById('pHome').style.display='none';
-  document.getElementById('pStudent').style.display='flex';
-  swTab('sTnav',['sP0','sP1','sP2','sP3','sP4'],0,sFns);
+function fillAllSels(){['s0Name','s1Name','s2Name'].forEach(fillSel);}
+
+function buildCWList(ex){
+  const c=document.getElementById('cwList');if(!c)return;c.innerHTML='';
+  DEPTS.forEach(dept=>{
+    const ms=MEMBERS.filter(m=>m.dept===dept&&m.name!==ex);if(!ms.length)return;
+    const dh=document.createElement('div');dh.className='cb-dh';
+    dh.innerHTML=`<span>${dept}</span><span style="font-size:11px;color:var(--text3)">전체 선택</span>`;
+    dh.addEventListener('click',()=>{const cbs=c.querySelectorAll(`.cw-cb[data-dept="${dept}"]`);const a=[...cbs].every(x=>x.checked);cbs.forEach(x=>x.checked=!a);});
+    c.appendChild(dh);
+    ms.forEach(m=>{
+      const row=document.createElement('div');row.className='cb-item';
+      const cb=document.createElement('input');cb.type='checkbox';cb.className='cw-cb';cb.dataset.dept=dept;cb.id='cw-'+m.name;cb.value=m.name;
+      const lb=document.createElement('label');lb.htmlFor='cw-'+m.name;lb.textContent=`${m.name} (${m.role})`;
+      row.appendChild(cb);row.appendChild(lb);c.appendChild(row);
+    });
+  });
 }
+function buildAssignCBs(){
+  const c=document.getElementById('assignCBs');if(!c)return;c.innerHTML='';
+  DEPTS.forEach(dept=>{
+    const dh=document.createElement('div');dh.className='cb-dh';
+    dh.innerHTML=`<span class="db db-${dept}">${dept}</span><span style="font-size:11px;color:var(--text3)">전체</span>`;
+    dh.addEventListener('click',()=>{const cbs=c.querySelectorAll(`.as-cb[data-dept="${dept}"]`);const a=[...cbs].every(x=>x.checked);cbs.forEach(x=>x.checked=!a);});
+    c.appendChild(dh);
+    MEMBERS.filter(m=>m.dept===dept).forEach(m=>{
+      const row=document.createElement('div');row.className='cb-item';
+      const cb=document.createElement('input');cb.type='checkbox';cb.className='as-cb';cb.dataset.dept=dept;cb.id='as-'+m.name;cb.value=m.name;
+      const lb=document.createElement('label');lb.htmlFor='as-'+m.name;lb.textContent=m.name;
+      row.appendChild(cb);row.appendChild(lb);c.appendChild(row);
+    });
+  });
+}
+function buildMAssigneeCBs(cur){
+  const c=document.getElementById('mAssigneeCBs');if(!c)return;c.innerHTML='';
+  DEPTS.forEach(dept=>{
+    const dh=document.createElement('div');dh.className='cb-dh';
+    dh.innerHTML=`<span class="db db-${dept}">${dept}</span><span style="font-size:11px;color:var(--text3)">전체</span>`;
+    dh.addEventListener('click',()=>{
+      const cbs=c.querySelectorAll(`.me-cb[data-dept="${dept}"]`);
+      const a=[...cbs].every(x=>x.checked);cbs.forEach(x=>x.checked=!a);
+      updMAssignee();
+    });
+    c.appendChild(dh);
+    MEMBERS.filter(m=>m.dept===dept).forEach(m=>{
+      const row=document.createElement('div');row.className='cb-item';
+      const cb=document.createElement('input');cb.type='checkbox';cb.className='me-cb';cb.dataset.dept=dept;cb.id='me-'+m.name;cb.value=m.name;
+      cb.checked=(cur||[]).includes(m.name);
+      cb.addEventListener('change',updMAssignee);
+      const lb=document.createElement('label');lb.htmlFor='me-'+m.name;lb.textContent=m.name;
+      row.appendChild(cb);row.appendChild(lb);c.appendChild(row);
+    });
+  });
+}
+function updMAssignee(){
+  const sel=[...document.querySelectorAll('.me-cb:checked')].map(x=>x.value);
+  document.getElementById('mAssigneeCur').textContent=sel.length?sel.join(', '):'선택 없음';
+}
+
+// ── 화면 전환 ──
 function showPw(){
-  document.getElementById('pHome').style.display='none';
-  document.getElementById('pPw').style.display='flex';
+  document.getElementById('modeSelect').style.display='none';
+  document.getElementById('pwScreen').style.display='flex';
   document.getElementById('pwInput').value='';
-  document.getElementById('pwInput').focus();
+  document.getElementById('pwErr').textContent='';
+  setTimeout(()=>document.getElementById('pwInput').focus(),100);
 }
 function checkPw(){
-  if(document.getElementById('pwInput').value==='0616'){
-    document.getElementById('pPw').style.display='none';
-    document.getElementById('pTeacher').style.display='flex';
-    swTab('tTnav',['tP0','tP1','tP2','tP3','tP4','tP5'],0,tFns);
-  } else { toast('비밀번호가 불일치합니다.'); }
+  if(document.getElementById('pwInput').value===PW){
+    document.getElementById('pwScreen').style.display='none';
+    enterTeacher();
+  } else {
+    document.getElementById('pwErr').textContent='비밀번호가 틀렸어요';
+    document.getElementById('pwInput').value='';
+    document.getElementById('pwInput').focus();
+  }
 }
+function enterStudent(){
+  document.getElementById('modeSelect').style.display='none';
+  document.getElementById('sView').style.display='block';
+  fillAllSels();buildCWList('');
+  document.getElementById('fDate').value=new Date().toISOString().split('T')[0];
+  renderAll_s();
+  // Firebase 최신 데이터 로드 후 갱신
+  fbLoad().then(ok=>{if(ok)renderAll_s();});
+}
+function enterTeacher(){
+  document.getElementById('tView').style.display='block';
+  renderAll_t();
+  fbLoad().then(ok=>{if(ok)renderAll_t();});
+}
+function goHome(){
+  ['modeSelect'].forEach(id=>document.getElementById(id).style.display='flex');
+  ['sView','tView','pwScreen'].forEach(id=>document.getElementById(id).style.display='none');
+}
+function renderAll_s(){renderUnNotice();renderMyTasks();renderManage();renderSDept();}
+function renderAll_t(){renderDash();renderTDept();renderTStu();renderAllTasks();}
+
+function closeMov(id){document.getElementById(id).classList.remove('open');}
+
+// ── 탭 전환 ──
 function swTab(navId,panels,n,fns){
   document.querySelectorAll('#'+navId+' .ti').forEach((t,i)=>t.classList.toggle('active',i===n));
   panels.forEach((p,i)=>{const el=document.getElementById(p);if(el)el.classList.toggle('active',i===n);});
-  if(fns && fns[n]) fns[n]();
+  fns[n]&&fns[n]();
 }
-function openMov(id){document.getElementById(id).style.display='flex'}
-function closeMov(id){document.getElementById(id).style.display='none'}
+const sFns=[renderMyTasks,()=>{},renderManage,()=>renderCal('s'),renderSDept];
+const tFns=[renderDash,()=>renderCal('t'),renderTDept,renderTStu,renderAllTasks];
 
-// ── 드롭다운 데이터 주입 ──
-function fillAllSels(){
-  const s0=document.getElementById('s0Name'), s2=document.getElementById('s2Name');
-  s0.innerHTML = MEMBERS.map(m=>`<option value="${m.name}">${m.name} (${m.dept})</option>`).join('');
-  s2.innerHTML = s0.innerHTML;
-  document.getElementById('tDept').innerHTML = DEPTS.map(d=>`<option value="${d}">${d}부</option>`).join('');
-  document.getElementById('tAsArea').innerHTML = MEMBERS.map(m=>`
-    <label style="display:flex;align-items:center;gap:6px;font-size:12px;padding:2px 0;cursor:pointer">
-      <input type="checkbox" value="${m.name}" class="reg-as-chk"> [${m.dept}] ${m.name}
-    </label>
-  `).join('');
-}
-
-function buildCWList(n){ /* 빈공간 유지 */ }
-
-// ── 컴포넌트 렌더러 ──
-function chip(deadline,status){
-  if(status==='완료') return '<span class="chip chip-v">완료</span>';
-  if(status==='피드백') return '<span class="chip chip-i">피드백</span>';
-  const d=dU(deadline);
-  if(d===null) return '<span class="chip chip-u">미지정</span>';
-  if(d<0) return `<span class="chip chip-d">만료 ${Math.abs(d)}일</span>`;
-  if(d===0) return '<span class="chip chip-d">오늘 마감</span>';
-  if(d<=3) return `<span class="chip chip-w">임박 ${d}일</span>`;
-  return `<span class="chip chip-u">D-${d}</span>`;
-}
-
+// ── 카드 렌더 ──
 function card(t,opts){
   opts=opts||{};
   const {showSB,showEB,showDel}=opts;
@@ -407,176 +696,277 @@ function card(t,opts){
   const dn=subs.filter(s=>s.done).length;
   const pct=subs.length>0?Math.round(dn/subs.length*100):0;
   const col=dc(t.dept);
-  const ass=t.assignees||[];
-
-  let h = `<div class="card" style="border-left:4px solid ${col}">
-    <div class="ch">
-      <div class="ctitle">${t.pri==='긴급'?'🚨 ':''}${t.title}</div>
-      <div class="cchips">${cp}<span class="db db-${t.dept}">${t.dept}</span></div>
-    </div>`;
-  
-  if(t.memo){ h += `<div class="cmemo">${t.memo}</div>`; }
-  
-  if(ass.length>0){
-    h += `<div style="font-size:11px;color:var(--text2);margin-top:-2px"><strong>🏃 담당 임원:</strong> ${ass.join(', ')}</div>`;
-  } else {
-    h += `<div style="font-size:11px;color:var(--danger);font-weight:700;margin-top:-2px">⚠️ 배정된 담당자 없음</div>`;
-  }
-
-  if(subs.length>0){
-    h += `<div class="subs-box">
-      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text2);font-weight:700;margin-bottom:2px">
-        <span>세부 미션 완료율</span><span>${dn}/${subs.length}개 (${pct}%)</span>
-      </div>
-      <div class="dp" style="margin-bottom:6px;height:4px"><div class="dpf" style="width:${pct}%;background:var(--accent3)"></div></div>`;
-    subs.forEach((s,idx)=>{
-      h += `<div class="sub-i ${s.done?'done':''}" data-action="togSub" data-id="${t.id}" data-idx="${idx}">
-        <div class="chk">${s.done?'✓':''}</div>
-        <div class="sub-t">${s.t}</div>
-      </div>`;
-    });
-    h += `</div>`;
-  }
-
-  h += `<div class="cfoot">
-    <span>📅 ${t.deadline||'기한 미지정'}</span>
-    <div class="cops">`;
-  if(showSB){ h += `<div class="cop" data-action="assign" data-id="${t.id}">👥 담당 변경</div>`; }
-  if(!ass.includes(document.getElementById('s0Name')?.value) && !showSB){
-    h += `<div class="cop" data-action="selfAssign" data-id="${t.id}">🖐️ 내가 맡기</div>`;
-  }
-  if(showEB){ h += `<div class="cop" data-action="edit" data-id="${t.id}">🛠️ 제어</div>`; }
-  if(showDel){ h += `<div class="cop cop-d" data-action="del" data-id="${t.id}">🗑️ 삭제</div>`; }
-  h += `</div></div></div>`;
-  return h;
-}
-
-function renderGrp(list,opts){return list.length?list.map(t=>card(t,opts)).join(''):'<div class="empty">진행 중인 업무가 없습니다.</div>'}
-function doneSec(list,opts,key){
-  if(!list.length)return '';
-  return `<div class="done-sec">
-    <div class="dtog" onclick="const d=document.getElementById('dl_${key}');d.style.display=d.style.display==='block'?'none':'block'">✅ 완료된 업무 보기 (${list.length}개) ▼</div>
-    <div class="dlist" id="dl_${key}">${list.map(t=>card(t,opts)).join('')}</div>
+  const ass=t.assignees||[t.assignee].filter(Boolean);
+  const shB=ass.length>1?'<span class="shared-b">공유 '+ass.length+'명</span>':'';
+  const eb=showEB?`<button type="button" class="eb" data-action="edit" data-id="${t.id}">✏️</button>`:'';
+  const db=showDel?`<button type="button" class="del-btn" data-action="del" data-id="${t.id}">🗑</button>`:'';
+  const dateL=[
+    t.date?`<span class="tc-date">📅 행사일 ${fD(t.date)}</span>`:'',
+    t.deadline?`<span class="tc-date${d!==null&&d<=3&&t.status!=='완료'?' urg':''}">⏰ 준비마감 ${fD(t.deadline)}</span>`:'',
+    cp
+  ].filter(Boolean).join('');
+  const subH=subs.length?`
+    <div class="pw2"><div class="pl"><span>세부 진행</span><span>${dn}/${subs.length}</span></div><div class="pb"><div class="pf" style="width:${pct}%;background:${col}"></div></div></div>
+    <div class="sl">${subs.map((s,i)=>`<div class="si">
+      <div class="sc${s.done?' done':''}" data-action="togSub" data-id="${t.id}" data-idx="${i}"></div>
+      <span class="st2${s.done?' done':''}">${s.text}</span>
+      <span class="sd2" data-action="editSD" data-id="${t.id}" data-idx="${i}">${s.date?fD(s.date):'날짜 추가'}</span>
+      ${showEB?`<button type="button" class="sdel2" data-action="delSub" data-id="${t.id}" data-idx="${i}">×</button>`:''}
+    </div>`).join('')}</div>`:'' ;
+  const addH=showEB?`<div class="add-si"><input type="text" placeholder="세부 할 일 추가" id="ns-${t.id}"><input type="date" class="dm" id="nd-${t.id}"><button type="button" data-action="addSub" data-id="${t.id}">추가</button></div>`:'';
+  const sbH=showSB?`<div class="sb">${['예정','진행중','완료','보류'].map(s=>`<button type="button" class="sb-btn${t.status===s?' a-'+s:''}" data-action="chgSt" data-id="${t.id}" data-status="${s}">${s}</button>`).join('')}</div>`:'';
+  return `<div class="tc" id="c-${t.id}">
+    <div class="tc-top"><div class="tc-ti">${t.title}</div><div class="tc-r">${shB}${eb}${db}<span class="tag tag-${t.status}">${t.status}</span></div></div>
+    <div class="tc-meta">${t.category?`<span class="db db-${t.dept}">${t.category}</span>`:'<span style="font-size:11px;color:var(--text3);font-style:italic">카테고리 미지정</span>'}${ass.length>1?`<span style="font-size:11px;color:var(--text2)">${ass.join(', ')}</span>`:''}</div>
+    ${dateL?`<div class="tc-meta" style="margin-top:2px">${dateL}</div>`:''}
+    ${subH}${addH}
+    ${t.memo?`<div style="margin-top:8px;font-size:12px;color:var(--text2);line-height:1.6">${t.memo}</div>`:''}
+    ${sbH}
   </div>`;
 }
+function doneSec(list,opts,id){
+  if(!list.length)return '';
+  const sorted=[...list].sort((a,b)=>{if(!a.completedAt&&!b.completedAt)return 0;if(!a.completedAt)return 1;if(!b.completedAt)return -1;return new Date(b.completedAt)-new Date(a.completedAt);});
+  return `<div class="dt" data-done="${id}"><span class="arr">▶</span><span>완료된 업무 ${list.length}개</span></div><div class="dl" id="dl-${id}">${sorted.map(t=>card(t,opts)).join('')}</div>`;
+}
+function grpTime(list){
+  const g={ov:[],td:[],wk:[],lt:[],nd:[]};
+  list.forEach(t=>{if(!t.deadline){g.nd.push(t);return;}const d=dU(t.deadline);if(d<0)g.ov.push(t);else if(d===0)g.td.push(t);else if(d<=7)g.wk.push(t);else g.lt.push(t);});
+  return g;
+}
+function renderGrp(list,opts){
+  const g=grpTime(list);
+  const defs=[{k:'ov',l:'기한 초과',cl:'tg-ov',c:'var(--danger)'},{k:'td',l:'오늘 마감',cl:'tg-td',c:'var(--warn)'},{k:'wk',l:'이번 주',cl:'tg-wk',c:'var(--info)'},{k:'lt',l:'이후',cl:'tg-lt',c:'var(--text2)'},{k:'nd',l:'날짜 미정',cl:'tg-nd',c:'var(--text3)'}];
+  let h='';
+  defs.forEach(({k,l,cl,c})=>{if(!g[k].length)return;h+=`<div class="tg"><div class="tgl ${cl}"><span class="tgd" style="background:${c}"></span>${l} (${g[k].length})</div>${g[k].map(t=>card(t,opts)).join('')}</div>`;});
+  return h||'<div class="empty"><div class="ei">🎉</div><p>업무 없음</p></div>';
+}
 
-// ── 학생 대시보드 ──
+// ── 미배정 공지 ──
+function renderUnNotice(){
+  const ua=tasks.filter(t=>isUA(t)&&t.status!=='완료');
+  const el=document.getElementById('unNotice');if(!el)return;
+  if(!ua.length){el.innerHTML='';return;}
+  el.innerHTML=`<div class="un-notice"><div class="un-hd">📢 담당자 배정이 필요한 업무 (${ua.length}개)</div>${ua.map(t=>`<div class="un-item"><span class="un-name">${t.title}${t.category?` <span style="font-size:11px;color:var(--text3)">(${t.category})</span>`:''}</span><span class="db db-${t.dept}">${t.dept}</span><button type="button" class="self-btn" data-action="selfAssign" data-id="${t.id}">내가 할게요</button></div>`).join('')}</div>`;
+}
+
+// ── 학생: 해야할 일 ──
 function renderMyTasks(){
+  renderUnNotice();
   const name=document.getElementById('s0Name').value;
   const area=document.getElementById('myArea');
-  if(!name){area.innerHTML='';return;}
-  const my=tasks.filter(t=>(t.assignees||[]).includes(name));
-  let h = '<div style="padding:0 16px">';
-  h += '<div class="stl">🔥 내게 배정된 핵심 미션</div>';
-  h += renderGrp(my.filter(t=>t.status!=='완료'),{showSB:false,showEB:false,showDel:false});
-  h += doneSec(my.filter(t=>t.status==='완료'),{showSB:false,showEB:false,showDel:false},'my');
-  h += '<div class="stl" style="margin-top:20px">📢 우리 부서 공동 업무</div>';
-  const dept=(MEMBERS.find(m=>m.name===name))?.dept||'';
-  const dpT=tasks.filter(t=>t.dept===dept && !(t.assignees||[]).includes(name));
-  h += renderGrp(dpT.filter(t=>t.status!=='완료'),{showSB:false,showEB:false,showDel:false});
-  h += doneSec(dpT.filter(t=>t.status==='완료'),{showSB:false,showEB:false,showDel:false},'my_dept');
-  h += '</div>';
-  area.innerHTML=h;
+  if(!name){area.innerHTML='<div class="empty" style="padding:20px 24px"><div class="ei">👆</div><p>이름을 선택하면<br>내 업무가 나타나요</p><img src="illust-student.png" alt="" style="width:100%;max-width:260px;margin-top:20px;border-radius:16px;opacity:0.9"></div>';return;}
+  document.getElementById('sHdr').textContent=name+'의 업무';
+  document.getElementById('sBadge').textContent=gd(name);
+  const all=tasks.filter(t=>(t.assignees||[t.assignee]).includes(name));
+  if(!all.length){area.innerHTML='<div class="empty"><div class="ei">📝</div><p>등록된 업무가 없어요</p></div>';return;}
+  area.innerHTML=renderGrp(all.filter(t=>t.status!=='완료'),{})+doneSec(all.filter(t=>t.status==='완료'),{},'my');
 }
 
-// ── 업무 추가 수행 ──
+// ── 학생: 업무 등록 ──
 function addSubRow(){
-  const d=document.createElement('div');d.className='sir';
-  d.innerHTML='<input type="text" class="ipt sub-ipt" placeholder="세부 항목 입력" style="padding:8px 10px;font-size:13px"><button type="button" class="sc3" data-action="rmSub">×</button>';
-  document.getElementById('subRows').appendChild(d);
+  const l=document.getElementById('subList');
+  const r=document.createElement('div');r.className='sir';
+  r.innerHTML='<input type="text" placeholder="세부 할 일" class="st"><input type="date" class="dm sd"><button type="button" class="sdel" data-action="rmSub">×</button>';
+  l.appendChild(r);
 }
-async function submitTask(){
-  const title=document.getElementById('tTitle').value.trim();
-  if(!title){toast('업무명을 작성해주세요.');return;}
-  const depts=document.querySelectorAll('.reg-as-chk:checked');
-  const ass=[]; depts.forEach(c=>ass.push(c.value));
+function submitTask(){
+  const name=document.getElementById('s1Name').value;
+  const title=document.getElementById('fTitle').value.trim();
+  if(!name){toast('이름을 선택해주세요');return;}
+  if(!title){toast('업무명을 입력해주세요');return;}
   const subs=[];
-  document.querySelectorAll('.sub-ipt').forEach(ipt=>{const v=ipt.value.trim();if(v)subs.push({t:v,done:false})});
-  const data={
-    title,dept:document.getElementById('tDept').value,
-    assignees:ass,deadline:document.getElementById('tDeadline').value,
-    pri:document.getElementById('tPri').value,memo:document.getElementById('tMemo').value,
-    status:'진행중',subtasks:subs
-  };
-  try{
-    await fetch(`${FB}/tasks.json`,{method:'POST',body:JSON.stringify(data)});
-    toast('업무가 정상 등록되었습니다!');
-    document.getElementById('tTitle').value='';
-    document.getElementById('tMemo').value='';
-    document.querySelectorAll('.reg-as-chk').forEach(c=>c.checked=false);
-    document.getElementById('subRows').innerHTML='<div class="sir"><input type="text" class="ipt sub-ipt" placeholder="예: 시안 확정" style="padding:8px 10px;font-size:13px"><button type="button" class="sc3" data-action="rmSub">×</button></div>';
-    initTasks();
-  }catch(e){toast('네트워크 상태를 확인해주세요.');}
+  document.querySelectorAll('.sir').forEach(r=>{const tx=r.querySelector('.st').value.trim();const dt=r.querySelector('.sd').value;if(tx)subs.push({text:tx,date:dt,done:false});});
+  if(!subs.length){toast('세부 할 일을 1개 이상 입력해주세요');return;}
+  const cws=[...document.querySelectorAll('.cw-cb:checked')].map(x=>x.value);
+  const ass=[name,...cws];
+  const t={id:Date.now().toString(),assignee:name,assignees:ass,dept:gd(name),title,category:document.getElementById('fCat').value.trim(),date:document.getElementById('fDate').value,deadline:document.getElementById('fDeadline').value,memo:document.getElementById('fMemo').value.trim(),status:'예정',subtasks:subs,createdAt:new Date().toISOString()};
+  tasks.push(t);saveLocal();fbPutAll();
+  toast('✅ '+ass.join(', ')+'에게 업무 등록!');
+  document.getElementById('fTitle').value='';document.getElementById('fCat').value='';document.getElementById('fMemo').value='';
+  document.getElementById('subList').innerHTML='<div class="sir"><input type="text" placeholder="예: 행사 장소 섭외" class="st"><input type="date" class="dm sd"><button type="button" class="sdel" data-action="rmSub">×</button></div>';
+  document.querySelectorAll('.cw-cb').forEach(x=>x.checked=false);
+  setTimeout(()=>{['s0Name','s1Name','s2Name'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=name;});buildCWList(name);swTab('sTnav',['sP0','sP1','sP2','sP3','sP4'],0,sFns);},600);
 }
 
-// ── 학생 업무 제어 ──
+// ── 학생: 업무 관리 ──
 function renderManage(){
   const name=document.getElementById('s2Name').value;
   const area=document.getElementById('manArea');
-  if(!name){area.innerHTML='<div class="empty">이름을 선택하세요.</div>';return;}
-  const my=tasks.filter(t=>(t.assignees||[]).includes(name));
-  let h='<div style="padding:0 16px">';
-  h += renderGrp(my.filter(t=>t.status!=='완료'),{showSB:true,showEB:true,showDel:true});
-  h += doneSec(my.filter(t=>t.status==='완료'),{showSB:true,showEB:true,showDel:true},'man');
-  h += '</div>';
-  area.innerHTML=h;
+ if(!name){area.innerHTML='<div class="empty" style="padding:20px 24px"><div class="ei">👆</div><p>이름을 선택해주세요</p><img src="illust-student.png" alt="" style="width:100%;max-width:260px;margin-top:20px;border-radius:16px;opacity:0.9"></div>';return;}
+ const all = tasks.filter(t => (t.assignees || [t.assignee]).includes(name));
+  if(!all.length){area.innerHTML='<div class="empty"><div class="ei">📝</div><p>등록된 업무가 없어요</p></div>';return;}
+  const opts={showSB:true,showEB:true,showDel:true};
+  area.innerHTML=renderGrp(all.filter(t=>t.status!=='완료'),opts)+doneSec(all.filter(t=>t.status==='완료'),opts,'man');
 }
 
-// ── 교사 대시보드 ──
-function renderDash(){
-  const total=tasks.length,done=tasks.filter(t=>t.status==='완료').length,ing=tasks.filter(t=>t.status!=='완료').length;
-  const urg=tasks.filter(t=>{const d=dU(t.deadline);return d!==null&&d<=3&&t.status!=='완료'}).length;
-  document.getElementById('stT').textContent=total;
-  document.getElementById('stD').textContent=done;
-  document.getElementById('stI').textContent=ing;
-  document.getElementById('stU').textContent=urg;
-  const ua=tasks.filter(t=>isUA(t)&&t.status!=='완료');
-  document.getElementById('uaArea').innerHTML=ua.length===0?'<div style="font-size:13px;color:var(--text3);padding:4px 0">담당자 미지정 업무 없음</div>':ua.map(t=>card(t,{showSB:true,showEB:true,showDel:true})).join('');
-  const urgL=tasks.filter(t=>{const d=dU(t.deadline);return d!==null&&d<=3&&t.status!=='완료'});
-  document.getElementById('urgArea').innerHTML=urgL.length===0?'<div style="font-size:13px;color:var(--text3);padding:4px 0">마감 임박 업무 없음</div>':urgL.map(t=>card(t,{showEB:true})).join('');
-  const fd=tasks.filter(t=>t.status==='완료').slice(-3);
-  document.getElementById('feedArea').innerHTML=fd.length===0?'<div style="font-size:13px;color:var(--text3);padding:4px 0">최근 완료된 업무 없음</div>':fd.map(t=>card(t,{})).join('');
-  
-  let dsh='';
-  DEPTS.forEach(dept=>{
-    const dt=tasks.filter(t=>t.dept===dept);
-    const dn=dt.filter(t=>t.status==='완료').length;
-    const pct=dt.length>0?Math.round(dn/dt.length*100):0;
-    dsh += `<div style="margin-bottom:8px">
-      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><strong>${dept}부</strong> <span style="font-family:monospace">${dn}/${dt.length} (${pct}%)</span></div>
-      <div class="dp" style="height:5px;margin-bottom:0"><div class="dpf" style="width:${pct}%;background:${dc(dept)}"></div></div>
-    </div>`;
-  });
-  document.getElementById('dSum').innerHTML=dsh;
+// ── 상태 변경 ──
+function chgSt(id,ns){
+  const t=tasks.find(x=>x.id===id);if(!t)return;
+  if(ns==='완료'){(t.subtasks||[]).forEach(s=>s.done=true);t.completedAt=new Date().toISOString();}
+  if(ns==='예정')(t.subtasks||[]).forEach(s=>s.done=false);
+  t.status=ns;saveLocal();fbPut(t);gasLog(t);refresh();
+  toast('"'+ns+'"으로 변경');
+  if(ns==='완료')setTimeout(openDones,100);
 }
 
-// ── 달력 엔진 ──
-function renderCal(mode){
-  const Y=mode==='s'?sCY:tCY, M=mode==='s'?sCM:tCM, selD=mode==='s'?sCS:tCS;
-  document.getElementById(mode==='s'?'sCT':'tCT').textContent=`${Y}년 ${M+1}월`;
-  const f=new Date(Y,M,1).getDay(), l=new Date(Y,M+1,0).getDate(), prevL=new Date(Y,M,0).getDate();
-  let h='<div class="cw">일</div><div class="cw">월</div><div class="cw">화</div><div class="cw">수</div><div class="cw">목</div><div class="cw">금</div><div class="cw">토</div>';
-  for(let i=f-1;i>=0;i--){ h+=`<div class="cd other">${prevL-i}</div>` }
-  const today=new Date(), ty=today.getFullYear(), tm=today.getMonth(), td=today.getDate();
-  for(let d=1;d<=l;d++){
-    const dateStr=`${Y}-${String(M+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const isToday=(Y===ty&&M===tm&&d===td);
-    const hasTask=tasks.some(t=>t.deadline===dateStr);
-    h+=`<div class="cd ${isToday?'today':''} ${selD===dateStr?'sel-d':''}" data-cal="${mode}" data-date="${dateStr}">
-      ${d}${hasTask?'<div class="cdot"></div>':''}
-    </div>`;
+// ── 세부 체크 ──
+function togSub(id,idx){
+  const t=tasks.find(x=>x.id===id);if(!t||!t.subtasks)return;
+  t.subtasks[idx].done=!t.subtasks[idx].done;
+  const cnt=t.subtasks.filter(s=>s.done).length;
+  if(cnt===0)t.status='예정';
+  else if(cnt===t.subtasks.length){t.status='완료';t.completedAt=new Date().toISOString();}
+  else t.status='진행중';
+  saveLocal();fbPut(t);gasLog(t);refresh();
+  toast(t.subtasks[idx].done?'✅ 완료!':'↩ 해제');
+  if(t.status==='완료')setTimeout(openDones,100);
+}
+
+// ── 세부 날짜 편집 ──
+function editSD(id,idx){
+  const t=tasks.find(x=>x.id===id);if(!t)return;
+  const el=document.querySelector(`[data-action="editSD"][data-id="${id}"][data-idx="${idx}"]`);if(!el)return;
+  const inp=document.createElement('input');inp.type='date';inp.className='sd2';inp.style.width='120px';inp.style.height='24px';inp.value=t.subtasks[idx].date||'';
+  el.replaceWith(inp);inp.focus();
+  const done=()=>{t.subtasks[idx].date=inp.value;saveLocal();fbPut(t);refresh();};
+  inp.addEventListener('change',done);inp.addEventListener('blur',done);
+}
+
+// ── 세부 추가 ──
+function addSub(id){
+  const t=tasks.find(x=>x.id===id);if(!t)return;
+  const tx=document.getElementById('ns-'+id);const dt=document.getElementById('nd-'+id);
+  if(!tx||!tx.value.trim()){toast('내용을 입력해주세요');return;}
+  if(!t.subtasks)t.subtasks=[];
+  t.subtasks.push({text:tx.value.trim(),date:dt?dt.value:'',done:false});
+  saveLocal();fbPut(t);refresh();toast('세부 항목 추가!');
+}
+
+// ── 세부 삭제 ──
+function delSub(id,idx){
+  const t=tasks.find(x=>x.id===id);if(!t||!t.subtasks)return;
+  t.subtasks.splice(idx,1);
+  const cnt=t.subtasks.filter(s=>s.done).length;
+  if(!t.subtasks.length)t.status='예정';
+  else if(cnt===t.subtasks.length)t.status='완료';
+  else if(cnt>0)t.status='진행중';
+  else t.status='예정';
+  saveLocal();fbPut(t);refresh();
+}
+
+// ── 자기 배정 ──
+function selfAssign(id){
+  const name=['s0Name','s1Name','s2Name'].map(x=>document.getElementById(x)?.value).find(x=>x);
+  if(!name){toast('먼저 내 이름을 선택해주세요');return;}
+  const t=tasks.find(x=>x.id===id);if(!t)return;
+  t.assignee=name;t.assignees=[name];t.dept=gd(name);
+  saveLocal();fbPut(t);refresh();
+  toast('✅ '+name+'이(가) "'+t.title+'" 담당자로 배정됐어요');
+}
+
+// ── 업무 삭제 ──
+function openDel(id){
+  _delId=id;
+  const t=tasks.find(x=>x.id===id);
+  document.getElementById('delTitle').textContent=t?t.title:'';
+  document.getElementById('delMov').classList.add('open');
+}
+function confirmDel(){
+  fbDel(_delId);
+  tasks=tasks.filter(t=>t.id!==_delId);
+  saveLocal();closeMov('delMov');refresh();toast('🗑 삭제됐어요');
+}
+
+// ── 편집 모달 ──
+function openEdit(id){
+  const t=tasks.find(x=>x.id===id);if(!t)return;
+  _editId=id;_editStatus=t.status;
+  document.getElementById('mTi').value=t.title||'';
+  document.getElementById('mCat').value=t.category||'';
+  document.getElementById('mDate').value=t.date||'';
+  document.getElementById('mDead').value=t.deadline||'';
+  document.getElementById('mMemo').value=t.memo||'';
+  document.querySelectorAll('#mStBtns .sb-btn').forEach(b=>b.className='sb-btn'+(t.status===b.dataset.status?' a-'+t.status:''));
+  const ass=t.assignees||[t.assignee].filter(Boolean);
+  document.getElementById('mAssigneeCur').textContent=ass.length?ass.join(', '):'미지정';
+  document.getElementById('mAssigneePanel').style.display='none';
+  document.getElementById('mAssigneeArrow').textContent='변경하기 ▼';
+  buildMAssigneeCBs(ass);
+  document.getElementById('editMov').classList.add('open');
+}
+function saveEdit(){
+  const t=tasks.find(x=>x.id===_editId);if(!t)return;
+  t.title=document.getElementById('mTi').value.trim()||t.title;
+  t.category=document.getElementById('mCat').value.trim();
+  t.date=document.getElementById('mDate').value;
+  t.deadline=document.getElementById('mDead').value;
+  t.memo=document.getElementById('mMemo').value.trim();
+  if(_editStatus){
+    if(_editStatus==='완료'&&t.status!=='완료'){(t.subtasks||[]).forEach(s=>s.done=true);t.completedAt=new Date().toISOString();}
+    if(_editStatus==='예정')(t.subtasks||[]).forEach(s=>s.done=false);
+    t.status=_editStatus;
   }
-  const rem=(7-(f+l)%7)%7;
-  for(let i=1;i<=rem;i++){ h+=`<div class="cd other">${i}</div>` }
-  document.getElementById(mode==='s'?'sCG':'tCG').innerHTML=h;
-  
-  const dArea=document.getElementById(mode==='s'?'sCD':'tCD');
-  if(selD){
-    const dt=tasks.filter(t=>t.deadline===selD);
-    dArea.innerHTML=`<div class="stl">🔍 ${selD.split('-')[2]}일 마감 업무 현황</div>`+(dt.length?dt.map(t=>card(t,mode==='t'?{showEB:true,showDel:true}:{})).join(''):'<div class="empty">해당 날짜 마감 업무가 없습니다.</div>');
-  } else { dArea.innerHTML='<div class="empty" style="padding:16px 0">날짜를 클릭하면 마감 업무를 확인합니다.</div>'; }
+  const panel=document.getElementById('mAssigneePanel');
+  if(panel&&panel.style.display!=='none'){
+    const sel=[...document.querySelectorAll('.me-cb:checked')].map(x=>x.value);
+    if(sel.length){t.assignees=sel;t.assignee=sel[0];t.dept=gd(sel[0]);}
+  }
+  saveLocal();fbPut(t);gasLog(t);closeMov('editMov');refresh();
+  toast('✅ 수정 완료!');
+  if(t.status==='완료')setTimeout(openDones,100);
 }
 
+// ── 배정 모달 ──
+function openAssign(id){
+  _assignId=id;
+  const t=tasks.find(x=>x.id===id);
+  document.getElementById('assignTitle').textContent='"'+t.title+'" 담당자 배정';
+  buildAssignCBs();
+  const ex=t.assignees||([t.assignee].filter(Boolean));
+  ex.forEach(n=>{const cb=document.getElementById('as-'+n);if(cb)cb.checked=true;});
+  document.getElementById('assignMov').classList.add('open');
+}
+function saveAssign(){
+  const t=tasks.find(x=>x.id===_assignId);
+  const sel=[...document.querySelectorAll('.as-cb:checked')].map(x=>x.value);
+  if(!t||!sel.length){toast('담당자를 선택해주세요');return;}
+  t.assignees=sel;t.assignee=sel[0];t.dept=gd(sel[0]);
+  saveLocal();fbPut(t);closeMov('assignMov');refresh();
+  toast('✅ '+sel.join(', ')+' 배정 완료');
+}
+
+// ── 달력 ──
+function renderCal(mode){
+  const Y=mode==='s'?sCY:tCY,M=mode==='s'?sCM:tCM,sel=mode==='s'?sCS:tCS;
+  document.getElementById(mode+'CT').textContent=Y+'년 '+(M+1)+'월';
+  const fd=new Date(Y,M,1).getDay(),ld=new Date(Y,M+1,0).getDate(),td=new Date();
+  let h=DKO.map(d=>'<div class="cdow">'+d+'</div>').join('');
+  const pl=new Date(Y,M,0).getDate();
+  for(let i=fd-1;i>=0;i--)h+='<div class="cday other"><div class="dnum">'+(pl-i)+'</div></div>';
+  for(let d=1;d<=ld;d++){
+    const ds=Y+'-'+String(M+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const iT=d===td.getDate()&&M===td.getMonth()&&Y===td.getFullYear();
+    const iS=sel===ds;
+    const dt=tasks.filter(t=>t.deadline===ds||t.date===ds);
+    const dots=[...new Set(dt.map(t=>dc(t.dept)))].slice(0,4);
+    h+='<div class="cday'+(iT?' today':'')+(iS?' sel':'')+'" data-cal="'+mode+'" data-date="'+ds+'"><div class="dnum">'+d+'</div><div class="ddots">'+dots.map(c=>'<div class="ddot" style="background:'+c+'"></div>').join('')+'</div></div>';
+  }
+  const rem=(fd+ld)%7===0?0:7-(fd+ld)%7;
+  for(let d=1;d<=rem;d++)h+='<div class="cday other"><div class="dnum">'+d+'</div></div>';
+  document.getElementById(mode+'CG').innerHTML=h;
+  renderCalDet(mode);
+}
+function renderCalDet(mode){
+  const sel=mode==='s'?sCS:tCS;
+  const det=document.getElementById(mode+'CD');
+  if(!sel){det.innerHTML='';return;}
+  const dt=tasks.filter(t=>t.deadline===sel||t.date===sel);
+  if(!dt.length){det.innerHTML='<div class="cdet"><div class="cdet-d">'+fD(sel)+'</div><div style="font-size:13px;color:var(--text3)">업무 없음</div></div>';return;}
+  det.innerHTML='<div class="cdet"><div class="cdet-d">'+fD(sel)+' — '+dt.length+'개</div>'+dt.map(t=>'<div class="ctr"><div class="cbar" style="background:'+dc(t.dept)+'"></div><div style="flex:1"><div style="font-size:13px;font-weight:600;margin-bottom:3px">'+t.title+'</div><div style="font-size:11px;color:var(--text2)">'+(t.assignees||[t.assignee]).join(', ')+' · '+t.dept+'</div></div><span class="tag tag-'+t.status+'">'+t.status+'</span></div>').join('')+'</div>';
+}
+
+// ── 부서 현황 ──
 function deptHtml(teacher){
   return DEPTS.map(dept=>{
     const dt=tasks.filter(t=>t.dept===dept);
@@ -589,166 +979,176 @@ function deptHtml(teacher){
     return '<div class="ds"><div class="dh"><span class="db db-'+dept+'">'+dept+'</span><span style="font-size:12px;color:'+col+';font-family:\'Space Mono\',monospace;font-weight:700">'+done+'/'+dt.length+' ('+pct+'%)</span></div><div class="dp"><div class="dpf" style="width:'+pct+'%;background:'+col+'"></div></div>'+(active.length?active.map(t=>card(t,opts)).join(''):'<div style="font-size:13px;color:var(--text3);padding:4px 0">진행 중 없음</div>')+doneSec(doneL,opts,dept+(teacher?'_t':'_s'))+'</div>';
   }).join('');
 }
-function renderTDept(){document.getElementById('tDept').innerHTML=deptHtml(true)}
+function renderSDept(){document.getElementById('sDept').innerHTML=deptHtml(false);}
+function renderTDept(){document.getElementById('tDept').innerHTML=deptHtml(true);}
 
-// ── 교사모드 학생 관리 (원상 복구) ──
+// ── 교사 대시보드 ──
+function renderDash(){
+  const total=tasks.length,done=tasks.filter(t=>t.status==='완료').length,ing=tasks.filter(t=>t.status==='진행중').length;
+  const urg=tasks.filter(t=>{const d=dU(t.deadline);return d!==null&&d<=3&&t.status!=='완료';}).length;
+  document.getElementById('stT').textContent=total;
+  document.getElementById('stD').textContent=done;
+  document.getElementById('stI').textContent=ing;
+  document.getElementById('stU').textContent=urg;
+  const ua=tasks.filter(t=>isUA(t)&&t.status!=='완료');
+  document.getElementById('uaArea').innerHTML=ua.length===0?'<div style="font-size:13px;color:var(--text3);padding:8px 0">미배정 없음 ✅</div>':ua.map(t=>'<div class="ua"><div class="ua-top"><div class="ua-ti">'+t.title+'</div><div class="ua-btns"><button type="button" class="eb" data-action="edit" data-id="'+t.id+'">✏️</button><button type="button" class="abtn" data-action="assign" data-id="'+t.id+'">배정</button></div></div><div class="tc-meta">'+(t.category?'<span class="db db-'+t.dept+'">'+t.category+'</span>':'')+'<span class="db db-'+t.dept+'">'+t.dept+'</span>'+(t.deadline?'<span style="font-size:11px;color:var(--text2)">⏰ '+fD(t.deadline)+'</span>':'')+'</div></div>').join('');
+  const ul=tasks.filter(t=>{const d=dU(t.deadline);return d!==null&&d<=3&&t.status!=='완료';}).sort((a,b)=>new Date(a.deadline)-new Date(b.deadline));
+  document.getElementById('urgArea').innerHTML=ul.length===0?'<div style="font-size:13px;color:var(--text3);padding:8px 0">마감 임박 없음 ✅</div>':ul.map(t=>card(t,{showEB:true})).join('');
+  const now=new Date();now.setHours(0,0,0,0);const wk=new Date(now);wk.setDate(wk.getDate()-7);
+  const recent=tasks.filter(t=>t.status==='완료'&&t.completedAt&&new Date(t.completedAt)>=wk).sort((a,b)=>new Date(b.completedAt)-new Date(a.completedAt)).slice(0,15);
+  const todayL=recent.filter(t=>new Date(t.completedAt)>=now);
+  const wkL=recent.filter(t=>new Date(t.completedAt)<now);
+  function feedFn(list){
+    return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:4px 16px;margin-bottom:8px;box-shadow:var(--sh)">'+list.map(t=>{
+      const a=t.assignees||[t.assignee].filter(Boolean);const col=dc(t.dept);
+      const diff=t.completedAt?Math.floor((new Date()-new Date(t.completedAt))/60000):0;
+      const ts=diff<1?'방금':diff<60?diff+'분 전':diff<1440?Math.floor(diff/60)+'시간 전':Math.floor(diff/1440)+'일 전';
+      return '<div class="feed-item"><div class="feed-av" style="background:'+col+'22;color:'+col+'">'+(a[0]||'?').slice(-1)+'</div><div class="feed-info"><div class="feed-nm">'+a.join(', ')+' <span class="db db-'+t.dept+'" style="font-size:10px">'+t.dept+'</span></div><div class="feed-tk">'+t.title+'</div></div><div class="feed-tm">'+ts+'</div></div>';
+    }).join('')+'</div>';
+  }
+  let fh='';
+  if(todayL.length)fh+='<div style="font-size:11px;color:var(--accent3);font-weight:700;font-family:\'Space Mono\',monospace;margin-bottom:8px">TODAY ('+todayL.length+')</div>'+feedFn(todayL);
+  if(wkL.length)fh+='<div style="font-size:11px;color:var(--text2);font-weight:700;font-family:\'Space Mono\',monospace;margin:12px 0 8px">이번 주 ('+wkL.length+')</div>'+feedFn(wkL);
+  document.getElementById('feedArea').innerHTML=fh||'<div style="font-size:13px;color:var(--text3);padding:8px 0">이번 주 완료 없음</div>';
+  document.getElementById('dSum').innerHTML=DEPTS.map(dept=>{
+    const dt=tasks.filter(t=>t.dept===dept);const d=dt.filter(t=>t.status==='완료').length;
+    const pct=dt.length>0?Math.round(d/dt.length*100):0;const col=dc(dept);
+    return '<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span class="db db-'+dept+'">'+dept+'</span><span style="font-size:12px;color:'+col+';font-family:\'Space Mono\',monospace;font-weight:600">'+d+'/'+dt.length+' '+pct+'%</span></div><div class="dp"><div class="dpf" style="width:'+pct+'%;background:'+col+'"></div></div></div>';
+  }).join('');
+}
+
+// ── 교사: 학생별 ──
 function renderTStu(){
-  const area=document.getElementById('tStu');if(!area)return;
-  let h='<div style="padding:16px"><h3 style="margin-bottom:16px;font-size:16px">👤 학생별 업무 현황</h3>';
-  MEMBERS.forEach(m=>{
-    const sT=tasks.filter(t=>(t.assignees||[t.assignee]).includes(m.name));
-    const uncom=sT.filter(t=>t.status!=='완료').length;
-    h+=`<div class="stu-row" data-action="openStu" data-name="${m.name}">
-      <div><strong>${m.name}</strong><span style="font-size:12px;color:var(--text3);margin-left:6px">${m.dept}부 | ${m.role||'임원'}</span></div>
-      <span class="badge" style="background:${uncom>0?'var(--warn)':'var(--surface2)'};color:${uncom>0?'#fff':'var(--text3)'}">진행중 ${uncom}</span>
-    </div>`;
-  });
-  h+='</div>';area.innerHTML=h;
+  document.getElementById('tStu').innerHTML='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:4px 16px;box-shadow:var(--sh)">'+MEMBERS.map(m=>{
+    const mt=tasks.filter(t=>(t.assignees||[t.assignee]).includes(m.name));
+    const done=mt.filter(t=>t.status==='완료').length;const pct=mt.length>0?Math.round(done/mt.length*100):0;const col=dc(m.dept);
+    return '<div class="sr" data-action="openStu" data-name="'+m.name+'"><div class="sav" style="background:'+col+'22;color:'+col+'">'+m.name.slice(-1)+'</div><div style="flex:1"><div style="font-size:13px;font-weight:600;margin-bottom:3px">'+m.name+'</div><span class="db db-'+m.dept+'">'+m.dept+'</span></div><div style="text-align:right"><div style="font-size:12px;color:var(--text2)">'+done+'/'+mt.length+'</div><div class="mb"><div class="mf" style="width:'+pct+'%;background:'+col+'"></div></div></div></div>';
+  }).join('')+'</div>';
 }
 function openStu(name){
-  document.getElementById('stuMTitle').textContent=`👤 ${name} 임원 업무`;
-  const my=tasks.filter(t=>(t.assignees||[]).includes(name));
-  document.getElementById('stuArea').innerHTML=my.length?my.map(t=>card(t,{})).join(''):'<div class="empty">지정된 업무가 없습니다.</div>';
-  openMov('stuMov');
+  const mt=tasks.filter(t=>(t.assignees||[t.assignee]).includes(name));
+  const m=gm(name);
+  document.getElementById('stuTitle').textContent=name+' ('+m.dept+') 업무 현황';
+  const opts={showEB:true,showSB:true,showDel:true};
+  document.getElementById('stuBody').innerHTML=renderGrp(mt.filter(t=>t.status!=='완료'),opts)+doneSec(mt.filter(t=>t.status==='완료'),opts,'stu_'+name);
+  document.getElementById('stuMov').classList.add('open');
 }
 
-// ── 전체 업무 검색/필터 ──
+// ── 교사: 전체 업무 ──
 function renderAllTasks(){
-  let f=tasks;
-  if(allFilt!=='전체') f=f.filter(t=>t.status===allFilt);
-  if(sq) f=f.filter(t=>t.title.includes(sq)||t.dept.includes(sq)||(t.assignees||[]).join(',').includes(sq));
-  document.getElementById('allArea').innerHTML=f.length?f.map(t=>card(t,{showSB:true,showEB:true,showDel:true})).join(''):'<div class="empty">검색 조건과 일치하는 업무가 없습니다.</div>';
+  let list=allFilt==='전체'?[...tasks]:tasks.filter(t=>t.status===allFilt);
+  if(sq){const q=sq.toLowerCase();list=list.filter(t=>(t.title||'').toLowerCase().includes(q)||(t.category||'').toLowerCase().includes(q)||((t.assignees||[t.assignee]).join(' ')).toLowerCase().includes(q)||(t.dept||'').toLowerCase().includes(q));}
+  list.sort((a,b)=>{if(a.status==='완료'&&b.status!=='완료')return 1;if(a.status!=='완료'&&b.status==='완료')return -1;if(!a.deadline)return 1;if(!b.deadline)return -1;return new Date(a.deadline)-new Date(b.deadline);});
+  const opts={showEB:true,showDel:true};
+  const active=list.filter(t=>t.status!=='완료');const done=list.filter(t=>t.status==='완료');
+  const area=document.getElementById('allArea');
+  if(!list.length){area.innerHTML='<div class="empty"><div class="ei">🔍</div><p>검색 결과가 없어요</p></div>';return;}
+  area.innerHTML=(active.length?active.map(t=>card(t,opts)).join(''):'')+doneSec(done,opts,'all');
 }
 
-// ── 전역 인라인 이벤트 게이트웨이 ──
-document.addEventListener('click',async function(e){
-  // 체크리스트 상태 즉시 토글 제어
-  const subI=e.target.closest('[data-action="togSub"]');
-  if(subI){
-    const id=subI.dataset.id, idx=parseInt(subI.dataset.idx);
-    const t=tasks.find(x=>x.id===id);
-    if(t&&t.subtasks&&t.subtasks[idx]){
-      t.subtasks[idx].done=!t.subtasks[idx].done;
-      try{
-        await fetch(`${FB}/tasks/${id}/subtasks/${idx}.json`,{method:'PUT',body:JSON.stringify(t.subtasks[idx])});
-        refreshViews();
-      }catch(err){toast('네트워크 불안정');}
-    }
-    return;
-  }
-  // 달력 일자 클릭 제어
-  const cday=e.target.closest('[data-date]');
-  if(cday){
-    const mode=cday.dataset.cal, date=cday.dataset.date;
-    if(mode==='s'){ sCS=sCS===date?null:date; renderCal('s'); }
-    else { tCS=tCS===date?null:date; renderCal('t'); }
-    return;
-  }
-  // 데이터 액션 바인딩 분기 처리
-  const el=e.target.closest('[data-action]'); if(!el)return;
-  const act=el.dataset.action, id=el.dataset.id;
-  if(act==='edit'){ openEdit(id); return; }
-  if(act==='del'){ _delId=id; openMov('delMov'); return; }
-  if(act==='assign'){ openAssign(id); return; }
-  if(act==='openStu'){ openStu(el.dataset.name); return; }
-  if(act==='rmSub'){ if(document.querySelectorAll('.sir').length<=1){toast('최소 1개 항목 필요');return;}el.closest('.sir').remove();return; }
-  if(act==='selfAssign'){
-    const name=document.getElementById('s0Name').value;
-    const t=tasks.find(x=>x.id===id);
-    if(t&&name){
-      if(!t.assignees)t.assignees=[];
-      if(!t.assignees.includes(name))t.assignees.push(name);
-      await fetch(`${FB}/tasks/${id}.json`,{method:'PUT',body:JSON.stringify(t)});
-      toast('업무를 수락했습니다.'); initTasks();
-    }
-    return;
-  }
-});
-
-// ── 업무 편집 모달 제어 ──
-function openEdit(id){
-  _editId=id; const t=tasks.find(x=>x.id===id); if(!t)return;
-  document.getElementById('mTitle').value=t.title||'';
-  document.getElementById('mDeadline').value=t.deadline||'';
-  document.getElementById('mPri').value=t.pri||'보통';
-  document.getElementById('mMemo').value=t.memo||'';
-  _editStatus=t.status||'진행중';
-  document.querySelectorAll('#mStBtns .sb-btn').forEach(b=>b.className='sb-btn'+(b.dataset.status===_editStatus?' a-'+_editStatus:''));
-  openMov('editMov');
+// ── refresh ──
+function refresh(){
+  const s0=document.getElementById('s0Name');
+  const s2=document.getElementById('s2Name');
+  renderUnNotice();
+  if(s0&&s0.value)renderMyTasks();
+  if(s2&&s2.value)renderManage();
+  renderSDept();
+  if(document.getElementById('tView').style.display!=='none'){renderDash();renderTDept();renderTStu();renderAllTasks();}
 }
-async function saveEdit(){
-  const t=tasks.find(x=>x.id==='_editId'||x.id===_editId); if(!t)return;
-  t.title=document.getElementById('mTitle').value.trim();
-  t.deadline=document.getElementById('mDeadline').value;
-  t.pri=document.getElementById('mPri').value;
-  t.memo=document.getElementById('mMemo').value;
-  t.status=_editStatus;
-  if(!t.title){toast('제목 필수');return;}
-  await fetch(`${FB}/tasks/${_editId}.json`,{method:'PUT',body:JSON.stringify(t)});
-  closeMov('editMov'); toast('편집 내용 저장 완료'); initTasks();
+function openDones(){
+  ['my','man','all'].forEach(id=>{
+    const dt=document.querySelector('[data-done="'+id+'"]');
+    const dl=document.getElementById('dl-'+id);
+    if(dt&&dl&&!dt.classList.contains('open')){dt.classList.add('open');dl.classList.add('open');}
+  });
 }
 
-// ── 배정 관리 모달 제어 ──
-function openAssign(id){
-  _assignId=id; const t=tasks.find(x=>x.id===id); if(!t)return;
-  const current=t.assignees||[];
-  document.getElementById('assignList').innerHTML=MEMBERS.map(m=>`
-    <div class="m-as-item" onclick="const c=this.querySelector('input');c.checked=!c.checked">
-      <span style="font-size:13px"><strong>${m.name}</strong> <span style="font-size:11px;color:var(--text3)">${m.dept}</span></span>
-      <input type="checkbox" value="${m.name}" class="m-as-chk" ${current.includes(m.name)?'checked':''} onclick="e.stopPropagation()">
-    </div>
-  `).join('');
-  openMov('assignMov');
-}
-async function saveAssign(){
-  const t=tasks.find(x=>x.id===_assignId); if(!t)return;
-  const ass=[]; document.querySelectorAll('.m-as-chk:checked').forEach(c=>ass.push(c.value));
-  t.assignees=ass;
-  await fetch(`${FB}/tasks/${_assignId}.json`,{method:'PUT',body:JSON.stringify(t)});
-  closeMov('assignMov'); toast('담당 인원 재배치 완료'); initTasks();
-}
-async function confirmDel(){
-  if(!_delId)return;
-  await fetch(`${FB}/tasks/${_delId}.json`,{method:'DELETE'});
-  closeMov('delMov'); toast('업무가 완전 삭제되었습니다.'); initTasks();
-}
-
-// ── 정적 탭 주입 배열 ──
-const sFns=[renderMyTasks,()=>{},renderManage,()=>renderCal('s'),()=>sFns[4]() /* 아래에서 오버라이딩 */];
-const tFns=[renderDash,()=>renderCal('t'),renderTDept,renderTStu,renderAllTasks];
-
+// ── 이벤트 바인딩 ──
 function bindStatic(){
+  // 모드 카드
   document.getElementById('btnS').addEventListener('click',enterStudent);
   document.getElementById('btnT').addEventListener('click',showPw);
+  // 비밀번호
   document.getElementById('pwOK').addEventListener('click',checkPw);
   document.getElementById('pwBack').addEventListener('click',goHome);
-  document.getElementById('pwInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkPw()});
+  document.getElementById('pwInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkPw();});
+  // 뒤로/잠금
   document.getElementById('sBack').addEventListener('click',goHome);
   document.getElementById('tBack').addEventListener('click',goHome);
   document.getElementById('lockBtn').addEventListener('click',goHome);
+  // 업무 등록
   document.getElementById('submitBtn').addEventListener('click',submitTask);
   document.getElementById('addSubBtn').addEventListener('click',addSubRow);
+  // 편집 모달
   document.getElementById('editSave').addEventListener('click',saveEdit);
   document.getElementById('editCancel').addEventListener('click',()=>closeMov('editMov'));
+  document.getElementById('mAssigneeToggle').addEventListener('click',()=>{
+    const p=document.getElementById('mAssigneePanel');
+    const open=p.style.display!=='none';
+    p.style.display=open?'none':'block';
+    document.getElementById('mAssigneeArrow').textContent=open?'변경하기 ▼':'접기 ▲';
+  });
+  document.querySelectorAll('#mStBtns .sb-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      _editStatus=btn.dataset.status;
+      document.querySelectorAll('#mStBtns .sb-btn').forEach(b=>b.className='sb-btn'+(b.dataset.status===_editStatus?' a-'+_editStatus:''));
+    });
+  });
+  // 배정 모달
   document.getElementById('assignSave').addEventListener('click',saveAssign);
   document.getElementById('assignCancel').addEventListener('click',()=>closeMov('assignMov'));
+  // 학생 모달
   document.getElementById('stuClose').addEventListener('click',()=>closeMov('stuMov'));
+  // 삭제 모달
   document.getElementById('delOK').addEventListener('click',confirmDel);
   document.getElementById('delCancel').addEventListener('click',()=>closeMov('delMov'));
-  document.getElementById('sCP').addEventListener('click',()=>{sCM--;if(sCM<0){sCM=11;sCY--}renderCal('s')});
-  document.getElementById('sCN').addEventListener('click',()=>{sCM++;if(sCM>11){sCM=0;sCY++}renderCal('s')});
-  document.getElementById('tCP').addEventListener('click',()=>{tCM--;if(tCM<0){tCM=11;tCY--}renderCal('t')});
-  document.getElementById('tCN').addEventListener('click',()=>{tCM++;if(tCM>11){tCM=0;tCY++}renderCal('t')});
-  
+  // 달력 네비
+  document.getElementById('sCP').addEventListener('click',()=>{sCM--;if(sCM<0){sCM=11;sCY--;}renderCal('s');});
+  document.getElementById('sCN').addEventListener('click',()=>{sCM++;if(sCM>11){sCM=0;sCY++;}renderCal('s');});
+  document.getElementById('tCP').addEventListener('click',()=>{tCM--;if(tCM<0){tCM=11;tCY--;}renderCal('t');});
+  document.getElementById('tCN').addEventListener('click',()=>{tCM++;if(tCM>11){tCM=0;tCY++;}renderCal('t');});
+  // 탭
   document.querySelectorAll('#sTnav .ti').forEach(ti=>ti.addEventListener('click',()=>swTab('sTnav',['sP0','sP1','sP2','sP3','sP4'],parseInt(ti.dataset.tab),sFns)));
-  document.querySelectorAll('#tTnav .ti').forEach(ti=>ti.addEventListener('click',()=>swTab('tTnav',['tP0','tP1','tP2','tP3','tP4','tP5'],parseInt(ti.dataset.tab),tFns)));
-  
-  document.querySelectorAll('#filterBar .fc').forEach(fc=>fc.addEventListener('click',()=>{allFilt=fc.dataset.filter;document.querySelectorAll('#filterBar .fc').forEach(c=>c.classList.toggle('active',c===fc));renderAllTasks()}));
+  document.querySelectorAll('#tTnav .ti').forEach(ti=>ti.addEventListener('click',()=>swTab('tTnav',['tP0','tP1','tP2','tP3','tP4'],parseInt(ti.dataset.tab),tFns)));
+  // 필터
+  document.querySelectorAll('#filterBar .fc').forEach(fc=>fc.addEventListener('click',()=>{allFilt=fc.dataset.filter;document.querySelectorAll('#filterBar .fc').forEach(c=>c.classList.toggle('active',c===fc));renderAllTasks();}));
+  // 검색
   const si=document.getElementById('searchInput');
-  if(si)si.addEventListener('input',()=>{sq=si.value.trim();renderAllTasks()});
   const sc=document.getElementById('searchClear');
-  if(sc)sc.addEventListener('click',()=>{sq='';if(si)si.value='';renderAllTasks()});
+  if(si)si.addEventListener('input',()=>{sq=si.value.trim();renderAllTasks();});
+  if(sc)sc.addEventListener('click',()=>{sq='';if(si)si.value='';renderAllTasks();});
+  // 모달 배경 닫기
+  document.querySelectorAll('.mov').forEach(mov=>{
+    mov.addEventListener('click',e=>{if(e.target.classList.contains('mov'))closeMov(mov.id);});
+  });
+  // 모달 내부 클릭 전파 차단
+  document.querySelectorAll('.ms').forEach(ms=>ms.addEventListener('click',e=>e.stopPropagation()));
 }
+
+// ── 동적 이벤트 위임 ──
+document.addEventListener('click',function(e){
+  // 완료 토글
+  const dt=e.target.closest('[data-done]');
+  if(dt){const id=dt.dataset.done;dt.classList.toggle('open');const dl=document.getElementById('dl-'+id);if(dl)dl.classList.toggle('open');return;}
+  // 달력 날짜
+  const cday=e.target.closest('.cday[data-date]');
+  if(cday){const mode=cday.dataset.cal,date=cday.dataset.date;if(mode==='s'){sCS=sCS===date?null:date;renderCal('s');}else{tCS=tCS===date?null:date;renderCal('t');}return;}
+  // data-action
+  const el=e.target.closest('[data-action]');if(!el)return;
+  const action=el.dataset.action,id=el.dataset.id,idx=el.dataset.idx!==undefined?parseInt(el.dataset.idx):undefined;
+  if(action==='edit'){openEdit(id);return;}
+  if(action==='del'){openDel(id);return;}
+  if(action==='chgSt'){chgSt(id,el.dataset.status);return;}
+  if(action==='togSub'){togSub(id,idx);return;}
+  if(action==='editSD'){editSD(id,idx);return;}
+  if(action==='addSub'){addSub(id);return;}
+  if(action==='delSub'){delSub(id,idx);return;}
+  if(action==='assign'){openAssign(id);return;}
+  if(action==='openStu'){openStu(el.dataset.name);return;}
+  if(action==='selfAssign'){selfAssign(id);return;}
+  if(action==='rmSub'){if(document.querySelectorAll('.sir').length<=1){toast('최소 1개 필요');return;}el.closest('.sir').remove();return;}
+});
 
 // 이름 change
 document.addEventListener('change',function(e){
@@ -765,40 +1165,43 @@ document.addEventListener('change',function(e){
 const PAID_ACCOUNTS = [
   { service: "식당 앞 자물쇠", id: "분류 없음", pw: "1112", memo: "오프라인 보관함 자물쇠" },
   { service: "캡컷 (CapCut)", id: "dy_sch03@daeyoung.sen.ms.kr", pw: "daeyoung12!", memo: "학생회 구글 아이디" },
-  { service: "미리캔버스 (~5/15)", id: "daeyoungstudentcouncil@gmail.com", pw: "dscdscdsc", memo: "디자인 제작 공용" },
-  { service: "구글 계정(공식)", id: "dysc_01@daeyoung.sen.ms.kr", pw: "@dy123456", memo: "공식 교육청 구글 계정" }
+  { service: "미리캔버스 (~5/15)", id: "daeyoungstudentcouncil@gmail.com", pw: "dscdscdsc", memo: "미리캔버스 공용" },
+  { service: "구글 계정(공식)", id: "dysc_01@daeyoung.sen.ms.kr", pw: "@dy123456", memo: "공식 구글 계정" }
 ];
 
 function getAccountShareHTML() {
-  let h = `
+  let html = `
     <div style="margin-top:14px; padding-top:12px; border-top:1px dashed var(--border);">
-      <h4 style="margin-bottom:8px; font-size:12px; color:var(--accent); display:flex; align-items:center; gap:4px;">🔑 학생회 공용 유료 계정 공유</h4>
+      <h4 style="margin-bottom:8px; font-size:12px; color:var(--accent); display:flex; align-items:center; gap:4px;">🔑 학생회 공용 유료 계정 공유 공간</h4>
       <div style="display:flex; flex-direction:column; gap:6px;">
   `;
   PAID_ACCOUNTS.forEach(acc => {
-    h += `
+    html += `
       <div style="background:var(--bg); padding:8px 10px; border-radius:6px; border:1px solid var(--border);">
         <strong style="font-size:12px; color:var(--text); display:block; margin-bottom:2px;">${acc.service}</strong>
         <div style="font-size:11px; color:var(--text2); font-family:monospace; background:var(--surface); padding:4px 6px; border-radius:4px; line-height:1.4;">
-          <div>ID: ${acc.id}</div>
-          <div>PW: ${acc.pw}</div>
+          <div><strong>ID:</strong> ${acc.id}</div>
+          <div><strong>PW:</strong> ${acc.pw}</div>
         </div>
       </div>
     `;
   });
-  h += `</div></div>`;
-  return h;
+  html += `</div></div>`;
+  return html;
 }
 
-// ── [요구사항 반영] 2. 학생 모드: 부서 현황 아코디언 토글 가두기 ──
+// ── [요구사항 반영] 2. 학생 모드: 부서 현황 원형 보존 및 타 부서 토글 숨김 ──
 function renderSDept() {
-  const area = document.getElementById('sDept'); if(!area) return;
+  const area = document.getElementById('sDept');
+  if(!area) return;
+  
   const myName = document.getElementById('s0Name')?.value || '';
   const myDept = (MEMBERS.find(m => m.name === myName))?.dept || '';
 
-  let h = '<div style="padding:16px;"><h3 style="margin-bottom:16px; font-size:16px;">👥 부서별 업무 현황</h3>';
+  let html = '<div style="padding:16px;"><h3 style="margin-bottom:16px; font-size:16px;">👥 부서별 업무 현황</h3>';
+  
   DEPTS.forEach(dept => {
-    const isMyDept = (dept === myDept);
+    const isMyDept = dept === myDept;
     const dt = tasks.filter(t => t.dept === dept);
     const done = dt.filter(t => t.status==='완료').length;
     const pct = dt.length > 0 ? Math.round(done / dt.length * 100) : 0;
@@ -806,51 +1209,64 @@ function renderSDept() {
     const active = dt.filter(t => t.status !== '완료');
     const doneL = dt.filter(t => t.status === '완료');
     
-    h += `
+    html += `
       <div class="dept-card" style="background:var(--surface); border-radius:var(--r); box-shadow:var(--sh); border:1px solid var(--border); margin-bottom:12px; overflow:hidden;">
-        <div class="dept-toggle-hdr" onclick="const b=this.nextElementSibling; b.style.display=b.style.display==='none'?'block':'none';" style="padding:12px 14px; background:var(--surface2); cursor:pointer; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border);">
+        <div class="dept-toggle-hdr" onclick="const b=this.nextElementSibling; if(b.style.display==='none'){b.style.display='block';}else{b.style.display='none';}" style="padding:12px 14px; background:var(--surface2); cursor:pointer; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border);">
           <div style="display:flex; align-items:center; gap:6px;">
-            <span class="db db-${dept}" style="background:${col}; color:#fff;">${dept}</span>
+            <span class="db db-${dept}" style="background:${col}; color:#fff; padding:2px 6px; border-radius:4px; font-size:11px;">${dept}</span>
             ${isMyDept ? '<span style="color:var(--accent); font-size:11px; font-weight:bold;">[내 부서]</span>' : ''}
           </div>
-          <span style="font-size:11px; color:var(--text3); font-weight:bold;">진행률 ${done}/${dt.length} (${pct}%) ▼</span>
+          <span style="font-size:12px; color:var(--text3); font-weight:bold;">진행률 ${done}/${dt.length} (${pct}%) ▼</span>
         </div>
-        <div class="dept-body" style="padding:12px; display:${isMyDept?'block':'none'};">
-          <div class="dp" style="height:4px; background:var(--surface2); border-radius:2px; margin-bottom:10px;"><div style="width:${pct}%; background:${col}; height:100%;"></div></div>
-          ${active.length ? active.map(t => card(t, {})).join('') : '<div style="font-size:13px; color:var(--text3); padding:4px 0">진행 중 업무 없음</div>'}
+        <div class="dept-body" style="padding:12px; display:${isMyDept ? 'block' : 'none'};">
+          <div class="dp" style="height:4px; background:var(--surface2); border-radius:2px; margin-bottom:10px; overflow:hidden;">
+            <div style="width:${pct}%; background:${col}; height:100%;"></div>
+          </div>
+          ${active.length ? active.map(t => card(t, {})).join('') : '<div style="font-size:13px; color:var(--text3); padding:4px 0">진행 중 없음</div>'}
           ${doneSec(doneL, {}, dept+'_s')}
+          
           ${getAccountShareHTML()}
         </div>
       </div>
     `;
   });
-  h += '</div>'; area.innerHTML = h;
+  
+  html += '</div>';
+  area.innerHTML = html;
 }
 sFns[4] = renderSDept;
 
-// ── [고도화 반영] 3. 교사 모드: 무제한 날짜 유연화 + 일괄 출석체크 전용 계층 시스템 ──
-let attDatesList = ['2026-03-19', '2026-03-27', '2026-04-06', '2026-04-08', '2026-04-20', '2026-05-14', '2026-06-10', '2026-07-10'];
-let currentAttDate = attDatesList[0];
 
-(function buildAttendanceDOMStructure() {
+// ── [요구사항 반영] 3. 교사 모드: 날짜별 실시간 출석체크 독립 탭 시스템 구축 ──
+const ATT_DATES = ['2026-03-19', '2026-03-27', '2026-04-06', '2026-04-08', '2026-04-20', '2026-05-14', '2026-06-10', '2026-07-10'];
+let currentAttDate = ATT_DATES[0];
+
+// 교사 화면 탭 목록 확장 HTML 주입 전용 일회성 실행 함수
+(function buildTeacherAttendanceDOM() {
   const tnav = document.getElementById('tTnav');
   if (tnav && !document.getElementById('tAttHeaderBtn')) {
+    // 탭 버튼 동적 추가
     const btn = document.createElement('button');
-    btn.type = 'button'; btn.className = 'ti';
-    btn.id = 'tAttHeaderBtn'; btn.setAttribute('data-tab', '5');
-    btn.textContent = '출석 관리'; tnav.appendChild(btn);
+    btn.type = 'button';
+    btn.className = 'ti';
+    btn.id = 'tAttHeaderBtn';
+    btn.setAttribute('data-tab', '5');
+    btn.textContent = '출석 관리';
+    tnav.appendChild(btn);
     
+    // 내용이 노출될 6번째 패널 영역 동적 추가
     const tView = document.getElementById('tView');
     if (tView && !document.getElementById('tP5')) {
       const panel = document.createElement('div');
-      panel.className = 'tp'; panel.id = 'tP5';
-      panel.innerHTML = '<div id="tAttPanelContainer"></div>';
+      panel.className = 'tp';
+      panel.id = 'tP5';
+      panel.innerHTML = '<div id="tAttContentArea"></div>';
       tView.appendChild(panel);
     }
   }
 })();
 
-async function saveSingleAttendance(name, status) {
+async function saveTeacherAttendance(name, status) {
   try {
     await fetch(`${FB}/attendance/${currentAttDate}/${name}.json`, {
       method: 'PUT',
@@ -858,103 +1274,42 @@ async function saveSingleAttendance(name, status) {
       body: JSON.stringify({ status: status, timestamp: new Date().toISOString() })
     });
     toast(`${name}: ${status}`);
-  } catch(e) { toast('서버 동기화 실패'); }
-}
-
-async function saveAllAttendanceAsPresent() {
-  if(!confirm(`${currentAttDate} 활동의 모든 임원을 '출석'으로 일괄 변경하시겠습니까?`)) return;
-  const ps = MEMBERS.map(m => {
-    return fetch(`${FB}/attendance/${currentAttDate}/${m.name}.json`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: '출석', timestamp: new Date().toISOString() })
-    });
-  });
-  try {
-    await Promise.all(ps);
-    toast('전원 출석 처리 완료');
-    renderAttendanceTabContent();
-  } catch(e){ toast('일괄 처리 중 에러 발생'); }
-}
-
-async function addNewAttendanceDate() {
-  const newD = document.getElementById('newAttDateIpt').value;
-  if(!newD) { toast('날짜를 올바르게 선택하세요.'); return; }
-  if(attDatesList.includes(newD)) { toast('이미 등록된 활동 일자입니다.'); return; }
-  attDatesList.push(newD);
-  attDatesList.sort();
-  currentAttDate = newD;
-  toast(`새로운 활동일 [${newD}] 추가 완료`);
-  renderAttendanceTabContent();
+  } catch(e) {
+    toast('출석 데이터 실시간 저장 실패');
+  }
 }
 
 async function renderAttendanceTabContent() {
-  const area = document.getElementById('tAttPanelContainer'); if(!area) return;
+  const area = document.getElementById('tAttContentArea');
+  if(!area) return;
   
-  // 1. 실시간 데이터베이스 원격 로드
-  let fullAttMap = {};
+  let attMap = {};
   try {
-    const res = await fetch(`${FB}/attendance.json`);
-    fullAttMap = await res.json() || {};
+    const res = await fetch(`${FB}/attendance/${currentAttDate}.json`);
+    attMap = await res.json() || {};
   } catch(e){}
-  
-  const currentMap = fullAttMap[currentAttDate] || {};
 
-  // 2. 임원별 누적 통계 실시간 자동 집계 연산
-  let statsHtml = `
-    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:12px; margin-bottom:12px; box-shadow:var(--sh);">
-      <div onclick="const s=this.nextElementSibling; s.style.display=s.style.display==='none'?'block':'none';" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
-        <strong style="font-size:13px; color:var(--accent);">📊 임원별 실시간 누적 출결 통계 확인 ▼</strong>
-      </div>
-      <div style="display:none; margin-top:10px; max-height:160px; overflow-y:auto; border-top:1px solid var(--surface2); padding-top:8px; font-size:11px; line-height:1.6;">
-  `;
-  MEMBERS.forEach(m => {
-    let p=0, l=0, a=0;
-    Object.keys(fullAttMap).forEach(d => {
-      const st = fullAttMap[d][m.name]?.status;
-      if(st === '출석') p++;
-      if(st === '지각') l++;
-      if(st === '결석') a++;
-    });
-    statsHtml += `<div style="display:flex; justify-content:space-between; padding:2px 0; border-bottom:1px solid #f8f9fa;">
-      <span><strong>${m.name}</strong> (${m.dept})</span>
-      <span style="font-family:monospace; font-weight:700;"><span style="color:var(--accent3)">출석 ${p}</span> | <span style="color:var(--warn)">지각 ${l}</span> | <span style="color:var(--danger)">결석 ${a}</span></span>
-    </div>`;
-  });
-  statsHtml += `</div></div>`;
-
-  // 3. 메인 인터페이스 렌더링 부품 조합
   let html = `
     <div style="padding:16px;">
-      <div style="background:var(--surface); padding:12px; border-radius:var(--r); box-shadow:var(--sh); border:1px solid var(--border); margin-bottom:10px;">
-        <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px; color:var(--text2);">📅 활동 일자 선택 및 신규 확장</label>
-        <select onchange="currentAttDate=this.value; renderAttendanceTabContent();" style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--border); font-size:13px; font-weight:700; background:#fff; margin-bottom:8px;">
-          ${attDatesList.map(d => `<option value="${d}" ${d===currentAttDate?'selected':''}>${d.split('-')[1]}월 ${d.split('-')[2]}일 활동 명부</option>`).join('')}
+      <div style="background:var(--surface); padding:12px; border-radius:var(--r); box-shadow:var(--sh); border:1px solid var(--border); margin-bottom:12px;">
+        <label style="font-size:12px; font-weight:500; display:block; margin-bottom:4px; color:var(--text2);">📅 학생회 활동 일자 선택 (CSV 기준)</label>
+        <select onchange="currentAttDate=this.value; renderAttendanceTabContent();" style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--border); font-size:13px; background:#fff; color:var(--text); font-weight:500;">
+          ${ATT_DATES.map(d => `<option value="${d}" ${d===currentAttDate?'selected':''}>${d.split('-')[1]}월 ${d.split('-')[2]}일 활동</option>`).join('')}
         </select>
-        <div style="display:flex; gap:4px;">
-          <input type="date" id="newAttDateIpt" class="ipt" style="padding:6px; font-size:12px; flex:1;">
-          <button type="button" onclick="addNewAttendanceDate()" style="background:var(--text); color:#fff; border:none; padding:0 12px; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer;">➕ 날짜 추가</button>
-        </div>
       </div>
-
-      ${statsHtml}
-
+      
       <div style="background:var(--surface); border-radius:var(--r); box-shadow:var(--sh); border:1px solid var(--border); overflow:hidden;">
-        <div style="padding:10px 14px; background:var(--surface2); display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border);">
-          <span style="font-size:12px; font-weight:700; color:var(--text2);">출결 체크리스트</span>
-          <button type="button" onclick="saveAllAttendanceAsPresent()" style="background:var(--accent3); color:#fff; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:700; cursor:pointer;">⚡ 전원 출석 처리</button>
-        </div>
   `;
 
   MEMBERS.forEach(m => {
-    const currentStatus = currentMap[m.name]?.status || '미체크';
+    const currentStatus = attMap[m.name]?.status || '미체크';
     html += `
       <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid var(--border);">
         <div>
           <strong style="font-size:13px; color:var(--text);">${m.name}</strong>
           <span style="font-size:11px; color:var(--text3); margin-left:4px;">${m.dept}</span>
         </div>
-        <div style="display:flex; gap:3px;">
+        <div style="display:flex; gap:4px;">
           ${['출석', '지각', '결석'].map(st => {
             const isChecked = currentStatus === st;
             let bg = 'var(--surface2)', co = 'var(--text2)';
@@ -963,7 +1318,7 @@ async function renderAttendanceTabContent() {
               if(st==='지각'){ bg='var(--warn)'; co='#fff'; }
               if(st==='결석'){ bg='var(--danger)'; co='#fff'; }
             }
-            return `<button type="button" onclick="saveSingleAttendance('${m.name}', '${st}'); this.parentElement.querySelectorAll('button').forEach(b=>{b.style.background='var(--surface2)';b.style.color='var(--text2)'}); this.style.background='${bg}'; this.style.color='#fff';" style="padding:4px 8px; font-size:11px; border:none; border-radius:4px; background:${bg}; color:${co}; font-weight:700; cursor:pointer;">${st}</button>`;
+            return `<button type="button" onclick="saveTeacherAttendance('${m.name}', '${st}'); this.parentElement.querySelectorAll('button').forEach(b=>{b.style.background='var(--surface2)';b.style.color='var(--text2)'}); this.style.background='${bg}'; this.style.color='#fff';" style="padding:4px 8px; font-size:11px; border:none; border-radius:4px; background:${bg}; color:${co}; font-weight:500; cursor:pointer;">${st}</button>`;
           }).join('')}
         </div>
       </div>
@@ -975,20 +1330,28 @@ async function renderAttendanceTabContent() {
 }
 tFns[5] = renderAttendanceTabContent;
 
-// ── [오류 제거 핵심 패치] 4. bindStatic 동적 랩핑 가로채기 재결합 ──
+
+// ── [오류 해결의 핵심] 4. bindStatic 이벤트 가로채기 및 안전 재결합 ──
+// 원본 소스코드가 선언된 뒤 실행되므로, 기존의 고정형 리스너를 지우고 tP5까지 포함한 배열로 오버라이딩합니다.
 const originalBindStatic = bindStatic;
 bindStatic = function() {
+  // 원래 명명된 고정 정적 이벤트 바인딩 로직 일차 수행
   originalBindStatic();
+  
+  // 교사 탭 내비게이션 바에 새로 만든 5번 인덱스(tP5)를 가두어 리스너 전면 전사 처리
   document.querySelectorAll('#tTnav .ti').forEach(ti => {
+    // 기존에 걸려있던 옛날 이벤트를 무력화하기 위해 새로운 복제 노드로 치환
     const newTi = ti.cloneNode(true);
     ti.parentNode.replaceChild(newTi, ti);
+    
     newTi.addEventListener('click', () => {
       swTab('tTnav', ['tP0', 'tP1', 'tP2', 'tP3', 'tP4', 'tP5'], parseInt(newTi.dataset.tab), tFns);
     });
   });
 };
 
-// ── 커널 엔진 콜백 기동 ──
+
+// ── 시스템 시작 ──
 initTasks();
 fillAllSels();
 buildCWList('');
