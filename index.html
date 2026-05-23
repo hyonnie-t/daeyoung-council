@@ -1161,27 +1161,29 @@ document.addEventListener('change',function(e){
   }
 });
 
-// ── [신규 반영] 1. 유료 계정 공유 데이터 및 전용 렌더러 ──
+// ── [교정 반영] 1. 정확한 공용 계정 데이터 및 전용 HTML 생성 ──
 const PAID_ACCOUNTS = [
-  { service: "Canva Pro", id: "daeyoung_canva@gmail.com", pw: "dyccpw0616!", memo: "카드뉴스 및 포스터 제작용 (공용 프로필 사용)" },
-  { service: "미리캔버스 엔터프라이즈", id: "dy_design", pw: "dycc0616**", memo: "행사 슬라이드 및 템플릿 보관함" },
-  { service: "ChatGPT Plus", id: "dy_ai_council", pw: "ai_daeyoung1!", memo: "행사 기획안 아이디어 도출 및 텍스트 검토용" }
+  { service: "식당 앞 자물쇠", id: "분류 없음", pw: "1112", memo: "오프라인 보관함 자물쇠" },
+  { service: "캡컷 (CapCut)", id: "dy_sch03@daeyoung.sen.ms.kr", pw: "daeyoung12!", memo: "학생회 구글 아이디 로그인 연동" },
+  { service: "미리캔버스 (~5/15)", id: "daeyoungstudentcouncil@gmail.com", pw: "dscdscdsc", memo: "디자인 및 제작 공용 계정" },
+  { service: "구글 공식 계정", id: "dysc_01@daeyoung.sen.ms.kr", pw: "@dy123456", memo: "교육청 소속 공식 구글 계정" }
 ];
 
 function getAccountShareHTML() {
   let html = `
     <div style="margin-top:20px; padding-top:16px; border-top:2px dashed var(--border);">
-      <h4 style="margin-bottom:8px; font-size:13px; color:var(--accent); display:flex; align-items:center; gap:4px;">🔑 학생회 공용 유료 계정 공유</h4>
+      <h4 style="margin-bottom:10px; font-size:13px; color:var(--accent); display:flex; align-items:center; gap:4px;">🔑 학생회 공용 유료 계정 공유 공간</h4>
       <div style="display:flex; flex-direction:column; gap:8px;">
   `;
   PAID_ACCOUNTS.forEach(acc => {
     html += `
       <div style="background:var(--bg); padding:10px; border-radius:8px; border:1px solid var(--border);">
-        <strong style="font-size:12px; color:var(--text); display:block; margin-bottom:4px;">${acc.service}</strong>
-        <div style="font-size:12px; color:var(--text2); font-family:monospace; background:var(--surface); padding:6px; border-radius:4px;">
-          <div>ID: ${acc.id}</div>
-          <div>PW: ${acc.pw}</div>
+        <strong style="font-size:13px; color:var(--text); display:block; margin-bottom:4px;">${acc.service}</strong>
+        <div style="font-size:12px; color:var(--text2); font-family:monospace; background:var(--surface); padding:6px; border-radius:4px; line-height:1.5;">
+          <div><strong>ID:</strong> ${acc.id}</div>
+          <div><strong>PW:</strong> ${acc.pw}</div>
         </div>
+        ${acc.memo ? `<div style="font-size:11px; color:var(--text3); margin-top:4px;">* ${acc.memo}</div>` : ''}
       </div>
     `;
   });
@@ -1189,12 +1191,11 @@ function getAccountShareHTML() {
   return html;
 }
 
-// ── [신규 반영] 2. 학생모드: 부서 현황 복구 및 토글 기능 고도화 ──
+// ── [원복 및 토글] 2. 학생모드: 부서 현황 원복 및 타 부서 토글 감추기 ──
 function renderSDept() {
   const area = document.getElementById('sDept');
   if(!area) return;
   
-  // 내 부서 찾기 (s0Name 선택값 기준)
   const myName = document.getElementById('s0Name')?.value || '';
   const myDept = (MEMBERS.find(m => m.name === myName))?.dept || '';
 
@@ -1211,7 +1212,7 @@ function renderSDept() {
             <span style="width:4px; height:16px; background:${DC[dept]||'#666'}; border-radius:2px;"></span>
             <strong style="font-size:14px;">${dept} ${isMyDept ? '<span style="color:var(--accent); font-size:11px; margin-left:4px;">[내 부서]</span>' : ''}</strong>
           </div>
-          <span class="arr" style="font-size:12px; color:var(--text3);">${isMyDept ? '▲' : '▼'}</span>
+          <span class="arr" style="font-size:12px; color:var(--text3); font-weight:bold;">${isMyDept ? '▲' : '▼'}</span>
         </div>
         <div class="dept-body" style="padding:14px; display:${isMyDept ? 'block' : 'none'};">
     `;
@@ -1223,7 +1224,7 @@ function renderSDept() {
       html += doneSec(dTasks.filter(t => t.status === '완료'), {showSB:false, showEB:false, showDel:false}, 'sdept_' + dept);
     }
     
-    // 유료 계정 공유 공간을 각 부서 내부 하단에 이식
+    // 정확한 계정 공유 정보 바인딩
     html += getAccountShareHTML();
     
     html += `
@@ -1235,13 +1236,58 @@ function renderSDept() {
   html += '</div>';
   area.innerHTML = html;
 }
-// 원상태로 복구된 renderSDept 함수를 학생회 5번째 탭(sP4)에 정식 재연동
 sFns[4] = renderSDept;
 
 
-// ── [신규 반영] 3. 교사모드: 활동 일자별 출석체크 및 관리 시스템 ──
+// ── [기능 복구] 3. 교사모드: 네 번째 탭 원래 기능(학생별 업무 확인) 강제 원복 ──
+function renderTStu() {
+  const area = document.getElementById('tStu');
+  if(!area) return;
+  let html = '<div style="padding:16px;"><h3 style="margin-bottom:16px; font-size:16px;">👤 학생별 업무 현황</h3>';
+  MEMBERS.forEach(m => {
+    const sTasks = tasks.filter(t => (t.assignees || [t.assignee]).includes(m.name));
+    const uncom = sTasks.filter(t => t.status !== '완료').length;
+    html += `
+      <div class="stu-row" onclick="openStu('${m.name}')" style="background:var(--surface); padding:14px 16px; border-radius:var(--r); box-shadow:var(--sh); border:1px solid var(--border); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+        <div>
+          <strong style="font-size:15px;">${m.name}</strong>
+          <span style="font-size:12px; color:var(--text3); margin-left:6px;">${m.dept} | ${m.role||'임원'}</span>
+        </div>
+        <span class="badge" style="background:${uncom>0?'var(--warn)':'var(--surface2)';}; color:${uncom>0?'#fff':'var(--text3)';}; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700;">진행중 ${uncom}</span>
+      </div>
+    `;
+  });
+  html += '</div>';
+  area.innerHTML = html;
+}
+tFns[3] = renderTStu;
+
+
+// ── [신규 전용 탭] 4. 교사모드: 탭 추가를 통한 날짜별 출석체크 전용 시스템 구현 ──
 const ATT_DATES = ['2026-03-19', '2026-03-27', '2026-04-06', '2026-04-08', '2026-04-20', '2026-05-14', '2026-06-10', '2026-07-10'];
 let currentAttDate = ATT_DATES[0];
+
+// 교사 화면 탭 목록 동적 확장 바인딩 처리
+(function injectAttendanceTab() {
+  const tnav = document.querySelector('.tnav');
+  if (tnav && !document.getElementById('tAttTabHeader')) {
+    const newTab = document.createElement('div');
+    newTab.className = 'ti';
+    newTab.id = 'tAttTabHeader';
+    newTab.textContent = '출석 관리';
+    newTab.onclick = () => swTab('tNav', ['tDash', 'tCal', 'tDept', 'tStu', 'tAll', 'tAttPanel'], 5, tFns);
+    tnav.appendChild(newTab);
+    
+    const tView = document.getElementById('tView');
+    if (tView && !document.getElementById('tAttPanel')) {
+      const newPanel = document.createElement('div');
+      newPanel.className = 'tp';
+      newPanel.id = 'tAttPanel';
+      newPanel.innerHTML = '<div id="tAttContent"></div>';
+      tView.appendChild(newPanel);
+    }
+  }
+})();
 
 async function saveTeacherAttendance(name, status) {
   try {
@@ -1252,15 +1298,14 @@ async function saveTeacherAttendance(name, status) {
     });
     toast(`${name}: ${status}`);
   } catch(e) {
-    toast('출석 데이터 실시간 저장 실패');
+    toast('출석 저장 실패');
   }
 }
 
-async function renderTStu() {
-  const area = document.getElementById('tStu');
+async function renderAttendanceTabContent() {
+  const area = document.getElementById('tAttContent');
   if(!area) return;
   
-  // 선택한 활동 일자의 데이터 백엔드에서 원격 로드
   let attMap = {};
   try {
     const res = await fetch(`${FB}/attendance/${currentAttDate}.json`);
@@ -1270,26 +1315,25 @@ async function renderTStu() {
   let html = `
     <div style="padding:16px;">
       <div style="background:var(--surface); padding:14px; border-radius:var(--r); box-shadow:var(--sh); border:1px solid var(--border); margin-bottom:16px;">
-        <label style="font-size:13px; font-weight:500; display:block; margin-bottom:6px; color:var(--text2);">📅 학생회 활동 일자 선택 (조회 및 체크)</label>
-        <select id="attDateSel" onchange="currentAttDate=this.value; renderTStu();" style="width:100%; padding:10px; border-radius:6px; border:1px solid var(--border); font-size:14px; font-weight:500; background:#fff; color:var(--text);">
-          ${ATT_DATES.map(d => `<option value="${d}" ${d===currentAttDate?'selected':''}>${d.replace('-','년 ').replace('-','월 ')}일 활동</option>`).join('')}
+        <label style="font-size:13px; font-weight:500; display:block; margin-bottom:6px; color:var(--text2);">📅 학생회 활동 일자 선택</label>
+        <select onchange="currentAttDate=this.value; renderAttendanceTabContent();" style="width:100%; padding:10px; border-radius:6px; border:1px solid var(--border); font-size:14px; font-weight:500; background:#fff; color:var(--text);">
+          ${ATT_DATES.map(d => `<option value="${d}" ${d===currentAttDate?'selected':''}>${d.split('-')[1]}월 ${d.split('-')[2]}일 활동</option>`).join('')}
         </select>
       </div>
       
       <div style="background:var(--surface); border-radius:var(--r); box-shadow:var(--sh); border:1px solid var(--border); overflow:hidden;">
         <div style="padding:12px 16px; background:var(--surface2); font-size:12px; font-weight:500; color:var(--text2); border-bottom:1px solid var(--border);">
-          학생회 총원 명단 및 출결 현황
+          날짜별 학생회 출결 현황 체크 리스트
         </div>
   `;
 
   MEMBERS.forEach(m => {
     const currentStatus = attMap[m.name]?.status || '미체크';
-    
     html += `
       <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid var(--border);">
         <div>
           <strong style="font-size:14px; color:var(--text);">${m.name}</strong>
-          <span style="font-size:11px; color:var(--text3); margin-left:6px;">${m.dept} | ${m.role||'임원'}</span>
+          <span style="font-size:11px; color:var(--text3); margin-left:6px;">${m.dept}</span>
         </div>
         <div style="display:flex; gap:4px;">
           ${['출석', '지각', '결석'].map(st => {
@@ -1300,11 +1344,7 @@ async function renderTStu() {
               if(st==='지각'){ bg='var(--warn)'; co='#fff'; }
               if(st==='결석'){ bg='var(--danger)'; co='#fff'; }
             }
-            return `
-              <button type="button" onclick="saveTeacherAttendance('${m.name}', '${st}'); this.parentElement.querySelectorAll('button').forEach(b=>{b.style.background='var(--surface2)';b.style.color='var(--text2)'}); this.style.background='${bg}'; this.style.color='#fff';" style="padding:5px 10px; font-size:12px; border:none; border-radius:4px; background:${bg}; color:${co}; font-weight:500; cursor:pointer; transition:all 0.2s;">
-                ${st}
-              </button>
-            `;
+            return `<button type="button" onclick="saveTeacherAttendance('${m.name}', '${st}'); this.parentElement.querySelectorAll('button').forEach(b=>{b.style.background='var(--surface2)';b.style.color='var(--text2)'}); this.style.background='${bg}'; this.style.color='#fff';" style="padding:5px 10px; font-size:12px; border:none; border-radius:4px; background:${bg}; color:${co}; font-weight:500; cursor:pointer;">${st}</button>`;
           }).join('')}
         </div>
       </div>
@@ -1314,8 +1354,8 @@ async function renderTStu() {
   html += '</div></div>';
   area.innerHTML = html;
 }
-// 교사모드 4번째 탭(tP3) 리프레시 대응 자동 매핑
-tFns[3] = renderTStu;
+// tFns 6번째 슬롯(index 5)에 출석 전용 렌더러 등록
+tFns[5] = renderAttendanceTabContent;
 
 
 // ── 시작 ──
