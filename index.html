@@ -754,7 +754,7 @@ function renderMyTasks(){
   renderUnNotice();
   const name=document.getElementById('s0Name').value;
   const area=document.getElementById('myArea');
-  if(!name){area.innerHTML='<div class="empty"><div class="ei">👆</div><p>이름을 선택하면<br>내 업무가 나타나요</p><img src="illust-student.png" alt="" style="width:100%;max-width:260px;margin-top:20px;border-radius:16px;opacity:0.9"></div>';return;}
+  if(!name){area.innerHTML='<div class="empty" style="padding:20px 24px"><div class="ei">👆</div><p>이름을 선택하면<br>내 업무가 나타나요</p><img src="illust-student.png" alt="" style="width:100%;max-width:260px;margin-top:20px;border-radius:16px;opacity:0.9"></div>';return;}
   document.getElementById('sHdr').textContent=name+'의 업무';
   document.getElementById('sBadge').textContent=gd(name);
   const all=tasks.filter(t=>(t.assignees||[t.assignee]).includes(name));
@@ -792,7 +792,7 @@ function submitTask(){
 function renderManage(){
   const name=document.getElementById('s2Name').value;
   const area=document.getElementById('manArea');
- if(!name){area.innerHTML='<div class="empty"><div class="ei">👆</div><p>이름을 선택해주세요</p><img src="illust-student.png" alt="" style="width:100%;max-width:260px;margin-top:20px;border-radius:16px;opacity:0.9"></div>';return;}
+ if(!name){area.innerHTML='<div class="empty" style="padding:20px 24px"><div class="ei">👆</div><p>이름을 선택해주세요</p><img src="illust-student.png" alt="" style="width:100%;max-width:260px;margin-top:20px;border-radius:16px;opacity:0.9"></div>';return;}
   if(!all.length){area.innerHTML='<div class="empty"><div class="ei">📝</div><p>등록된 업무가 없어요</p></div>';return;}
   const opts={showSB:true,showEB:true,showDel:true};
   area.innerHTML=renderGrp(all.filter(t=>t.status!=='완료'),opts)+doneSec(all.filter(t=>t.status==='완료'),opts,'man');
