@@ -391,7 +391,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
   </div>
 
   <div class="tp" id="tP5">
-  <div class="stl" style="margin-top:4px; color:var(--accent); font-size:18px; font-weight:900;">📊 학생회 출석 관리 대시보드</div>
+  <div class="stl" style="margin-top:4px; color:var(--accent); font-size:16px; font-weight:700;">📊 학생회 출석 관리 대시보드</div>
   <div id="_attPanelView" style="margin-top:12px;"></div>
 </div>
 </div>
@@ -1281,6 +1281,7 @@ bindStatic();
         body: JSON.stringify({ status: status, type: cur.type, timestamp: new Date().toISOString() })
       });
       if (typeof toast === 'function') toast(`${name}: ${status} 저장`);
+      _attRenderCore();
     } catch(e) {
       if (typeof toast === 'function') toast('서버 동기화 실패');
     }
