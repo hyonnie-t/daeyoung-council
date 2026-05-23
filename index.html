@@ -312,7 +312,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
   <div class="tp active" id="sP0">
     <div id="unNotice"></div>
     <div class="nw"><label>내 이름</label><select id="s0Name"></select></div>
-    <div id="myArea"><div class="empty"><div class="ei">👆</div><p>이름을 선택하면<br>내 업무가 나타나요</p></div></div>
+    <div id="myArea"><div class="empty"><div class="ei">👆</div><p>이름을 선택하면<br>내 업무가 나타나요</p><img src="illust-student.png" alt="" style="width:100%;max-width:260px;margin-top:20px;border-radius:16px;opacity:0.9"></div></div>
   </div>
   <div class="tp" id="sP1">
     <div class="nw"><label>내 이름 <span class="req">*</span></label><select id="s1Name"></select></div>
@@ -754,7 +754,7 @@ function renderMyTasks(){
   renderUnNotice();
   const name=document.getElementById('s0Name').value;
   const area=document.getElementById('myArea');
-  if(!name){area.innerHTML='<div class="empty"><div class="ei">👆</div><p>이름을 선택하면<br>내 업무가 나타나요</p></div>';return;}
+  if(!name){area.innerHTML='<div class="empty"><div class="ei">👆</div><p>이름을 선택하면<br>내 업무가 나타나요</p><img src="illust-student.png" alt="" style="width:100%;max-width:260px;margin-top:20px;border-radius:16px;opacity:0.9"></div>';return;}
   document.getElementById('sHdr').textContent=name+'의 업무';
   document.getElementById('sBadge').textContent=gd(name);
   const all=tasks.filter(t=>(t.assignees||[t.assignee]).includes(name));
