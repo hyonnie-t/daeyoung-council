@@ -1161,6 +1161,110 @@ document.addEventListener('change',function(e){
   }
 });
 
+// ── [신규 추가] 1. 유료 계정 공유 데이터 ──
+const PAID_ACCOUNTS = [
+  { service: "Canva Pro", id: "daeyoung_canva@gmail.com", pw: "dyccpw0616!", memo: "카드뉴스 및 포스터 제작용 (공용 프로필 사용)" },
+  { service: "미리캔버스 엔터프라이즈", id: "dy_design", pw: "dycc0616**", memo: "행사 슬라이드 및 템플릿 보관함" },
+  { service: "ChatGPT Plus", id: "dy_ai_council", pw: "ai_daeyoung1!", memo: "행사 기획안 아이디어 도출 및 텍스트 검토용" }
+];
+
+// ── [신규 추가] 2. 유료 계정 공유 화면 렌더링 ──
+function renderAccountShare(targetId) {
+  const area = document.getElementById(targetId);
+  if(!area) return;
+  let html = `
+    <div style="padding:16px 0; margin-top:20px; border-top:2px dashed var(--border);">
+      <h3 style="margin-bottom:8px; font-size:16px; color:var(--text); display:flex; align-items:center; gap:6px;">🔑 학생회 공용 유료 계정</h3>
+      <p style="font-size:12px; color:var(--danger); margin-bottom:12px; font-weight:500;">* 학생회 활동 외 타인에게 계정 공유를 절대 금지합니다.</p>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+  `;
+  PAID_ACCOUNTS.forEach(acc => {
+    html += `
+      <div style="background:var(--surface); padding:12px; border-radius:var(--r); box-shadow:var(--sh); border:1px solid var(--border);">
+        <strong style="color:var(--accent); font-size:14px; display:block; margin-bottom:6px;">${acc.service}</strong>
+        <div style="font-size:13px; color:var(--text2); background:var(--surface2); padding:8px; border-radius:6px; margin-bottom:6px; font-family:'Space Mono', monospace;">
+          <div><strong>ID:</strong> ${acc.id}</div>
+          <div style="margin-top:2px;"><strong>PW:</strong> ${acc.pw}</div>
+        </div>
+        <div style="font-size:11px; color:var(--text3);">${acc.memo}</div>
+      </div>
+    `;
+  });
+  html += `</div></div>`;
+  area.insertAdjacentHTML('beforeend', html);
+}
+
+// ── [신규 추가] 3. 실시간 출석체크 기능 ──
+async function saveAttendance(date, name, status) {
+  try {
+    await fetch(`${FB}/attendance/${date}/${name}.json`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: status, time: new Date().toLocaleTimeString() })
+    });
+    toast(`${name}님 [${status}] 기록 완료`);
+  } catch(e) {
+    toast('출석 저장 실패');
+  }
+}
+
+// ── [신규 추가] 4. 출석체크 & 계정공유 통합 화면 렌더링 ──
+async function renderAttendanceView() {
+  const area = document.getElementById('sDept'); // 기존 sP4 탭 내부의 부서 레이아웃 영역 활용
+  if(!area) return;
+  
+  const today = new Date().toISOString().split('T')[0];
+  let serverData = {};
+  try {
+    const res = await fetch(`${FB}/attendance/${today}.json`);
+    serverData = await res.json() || {};
+  } catch(e){}
+
+  let html = `
+    <div style="padding:16px;">
+      <h3 style="font-size:16px; margin-bottom:12px; display:flex; align-items:center; gap:6px;">📅 학생회 출석체크 (${today})</h3>
+      <div style="background:var(--surface); border-radius:var(--r); box-shadow:var(--sh); border:1px solid var(--border); overflow:hidden; max-height:400px; overflow-y:auto;">
+  `;
+
+  MEMBERS.forEach(m => {
+    const currentStatus = serverData[m.name]?.status || '미체크';
+    html += `
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid var(--border);">
+        <div>
+          <span style="font-weight:500; font-size:14px;">${m.name}</span>
+          <span style="font-size:11px; color:var(--text3); margin-left:4px;">${m.dept}</span>
+        </div>
+        <div style="display:flex; gap:4px;" class="att-btns">
+          ${['출석', '지각', '결석'].map(st => {
+            const isChecked = currentStatus === st;
+            let bg = 'var(--surface2)', co = 'var(--text2)';
+            if(isChecked) {
+              if(st==='출석'){ bg='var(--accent3)'; co='#fff'; }
+              if(st==='지각'){ bg='var(--warn)'; co='#fff'; }
+              if(st==='결석'){ bg='var(--danger)'; co='#fff'; }
+            }
+            return `<button type="button" onclick="saveAttendance('${today}', '${m.name}', '${st}'); this.parentElement.querySelectorAll('button').forEach(b=>{b.style.background='var(--surface2)';b.style.color='var(--text2)'}); this.style.background='${bg}'; this.style.color='#fff';" style="padding:4px 8px; font-size:12px; border:none; border-radius:4px; background:${bg}; color:${co}; font-weight:500; cursor:pointer;">${st}</button>`;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  });
+
+  html += `
+      </div>
+      <div id="accountZone"></div>
+    </div>
+  `;
+  
+  area.innerHTML = html;
+  // 출석부 하단에 유료 계정 공유 화면을 이어서 렌더링
+  renderAccountShare('accountZone');
+}
+
+// ── [신규 추가] 5. 학생회 5번째 탭(sP4) 연동 변경 ──
+// 기존 상단에 선언되어 있던 sFns[4]를 덮어써서 5번째 탭을 누르면 출석부 화면이 뜨게 만듭니다.
+sFns[4] = renderAttendanceView;
+
 // ── 시작 ──
 initTasks();
 fillAllSels();
