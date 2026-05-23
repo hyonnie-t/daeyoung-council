@@ -1161,7 +1161,7 @@ document.addEventListener('change',function(e){
   }
 });
 
-// ── [교정 반영] 1. 정확한 공용 계정 데이터 ──
+// ── [요구사항 반영] 1. 정확한 4가지 공용 계정 데이터 및 HTML 설계 ──
 const PAID_ACCOUNTS = [
   { service: "식당 앞 자물쇠", id: "분류 없음", pw: "1112", memo: "오프라인 보관함 자물쇠" },
   { service: "캡컷 (CapCut)", id: "dy_sch03@daeyoung.sen.ms.kr", pw: "daeyoung12!", memo: "학생회 구글 아이디" },
@@ -1171,8 +1171,8 @@ const PAID_ACCOUNTS = [
 
 function getAccountShareHTML() {
   let html = `
-    <div style="margin-top:16px; padding-top:12px; border-top:1px dashed var(--border);">
-      <h4 style="margin-bottom:8px; font-size:12px; color:var(--accent); display:flex; align-items:center; gap:4px;">🔑 학생회 공용 유료 계정 공유</h4>
+    <div style="margin-top:14px; padding-top:12px; border-top:1px dashed var(--border);">
+      <h4 style="margin-bottom:8px; font-size:12px; color:var(--accent); display:flex; align-items:center; gap:4px;">🔑 학생회 공용 유료 계정 공유 공간</h4>
       <div style="display:flex; flex-direction:column; gap:6px;">
   `;
   PAID_ACCOUNTS.forEach(acc => {
@@ -1180,8 +1180,8 @@ function getAccountShareHTML() {
       <div style="background:var(--bg); padding:8px 10px; border-radius:6px; border:1px solid var(--border);">
         <strong style="font-size:12px; color:var(--text); display:block; margin-bottom:2px;">${acc.service}</strong>
         <div style="font-size:11px; color:var(--text2); font-family:monospace; background:var(--surface); padding:4px 6px; border-radius:4px; line-height:1.4;">
-          <div>ID: ${acc.id}</div>
-          <div>PW: ${acc.pw}</div>
+          <div><strong>ID:</strong> ${acc.id}</div>
+          <div><strong>PW:</strong> ${acc.pw}</div>
         </div>
       </div>
     `;
@@ -1190,7 +1190,7 @@ function getAccountShareHTML() {
   return html;
 }
 
-// ── [토글 감추기] 2. 학생모드: 부서 현황 복구 및 타 부서 토글 ──
+// ── [요구사항 반영] 2. 학생 모드: 부서 현황 원형 보존 및 타 부서 토글 숨김 ──
 function renderSDept() {
   const area = document.getElementById('sDept');
   if(!area) return;
@@ -1202,30 +1202,30 @@ function renderSDept() {
   
   DEPTS.forEach(dept => {
     const isMyDept = dept === myDept;
-    const dTasks = tasks.filter(t => t.dept === dept);
+    const dt = tasks.filter(t => t.dept === dept);
+    const done = dt.filter(t => t.status==='완료').length;
+    const pct = dt.length > 0 ? Math.round(done / dt.length * 100) : 0;
+    const col = dc(dept);
+    const active = dt.filter(t => t.status !== '완료');
+    const doneL = dt.filter(t => t.status === '완료');
     
     html += `
       <div class="dept-card" style="background:var(--surface); border-radius:var(--r); box-shadow:var(--sh); border:1px solid var(--border); margin-bottom:12px; overflow:hidden;">
         <div class="dept-toggle-hdr" onclick="const b=this.nextElementSibling; if(b.style.display==='none'){b.style.display='block';}else{b.style.display='none';}" style="padding:12px 14px; background:var(--surface2); cursor:pointer; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border);">
           <div style="display:flex; align-items:center; gap:6px;">
-            <span style="width:4px; height:14px; background:${DC[dept]||'#666'}; border-radius:2px;"></span>
-            <strong style="font-size:13px;">${dept} ${isMyDept ? '<span style="color:var(--accent); font-size:11px; margin-left:4px;">[내 부서]</span>' : ''}</strong>
+            <span class="db db-${dept}" style="background:${col}; color:#fff; padding:2px 6px; border-radius:4px; font-size:11px;">${dept}</span>
+            ${isMyDept ? '<span style="color:var(--accent); font-size:11px; font-weight:bold;">[내 부서]</span>' : ''}
           </div>
-          <span style="font-size:11px; color:var(--text3);">접기/펼치기</span>
+          <span style="font-size:12px; color:var(--text3); font-weight:bold;">진행률 ${done}/${dt.length} (${pct}%) ▼</span>
         </div>
         <div class="dept-body" style="padding:12px; display:${isMyDept ? 'block' : 'none'};">
-    `;
-    
-    if(dTasks.length === 0) {
-      html += '<p style="font-size:12px; color:var(--text3); text-align:center; padding:8px;">등록된 부서 업무가 없습니다.</p>';
-    } else {
-      html += renderGrp(dTasks.filter(t => t.status !== '완료'), {showSB:false, showEB:false, showDel:false});
-      html += doneSec(dTasks.filter(t => t.status === '완료'), {showSB:false, showEB:false, showDel:false}, 'sdept_' + dept);
-    }
-    
-    html += getAccountShareHTML();
-    
-    html += `
+          <div class="dp" style="height:4px; background:var(--surface2); border-radius:2px; margin-bottom:10px; overflow:hidden;">
+            <div style="width:${pct}%; background:${col}; height:100%;"></div>
+          </div>
+          ${active.length ? active.map(t => card(t, {})).join('') : '<div style="font-size:13px; color:var(--text3); padding:4px 0">진행 중 없음</div>'}
+          ${doneSec(doneL, {}, dept+'_s')}
+          
+          ${getAccountShareHTML()}
         </div>
       </div>
     `;
@@ -1237,62 +1237,31 @@ function renderSDept() {
 sFns[4] = renderSDept;
 
 
-// ── [원상 복구] 3. 교사모드: 네 번째 탭 원래 기능(학생별 업무 확인) 완벽 복원 ──
-function renderTStu() {
-  const area = document.getElementById('tStu');
-  if(!area) return;
-  let html = '<div style="padding:16px;"><h3 style="margin-bottom:16px; font-size:16px;">👤 학생별 업무 현황</h3>';
-  MEMBERS.forEach(m => {
-    const sTasks = tasks.filter(t => (t.assignees || [t.assignee]).includes(m.name));
-    const uncom = sTasks.filter(t => t.status !== '완료').length;
-    html += `
-      <div class="stu-row" onclick="openStu('${m.name}')" style="background:var(--surface); padding:14px 16px; border-radius:var(--r); box-shadow:var(--sh); border:1px solid var(--border); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
-        <div>
-          <strong style="font-size:15px;">${m.name}</strong>
-          <span style="font-size:12px; color:var(--text3); margin-left:6px;">${m.dept} | ${m.role||'임원'}</span>
-        </div>
-        <span class="badge" style="background:${uncom>0?'var(--warn)':'var(--surface2)';}; color:${uncom>0?'#fff':'var(--text3)';}; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700;">진행중 ${uncom}</span>
-      </div>
-    `;
-  });
-  html += '</div>';
-  area.innerHTML = html;
-}
-tFns[3] = renderTStu;
-
-
-// ── [신규 추가] 4. 교사모드: 완벽한 격리형 출석 관리 전용 UI 탭 생성 ──
+// ── [요구사항 반영] 3. 교사 모드: 날짜별 실시간 출석체크 독립 탭 시스템 구축 ──
 const ATT_DATES = ['2026-03-19', '2026-03-27', '2026-04-06', '2026-04-08', '2026-04-20', '2026-05-14', '2026-06-10', '2026-07-10'];
 let currentAttDate = ATT_DATES[0];
 
-// 기존 내비게이션 바 구조를 파괴하지 않고 안전하게 엘리먼트 동적 삽입
-(function safeInjectAttendanceSystem() {
+// 교사 화면 탭 목록 확장 HTML 주입 전용 일회성 실행 함수
+(function buildTeacherAttendanceDOM() {
   const tnav = document.getElementById('tTnav');
   if (tnav && !document.getElementById('tAttHeaderBtn')) {
-    const newBtn = document.createElement('button');
-    newBtn.type = 'button';
-    newBtn.className = 'ti';
-    newBtn.id = 'tAttHeaderBtn';
-    newBtn.textContent = '출석 관리';
+    // 탭 버튼 동적 추가
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'ti';
+    btn.id = 'tAttHeaderBtn';
+    btn.setAttribute('data-tab', '5');
+    btn.textContent = '출석 관리';
+    tnav.appendChild(btn);
     
-    // 원본 바인딩과 매칭되도록 tP5 패널과 인덱스 5번 부여
-    newBtn.onclick = () => swTab('tTnav', ['tP0', 'tP1', 'tP2', 'tP3', 'tP4', 'tP5'], 5, tFns);
-    tnav.appendChild(newBtn);
-    
+    // 내용이 노출될 6번째 패널 영역 동적 추가
     const tView = document.getElementById('tView');
     if (tView && !document.getElementById('tP5')) {
-      const newPanel = document.createElement('div');
-      newPanel.className = 'tp';
-      newPanel.id = 'tP5';
-      newPanel.innerHTML = '<div id="tAttContentArea"></div>';
-      tView.appendChild(newPanel);
-      
-      // 기존 탭들의 이벤트 리스너에도 tP5 패널 매핑이 누락되지 않도록 원본 바인딩 확장 패치 적용
-      document.querySelectorAll('#tTnav .ti').forEach((ti, index) => {
-        if(ti.id !== 'tAttHeaderBtn') {
-          ti.addEventListener('click', () => swTab('tTnav', ['tP0', 'tP1', 'tP2', 'tP3', 'tP4', 'tP5'], index, tFns));
-        }
-      });
+      const panel = document.createElement('div');
+      panel.className = 'tp';
+      panel.id = 'tP5';
+      panel.innerHTML = '<div id="tAttContentArea"></div>';
+      tView.appendChild(panel);
     }
   }
 })();
@@ -1306,7 +1275,7 @@ async function saveTeacherAttendance(name, status) {
     });
     toast(`${name}: ${status}`);
   } catch(e) {
-    toast('출석 서버 저장 실패');
+    toast('출석 데이터 실시간 저장 실패');
   }
 }
 
@@ -1323,7 +1292,7 @@ async function renderAttendanceTabContent() {
   let html = `
     <div style="padding:16px;">
       <div style="background:var(--surface); padding:12px; border-radius:var(--r); box-shadow:var(--sh); border:1px solid var(--border); margin-bottom:12px;">
-        <label style="font-size:12px; font-weight:500; display:block; margin-bottom:4px; color:var(--text2);">📅 학생회 활동 일자 선택</label>
+        <label style="font-size:12px; font-weight:500; display:block; margin-bottom:4px; color:var(--text2);">📅 학생회 활동 일자 선택 (CSV 기준)</label>
         <select onchange="currentAttDate=this.value; renderAttendanceTabContent();" style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--border); font-size:13px; background:#fff; color:var(--text); font-weight:500;">
           ${ATT_DATES.map(d => `<option value="${d}" ${d===currentAttDate?'selected':''}>${d.split('-')[1]}월 ${d.split('-')[2]}일 활동</option>`).join('')}
         </select>
@@ -1362,7 +1331,27 @@ async function renderAttendanceTabContent() {
 tFns[5] = renderAttendanceTabContent;
 
 
-// ── 시작 ──
+// ── [오류 해결의 핵심] 4. bindStatic 이벤트 가로채기 및 안전 재결합 ──
+// 원본 소스코드가 선언된 뒤 실행되므로, 기존의 고정형 리스너를 지우고 tP5까지 포함한 배열로 오버라이딩합니다.
+const originalBindStatic = bindStatic;
+bindStatic = function() {
+  // 원래 명명된 고정 정적 이벤트 바인딩 로직 일차 수행
+  originalBindStatic();
+  
+  // 교사 탭 내비게이션 바에 새로 만든 5번 인덱스(tP5)를 가두어 리스너 전면 전사 처리
+  document.querySelectorAll('#tTnav .ti').forEach(ti => {
+    // 기존에 걸려있던 옛날 이벤트를 무력화하기 위해 새로운 복제 노드로 치환
+    const newTi = ti.cloneNode(true);
+    ti.parentNode.replaceChild(newTi, ti);
+    
+    newTi.addEventListener('click', () => {
+      swTab('tTnav', ['tP0', 'tP1', 'tP2', 'tP3', 'tP4', 'tP5'], parseInt(newTi.dataset.tab), tFns);
+    });
+  });
+};
+
+
+// ── 시스템 시작 ──
 initTasks();
 fillAllSels();
 buildCWList('');
