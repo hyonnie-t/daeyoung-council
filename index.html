@@ -1151,11 +1151,11 @@ document.addEventListener('click',function(e){
 });
 
 // =================================================================
-// 📊 [교사 모드] 대시보드 탭 -> 활동 구분형(정기/상설) 출석 시스템으로 완전 대체
+// 📊 [교사 모드] 6번째 '출석 관리' 전용 탭 생성 및 활동명 직접 입력 고도화
 // =================================================================
 (function() {
-  // 1. CSV 기반 활동 유형 및 날짜 매핑 명부 데이터셋
-  let _attDates = [
+  // 1. 초기 활동 명부 데이터셋 (구분과 날짜, 라벨을 유연하게 결합)
+  let _attList = [
     { type: '정기', date: '2026-03-19', label: '정규(3/19) 활동' },
     { type: '상설', date: '2026-03-27', label: '상설(3/27) 활동' },
     { type: '정기', date: '2026-04-06', label: '정규(4/06) 영등포구의회' },
@@ -1165,39 +1165,62 @@ document.addEventListener('click',function(e){
     { type: '출결', date: '2026-06-10', label: '출결(6/10) 활동' },
     { type: '출결', date: '2026-07-10', label: '출결(7/10) 활동' }
   ];
-  let _attCurrentIdx = 0; // 초기 선택: 첫 번째 활동
+  let _attCurIdx = 0;
 
-  // 2. 교사 메인 대시보드(tP0) 구조 초기화 및 락(Lock)
-  function _attOverwriteDashboard() {
-    const tp0 = document.getElementById('tP0');
-    if (tp0) {
-      tp0.innerHTML = `
-        <div class="stl" style="margin-top:4px; color:var(--accent); font-size:18px; font-weight:900;">📊 학생회 출석 관리 대시보드</div>
-        <div id="tAttPanelContainer" style="margin-top:12px;"></div>
-      `;
-      _attRenderCore();
+  // 2. 상단 메뉴바에 6번째 독립 탭('출석 관리') 및 전용 화면 패널 생성
+  function _attInjectTabAndPanel() {
+    const tnav = document.getElementById('tTnav');
+    if (tnav && !document.getElementById('_attTabBtn')) {
+      // 6번째 탭 버튼 추가
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'ti';
+      btn.id = '_attTabBtn';
+      btn.setAttribute('data-tab', '5');
+      btn.innerHTML = '출석 관리';
+      tnav.appendChild(btn);
+      
+      // 6번째 전용 패널 화면 생성 (대시보드와 동일한 격자 디자인 구성)
+      const tView = document.getElementById('tView');
+      if (tView && !document.getElementById('tP5')) {
+        const panel = document.createElement('div');
+        panel.className = 'tp';
+        panel.id = 'tP5';
+        panel.innerHTML = `
+          <div class="stl" style="margin-top:4px; color:var(--accent); font-size:18px; font-weight:900;">📊 학생회 출석 관리 대시보드</div>
+          <div id="_attPanelView" style="margin-top:12px;"></div>
+        `;
+        tView.appendChild(panel);
+      }
+      
+      // 원본 탭 클릭 스위칭 함수(swTab) 구조에 맞게 클릭 이벤트 재연동
+      btn.addEventListener('click', () => {
+        if (typeof swTab === 'function') {
+          swTab('tTnav', ['tP0', 'tP1', 'tP2', 'tP3', 'tP4', 'tP5'], 5, tFns);
+        }
+      });
     }
   }
 
-  // 3. 개별 학생 출결 원격 저장 브릿지
+  // 3. 개별 출석 데이터 Firebase 원격 저장
   window._attSaveSingle = async function(name, status) {
-    const cur = _attDates[_attCurrentIdx];
+    const cur = _attList[_attCurIdx];
     try {
       await fetch(`${FB}/attendance/${cur.date}/${name}.json`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: status, type: cur.type, timestamp: new Date().toISOString() })
       });
-      toast(`${name}: ${status} (${cur.type}) 완료`);
+      toast(`${name}: ${status} 저장 완료`);
     } catch(e) {
       toast('서버 동기화 실패');
     }
   };
 
-  // 4. [⚡ 일괄 기능] 전원 출석 프리셋 엔진
+  // 4. [⚡ 일괄 처리] 전원 출석 완료 등록
   window._attSaveAllPresent = async function() {
-    const cur = _attDates[_attCurrentIdx];
-    if (!confirm(`[${cur.label}]의 모든 임원을 '출석'으로 일괄 변경하시겠습니까?`)) return;
+    const cur = _attList[_attCurIdx];
+    if (!confirm(`[${cur.label}] 모든 임원을 '출석'으로 일괄 변경하시겠습니까?`)) return;
     
     toast('전원 출석 처리 중...');
     const promises = MEMBERS.map(m => {
@@ -1210,43 +1233,44 @@ document.addEventListener('click',function(e){
     
     try {
       await Promise.all(promises);
-      toast('🎉 전원 출석 처리가 완료되었습니다!');
+      toast('🎉 전원 출석 등록 완료!');
       _attRenderCore();
     } catch(e) {
-      toast('일부 항목 저장 실패');
+      toast('일부 저장 실패');
     }
   };
 
-  // 5. [➕ 확장] 활동 유형(정기/상설)을 선택하여 새 날짜 추가
+  // 5. [➕ 활동명 직접 입력] 원하는 구분명과 날짜를 직접 타이핑하여 무제한 확장
   window._attAddNewDate = function() {
-    const typeSel = document.getElementById('newAttTypeSel');
-    const dateIpt = document.getElementById('newAttDateIpt');
+    const typeIpt = document.getElementById('_attNewTypeIpt'); // 활동명 입력칸
+    const dateIpt = document.getElementById('_attNewDateIpt'); // 날짜 선택칸
     
-    const t = typeSel ? typeSel.value : '정기';
+    const t = typeIpt ? typeIpt.value.trim() : '';
     const d = dateIpt ? dateIpt.value : '';
     
-    if (!d) { toast('날짜를 올바르게 선택해 주세요.'); return; }
-    if (_attDates.some(item => item.date === d)) { toast('이미 등록된 활동 일자입니다.'); return; }
+    if (!t) { toast('활동 구분명(예: 상설, 정기, 대의원회 등)을 입력해 주세요.'); return; }
+    if (!d) { toast('활동 날짜를 선택해 주세요.'); return; }
+    if (_attList.some(item => item.date === d)) { toast('이미 해당 날짜에 등록된 활동이 있습니다.'); return; }
     
     const [, mm, dd] = d.split('-');
-    const newLabel = `${t}(${parseInt(mm)}/${parseInt(dd)}) 추가 활동`;
+    const customLabel = `${t}(${parseInt(mm)}/${parseInt(dd)}) 활동`;
     
-    _attDates.push({ type: t, date: d, label: newLabel });
-    _attDates.sort((a, b) => a.date.localeCompare(b.date));
+    _attList.push({ type: t, date: d, label: customLabel });
+    _attList.sort((a, b) => a.date.localeCompare(b.date));
     
-    _attCurrentIdx = _attDates.findIndex(item => item.date === d);
-    toast(`📅 [${newLabel}] 일정이 새 출석부에 추가되었습니다.`);
+    _attCurIdx = _attList.findIndex(item => item.date === d);
+    toast(`📅 [${customLabel}] 과 명부가 출석부에 등록되었습니다.`);
     _attRenderCore();
   };
 
-  window._attChangeDateIdx = function(idx) {
-    _attCurrentIdx = parseInt(idx);
+  window._attChangeIdx = function(idx) {
+    _attCurIdx = parseInt(idx);
     _attRenderCore();
   };
 
-  // 6. 실시간 출석 데이터 집계 및 코어 뷰 렌더러
+  // 6. 6번째 탭 전용 대시보드 형태의 리얼 렌더링 엔진
   async function _attRenderCore() {
-    const area = document.getElementById('tAttPanelContainer');
+    const area = document.getElementById('_attPanelView');
     if (!area) return;
     
     let fullMap = {};
@@ -1255,10 +1279,10 @@ document.addEventListener('click',function(e){
       fullMap = await res.json() || {};
     } catch(e) {}
     
-    const cur = _attDates[_attCurrentIdx] || _attDates[0];
+    const cur = _attList[_attCurIdx] || _attList[0];
     const currentMap = fullMap[cur.date] || {};
 
-    // 임원별 통계 (아코디언 요약판)
+    // 임원별 통계 대시보드 박스 (아코디언 형태)
     let statsHtml = `
       <div class="ds" style="margin-bottom:12px; padding:12px; background:var(--surface);">
         <div onclick="const s=this.nextElementSibling; s.style.display=s.style.display==='none'?'block':'none';" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
@@ -1269,7 +1293,7 @@ document.addEventListener('click',function(e){
     
     MEMBERS.forEach(m => {
       let p = 0, l = 0, a = 0;
-      _attDates.forEach(dItem => {
+      _attList.forEach(dItem => {
         const st = fullMap[dItem.date]?.[m.name]?.status;
         if (st === '출석') p++;
         if (st === '지각') l++;
@@ -1287,23 +1311,20 @@ document.addEventListener('click',function(e){
     });
     statsHtml += `</div></div>`;
 
-    // 전체 UI 바인딩 및 생성
+    // 메인 컨트롤 및 명부 보드 UI 생성
     let html = `
       <div style="display:flex; flex-direction:column; gap:12px;">
         
         <div class="ds" style="padding:12px; margin-bottom:0;">
-          <label style="font-size:12px; font-weight:700; display:block; margin-bottom:6px; color:var(--text2);">📅 활동 선택 및 구분 확인</label>
-          <select onchange="window._attChangeDateIdx(this.value);" class="sel" style="font-weight:700; margin-bottom:8px; border-left: 5px solid ${cur.type === '정기' ? 'var(--info)' : cur.type === '상설' ? 'var(--accent2)' : 'var(--text3)'};">
-            ${_attDates.map((d, idx) => `<option value="${idx}" ${idx===_attCurrentIdx?'selected':''}>[${d.type}] ${d.label}</option>`).join('')}
+          <label style="font-size:12px; font-weight:700; display:block; margin-bottom:6px; color:var(--text2);">📅 출석 관리 대상 활동 선택</label>
+          <select onchange="window._attChangeIdx(this.value);" class="sel" style="font-weight:700; margin-bottom:8px; border-left: 5px solid var(--accent);">
+            ${_attList.map((d, idx) => `<option value="${idx}" ${idx===_attCurIdx?'selected':''}>[${d.type}] ${d.label}</option>`).join('')}
           </select>
           
           <div style="display:flex; gap:4px; margin-top:4px;">
-            <select id="newAttTypeSel" class="sel" style="width:75px; font-size:12px; padding:0 4px; height:34px;">
-              <option value="정기">정기</option>
-              <option value="상설">상설</option>
-            </select>
-            <input type="date" id="newAttDateIpt" class="ipt" style="padding:6px 10px; font-size:13px; flex:1; height:34px;">
-            <button type="button" onclick="window._attAddNewDate()" class="fc active" style="border-radius:8px; font-size:11px; padding:0 8px; height:34px; white-space:nowrap;">➕ 활동일 추가</button>
+            <input type="text" id="_attNewTypeIpt" class="ipt" placeholder="활동명 입력 (예: 상설)" style="width:110px; font-size:12px; padding:6px; height:34px;">
+            <input type="date" id="_attNewDateIpt" class="ipt" style="padding:6px 10px; font-size:12px; flex:1; height:34px;">
+            <button type="button" onclick="window._attAddNewDate()" class="fc active" style="border-radius:8px; font-size:11px; padding:0 8px; height:34px; white-space:nowrap;">➕ 활동 추가</button>
           </div>
         </div>
 
@@ -1312,12 +1333,12 @@ document.addEventListener('click',function(e){
         <div class="ds" style="padding:0; overflow:hidden; margin-bottom:0;">
           <div style="padding:12px 14px; background:var(--surface2); display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border);">
             <div>
-              <span class="badge" style="background:${cur.type==='정기'?'var(--info)':cur.type==='상설'?'var(--accent2)':'var(--text3)'}; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; margin-right:6px; font-weight:bold;">${cur.type} 활동</span>
-              <strong style="font-size:13px; color:var(--text2);">${cur.date} 명부</strong>
+              <span class="badge" style="background:var(--accent); color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; margin-right:6px; font-weight:bold;">${cur.type}</span>
+              <strong style="font-size:13px; color:var(--text2);">${cur.date} 명부 체크</strong>
             </div>
             <button type="button" onclick="window._attSaveAllPresent()" class="fc active" style="background:var(--accent3); border-radius:6px; font-size:11px; padding:4px 10px;">⚡ 전원 출석 처리</button>
           </div>
-          <div style="max-height:460px; overflow-y:auto;">
+          <div style="max-height:450px; overflow-y:auto;">
     `;
 
     MEMBERS.forEach(m => {
@@ -1353,15 +1374,16 @@ document.addEventListener('click',function(e){
     area.innerHTML = html;
   }
 
-  // 7. 인터벌 동기화 안정 장치 및 교사 라우터 갱신 후킹
+  // 7. 시스템 초기 대기 및 교사 라우터 탭 가로채기 안전 연동
   const _attInterval = setInterval(() => {
     if (document.getElementById('tP0')) {
       clearInterval(_attInterval);
-      _attOverwriteDashboard();
+      _attInjectTabAndPanel();
       
-      if (typeof tFns !== 'undefined' && tFns[0]) {
-        tFns[0] = function() {
-          _attOverwriteDashboard();
+      if (typeof tFns !== 'undefined') {
+        tFns[5] = function() {
+          _attInjectTabAndPanel();
+          _attRenderCore();
         };
       }
     }
