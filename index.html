@@ -379,6 +379,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
   <div class="tp" id="tP2"><div id="tDept"></div></div>
   <div class="tp" id="tP3"><div id="tStu"></div></div>
   <div class="tp" id="tP4">
+<button type="button" id="tAddTaskBtn" class="fc active" style="width:100%;margin-bottom:10px;padding:10px;border-radius:10px;font-size:14px;font-weight:700;">➕ 업무 추가</button>
     <div class="sw"><span class="si2">🔍</span><input type="text" id="searchInput" placeholder="업무명, 담당자, 카테고리 검색..."><button type="button" class="sc3" id="searchClear">×</button></div>
     <div class="fb" id="filterBar">
       <button type="button" class="fc active" data-filter="전체">전체</button>
@@ -451,6 +452,29 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
   </div>
 </div>
 
+<!-- 업무 추가 모달 (교사용) -->
+<div class="mov" id="tAddMov">
+  <div class="ms">
+    <div class="mh"></div><div class="mt">업무 추가</div>
+    <div class="fg"><label>담당자</label><select id="tAddAssignee"></select></div>
+    <div class="fg"><label>업무명</label><input type="text" id="tAddTitle" placeholder="업무명 입력"></div>
+    <div class="fg"><label>카테고리</label><input type="text" id="tAddCat" placeholder="예: 리더십 캠프"></div>
+    <div class="fg"><label>행사일</label><input type="date" id="tAddDate"></div>
+    <div class="fg"><label>준비 마감일</label><input type="date" id="tAddDead"></div>
+    <div class="fg">
+      <label>상태</label>
+      <div class="sb" id="tAddStBtns">
+        <button type="button" class="sb-btn a-예정" data-status="예정">예정</button>
+        <button type="button" class="sb-btn" data-status="진행중">진행중</button>
+        <button type="button" class="sb-btn" data-status="완료">완료</button>
+        <button type="button" class="sb-btn" data-status="보류">보류</button>
+      </div>
+    </div>
+    <div class="fg"><label>메모</label><textarea id="tAddMemo" rows="2"></textarea></div>
+    <div class="ma"><button type="button" class="bc" id="tAddCancel">취소</button><button type="button" class="bs" id="tAddSave">추가</button></div>
+  </div>
+</div>
+  
 <!-- 삭제 확인 모달 -->
 <div class="mov" id="delMov">
   <div class="ms">
@@ -1089,6 +1113,44 @@ function bindStatic(){
   // 업무 등록
   document.getElementById('submitBtn').addEventListener('click',submitTask);
   document.getElementById('addSubBtn').addEventListener('click',addSubRow);
+  // 교사 모드 업무 추가
+  let _tAddStatus = '예정';
+  document.getElementById('tAddTaskBtn').addEventListener('click', () => {
+    const sel = document.getElementById('tAddAssignee');
+    sel.innerHTML = '<option value="">담당자 선택</option>' +
+      DEPTS.map(dept => `<optgroup label="${dept}">${MEMBERS.filter(m=>m.dept===dept).map(m=>`<option value="${m.name}">${m.name}</option>`).join('')}</optgroup>`).join('');
+    ['tAddTitle','tAddCat','tAddMemo'].forEach(id => document.getElementById(id).value = '');
+    ['tAddDate','tAddDead'].forEach(id => document.getElementById(id).value = '');
+    _tAddStatus = '예정';
+    document.querySelectorAll('#tAddStBtns .sb-btn').forEach(b => b.className = 'sb-btn' + (b.dataset.status==='예정' ? ' a-예정' : ''));
+    document.getElementById('tAddMov').classList.add('open');
+  });
+  document.getElementById('tAddCancel').addEventListener('click', () => closeMov('tAddMov'));
+  document.querySelectorAll('#tAddStBtns .sb-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      _tAddStatus = btn.dataset.status;
+      document.querySelectorAll('#tAddStBtns .sb-btn').forEach(b => b.className = 'sb-btn' + (b === btn ? ' a-' + _tAddStatus : ''));
+    });
+  });
+  document.getElementById('tAddSave').addEventListener('click', () => {
+    const assignee = document.getElementById('tAddAssignee').value;
+    const title = document.getElementById('tAddTitle').value.trim();
+    if (!assignee) { toast('담당자를 선택해주세요'); return; }
+    if (!title) { toast('업무명을 입력해주세요'); return; }
+    const t = {
+      id: Date.now().toString(), assignee, assignees: [assignee], allAssignees: [assignee],
+      dept: gd(assignee), title,
+      category: document.getElementById('tAddCat').value.trim(),
+      date: document.getElementById('tAddDate').value,
+      deadline: document.getElementById('tAddDead').value,
+      memo: document.getElementById('tAddMemo').value.trim(),
+      status: _tAddStatus, subtasks: [], createdAt: new Date().toISOString()
+    };
+    tasks.push(t); saveLocal(); fbPutAll();
+    toast('✅ ' + assignee + ' 업무 추가!');
+    closeMov('tAddMov');
+    renderAllTasks();
+  });
   // 편집 모달
   document.getElementById('editSave').addEventListener('click',saveEdit);
   document.getElementById('editCancel').addEventListener('click',()=>closeMov('editMov'));
