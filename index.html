@@ -877,7 +877,10 @@ function editSD(id,idx){
 // ── 세부 추가 ──
 function addSub(id){
   const t=tasks.find(x=>x.id===id);if(!t)return;
-  const tx=document.getElementById('ns-'+id);const dt=document.getElementById('nd-'+id);
+  const btn=document.querySelector(`.tp.active [data-action="addSub"][data-id="${id}"]`)||document.querySelector(`[data-action="addSub"][data-id="${id}"]`);
+  const wrap=btn?btn.closest('.add-si'):null;
+  const tx=wrap?wrap.querySelector('input[type="text"]'):null;
+  const dt=wrap?wrap.querySelector('input[type="date"]'):null;
   if(!tx||!tx.value.trim()){toast('내용을 입력해주세요');return;}
   if(!t.subtasks)t.subtasks=[];
   t.subtasks.push({text:tx.value.trim(),date:dt?dt.value:'',done:false});
