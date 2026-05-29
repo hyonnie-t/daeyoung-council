@@ -456,8 +456,11 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 <div class="mov" id="tAddMov">
   <div class="ms">
     <div class="mh"></div><div class="mt">업무 추가</div>
-    <div class="fg"><label>담당자</label><select id="tAddAssignee"></select></div>
-    <div class="fg"><label>업무명</label><input type="text" id="tAddTitle" placeholder="업무명 입력"></div>
+    <div class="fg">
+      <label>담당자 <span class="req">*</span></label>
+      <div id="tAddAssigneeWrap" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px;max-height:200px;overflow-y:auto"></div>
+    </div>
+    <div class="fg"><label>업무명 <span class="req">*</span></label><input type="text" id="tAddTitle" placeholder="업무명 입력"></div>
     <div class="fg"><label>카테고리</label><input type="text" id="tAddCat" placeholder="예: 리더십 캠프"></div>
     <div class="fg"><label>행사일</label><input type="date" id="tAddDate"></div>
     <div class="fg"><label>준비 마감일</label><input type="date" id="tAddDead"></div>
@@ -469,6 +472,11 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
         <button type="button" class="sb-btn" data-status="완료">완료</button>
         <button type="button" class="sb-btn" data-status="보류">보류</button>
       </div>
+    </div>
+    <div class="fg">
+      <label>세부 할 일</label>
+      <div id="tAddSubList"><div class="sir"><input type="text" placeholder="예: 행사 장소 섭외" class="st"><input type="date" class="dm sd"><button type="button" class="sdel" data-action="tAddRmSub">×</button></div></div>
+      <button type="button" class="asb" id="tAddSubBtn">+ 세부 할 일 추가</button>
     </div>
     <div class="fg"><label>메모</label><textarea id="tAddMemo" rows="2"></textarea></div>
     <div class="ma"><button type="button" class="bc" id="tAddCancel">취소</button><button type="button" class="bs" id="tAddSave">추가</button></div>
@@ -1113,9 +1121,51 @@ function bindStatic(){
   // 업무 등록
   document.getElementById('submitBtn').addEventListener('click',submitTask);
   document.getElementById('addSubBtn').addEventListener('click',addSubRow);
-  // 교사 모드 업무 추가
+// 교사 모드 업무 추가
   let _tAddStatus = '예정';
+
+  function buildTAddAssigneeCBs() {
+    const c = document.getElementById('tAddAssigneeWrap'); if (!c) return; c.innerHTML = '';
+    DEPTS.forEach(dept => {
+      const dh = document.createElement('div'); dh.className = 'cb-dh';
+      dh.innerHTML = `<span class="db db-${dept}">${dept}</span><span style="font-size:11px;color:var(--text3)">전체</span>`;
+      dh.addEventListener('click', () => {
+        const cbs = c.querySelectorAll(`.tadd-cb[data-dept="${dept}"]`);
+        const all = [...cbs].every(x => x.checked); cbs.forEach(x => x.checked = !all);
+      });
+      c.appendChild(dh);
+      MEMBERS.filter(m => m.dept === dept).forEach(m => {
+        const row = document.createElement('div'); row.className = 'cb-item';
+        const cb = document.createElement('input'); cb.type = 'checkbox'; cb.className = 'tadd-cb'; cb.dataset.dept = dept; cb.id = 'tadd-' + m.name; cb.value = m.name;
+        const lb = document.createElement('label'); lb.htmlFor = 'tadd-' + m.name; lb.textContent = `${m.name} (${m.role})`;
+        row.appendChild(cb); row.appendChild(lb); c.appendChild(row);
+      });
+    });
+  }
+
   document.getElementById('tAddTaskBtn').addEventListener('click', () => {
+    buildTAddAssigneeCBs();
+    ['tAddTitle','tAddCat','tAddMemo'].forEach(id => document.getElementById(id).value = '');
+    ['tAddDate','tAddDead'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('tAddSubList').innerHTML = '<div class="sir"><input type="text" placeholder="예: 행사 장소 섭외" class="st"><input type="date" class="dm sd"><button type="button" class="sdel" data-action="tAddRmSub">×</button></div>';
+    _tAddStatus = '예정';
+    document.querySelectorAll('#tAddStBtns .sb-btn').forEach(b => b.className = 'sb-btn' + (b.dataset.status === '예정' ? ' a-예정' : ''));
+    document.getElementById('tAddMov').classList.add('open');
+  });
+  document.getElementById('tAddSubBtn').addEventListener('click', () => {
+    const l = document.getElementById('tAddSubList');
+    const r = document.createElement('div'); r.className = 'sir';
+    r.innerHTML = '<input type="text" placeholder="세부 할 일" class="st"><input type="date" class="dm sd"><button type="button" class="sdel" data-action="tAddRmSub">×</button>';
+    l.appendChild(r);
+  });
+  document.getElementById('tAddCancel').addEventListener('click', () => closeMov('tAddMov'));
+  document.querySelectorAll('#tAddStBtns .sb-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      _tAddStatus = btn.dataset.status;
+      document.querySelectorAll('#tAddStBtns .sb-btn').forEach(b => b.className = 'sb-btn' + (b === btn ? ' a-' + _tAddStatus : ''));
+    });
+  });
+  document.getElementById('tAddSave').addEventListener('click', () => {
     const sel = document.getElementById('tAddAssignee');
     sel.innerHTML = '<option value="">담당자 선택</option>' +
       DEPTS.map(dept => `<optgroup label="${dept}">${MEMBERS.filter(m=>m.dept===dept).map(m=>`<option value="${m.name}">${m.name}</option>`).join('')}</optgroup>`).join('');
@@ -1133,18 +1183,24 @@ function bindStatic(){
     });
   });
   document.getElementById('tAddSave').addEventListener('click', () => {
-    const assignee = document.getElementById('tAddAssignee').value;
+    const checked = [...document.querySelectorAll('.tadd-cb:checked')].map(x => x.value);
     const title = document.getElementById('tAddTitle').value.trim();
-    if (!assignee) { toast('담당자를 선택해주세요'); return; }
+    if (!checked.length) { toast('담당자를 1명 이상 선택해주세요'); return; }
     if (!title) { toast('업무명을 입력해주세요'); return; }
+    const subs = [];
+    document.querySelectorAll('#tAddSubList .sir').forEach(r => {
+      const tx = r.querySelector('.st').value.trim(); const dt = r.querySelector('.sd').value;
+      if (tx) subs.push({ text: tx, date: dt, done: false });
+    });
+    const assignee = checked[0];
     const t = {
-      id: Date.now().toString(), assignee, assignees: [assignee], allAssignees: [assignee],
+      id: Date.now().toString(), assignee, assignees: checked, allAssignees: checked,
       dept: gd(assignee), title,
       category: document.getElementById('tAddCat').value.trim(),
       date: document.getElementById('tAddDate').value,
       deadline: document.getElementById('tAddDead').value,
       memo: document.getElementById('tAddMemo').value.trim(),
-      status: _tAddStatus, subtasks: [], createdAt: new Date().toISOString()
+      status: _tAddStatus, subtasks: subs, createdAt: new Date().toISOString()
     };
     tasks.push(t); saveLocal(); fbPutAll();
     toast('✅ ' + assignee + ' 업무 추가!');
@@ -1219,6 +1275,7 @@ document.addEventListener('click',function(e){
   if(action==='openStu'){openStu(el.dataset.name);return;}
   if(action==='selfAssign'){selfAssign(id);return;}
   if(action==='rmSub'){if(document.querySelectorAll('.sir').length<=1){toast('최소 1개 필요');return;}el.closest('.sir').remove();return;}
+  if(action==='tAddRmSub'){if(document.querySelectorAll('#tAddSubList .sir').length<=1){toast('최소 1개 필요');return;}el.closest('.sir').remove();return;}
 });
 
 
