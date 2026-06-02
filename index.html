@@ -278,6 +278,10 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
     <div class="logo-t">학생회<br>업무 시스템</div>
     <div class="logo-sub">2026학년도 대영중학교</div>
   </div>
+  <div id="noticeBox" style="display:none;width:100%;max-width:360px;background:#fff9db;border:1px solid #ffd43b;border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh)">
+  <div style="font-size:11px;font-weight:700;color:var(--warn);margin-bottom:6px;letter-spacing:1px">📢 공지사항</div>
+  <div id="noticeText" style="font-size:14px;color:var(--text);line-height:1.7;white-space:pre-wrap"></div>
+</div>
   <div class="mode-wrap">
     <button type="button" class="mc" id="btnS"><div class="mc-i">✋</div><div class="mc-t">학생 모드</div><div class="mc-d">업무 등록 · 진행 체크 · 일정 확인</div></button>
     <button type="button" class="mc t" id="btnT"><div class="mc-i">📋</div><div class="mc-t">선생님 모드</div><div class="mc-d">전체 현황 · 업무 배정 · 완료 피드</div></button>
@@ -367,6 +371,14 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
       <div class="sc2 c3"><div class="sn" id="stI">0</div><div class="sl2">진행중</div></div>
       <div class="sc2 c4"><div class="sn" id="stU">0</div><div class="sl2">마감 임박</div></div>
     </div>
+    <div class="stl">📢 공지사항 관리</div>
+<div id="noticeAdmin" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:8px;box-shadow:var(--sh)">
+  <textarea id="noticeInput" rows="3" placeholder="공지 내용을 입력하세요. 비워두면 공지가 숨겨집니다." style="margin-bottom:8px"></textarea>
+  <div style="display:flex;gap:8px">
+    <button type="button" class="bs" id="noticeSave" style="flex:1">저장</button>
+    <button type="button" class="bc" id="noticeClear">공지 삭제</button>
+  </div>
+</div>
     <div class="stl">⚠️ 담당자 미배정</div><div id="uaArea"></div>
     <div class="stl">🔴 마감 임박</div><div id="urgArea"></div>
     <div class="stl">✅ 최근 완료</div><div id="feedArea"></div>
@@ -1253,7 +1265,21 @@ function bindStatic(){
     mov.addEventListener('click',e=>{if(e.target.classList.contains('mov'))closeMov(mov.id);});
   });
   // 모달 내부 클릭 전파 차단
-  document.querySelectorAll('.ms').forEach(ms=>ms.addEventListener('click',e=>e.stopPropagation()));
+document.querySelectorAll('.ms').forEach(ms=>ms.addEventListener('click',e=>e.stopPropagation()));
+  // 공지 저장
+  document.getElementById('noticeSave').addEventListener('click', async () => {
+    const text = document.getElementById('noticeInput').value.trim();
+    await fetch(FB+'/notice.json', {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(text||null)});
+    toast(text ? '📢 공지 저장 완료!' : '공지가 비워졌어요');
+    loadNotice();
+  });
+  document.getElementById('noticeClear').addEventListener('click', async () => {
+    await fetch(FB+'/notice.json', {method:'PUT', headers:{'Content-Type':'application/json'}, body:'null'});
+    document.getElementById('noticeInput').value = '';
+    toast('공지 삭제됨');
+    loadNotice();
+  });
+}
 }
 
 // ── 동적 이벤트 위임 ──
@@ -1369,8 +1395,27 @@ function renderSDept() {
 }
 sFns[4] = renderSDept;
 
+  async function loadNotice(){
+  try{
+    const r = await fetch(FB+'/notice.json');
+    const text = await r.json();
+    const box = document.getElementById('noticeBox');
+    const el = document.getElementById('noticeText');
+    const input = document.getElementById('noticeInput');
+    if(text){
+      el.textContent = text;
+      box.style.display = 'block';
+      if(input) input.value = text;
+    } else {
+      box.style.display = 'none';
+      if(input) input.value = '';
+    }
+  } catch(e){}
+}
+  
 // ── 시스템 시작 ──
 initTasks();
+loadNotice();
 fillAllSels();
 buildCWList('');
 bindStatic();
