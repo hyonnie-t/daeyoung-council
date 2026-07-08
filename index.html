@@ -555,9 +555,13 @@ function fD(ds){if(!ds)return '';const d=new Date(ds);return `${d.getMonth()+1}/
 function dc(dept){return DC[dept]||'#868e96';}
 function gm(name){return MEMBERS.find(m=>m.name===name)||{};}
 function gd(name){return gm(name).dept||'';}
-function chip(ds,st){
-  if(!ds||st==='완료')return '';
-  const d=dU(ds);
+// 마감일 없으면 행사일로 폴백해서 D-day 계산
+function effDeadline(t){return t.deadline||t.date||'';}
+function chip(ds,st,fallbackDate){
+  const target=ds||(fallbackDate||'');
+  if(!target||st==='완료')return '';
+  const d=dU(target);
+  if(d===null)return '';
   if(d<0)return '<span class="chip chip-over">기한 초과</span>';
   if(d===0)return '<span class="chip chip-today">오늘 마감</span>';
   if(d<=3)return `<span class="chip chip-soon">D-${d}</span>`;
@@ -742,8 +746,9 @@ const tFns=[renderDash,()=>renderCal('t'),renderTDept,renderTStu,renderAllTasks,
 function card(t,opts){
   opts=opts||{};
   const {showSB,showEB,showDel}=opts;
-  const d=dU(t.deadline);
-  const cp=chip(t.deadline,t.status);
+  const eff=effDeadline(t);
+  const d=dU(eff);
+  const cp=chip(t.deadline,t.status,t.date);
   const subs=t.subtasks||[];
   const dn=subs.filter(s=>s.done).length;
   const pct=subs.length>0?Math.round(dn/subs.length*100):0;
@@ -754,7 +759,8 @@ function card(t,opts){
   const db=showDel?`<button type="button" class="del-btn" data-action="del" data-id="${t.id}">🗑</button>`:'';
   const dateL=[
     t.date?`<span class="tc-date">📅 행사일 ${fD(t.date)}</span>`:'',
-    t.deadline?`<span class="tc-date${d!==null&&d<=3&&t.status!=='완료'?' urg':''}">⏰ 준비마감 ${fD(t.deadline)}</span>`:'',
+    t.deadline?`<span class="tc-date${d!==null&&d<=3&&t.status!=='완료'?' urg':''}">⏰ 준비마감 ${fD(t.deadline)}</span>`:
+    (t.date&&!t.deadline?`<span class="tc-date${d!==null&&d<=3&&t.status!=='완료'?' urg':''}">📅 행사일 ${fD(t.date)}</span>`:''),
     cp
   ].filter(Boolean).join('');
   const subH=subs.length?`
@@ -783,7 +789,12 @@ function doneSec(list,opts,id){
 }
 function grpTime(list){
   const g={ov:[],td:[],wk:[],lt:[],nd:[]};
-  list.forEach(t=>{if(!t.deadline){g.nd.push(t);return;}const d=dU(t.deadline);if(d<0)g.ov.push(t);else if(d===0)g.td.push(t);else if(d<=7)g.wk.push(t);else g.lt.push(t);});
+  list.forEach(t=>{
+    const eff=effDeadline(t);
+    if(!eff){g.nd.push(t);return;}
+    const d=dU(eff);
+    if(d<0)g.ov.push(t);else if(d===0)g.td.push(t);else if(d<=7)g.wk.push(t);else g.lt.push(t);
+  });
   return g;
 }
 function renderGrp(list,opts){
@@ -1039,14 +1050,14 @@ function renderTDept(){document.getElementById('tDept').innerHTML=deptHtml(true)
 // ── 교사 대시보드 ──
 function renderDash(){
   const total=tasks.length,done=tasks.filter(t=>t.status==='완료').length,ing=tasks.filter(t=>t.status==='진행중').length;
-  const urg=tasks.filter(t=>{const d=dU(t.deadline);return d!==null&&d<=3&&t.status!=='완료';}).length;
+  const urg=tasks.filter(t=>{const d=dU(effDeadline(t));return d!==null&&d<=3&&t.status!=='완료';}).length;
   document.getElementById('stT').textContent=total;
   document.getElementById('stD').textContent=done;
   document.getElementById('stI').textContent=ing;
   document.getElementById('stU').textContent=urg;
   const ua=tasks.filter(t=>isUA(t)&&t.status!=='완료');
   document.getElementById('uaArea').innerHTML=ua.length===0?'<div style="font-size:13px;color:var(--text3);padding:8px 0">미배정 없음 ✅</div>':ua.map(t=>'<div class="ua"><div class="ua-top"><div class="ua-ti">'+t.title+'</div><div class="ua-btns"><button type="button" class="eb" data-action="edit" data-id="'+t.id+'">✏️</button><button type="button" class="abtn" data-action="assign" data-id="'+t.id+'">배정</button></div></div><div class="tc-meta">'+(t.category?'<span class="db db-'+t.dept+'">'+t.category+'</span>':'')+'<span class="db db-'+t.dept+'">'+t.dept+'</span>'+(t.deadline?'<span style="font-size:11px;color:var(--text2)">⏰ '+fD(t.deadline)+'</span>':'')+'</div></div>').join('');
-  const ul=tasks.filter(t=>{const d=dU(t.deadline);return d!==null&&d<=3&&t.status!=='완료';}).sort((a,b)=>new Date(a.deadline)-new Date(b.deadline));
+  const ul=tasks.filter(t=>{const d=dU(effDeadline(t));return d!==null&&d<=3&&t.status!=='완료';}).sort((a,b)=>new Date(effDeadline(a))-new Date(effDeadline(b)));
   document.getElementById('urgArea').innerHTML=ul.length===0?'<div style="font-size:13px;color:var(--text3);padding:8px 0">마감 임박 없음 ✅</div>':ul.map(t=>card(t,{showEB:true})).join('');
   const now=new Date();now.setHours(0,0,0,0);const wk=new Date(now);wk.setDate(wk.getDate()-7);
   const recent=tasks.filter(t=>t.status==='완료'&&t.completedAt&&new Date(t.completedAt)>=wk).sort((a,b)=>new Date(b.completedAt)-new Date(a.completedAt)).slice(0,15);
