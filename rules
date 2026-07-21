@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>대영중학교 학생회 규정 — 디케 프로젝트</title>
+<style>
+  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css');
+  :root{
+    --ink:#20242b; --ink2:#565f6b; --ink3:#909aa6;
+    --line:#e4e7ec; --line2:#f0f2f5;
+    --blue:#2c5f8d; --blue-bg:#eef4fa; --blue-dim:#7fa3c4;
+    --sand:#f8f4ec; --sand-line:#c9a961;
+    --bg:#f2f3f5; --card:#fff;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:Pretendard,-apple-system,BlinkMacSystemFont,'Malgun Gothic',sans-serif;
+    background:var(--bg);color:var(--ink);
+    font-size:15px;line-height:1.7;word-break:keep-all;
+    padding-bottom:80px;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:0 14px}
+
+  /* 헤더 */
+  header{
+    background:var(--card);border-bottom:1px solid var(--line);
+    padding:26px 0 20px;margin-bottom:14px;
+  }
+  .eyebrow{font-size:11px;letter-spacing:.14em;font-weight:700;color:var(--blue);margin:0 0 6px}
+  h1{font-size:22px;margin:0 0 6px;font-weight:800;letter-spacing:-.02em}
+  .hsub{font-size:13px;color:var(--ink2);margin:0}
+
+  /* 컨트롤 */
+  .controls{
+    position:sticky;top:0;z-index:20;background:var(--bg);
+    padding:10px 0 12px;margin-bottom:6px;
+  }
+  .search{
+    width:100%;padding:11px 14px;font-size:15px;font-family:inherit;
+    border:1.5px solid var(--line);border-radius:9px;background:var(--card);
+    color:var(--ink);outline:none;
+  }
+  .search:focus{border-color:var(--blue)}
+  .search::placeholder{color:var(--ink3)}
+  .chips{display:flex;gap:6px;overflow-x:auto;padding:9px 0 2px;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{
+    flex:none;padding:7px 13px;font-size:13px;font-weight:600;font-family:inherit;
+    border:1.5px solid var(--line);border-radius:999px;background:var(--card);
+    color:var(--ink2);cursor:pointer;white-space:nowrap;
+  }
+  .chip[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+
+  .count{font-size:12.5px;color:var(--ink3);padding:2px 2px 10px}
+
+  /* 장 */
+  .chapter{
+    font-size:12px;font-weight:800;letter-spacing:.1em;color:var(--blue);
+    background:var(--blue-bg);padding:8px 14px;border-radius:7px;
+    margin:18px 0 10px;
+  }
+
+  /* 조항 카드 */
+  .art{
+    background:var(--card);border:1px solid var(--line);border-radius:10px;
+    margin-bottom:9px;overflow:hidden;
+  }
+  .art.read{border-color:#cfe0d3;background:#fcfefc}
+  .art-head{
+    display:flex;align-items:flex-start;gap:9px;width:100%;
+    padding:14px 15px;background:none;border:0;font-family:inherit;
+    text-align:left;cursor:pointer;color:inherit;
+  }
+  .art-no{
+    flex:none;font-size:12px;font-weight:800;color:var(--blue);
+    background:var(--blue-bg);padding:3px 8px;border-radius:5px;margin-top:1px;
+  }
+  .art.read .art-no{background:#e3f0e5;color:#2e6b3a}
+  .art-title{flex:1;font-size:15px;font-weight:700;line-height:1.5;letter-spacing:-.01em}
+  .art-mark{flex:none;font-size:13px;color:var(--ink3);margin-top:2px}
+  .art.read .art-mark{color:#3d8a4d}
+
+  .art-body{display:none;padding:0 15px 15px;border-top:1px solid var(--line2)}
+  .art.open .art-body{display:block}
+  .art-text{
+    font-size:14.5px;color:var(--ink);white-space:pre-line;
+    padding:13px 0 0;line-height:1.85;
+  }
+  .art-text .sub{display:block;padding-left:13px;color:var(--ink2);font-size:14px}
+
+  .art-tools{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}
+  .btn{
+    padding:8px 13px;font-size:13px;font-weight:600;font-family:inherit;
+    border-radius:7px;border:1.5px solid var(--line);background:var(--card);
+    color:var(--ink2);cursor:pointer;
+  }
+  .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+  .btn:active{transform:scale(.98)}
+
+  /* 안내 박스 */
+  .guide{
+    background:var(--sand);border-left:4px solid var(--sand-line);
+    padding:14px 16px;margin:0 0 16px;font-size:13.5px;color:#5d4c22;border-radius:0 8px 8px 0;
+  }
+  .guide b{color:#8a6d2f}
+  .guide ul{margin:8px 0 0;padding-left:18px}
+  .guide li{margin-bottom:4px}
+
+  .empty{text-align:center;padding:48px 20px;color:var(--ink3);font-size:14px}
+
+  /* 하단 바 */
+  .bar{
+    position:fixed;left:0;right:0;bottom:0;z-index:30;
+    background:rgba(255,255,255,.96);backdrop-filter:blur(8px);
+    border-top:1px solid var(--line);
+    padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+  }
+  .bar-in{max-width:760px;margin:0 auto;display:flex;gap:8px;align-items:center}
+  .bar-txt{flex:1;font-size:12.5px;color:var(--ink2);line-height:1.45}
+  .bar-txt b{color:var(--blue)}
+  .bar .btn{flex:none}
+
+  .toast{
+    position:fixed;left:50%;bottom:88px;transform:translateX(-50%) translateY(12px);
+    background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;
+    font-size:13.5px;opacity:0;pointer-events:none;transition:.22s;z-index:60;white-space:nowrap;
+  }
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  footer{padding:26px 4px 10px;font-size:12px;color:var(--ink3);line-height:1.7}
+
+  @media (min-width:640px){
+    body{font-size:15.5px}
+    h1{font-size:25px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <p class="eyebrow">디케 프로젝트 · 2026 대영중학교 학생회</p>
+    <h1>학생회 규정</h1>
+    <p class="hsub">전체 37개 조항 · 조항을 눌러 펼쳐 보세요</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="guide">
+    <b>이렇게 보면 됩니다</b>
+    <ul>
+      <li>위에서 자기 부서를 누르면 담당 조항만 나옵니다</li>
+      <li>읽은 조항은 <b>읽음</b>으로 표시해두면 어디까지 봤는지 남습니다</li>
+      <li>이야기해볼 만한 조항을 찾으면 <b>이 조항 제출</b>을 누르세요</li>
+    </ul>
+  </div>
+
+  <div class="controls">
+    <input type="search" class="search" id="q" placeholder="조항 내용 검색 (예: 선거, 회장, 임기)" autocomplete="off">
+    <div class="chips" id="chips"></div>
+    <div class="count" id="count"></div>
+  </div>
+
+  <div id="list"></div>
+
+  <footer>
+    이 화면은 규정 원문을 읽기 쉽게 옮긴 것입니다. 공식 문서는 학교에서 보관하는 규정집입니다.<br>
+    옮기는 과정에서 틀린 곳을 발견하면 회장단에게 알려주세요.
+  </footer>
+</div>
+
+<div class="bar">
+  <div class="bar-in">
+    <div class="bar-txt" id="prog">읽은 조항 <b>0</b> / 37</div>
+    <button type="button" class="btn" id="reset">읽음 초기화</button>
+    <button type="button" class="btn primary" id="goForm">제출하러 가기</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ── 설정 ────────────────────────────────────────────
+  var FORM_URL = 'https://forms.gle/kWs2UiRXAAxM1uAP8';
+  var SKEY = 'dike_rules_read_v1';
+
+  var DEPTS = [
+    { id: 'all',  name: '전체',       from: 1,  to: 37 },
+    { id: 'lead', name: '회장단',     from: 1,  to: 6  },
+    { id: 'alim', name: '알림부',     from: 7,  to: 12 },
+    { id: 'evt',  name: '행사진행부', from: 13, to: 21 },
+    { id: 'pr',   name: '홍보기획부', from: 22, to: 28 },
+    { id: 'ord',  name: '자율질서부', from: 29, to: 37 }
+  ];
+
+  // ── 규정 원문 ───────────────────────────────────────
+  var CHAPTERS = {
+    1:  '제 1 장  총칙',
+    7:  '제 2 장  조직과 임무',
+    11: '제 3 장  임원의 자격 및 선출',
+    13: '제 4 장  선거',
+    22: '제 5 장  대의원회',
+    29: '제 6 장  학급회 조직 및 운영'
+  };
+
+  var ARTICLES = [
+    { n:1, t:'명칭', b:'본회는 대영중학교 학생회라 칭한다.' },
+    { n:2, t:'본부', b:'본회는 대영중학교 내에 둔다.' },
+    { n:3, t:'회원', b:'본회 회원은 본교 재학생으로 한다.' },
+    { n:4, t:'목적', b:'본회는 학생 자치 활동을 통하여 자율적인 생활 태도를 기르고 친목과 협동 정신, 건전하고 창의적인 생활을 바탕으로 바람직한 민주시민으로서의 자질을 함양하고 건전하여 자발적인 학교 문화 조성을 목적으로 한다.' },
+    { n:5, t:'회원의 권리와 의무', b:'본회의 회원은 선거권을 가지며, 본회의 모든 활동에 참여할 권리와 학칙 및 회칙 준수의 의무를 갖는다.' },
+    { n:6, t:'기능', b:'본 회는 제4조의 목적 달성을 위하여 다음과 같은 기능을 갖는다.\n1. 학교 구성원들의 의견 수렴\n2. 축제 등 학생 참여 행사 의견 수렴 및 기획, 운영' },
+
+    { n:7, t:'기구', b:'본 회는 다음의 기구를 둔다.\n1. 학급 자치회\n2. 대의원회\n3. 집행부(집행부 부장, 차장)\n4. 학생회 회장단 (학생회장, 학생 부회장)' },
+    { n:8, t:'임원', b:'본 회는 다음과 같은 임원을 둔다.\n1. 회장 1인\n2. 부회장 2인 (3학년 1인, 2학년 1인)\n3. 각 부는 부장 1인과 차장 2인을 두고, 총 30명 이내로 구성한다.' },
+    { n:9, t:'부서', b:'본 회는 다음 각 호의 부서를 두고 사무를 관장한다.\n1. 알림부 : 자치활동 및 행사 홍보 및 선전에 관한 사항\n2. 자율질서부 : 자치 활동 및 행사 시 안전 및 질서, 교육 환경 관리에 관한 사항\n3. 홍보기획부 : 학생 참여 예산 집행 및 학생 자치 행사 기획\n4. 행사진행부 : 학생회 자치 행사 진행 및 소규모 공연 지원에 관한 사항' },
+    { n:10, t:'임원의 임무', b:'임원의 임무는 다음과 같다.\n1. 회장은 본 회를 대표하며, 대의원회의 의장으로서 이를 통괄한다.\n2. 부회장은 회장을 보좌하고 회장 유고 시 그 직무를 대행한다.\n3. 부장은 소속 부서의 업무를 통괄한다.\n4. 2학년 부회장은 서기의 역할을 대신한다.' },
+
+    { n:11, t:'임원의 자격', b:'임원의 자격은 다음 각 호에 해당하는 학생으로 한다.\n1. 학생회장은 본교 재학생 중 3학년으로 한다.\n2. 학생회 부회장은 본교 재학생 중 2학년과 3학년으로 한다.' },
+    { n:12, t:'임원 후보자의 선출 및 임원의 임기', b:'임원의 선출 및 임기는 다음과 같다.\n\n① 임원의 선출\n1. 학생회장, 2·3학년 부회장은 회원의 직접, 비밀 투표에 의하여 선출한다.\n2. 집행부 부장과 차장은 전체 학생을 대상으로 공모하여 학생회 회장단과 지도교사가 선정하며 부장은 3학년, 차장은 2, 3학년 전체 학생에게 공모자격을 부여한다. 공모 절차는 학생회 지도교사와 회장단이 논의하여 결정한다.\n\n② 임원의 임기\n1. 학생회 회장, 부회장, 부장, 차장의 임기는 당해 학년도로 한다.\n2. 회장이 결원될 때에는 부회장이 회장의 직임을 승계한다.\n3. 부회장이 1개월 이상 결원될 때에는 회장이 부장 중 1인을 부회장으로 지명하여 대의원회에서 출석인원 과반수의 찬성을 얻어 임명하고, 1개월 미만일 때에는 홍보기획부 부장, 행사진행부 부장 등의 순서로 그 직무를 대행한다. 각 부 부장의 결원 시 차장이 대리할 수 있다.\n\n③ 학생회 정·부회장 및 각 부장, 차장의 임명은 학년 초에 한다.' },
+
+    { n:13, t:'입후보', b:'① 입후보자는 선거 실시 10일 전까지 회장단 선거관리위원회에 입후보 등록을 마친다.\n② 3학년 회장 부회장 출마자는 러닝메이트 또는 다득표 순위별 임명 방식으로 선거관리위원회에 후보자 등록을 한다.\n③ 2학년 부회장 출마자는 단독으로 선거관리위원회에 후보자 등록을 한다.' },
+    { n:14, t:'제출 서류', b:'학부모확인 입후보 신청서 1부, 담임 추천서 1부, 선거 운동원 명단 1부, 소견 발표문 1부, 홍보용 포스터 1부, 후보 추천서 1부(재학생 50인 이상이 자필 서명하여야 하며 중복 가능함)' },
+    { n:15, t:'선거 시기', b:'학생회장, 부회장 및 임원진의 선출은 매년 12월에 실시한다.' },
+    { n:16, t:'선거운동', b:'① 선거운동은 학생회장 또는 부회장 입후보 후 정해진 기간 동안 실시한다. 이를 위반하면 부정선거로 간주하여 선거관리위원회의 회의를 거쳐 자격을 박탈할 수 있다.\n② 선거운동은 포스터, 피켓 홍보, 방송 연설 등으로 하되, 세부적인 사항(규격, 매수 등)은 선거관리위원회에서 정하고 홍보물 부착은 지정된 장소에 한정한다.\n③ 홍보물이나 게시물 등은 후보자간 규격과 매수를 통일한다.\n④ 선거관리위원회에서 공약심의위원회를 구성하여 후보자 선거공약의 타당성과 실현 가능성을 사전에 점검하고 필요시 수정을 요청한다.\n⑤ 선거 홍보시간은 등·하교 시간, 휴식 시간, 점심시간으로, 홍보 장소는 교내로 한정한다.' },
+    { n:17, t:'선거진행', b:'① 선거 당일 후보자의 소견발표 후 지정된 방식으로 무기명 비밀투표를 실시한다.\n② 선거 진행은 다음과 같은 일정으로 실시한다.\n1. 후보자 소견 발표 및 질의·응답 : 1교시\n2. 선거 실시 : 2교시\n3. 개표 : 3교시\n4. 확인 및 최종집계 : 4교시\n5. 발표 및 공고 : 다음 주 월요일' },
+    { n:18, t:'개표', b:'① 개표는 선거 종료 후 선거관리위원회 입회 하에 선거함을 모두 모아 지정된 장소에서 공개적으로 실시한다.\n② 개표 결과는 최종집계 → 지도교사 확인 → 학교장의 결재를 거쳐 최종 확정된다.\n③ 개표 결과에 이의가 있는 후보자는 확정 발표 후 2일 이내에 선거관리위원회에 서면으로 재검표를 요청할 수 있다.' },
+    { n:19, t:'당선자 결정', b:'① 후보자 중 직접·비밀선거에 의한 최다 득표자를 당선자로 결정한다. 단, 다 득표자가 동점일 경우는 동점자에 한해 재투표를 실시하여 최다 득표자를 당선자로 한다. 두 번째 다득표자 중 다른 성의 후보자를 부회장으로 한다.\n② 당선자에 대해서는 부정선거 유무와 그 자격여부를 확인하고, 학교장의 결재 후 공고를 통하여 최종 확정 발표하고 선거관리위원회에서 당선증을 교부한 후 학교장이 임명한다.\n③ 당선 발표 전 또는 당선 발표 후라도 부정선거운동이나 기타 불미스러운 일이 발견되거나 발생할 시는 선거관리위원의 협의를 거친 후 그 당선의 무효 여·부를 결정한다.\n④ 부정선거운동은 상대방 비방, 허위사실유포, 개표 조작, 후보자 매수, 후보자 담합, 금품살포, 협박, 욕설 등의 행위를 가리킨다.\n⑤ 선거관리위원회 개표 결과 당선이 무효로 처리되면 후순위 득표자를 당선자로 결정한다.\n⑥ 후보자가 단독으로 출마한 경우는 선거관리위원회의 결정으로 무투표 당선 또는 찬반 투표 실시여부를 결정하여 시행한다.' },
+    { n:20, t:'자격 정지·해임', b:'학생회장, 부회장, 학생회 임원에게 다음과 같은 사유가 발생한 경우 선거관리위원회의 심의를 거쳐 그 자격을 정지하거나 해임할 수 있다.\n1. 자격기준에 미달하는 징계사실이 드러난 경우\n2. 전학·휴학·교환학생·질병 등의 사유로 원활한 직무수행이 어려운 경우\n3. 선거과정에 부정행위나 선거결과에 영향을 미칠 수 있는 불미스러운 행동이 드러난 경우\n4. 회장단 선출 후 또는 임명 전·후로 학년생활교육위원회 및 생활교육위원회, 교권보호위원회, 학교폭력대책심의위원회에서 교내봉사 이상의 징계 처분을 받을 경우\n5. 임원으로서 역할을 소홀히 하거나, 품행으로써 학교의 명예를 심하게 훼손한 경우 교사 20인 이상과 학생 1/3의 연명을 거쳐 해임을 정할 수 있다.\n6. 자격정지나 해임을 위한 선거관리위원회 개최 시 학생 또는 학부모에게 그 사실을 통지하고 의견진술의 기회를 제공한다.' },
+    { n:21, t:'보궐선거', b:'① 보궐선거는 학생회 회장 또는 부회장이 그 자격 정지 및 해임 등의 사유로 인하여 그 임무를 지속할 수 없을 때 대의 선거와 동일하게 진행한다.\n② 보궐선거 당선자의 임기는 전임자의 잔여기간으로 한다.\n③ 임기 잔여기간이 3개월 미만인 경우 선거관리위원회 심의를 거쳐 그 실시 여부를 결정한다.' },
+
+    { n:22, t:'성격', b:'대의원회는 심의 및 의결기관이다.' },
+    { n:23, t:'구성', b:'대의원회는 회장, 부회장, 학생회 집행부 및 각 학급의 회장으로 구성하며 학생회장이 의장이 된다.' },
+    { n:24, t:'기능 및 권한', b:'대의원회는 학생회 총회를 대행하여 관련 사항에 대한 심의, 의결 권한을 갖는다.' },
+    { n:25, t:'권한', b:'대의원회는 본회의 목적을 달성하기 위하여 다음의 권한을 갖는다.\n1. 정기 및 임시 대의원회 실시\n2. 기타 본회의 활동에 관한 일' },
+    { n:26, t:'회의', b:'대의원회는 정기총회와 임시총회로 나누어 소집한다.\n1. 정기총회는 교육과정 상 정해진 일정에 따라 개최함을 원칙으로 한다.\n2. 임시총회는 회장이 필요하다고 인정할 때, 또는 대의원의 3분의 1 이상의 요구가 있을 때, 학교장의 승인을 얻어 회장이 소집한다.' },
+    { n:27, t:'의결', b:'대의원회 의결은 재적의원의 과반수 이상의 출석과 출석의원 과반수 이상의 찬성으로 한다.' },
+    { n:28, t:'안건결재', b:'의결된 안건은 교내 관련 부서 부장에게 서면 보고하고, 학교장의 결재를 받아 이를 시행한다.' },
+
+    { n:29, t:'목적', b:'이 규정은 각 학급 자치회의 자율성과 활성화 등을 도모하기 위하여 각 학급의 회장의 임명과 복무에 관한 사항을 정하는 것을 그 목적으로 한다.' },
+    { n:30, t:'조직', b:'각 학급회의 조직은 다음과 같이 한다.\n1. 학급의 회장을 학기별로 2명을 선출한다.\n2. 학급회장 2명의 성별은 달리한다.' },
+    { n:31, t:'후보 자격', b:'회장의 후보 자격은 품행이 바르고 학급을 위하여 봉사하고자 하는 자 중에서 학급 학생 5명 이상의 추천을 받은 자로 한다.\n1. 학생회 회장단은 임기가 1년이므로 학급회 임원에 출마할 수 없다.\n2. 학생회 집행부 부장(3학년)과 차장(2학년)은 학급회 임원에 출마할 수 있다.' },
+    { n:32, t:'선출 방법', b:'회장의 선출 방법은 다음과 같다.\n1. 회장은 비밀 무기명 투표로 선출한다.\n2. 회장 출마자 중 과반수의 표를 획득한 학생을 선출하고, 과반수의 표를 획득한 학생이 없으면 다 득표자 2인을 대상으로 결선투표를 실시하여 선출한다.\n3. 회장으로 선출된 자가 학기 중 부적절한 사유가 있거나 전출할 때에는 본 규정에 의한 절차를 밟아 교체할 수 있다.' },
+    { n:33, t:'임명', b:'학급 학생들이 선출한 후보자를 학교장이 회장으로 임명한다.' },
+    { n:34, t:'임기', b:'회장의 임기는 한 학기이며, 동일 학년에서 중임은 허용되지 않는다.' },
+    { n:35, t:'임무', b:'회장의 임무는 다음과 같다.\n1. 회장은 학급 자치회의를 주관하며 좋은 학급의 기풍을 세우는 데 힘써 노력하여야 한다.' },
+    { n:36, t:'회의록', b:'학급회의 결과는 회의록을 작성하여 학급경영자료로 활용한다. 회의록의 서식은 학생회에서 제공한다.' },
+    { n:37, t:'자격정지·해임', b:'임기 도중에 생활교육위원회, 교권보호위원회, 학교폭력대책심의위원회로부터 \u2018학교 내의 봉사\u2019 이상의 징계 처분이 확정되었을 때 그날로부터 학급회장의 자격을 상실한다.' }
+  ];
+
+  // ── 상태 ────────────────────────────────────────────
+  var state = { dept: 'all', q: '', read: {} };
+
+  function loadRead() {
+    try {
+      var raw = window.localStorage.getItem(SKEY);
+      state.read = raw ? JSON.parse(raw) : {};
+    } catch (e) { state.read = {}; }
+  }
+  function saveRead() {
+    try { window.localStorage.setItem(SKEY, JSON.stringify(state.read)); } catch (e) {}
+  }
+
+  // ── 렌더 ────────────────────────────────────────────
+  var elList = document.getElementById('list');
+  var elChips = document.getElementById('chips');
+  var elCount = document.getElementById('count');
+  var elProg = document.getElementById('prog');
+  var elToast = document.getElementById('toast');
+
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+
+  function renderChips() {
+    elChips.innerHTML = DEPTS.map(function (d) {
+      var range = d.id === 'all' ? '' : ' ' + d.from + '\u2013' + d.to;
+      return '<button type="button" class="chip" data-dept="' + d.id + '" ' +
+             'aria-pressed="' + (state.dept === d.id) + '">' +
+             esc(d.name) + esc(range) + '</button>';
+    }).join('');
+  }
+
+  function filtered() {
+    var d = DEPTS.filter(function (x) { return x.id === state.dept; })[0];
+    var q = state.q.trim();
+    return ARTICLES.filter(function (a) {
+      if (a.n < d.from || a.n > d.to) return false;
+      if (!q) return true;
+      return (a.t + ' ' + a.b + ' 제' + a.n + '조').indexOf(q) !== -1;
+    });
+  }
+
+  function renderList() {
+    var items = filtered();
+    var showChapter = !state.q.trim();
+    var html = '';
+    var lastCh = null;
+
+    if (!items.length) {
+      elList.innerHTML = '<div class="empty">해당하는 조항이 없습니다.<br>다른 말로 검색해 보세요.</div>';
+      elCount.textContent = '';
+      return;
+    }
+
+    items.forEach(function (a) {
+      if (showChapter && CHAPTERS[a.n] && CHAPTERS[a.n] !== lastCh) {
+        html += '<div class="chapter">' + esc(CHAPTERS[a.n]) + '</div>';
+        lastCh = CHAPTERS[a.n];
+      }
+      var isRead = !!state.read[a.n];
+      html +=
+        '<article class="art' + (isRead ? ' read' : '') + '" data-n="' + a.n + '">' +
+          '<button type="button" class="art-head" data-act="toggle">' +
+            '<span class="art-no">제' + a.n + '조</span>' +
+            '<span class="art-title">' + esc(a.t) + '</span>' +
+            '<span class="art-mark">' + (isRead ? '\u2713' : '\u203A') + '</span>' +
+          '</button>' +
+          '<div class="art-body">' +
+            '<div class="art-text">' + esc(a.b) + '</div>' +
+            '<div class="art-tools">' +
+              '<button type="button" class="btn" data-act="read">' +
+                (isRead ? '읽음 해제' : '읽음 표시') + '</button>' +
+              '<button type="button" class="btn" data-act="copy">조항 복사</button>' +
+              '<button type="button" class="btn primary" data-act="submit">이 조항 제출</button>' +
+            '</div>' +
+          '</div>' +
+        '</article>';
+    });
+
+    elList.innerHTML = html;
+    elCount.textContent = items.length + '개 조항';
+  }
+
+  function renderProg() {
+    var n = Object.keys(state.read).filter(function (k) { return state.read[k]; }).length;
+    elProg.innerHTML = '읽은 조항 <b>' + n + '</b> / ' + ARTICLES.length;
+  }
+
+  var toastTimer = null;
+  function toast(msg) {
+    elToast.textContent = msg;
+    elToast.classList.add('on');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { elToast.classList.remove('on'); }, 1900);
+  }
+
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(
+        function () { toast('복사했습니다'); },
+        function () { fallbackCopy(text); }
+      );
+    } else {
+      fallbackCopy(text);
+    }
+  }
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, ta.value.length);
+    try { document.execCommand('copy'); toast('복사했습니다'); }
+    catch (e) { toast('복사가 안 됐어요. 길게 눌러 복사하세요'); }
+    document.body.removeChild(ta);
+  }
+
+  // ── 이벤트 (전부 위임) ──────────────────────────────
+  elChips.addEventListener('click', function (e) {
+    var btn = e.target.closest('.chip');
+    if (!btn) return;
+    state.dept = btn.getAttribute('data-dept');
+    renderChips();
+    renderList();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  document.getElementById('q').addEventListener('input', function (e) {
+    state.q = e.target.value;
+    renderList();
+  });
+
+  elList.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-act]');
+    if (!btn) return;
+    var art = btn.closest('.art');
+    if (!art) return;
+    var n = parseInt(art.getAttribute('data-n'), 10);
+    var act = btn.getAttribute('data-act');
+    var data = ARTICLES.filter(function (a) { return a.n === n; })[0];
+
+    if (act === 'toggle') {
+      art.classList.toggle('open');
+      return;
+    }
+    if (act === 'read') {
+      state.read[n] = !state.read[n];
+      saveRead();
+      renderProg();
+      var wasOpen = art.classList.contains('open');
+      renderList();
+      if (wasOpen) {
+        var again = elList.querySelector('.art[data-n="' + n + '"]');
+        if (again) again.classList.add('open');
+      }
+      return;
+    }
+    if (act === 'copy') {
+      copyText('제' + data.n + '조(' + data.t + ') ' + data.b);
+      return;
+    }
+    if (act === 'submit') {
+      copyText('제' + data.n + '조(' + data.t + ')');
+      setTimeout(function () { window.open(FORM_URL, '_blank', 'noopener'); }, 260);
+      toast('조항 번호를 복사했어요. 폼에 붙여넣으세요');
+      return;
+    }
+  });
+
+  document.getElementById('goForm').addEventListener('click', function () {
+    window.open(FORM_URL, '_blank', 'noopener');
+  });
+
+  document.getElementById('reset').addEventListener('click', function () {
+    if (!window.confirm('읽음 표시를 모두 지울까요?')) return;
+    state.read = {};
+    saveRead();
+    renderList();
+    renderProg();
+    toast('초기화했습니다');
+  });
+
+  // ── 시작 ────────────────────────────────────────────
+  loadRead();
+  renderChips();
+  renderList();
+  renderProg();
+})();
+</script>
+</body>
+</html>
