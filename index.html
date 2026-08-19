@@ -1438,8 +1438,10 @@ bindStatic();
 (function(){
   const ATT_LIST_FB_KEY=FB+'/attList.json';
 
-  // 활동 구분(type) — 프리셋으로 고정해 표기 흔들림 방지
-  const ATT_TYPES=['정기','상설','출결','기타'];
+  // 추가/수정 폼에 노출되는 구분 — 정기/상설만
+  const ATT_TYPES=['정기','상설'];
+  // 기존 데이터 호환용(예전에 저장된 '출결' 등도 깨지지 않게 표시만 유지)
+  const ATT_ALL_TYPES=['정기','상설','출결','기타'];
   const ATT_TYPE_COLORS={'정기':'#1971c2','상설':'#2f9e44','출결':'#e67700','기타':'#868e96'};
   const ATT_TYPE_ICON={'정기':'🔵','상설':'🟢','출결':'🟠','기타':'⚪'};
 
@@ -1472,8 +1474,9 @@ bindStatic();
       const r=await fetch(ATT_LIST_FB_KEY);
       const data=await r.json();
       if(data&&Array.isArray(data)&&data.length){
+        // ATT_ALL_TYPES 기준으로 검증 — '출결' 같은 기존 값이 강제로 '기타'로 뭉개지지 않게 함
         _attList=data.map(item=>({
-          type:ATT_TYPES.includes(item.type)?item.type:'기타',
+          type:ATT_ALL_TYPES.includes(item.type)?item.type:'기타',
           date:item.date,
           name:item.name||''
         }));
@@ -1521,9 +1524,19 @@ bindStatic();
     }
   };
 
-  // 추가 폼의 구분(정기/상설/출결/기타) 토글
+  // 추가 폼의 구분(정기/상설) 토글
   window._attSetNewType=function(type){
     _attNewType=type;
+    _attRenderCore();
+  };
+
+  // [NEW] 이미 등록된 활동의 구분을 수정
+  window._attEditType=async function(newType){
+    const cur=_attList[_attCurIdx];
+    if(!cur||cur.type===newType)return;
+    cur.type=newType;
+    await _saveAttList();
+    if(typeof toast==='function')toast(`구분을 [${newType}]로 변경했어요`);
     _attRenderCore();
   };
 
@@ -1583,7 +1596,7 @@ bindStatic();
     });
     statsHtml+=`</div></div>`;
 
-    // 구분 토글 버튼 (정기/상설/출결/기타)
+    // 추가 폼용 구분 토글 (정기/상설)
     const typeToggleHtml=ATT_TYPES.map(t=>{
       const c=ATT_TYPE_COLORS[t];
       const active=t===_attNewType;
@@ -1592,6 +1605,17 @@ bindStatic();
         ${ATT_TYPE_ICON[t]} ${t}
       </button>`;
     }).join('');
+
+    // [NEW] 현재 선택된 활동의 구분 수정 토글 (정기/상설)
+    const editTypeToggleHtml=ATT_TYPES.map(t=>{
+      const c=ATT_TYPE_COLORS[t];
+      const active=t===cur.type;
+      return `<button type="button" onclick="window._attEditType('${t}')"
+        style="padding:5px 10px;font-size:11px;font-weight:700;border-radius:7px;border:1px solid ${active?c:'var(--border)'};background:${active?c:'var(--surface)'};color:${active?'#fff':'var(--text2)'};cursor:pointer;white-space:nowrap;">
+        ${ATT_TYPE_ICON[t]} ${t}
+      </button>`;
+    }).join('');
+    const legacyNote=(cur.type==='출결'||cur.type==='기타')?`<span style="font-size:10px;color:var(--text3);">현재: ${ATT_TYPE_ICON[cur.type]||''} ${cur.type} (구버전 구분, 아래 버튼으로 변경 가능)</span>`:'';
 
     // 활동 선택 드롭다운 — 구분 아이콘 + 날짜 + (있으면) 활동명
     const selectOptionsHtml=_attList.map((d,idx)=>{
@@ -1602,9 +1626,14 @@ bindStatic();
     let html=`<div style="display:flex;flex-direction:column;gap:12px;">
       <div class="ds" style="padding:12px;margin-bottom:0;">
         <label style="font-size:12px;font-weight:700;display:block;margin-bottom:6px;color:var(--text2);">📅 출석 관리 대상 활동 선택</label>
-        <select onchange="window._attChangeIdx(this.value);" style="font-weight:700;margin-bottom:10px;border-left:5px solid ${curColor};">
+        <select onchange="window._attChangeIdx(this.value);" style="font-weight:700;margin-bottom:8px;border-left:5px solid ${curColor};">
           ${selectOptionsHtml}
         </select>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;padding:8px;background:var(--surface2);border-radius:8px;">
+          <span style="font-size:11px;color:var(--text3);font-weight:700;">✏️ 현재 활동 구분 수정:</span>
+          ${editTypeToggleHtml}
+          ${legacyNote}
+        </div>
         <label style="font-size:11px;font-weight:700;display:block;margin-bottom:6px;color:var(--text3);">➕ 새 활동 추가</label>
         <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;">${typeToggleHtml}</div>
         <div style="display:flex;gap:4px;">
@@ -1659,6 +1688,7 @@ bindStatic();
   },200);
 })();
 </script>
+
 
 </body>
 </html>
