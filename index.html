@@ -51,6 +51,9 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .mc:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:var(--sh2)}
 .mc.t:hover{border-color:var(--accent2)}
 .mc-i{font-size:28px;margin-bottom:12px}.mc-t{font-size:18px;font-weight:700;margin-bottom:4px}.mc-d{font-size:13px;color:var(--text2);line-height:1.6}
+.mc-link{display:flex;align-items:center;justify-content:center;gap:6px;background:none;border:1px dashed var(--border);color:var(--text2);border-radius:var(--r);padding:12px;font-size:13px;font-weight:600;text-decoration:none;transition:all .2s}
+.mc-link:hover{border-color:var(--accent);color:var(--accent)}
+.mc-link-ext{font-size:11px;opacity:.7}
 
 /* 비밀번호 화면 */
 #pwScreen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 24px;background:linear-gradient(135deg,#f8f9fa,#e9ecef)}
@@ -285,6 +288,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
   <div class="mode-wrap">
     <button type="button" class="mc" id="btnS"><div class="mc-i">✋</div><div class="mc-t">학생 모드</div><div class="mc-d">업무 등록 · 진행 체크 · 일정 확인</div></button>
     <button type="button" class="mc t" id="btnT"><div class="mc-i">📋</div><div class="mc-t">선생님 모드</div><div class="mc-d">전체 현황 · 업무 배정 · 완료 피드</div></button>
+    <a class="mc-link" href="https://docs.google.com/document/d/184Tscu9FSgxyeuxSgPnjnkRiOwjqS60pak2y8cuw9cQ/edit" target="_blank" rel="noopener">📝 회의록 바로가기 <span class="mc-link-ext">↗</span></a>
   </div>
 </div>
 
