@@ -72,6 +72,8 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .hbadge{font-family:'Space Mono',monospace;font-size:11px;color:var(--text3)}
 .lock-btn{font-size:12px;color:var(--text3);background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;font-family:inherit;transition:all .2s}
 .lock-btn:hover{border-color:var(--danger);color:var(--danger)}
+.acct-btn{font-size:12px;color:var(--accent);background:#f3f0ff;border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-weight:700;text-decoration:none;white-space:nowrap;transition:all .2s;flex-shrink:0}
+.acct-btn:hover{border-color:var(--accent)}
 
 /* 탭 */
 .tnav{display:flex;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;box-shadow:var(--sh)}
@@ -310,6 +312,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
     <button type="button" class="back-btn" id="sBack">←</button>
     <h2 id="sHdr">학생 모드</h2>
     <span class="hbadge" id="sBadge"></span>
+    <a class="acct-btn" href="https://docs.google.com/spreadsheets/d/1kuBQRMXVZypsh2hL7Fjrtp39hZgQskD_J3oxDOzSmKc/edit#gid=1570826793" target="_blank" rel="noopener">🔑 계정</a>
   </div>
   <div class="tnav" id="sTnav">
     <button type="button" class="ti active" data-tab="0"><span class="tn">STEP1</span>해야할 일</button>
@@ -358,6 +361,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
   <div class="ah">
     <button type="button" class="back-btn" id="tBack">←</button>
     <h2>전체 현황</h2>
+    <a class="acct-btn" href="https://docs.google.com/spreadsheets/d/1kuBQRMXVZypsh2hL7Fjrtp39hZgQskD_J3oxDOzSmKc/edit#gid=1570826793" target="_blank" rel="noopener">🔑 계정</a>
     <button type="button" class="lock-btn" id="lockBtn">🔒 잠금</button>
   </div>
   <div class="tnav" id="tTnav">
@@ -1348,16 +1352,6 @@ document.addEventListener('change',function(e){
   }
 });
 
-// ── 공용 계정 정보 (계정/비밀번호는 코드에 넣지 않고 구글 시트로 관리) ──
-const ACCOUNT_SHEET_URL='https://docs.google.com/spreadsheets/d/1kuBQRMXVZypsh2hL7Fjrtp39hZgQskD_J3oxDOzSmKc/edit#gid=1570826793';
-
-function getAccountShareHTML(){
-  return `<div style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--border);">
-    <h4 style="margin-bottom:8px;font-size:12px;color:var(--accent);">🔑 학생회 공용 유료 계정 공유 공간</h4>
-    <a href="${ACCOUNT_SHEET_URL}" target="_blank" rel="noopener" class="mc-link" style="justify-content:flex-start">📄 계정/비밀번호 시트 바로가기 <span class="mc-link-ext">↗</span></a>
-  </div>`;
-}
-
 // ── 학생 부서 현황 ──
 function renderSDept(){
   const area=document.getElementById('sDept');if(!area)return;
@@ -1386,7 +1380,6 @@ function renderSDept(){
         </div>
         ${active.length?active.map(t=>card(t,{})).join(''):'<div style="font-size:13px;color:var(--text3);padding:4px 0">진행 중 없음</div>'}
         ${doneSec(doneL,{},dept+'_s')}
-        ${getAccountShareHTML()}
       </div>
     </div>`;
   });
