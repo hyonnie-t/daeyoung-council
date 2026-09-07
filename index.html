@@ -1348,29 +1348,14 @@ document.addEventListener('change',function(e){
   }
 });
 
-// ── 공용 계정 데이터 ──
-const PAID_ACCOUNTS=[
-  {service:'식당 앞 자물쇠',id:'분류 없음',pw:'1112',memo:'오프라인 보관함 자물쇠'},
-  {service:'캡컷 (CapCut)',id:'dy_sch03@daeyoung.sen.ms.kr',pw:'daeyoung12!',memo:'구글 로그인'},
-  {service:'미리캔버스(기존 계정 X)',id:'dy_sch03@daeyoung.sen.ms.kr',pw:'daeyoung12!',memo:'기존 학생회 계정 사용 X'},
-  {service:'구글 계정(공식)',id:'dysc_01@daeyoung.sen.ms.kr',pw:'@dy123456',memo:'공식 구글 계정'}
-];
+// ── 공용 계정 정보 (계정/비밀번호는 코드에 넣지 않고 구글 시트로 관리) ──
+const ACCOUNT_SHEET_URL='https://docs.google.com/spreadsheets/d/1kuBQRMXVZypsh2hL7Fjrtp39hZgQskD_J3oxDOzSmKc/edit#gid=1570826793';
 
 function getAccountShareHTML(){
-  let html=`<div style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--border);">
+  return `<div style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--border);">
     <h4 style="margin-bottom:8px;font-size:12px;color:var(--accent);">🔑 학생회 공용 유료 계정 공유 공간</h4>
-    <div style="display:flex;flex-direction:column;gap:6px;">`;
-  PAID_ACCOUNTS.forEach(acc=>{
-    html+=`<div style="background:var(--bg);padding:8px 10px;border-radius:6px;border:1px solid var(--border);">
-      <strong style="font-size:12px;color:var(--text);display:block;margin-bottom:2px;">${acc.service}</strong>
-      <div style="font-size:11px;color:var(--text2);font-family:monospace;background:var(--surface);padding:4px 6px;border-radius:4px;line-height:1.4;">
-        <div><strong>ID:</strong> ${acc.id}</div>
-        <div><strong>PW:</strong> ${acc.pw}</div>
-      </div>
-    </div>`;
-  });
-  html+=`</div></div>`;
-  return html;
+    <a href="${ACCOUNT_SHEET_URL}" target="_blank" rel="noopener" class="mc-link" style="justify-content:flex-start">📄 계정/비밀번호 시트 바로가기 <span class="mc-link-ext">↗</span></a>
+  </div>`;
 }
 
 // ── 학생 부서 현황 ──
