@@ -594,16 +594,10 @@ async function fbLoad(){
 async function fbPut(t){
   try{
     await fetch(FB+'/tasks/'+t.id+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(t)});
-  }catch(e){console.warn('FB put 실패:',e);}
-}
-async function fbPutAll(){
-  try{
-    const obj={};tasks.forEach(t=>{obj[t.id]=t;});
-    await fetch(FB+'/tasks.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(obj)});
-  }catch(e){console.warn('FB putAll 실패:',e);}
+  }catch(e){console.warn('FB put 실패:',e);toast('⚠️ 서버 저장 실패 — 인터넷 연결을 확인해주세요');}
 }
 async function fbDel(id){
-  try{await fetch(FB+'/tasks/'+id+'.json',{method:'DELETE'});}catch(e){}
+  try{await fetch(FB+'/tasks/'+id+'.json',{method:'DELETE'});}catch(e){toast('⚠️ 서버 삭제 실패 — 인터넷 연결을 확인해주세요');}
 }
 function gasLog(t){
   if(!GAS||t.status!=='완료')return;
@@ -847,8 +841,8 @@ function submitTask(){
   if(!subs.length){toast('세부 할 일을 1개 이상 입력해주세요');return;}
   const cws=[...document.querySelectorAll('.cw-cb:checked')].map(x=>x.value);
   const ass=[name,...cws];
-  const t={id:Date.now().toString(),assignee:name,assignees:ass,dept:gd(name),title,category:document.getElementById('fCat').value.trim(),date:document.getElementById('fDate').value,deadline:document.getElementById('fDeadline').value,memo:document.getElementById('fMemo').value.trim(),status:'예정',subtasks:subs,createdAt:new Date().toISOString()};
-  tasks.push(t);saveLocal();fbPutAll();
+  const t={id:crypto.randomUUID(),assignee:name,assignees:ass,dept:gd(name),title,category:document.getElementById('fCat').value.trim(),date:document.getElementById('fDate').value,deadline:document.getElementById('fDeadline').value,memo:document.getElementById('fMemo').value.trim(),status:'예정',subtasks:subs,createdAt:new Date().toISOString()};
+  tasks.push(t);saveLocal();fbPut(t);
   toast('✅ '+ass.join(', ')+'에게 업무 등록!');
   document.getElementById('fTitle').value='';document.getElementById('fCat').value='';document.getElementById('fMemo').value='';
   document.getElementById('subList').innerHTML='<div class="sir"><input type="text" placeholder="예: 행사 장소 섭외" class="st"><input type="date" class="dm sd"><button type="button" class="sdel" data-action="rmSub">×</button></div>';
@@ -1221,7 +1215,7 @@ function bindStatic(){
     });
     const assignee=checked[0];
     const t={
-      id:Date.now().toString(),assignee,assignees:checked,allAssignees:checked,
+      id:crypto.randomUUID(),assignee,assignees:checked,allAssignees:checked,
       dept:gd(assignee),title,
       category:document.getElementById('tAddCat').value.trim(),
       date:document.getElementById('tAddDate').value,
@@ -1230,7 +1224,7 @@ function bindStatic(){
       status:_tAddStatus,subtasks:subs,createdAt:new Date().toISOString()
     };
     tasks.push(t);saveLocal();
-    fbPutAll().then(()=>{
+    fbPut(t).then(()=>{
       renderDash();
       renderTStu();
       renderAllTasks();
