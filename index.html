@@ -288,6 +288,8 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .subfold[open] summary{color:var(--accent);border-color:var(--accent)}
 .dchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .dchip{font-size:12px;padding:5px 10px;border-radius:16px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-weight:600}
+.dchip-all{background:var(--accent);border-color:var(--accent);color:#fff}
+.dchip-all[data-val="0"]{background:var(--surface);color:var(--text2);border-color:var(--border)}
 .dchip.on{background:#ebfbee;border-color:#8ce99a;color:var(--accent3)}
 .ev-add{background:var(--surface2);border:1px dashed var(--border);color:var(--text2);padding:8px;border-radius:8px;width:100%;font-size:12px;margin-top:8px}
 .ev-add:hover{border-color:var(--accent);color:var(--accent)}
@@ -735,7 +737,9 @@ function derive(t){
 // 선생님용: 담당자별 완료 체크 칩(누르면 그 학생 몫을 체크/해제)
 function doneChips(t){
   const db=t.doneBy||{};
-  return '<div class="dchips">'+assOf(t).map(n=>'<button type="button" class="dchip'+(db[n]?' on':'')+'" data-action="tDone" data-id="'+t.id+'" data-name="'+esc(n)+'">'+(db[n]?'✅ ':'⬜ ')+esc(n)+'</button>').join('')+'</div>';
+  const ass=assOf(t),all=ass.length&&ass.every(n=>db[n]);
+  return '<div class="dchips">'+ass.map(n=>'<button type="button" class="dchip'+(db[n]?' on':'')+'" data-action="tDone" data-id="'+t.id+'" data-name="'+esc(n)+'">'+(db[n]?'✅ ':'⬜ ')+esc(n)+'</button>').join('')+
+    (ass.length>0?'<button type="button" class="dchip dchip-all" data-action="tAll" data-id="'+t.id+'" data-val="'+(all?'0':'1')+'">'+(all?'↩ 전원 취소':'✅ 전원 완료')+'</button>':'')+'</div>';
 }
 function evById(id){return events.find(e=>e.id===id);}
 function evEnd(e){return e.end||e.start;}
@@ -1252,13 +1256,17 @@ function openEdit(id){
   document.getElementById('mTi').value=t.title||'';
   document.getElementById('mCat').value=t.category||'';
   fillEvSel('mEv',evIdsOf(t));
-  document.getElementById('mStHint').style.display=isPer(t)?'block':'none';
+  const tvE=document.getElementById('tView').style.display!=='none';
+  const hint=document.getElementById('mStHint');
+  hint.style.display=isPer(t)?'block':'none';
+  hint.textContent=tvE?"💡 '완료'는 담당자 전원 완료, '예정'은 전원 체크 취소예요. 한 명씩은 카드의 이름을 눌러요.":"💡 완료는 담당자마다 '내 몫 완료'로 체크해요. 여기서는 '보류'만 걸거나 풀 수 있어요.";
   document.getElementById('mDate').value=t.date||'';
   document.getElementById('mDead').value=t.deadline||'';
   document.getElementById('mMemo').value=t.memo||'';
   document.querySelectorAll('#mStBtns .sb-btn').forEach(b=>{
     b.className='sb-btn'+(t.status===b.dataset.status?' a-'+t.status:'');
-    b.style.display=isPer(t)&&b.dataset.status!=='보류'?'none':'';
+    const tv=document.getElementById('tView').style.display!=='none';
+    b.style.display=isPer(t)&&(tv?b.dataset.status==='진행중':b.dataset.status!=='보류')?'none':'';
   });
   const ass=t.assignees||[t.assignee].filter(Boolean);
   document.getElementById('mAssigneeCur').textContent=ass.length?ass.join(', '):'미지정';
@@ -1292,6 +1300,8 @@ function saveEdit(){
       assOf(t).forEach(n=>{if(!t.doneBy[n]){t.doneBy[n]=at;doneWrites.push([n,at]);}});
     }
     if(_editStatus==='보류')t.status='보류';
+    else if(_editStatus==='완료'&&t.status!=='완료')doneWrites.push(...applyAllDone(t,true));
+    else if(_editStatus==='예정'&&t.status!=='예정')doneWrites.push(...applyAllDone(t,false));
     else{if(t.status==='보류')t.status='예정';derive(t);}
     if(!t.eventId)t.per=true; // 행사 연결을 모두 풀어도 1인별 체크 유지
   } else if(_editStatus){
@@ -1673,6 +1683,7 @@ document.addEventListener('click',function(e){
   if(action==='selfAssign'){selfAssign(id);return;}
   if(action==='meDone'){meDone(id);return;}
   if(action==='tDone'){tDone(id,el.dataset.name);return;}
+  if(action==='tAll'){setAllDone(id,el.dataset.val==='1');return;}
   if(action==='acct'){
     const f=document.getElementById('acctFrame');
     // 편집 도구 줄을 줄인 보기로 띄움. 처음 열 때만 로드
@@ -1758,6 +1769,29 @@ async function loadNotice(){
 }
 
 // ── 1인별 완료 체크 ──
+// 선생님: 담당자 전원을 한 번에 완료/취소 (사람별 키에 각각 기록)
+function applyAllDone(t,val){
+  t.doneBy=t.doneBy||{};
+  const now=new Date().toISOString(),writes=[];
+  assOf(t).forEach(n=>{
+    if(val&&!t.doneBy[n]){t.doneBy[n]=now;writes.push([n,now]);}
+    if(!val&&t.doneBy[n]){delete t.doneBy[n];writes.push([n,null]);}
+  });
+  if(t.status==='보류')t.status='예정';
+  derive(t);
+  return writes;
+}
+async function setAllDone(id,val){
+  const t=tasks.find(x=>x.id===id);if(!t)return;
+  const writes=applyAllDone(t,val);
+  saveLocal();refresh();
+  toast(val?'✅ 전원 완료 처리':'↩ 전원 완료 취소');
+  try{
+    await Promise.all(writes.map(([n,v])=>fbSetDone(id,n,v)));
+    await fetch(FB+'/tasks/'+id+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:t.status,completedAt:t.completedAt||null})});
+    gasLog(t);
+  }catch(e){toast('⚠️ 서버 저장 실패 — 인터넷 연결을 확인해주세요');}
+}
 function meDone(id){return toggleDone(id,myName(),false);}
 // 선생님 화면에서 학생 이름 칩을 눌러 대신 체크/해제
 function tDone(id,name){return toggleDone(id,name,true);}
