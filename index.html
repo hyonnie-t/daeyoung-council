@@ -277,6 +277,9 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .ev-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border)}
 .ev-row-ti{font-size:13px;font-weight:600;flex:1;line-height:1.4}
 .ev-row-who{font-size:11px;color:var(--text2);margin-top:2px}
+.dchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.dchip{font-size:12px;padding:5px 10px;border-radius:16px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-weight:600}
+.dchip.on{background:#ebfbee;border-color:#8ce99a;color:var(--accent3)}
 .ev-add{background:var(--surface2);border:1px dashed var(--border);color:var(--text2);padding:8px;border-radius:8px;width:100%;font-size:12px;margin-top:8px}
 .ev-add:hover{border-color:var(--accent);color:var(--accent)}
 .ev-new{background:#f3f0ff;border:1px solid var(--accent);color:var(--accent);padding:10px;border-radius:10px;width:100%;font-size:13px;font-weight:700;margin-bottom:12px}
@@ -605,7 +608,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
   <div class="ms">
     <div class="mh"></div><div class="mt" id="evMovTitle">행사 등록</div>
     <div class="fg"><label>행사 이름 <span class="req">*</span></label><input type="text" id="evName" placeholder="예: 할로윈 행사"></div>
-    <div class="fg"><label>시작일 <span class="req">*</span></label><input type="date" id="evStart"></div>
+    <div class="fg"><label>시작일 <span style="font-size:11px;color:var(--text3)">(비워두면 상시 프로젝트 — 예: 디케 프로젝트)</span></label><input type="date" id="evStart"></div>
     <div class="fg"><label>종료일 <span style="font-size:11px;color:var(--text3)">(하루 행사면 비워두기)</span></label><input type="date" id="evEnd"></div>
     <div class="fg"><label>주관 부서</label><select id="evDept"></select></div>
     <div class="fg"><label>설명</label><textarea id="evDesc" rows="2" placeholder="예: 7, 8반쪽 현관 사용 가능"></textarea></div>
@@ -726,23 +729,35 @@ function derive(t){
   }
   return t;
 }
+// 선생님용: 담당자별 완료 체크 칩(누르면 그 학생 몫을 체크/해제)
+function doneChips(t){
+  const db=t.doneBy||{};
+  return '<div class="dchips">'+assOf(t).map(n=>'<button type="button" class="dchip'+(db[n]?' on':'')+'" data-action="tDone" data-id="'+t.id+'" data-name="'+esc(n)+'">'+(db[n]?'✅ ':'⬜ ')+esc(n)+'</button>').join('')+'</div>';
+}
 function evById(id){return events.find(e=>e.id===id);}
 function evEnd(e){return e.end||e.start;}
-function evRange(e){const a=fD(e.start),b=evEnd(e)!==e.start?fD(evEnd(e)):'';return b?a+' ~ '+b:a;}
+// 상시 프로젝트: 시작일 없이 등록한 행사(kind:'project'). 달력·다가오는 행사 목록에는 안 나오고, 끝나면 closed로 종료 처리
+function isProj(e){return e&&e.kind==='project';}
+function evRange(e){if(isProj(e))return e.closed?'종료된 프로젝트':'상시 프로젝트';const a=fD(e.start),b=evEnd(e)!==e.start?fD(evEnd(e)):'';return b?a+' ~ '+b:a;}
 function canEv(name){const m=gm(name);return m.dept==='회장단'||m.role==='부장';}
 function myName(){return document.getElementById('s0Name')?.value||'';}
 function evSorted(){
   const td=todayStr();
-  const up=events.filter(e=>evEnd(e)>=td).sort((a,b)=>a.start.localeCompare(b.start));
-  const past=events.filter(e=>evEnd(e)<td).sort((a,b)=>b.start.localeCompare(a.start));
-  return {up,past};
+  const dated=events.filter(e=>!isProj(e));
+  const up=dated.filter(e=>evEnd(e)>=td).sort((a,b)=>a.start.localeCompare(b.start));
+  const proj=events.filter(e=>isProj(e)&&!e.closed).sort((a,b)=>(a.createdAt||'').localeCompare(b.createdAt||''));
+  // 지난 행사 = 날짜 지난 행사 + 종료된 프로젝트 (프로젝트는 종료 시각 기준)
+  const pk=e=>isProj(e)?(e.closedAt||'').slice(0,10):e.start;
+  const past=dated.filter(e=>evEnd(e)<td).concat(events.filter(e=>isProj(e)&&e.closed)).sort((a,b)=>pk(b).localeCompare(pk(a)));
+  return {up,proj,past};
 }
 function fillEvSel(id,cur){
   const el=document.getElementById(id);if(!el)return;
-  const {up,past}=evSorted();
-  const opt=e=>'<option value="'+esc(e.id)+'">'+esc(evRange(e)+' '+e.name)+'</option>';
+  const {up,proj,past}=evSorted();
+  const opt=e=>'<option value="'+esc(e.id)+'">'+esc((isProj(e)?'📂 ':evRange(e)+' ')+e.name)+'</option>';
   el.innerHTML='<option value="">행사 없음 (기타 업무)</option>'+
     (up.length?'<optgroup label="다가오는 행사">'+up.map(opt).join('')+'</optgroup>':'')+
+    (proj.length?'<optgroup label="상시 프로젝트">'+proj.map(opt).join('')+'</optgroup>':'')+
     (past.length?'<optgroup label="지난 행사">'+past.map(opt).join('')+'</optgroup>':'');
   el.value=cur&&evById(cur)?cur:'';
 }
@@ -787,7 +802,7 @@ async function evLoad(){
     const r=await fetch(FB+'/events.json');
     if(!r.ok)return false;
     const data=await r.json();
-    events=data?Object.values(data).filter(e=>e&&e.id&&e.start):[];
+    events=data?Object.values(data).filter(e=>e&&e.id&&(e.start||isProj(e))):[];
     saveEvLocal();
     return true;
   }catch(e){console.warn('행사 로드 실패:',e);return false;}
@@ -1006,12 +1021,14 @@ function card(t,opts){
     const mine=me&&ass.includes(me);
     const iDid=mine&&(t.doneBy||{})[me];
     ppH=`<div class="pp"><div class="pp-line"><b>${ass.length}명 중 ${dnc}명 완료</b>${left.length?` · 남은 사람: <span class="pp-left">${left.map(esc).join(', ')}</span>`:' · 모두 끝났어요 🎉'}</div>`+
-      (mine&&t.status!=='보류'?`<button type="button" class="me-btn${iDid?' undo':''}" data-action="meDone" data-id="${t.id}">${iDid?'↩ 내 완료 취소':'✅ 내 몫 완료'}</button>`:'')+`</div>`;
+      (mine&&t.status!=='보류'?`<button type="button" class="me-btn${iDid?' undo':''}" data-action="meDone" data-id="${t.id}">${iDid?'↩ 내 완료 취소':'✅ 내 몫 완료'}</button>`:'')+
+      (opts.teacher?doneChips(t):'')+`</div>`;
   }
-  const sbH=showSB&&!per?`<div class="sb">${['예정','진행중','완료','보류'].map(s=>`<button type="button" class="sb-btn${t.status===s?' a-'+s:''}" data-action="chgSt" data-id="${t.id}" data-status="${s}">${s}</button>`).join('')}</div>`:'';
+  // 선생님 화면: 기존(행사 없는) 업무도 상태 버튼으로 바로 완료 처리
+  const sbH=(showSB||opts.teacher)&&!per?`<div class="sb">${['예정','진행중','완료','보류'].map(s=>`<button type="button" class="sb-btn${t.status===s?' a-'+s:''}" data-action="chgSt" data-id="${t.id}" data-status="${s}">${s}</button>`).join('')}</div>`:'';
   return `<div class="tc" id="c-${t.id}">
     <div class="tc-top"><div class="tc-ti">${t.title}</div><div class="tc-r">${shB}${eb}${db}<span class="tag tag-${t.status}">${t.status}</span></div></div>
-    <div class="tc-meta">${ev?`<span class="ev-chip">🎪 ${esc(ev.name)}</span>`:t.category?`<span class="db db-${t.dept}">${t.category}</span>`:'<span style="font-size:11px;color:var(--text3);font-style:italic">카테고리 미지정</span>'}${ass.length>1&&!per?`<span style="font-size:11px;color:var(--text2)">${ass.join(', ')}</span>`:''}</div>
+    <div class="tc-meta">${ev?`<span class="ev-chip">${isProj(ev)?'📂':'🎪'} ${esc(ev.name)}</span>`:t.category?`<span class="db db-${t.dept}">${t.category}</span>`:'<span style="font-size:11px;color:var(--text3);font-style:italic">카테고리 미지정</span>'}${ass.length>1&&!per?`<span style="font-size:11px;color:var(--text2)">${ass.join(', ')}</span>`:''}</div>
     ${dateL?`<div class="tc-meta" style="margin-top:2px">${dateL}</div>`:''}
     ${subH}${addH}
     ${t.memo?`<div style="margin-top:8px;font-size:12px;color:var(--text2);line-height:1.6">${t.memo}</div>`:''}
@@ -1064,7 +1081,7 @@ function renderMyTasks(){
   const opts={showSB:true,showEB:true,showDel:true,me:name};
   // 1) 다가오는 행사(오늘~2주) — 행사마다 내가 맡은 일
   const td=todayStr(),lim=addDays(td,14);
-  const near=events.filter(e=>evEnd(e)>=td&&e.start<=lim).sort((a,b)=>a.start.localeCompare(b.start));
+  const near=events.filter(e=>!isProj(e)&&evEnd(e)>=td&&e.start<=lim).sort((a,b)=>a.start.localeCompare(b.start));
   const shown=new Set();
   let h='<div class="sec-t"><span>🎪 다가오는 행사 (2주)</span></div>';
   if(canEv(name))h+='<button type="button" class="ev-new" data-action="evNew">+ 행사 등록</button>';
@@ -1089,6 +1106,16 @@ function renderMyTasks(){
   });
   if(others.length)h+='<div class="ev-front" style="max-width:none;margin-bottom:8px"><div class="ev-front-t" style="color:var(--text2)">내가 맡은 일이 없는 행사</div>'+others.map(e=>
     '<div class="ev-front-r"><div class="ev-front-d">'+evRange(e).replace(' ~ ','~<br>')+'</div><div class="ev-front-n">'+esc(e.name)+'</div>'+(canEv(name)?'<button type="button" class="eb" data-action="evEdit" data-id="'+esc(e.id)+'">✏️</button>':'')+'</div>').join('')+'</div>';
+  // 1-2) 진행 중인 상시 프로젝트 — 내가 아직 안 끝낸 업무가 있는 것만
+  const projH=evSorted().proj.map(e=>{
+    const act=tasks.filter(t=>t.eventId===e.id&&assOf(t).includes(name)&&t.status!=='완료');
+    if(!act.length)return '';
+    act.forEach(t=>shown.add(t.id));
+    return `<div class="ev" style="border-left-color:${e.dept?dc(e.dept):'var(--accent)'}"><div class="ev-hd"><div class="ev-nm">📂 ${esc(e.name)}</div>${canEv(name)?`<button type="button" class="eb" data-action="evEdit" data-id="${esc(e.id)}">✏️</button>`:''}</div>
+      ${e.desc?`<div class="ev-desc">${esc(e.desc)}</div>`:''}
+      <div class="ev-sub">내가 맡은 일</div>${act.map(t=>card(t,opts)).join('')}</div>`;
+  }).join('');
+  if(projH)h+='<div class="sec-t" style="margin-top:20px"><span>📂 진행 중인 프로젝트</span></div>'+projH;
   // 2) 그 밖의 내 업무
   const rest=all.filter(t=>!shown.has(t.id));
   h+='<div class="sec-t" style="margin-top:20px"><span>📝 그 밖의 내 업무</span></div>';
@@ -1298,7 +1325,7 @@ function renderCal(mode){
     const iS=sel===ds;
     const dt=tasks.filter(t=>t.deadline===ds||t.date===ds);
     const dots=[...new Set(dt.map(t=>dc(t.dept)))].slice(0,4);
-    const hasEv=events.some(e=>e.start<=ds&&ds<=evEnd(e));
+    const hasEv=events.some(e=>!isProj(e)&&e.start<=ds&&ds<=evEnd(e));
     h+='<div class="cday'+(iT?' today':'')+(iS?' sel':'')+'" data-cal="'+mode+'" data-date="'+ds+'"><div class="dnum">'+d+'</div>'+(hasEv?'<div class="evbar"></div>':'')+'<div class="ddots">'+dots.map(c=>'<div class="ddot" style="background:'+c+'"></div>').join('')+'</div></div>';
   }
   const rem=(fd+ld)%7===0?0:7-(fd+ld)%7;
@@ -1311,7 +1338,7 @@ function renderCalDet(mode){
   const det=document.getElementById(mode+'CD');
   if(!sel){det.innerHTML='';return;}
   const dt=tasks.filter(t=>t.deadline===sel||t.date===sel);
-  const evs=events.filter(e=>e.start<=sel&&sel<=evEnd(e));
+  const evs=events.filter(e=>!isProj(e)&&e.start<=sel&&sel<=evEnd(e));
   const evH=evs.map(e=>'<div class="cev">🎪 '+esc(e.name)+'</div>').join('');
   if(!dt.length){det.innerHTML='<div class="cdet"><div class="cdet-d">'+fD(sel)+'</div>'+evH+'<div style="font-size:13px;color:var(--text3)">업무 없음</div></div>';return;}
   det.innerHTML='<div class="cdet"><div class="cdet-d">'+fD(sel)+' — '+dt.length+'개</div>'+evH+dt.map(t=>'<div class="ctr"><div class="cbar" style="background:'+dc(t.dept)+'"></div><div style="flex:1"><div style="font-size:13px;font-weight:600;margin-bottom:3px">'+t.title+'</div><div style="font-size:11px;color:var(--text2)">'+(t.assignees||[t.assignee]).join(', ')+' · '+t.dept+'</div></div><span class="tag tag-'+t.status+'">'+t.status+'</span></div>').join('')+'</div>';
@@ -1326,7 +1353,7 @@ function deptHtml(teacher){
     const col=dc(dept);
     const active=dt.filter(t=>t.status!=='완료');
     const doneL=dt.filter(t=>t.status==='완료');
-    const opts=teacher?{showEB:true,showDel:true}:{};
+    const opts=teacher?{showEB:true,showDel:true,teacher:true}:{};
     return '<div class="ds"><div class="dh"><span class="db db-'+dept+'">'+dept+'</span><span style="font-size:12px;color:'+col+';font-family:\'Space Mono\',monospace;font-weight:700">'+done+'/'+dt.length+' ('+pct+'%)</span></div><div class="dp"><div class="dpf" style="width:'+pct+'%;background:'+col+'"></div></div>'+(active.length?active.map(t=>card(t,opts)).join(''):'<div style="font-size:13px;color:var(--text3);padding:4px 0">진행 중 없음</div>')+doneSec(doneL,opts,dept+(teacher?'_t':'_s'))+'</div>';
   }).join('');
 }
@@ -1343,7 +1370,7 @@ function renderDash(){
   const ua=tasks.filter(t=>isUA(t)&&t.status!=='완료');
   document.getElementById('uaArea').innerHTML=ua.length===0?'<div style="font-size:13px;color:var(--text3);padding:8px 0">미배정 없음 ✅</div>':ua.map(t=>'<div class="ua"><div class="ua-top"><div class="ua-ti">'+t.title+'</div><div class="ua-btns"><button type="button" class="eb" data-action="edit" data-id="'+t.id+'">✏️</button><button type="button" class="abtn" data-action="assign" data-id="'+t.id+'">배정</button></div></div><div class="tc-meta">'+(t.category?'<span class="db db-'+t.dept+'">'+t.category+'</span>':'')+'<span class="db db-'+t.dept+'">'+t.dept+'</span>'+(t.deadline?'<span style="font-size:11px;color:var(--text2)">⏰ '+fD(t.deadline)+'</span>':'')+'</div></div>').join('');
   const ul=tasks.filter(t=>{const d=dU(effDeadline(t));return d!==null&&d<=3&&t.status!=='완료';}).sort((a,b)=>new Date(effDeadline(a))-new Date(effDeadline(b)));
-  document.getElementById('urgArea').innerHTML=ul.length===0?'<div style="font-size:13px;color:var(--text3);padding:8px 0">마감 임박 없음 ✅</div>':ul.map(t=>card(t,{showEB:true})).join('');
+  document.getElementById('urgArea').innerHTML=ul.length===0?'<div style="font-size:13px;color:var(--text3);padding:8px 0">마감 임박 없음 ✅</div>':ul.map(t=>card(t,{showEB:true,teacher:true})).join('');
   const now=new Date();now.setHours(0,0,0,0);const wk=new Date(now);wk.setDate(wk.getDate()-7);
   const recent=tasks.filter(t=>t.status==='완료'&&t.completedAt&&new Date(t.completedAt)>=wk).sort((a,b)=>new Date(b.completedAt)-new Date(a.completedAt)).slice(0,15);
   const todayL=recent.filter(t=>new Date(t.completedAt)>=now);
@@ -1379,7 +1406,7 @@ function openStu(name){
   const mt=tasks.filter(t=>(t.assignees||[t.assignee]).includes(name));
   const m=gm(name);
   document.getElementById('stuTitle').textContent=name+' ('+m.dept+') 업무 현황';
-  const opts={showEB:true,showSB:true,showDel:true};
+  const opts={showEB:true,showSB:true,showDel:true,teacher:true};
   const active=mt.filter(t=>t.status!=='완료');
   const done=mt.filter(t=>t.status==='완료');
   // [BUG1 FIX] 완료 토글 섹션에 고유 id 부여 후 직접 클릭 핸들러 바인딩
@@ -1403,7 +1430,7 @@ function renderAllTasks(){
   let list=allFilt==='전체'?[...tasks]:tasks.filter(t=>t.status===allFilt);
   if(sq){const q=sq.toLowerCase();list=list.filter(t=>(t.title||'').toLowerCase().includes(q)||(t.category||'').toLowerCase().includes(q)||((t.assignees||[t.assignee]).join(' ')).toLowerCase().includes(q)||(t.dept||'').toLowerCase().includes(q));}
   list.sort((a,b)=>{if(a.status==='완료'&&b.status!=='완료')return 1;if(a.status!=='완료'&&b.status==='완료')return -1;if(!a.deadline)return 1;if(!b.deadline)return -1;return new Date(a.deadline)-new Date(b.deadline);});
-  const opts={showEB:true,showDel:true};
+  const opts={showEB:true,showDel:true,teacher:true};
   const active=list.filter(t=>t.status!=='완료');const done=list.filter(t=>t.status==='완료');
   const area=document.getElementById('allArea');
   if(!list.length){area.innerHTML='<div class="empty"><div class="ei">🔍</div><p>검색 결과가 없어요</p></div>';return;}
@@ -1647,6 +1674,7 @@ document.addEventListener('click',function(e){
   if(action==='openStu'){openStu(el.dataset.name);return;}
   if(action==='selfAssign'){selfAssign(id);return;}
   if(action==='meDone'){meDone(id);return;}
+  if(action==='tDone'){tDone(id,el.dataset.name);return;}
   if(action==='acct'){
     const f=document.getElementById('acctFrame');
     // 편집 도구 줄을 줄인 보기로 띄움. 처음 열 때만 로드
@@ -1658,6 +1686,8 @@ document.addEventListener('click',function(e){
   if(action==='evNew'){openEv(null);return;}
   if(action==='evEdit'){openEv(id);return;}
   if(action==='evSeed'){seedOct();return;}
+  if(action==='evClose'){setEvClosed(id,true);return;}
+  if(action==='evReopen'){setEvClosed(id,false);return;}
   if(action==='evAddTask'){
     document.getElementById('tAddTaskBtn').click();
     const ev=evById(id);
@@ -1730,15 +1760,17 @@ async function loadNotice(){
 }
 
 // ── 1인별 완료 체크 ──
-async function meDone(id){
-  const name=myName();
+function meDone(id){return toggleDone(id,myName(),false);}
+// 선생님 화면에서 학생 이름 칩을 눌러 대신 체크/해제
+function tDone(id,name){return toggleDone(id,name,true);}
+async function toggleDone(id,name,byTeacher){
   const t=tasks.find(x=>x.id===id);if(!t||!name)return;
-  if(!assOf(t).includes(name)){toast('내가 담당한 업무가 아니에요');return;}
+  if(!assOf(t).includes(name)){toast(byTeacher?'담당자가 아니에요':'내가 담당한 업무가 아니에요');return;}
   t.doneBy=t.doneBy||{};
   const val=t.doneBy[name]?null:new Date().toISOString();
   if(val)t.doneBy[name]=val;else delete t.doneBy[name];
   derive(t);saveLocal();refresh();
-  toast(val?'✅ 내 몫 완료!':'↩ 완료 취소');
+  toast(byTeacher?(val?'✅ '+name+' 완료 처리':'↩ '+name+' 완료 취소'):(val?'✅ 내 몫 완료!':'↩ 완료 취소'));
   try{
     await fbSetDone(id,name,val);
     // 다른 사람이 방금 체크했을 수도 있으니 서버의 최신 체크 현황으로 다시 계산
@@ -1768,12 +1800,13 @@ async function saveEv(){
   const start=document.getElementById('evStart').value;
   const end=document.getElementById('evEnd').value||start;
   if(!name){toast('행사 이름을 입력해주세요');return;}
-  if(!start){toast('시작일을 입력해주세요');return;}
-  if(end<start){toast('종료일이 시작일보다 빨라요');return;}
+  const proj=!start;
+  if(!proj&&end<start){toast('종료일이 시작일보다 빨라요');return;}
   const old=_evId?evById(_evId):null;
   const inTeacher=document.getElementById('tView').style.display!=='none';
   const ev={
-    id:old?old.id:crypto.randomUUID(),name,start,end,
+    id:old?old.id:crypto.randomUUID(),name,start:proj?'':start,end:proj?'':end,
+    ...(proj?{kind:'project',closed:!!(old&&old.closed),...(old&&old.closedAt?{closedAt:old.closedAt}:{})}:{}),
     dept:document.getElementById('evDept').value,
     desc:document.getElementById('evDesc').value.trim(),
     createdBy:old?old.createdBy:(inTeacher?'선생님':myName()),
@@ -1782,7 +1815,16 @@ async function saveEv(){
   if(!await evPut(ev))return;
   events=events.filter(e=>e.id!==ev.id).concat(ev);saveEvLocal();
   closeMov('evMov');refresh();fillEvSel('fEv',document.getElementById('fEv').value);
-  toast(old?'✅ 행사 수정 완료':'🎪 행사 등록 완료');
+  toast(old?'✅ 수정 완료':proj?'📂 상시 프로젝트 등록 완료':'🎪 행사 등록 완료');
+}
+async function setEvClosed(id,closed){
+  const e=evById(id);if(!e||!isProj(e))return;
+  if(closed&&!confirm('"'+e.name+'" 프로젝트를 종료할까요? 지난 행사로 옮겨져요'))return;
+  const ev={...e,closed};
+  if(closed)ev.closedAt=new Date().toISOString();else delete ev.closedAt;
+  if(!await evPut(ev))return;
+  events=events.map(x=>x.id===id?ev:x);saveEvLocal();refresh();
+  toast(closed?'📂 프로젝트 종료':'📂 프로젝트 다시 열림');
 }
 async function deleteEv(){
   const e=evById(_evId);if(!e)return;
@@ -1811,7 +1853,7 @@ function renderTEvents(){
   const area=document.getElementById('tEvArea');if(!area)return;
   let h='<button type="button" class="ev-new" data-action="evNew">+ 행사 등록</button>';
   if(!events.length)h+='<button type="button" class="ev-add" data-action="evSeed" style="margin:0 0 16px;padding:12px;font-weight:700">📥 10월 일정 '+EV_OCT.length+'개 한 번에 등록</button>';
-  const {up,past}=evSorted();
+  const {up,proj,past}=evSorted();
   const evCard=e=>{
     const et=tasks.filter(t=>t.eventId===e.id);
     const dn=et.filter(t=>t.status==='완료').length;
@@ -1820,22 +1862,24 @@ function renderTEvents(){
     const rows=et.sort((a,b)=>(a.status==='완료')-(b.status==='완료')).map(t=>{
       const ass=assOf(t),left=ass.filter(n=>!(t.doneBy||{})[n]);
       const who=!ass.length?'<span class="pp-left">담당자 미배정</span>':t.status==='완료'?'모두 완료':'남은 사람: <span class="pp-left">'+left.map(esc).join(', ')+'</span> ('+(ass.length-left.length)+'/'+ass.length+')';
-      return '<div class="ev-row"><div style="flex:1"><div class="ev-row-ti">'+esc(t.title)+'</div><div class="ev-row-who">'+who+'</div></div><span class="tag tag-'+t.status+'">'+t.status+'</span><button type="button" class="eb" data-action="edit" data-id="'+t.id+'">✏️</button></div>';
+      return '<div class="ev-row"><div style="flex:1"><div class="ev-row-ti">'+esc(t.title)+'</div><div class="ev-row-who">'+who+'</div>'+(t.status!=='보류'?doneChips(t):'')+'</div><span class="tag tag-'+t.status+'">'+t.status+'</span><button type="button" class="eb" data-action="edit" data-id="'+t.id+'">✏️</button></div>';
     }).join('');
     return '<div class="ev" style="border-left-color:'+col+'"><div class="ev-hd"><div class="ev-nm">'+esc(e.name)+'</div><button type="button" class="eb" data-action="evEdit" data-id="'+esc(e.id)+'">✏️</button></div>'+
-      '<div class="ev-dt">📅 '+evRange(e)+(e.dept?' <span class="db db-'+e.dept+'">'+e.dept+'</span>':'')+'<span>· 업무 '+dn+'/'+et.length+' 완료</span></div>'+
+      '<div class="ev-dt">'+(isProj(e)?'📂 ':'📅 ')+evRange(e)+(e.dept?' <span class="db db-'+e.dept+'">'+e.dept+'</span>':'')+'<span>· 업무 '+dn+'/'+et.length+' 완료</span></div>'+
       (e.desc?'<div class="ev-desc">'+esc(e.desc)+'</div>':'')+
       '<div class="dp" style="margin-bottom:6px"><div class="dpf" style="width:'+pct+'%;background:'+col+'"></div></div>'+
       (rows||'<div class="ev-none">연결된 업무가 없어요</div>')+
-      '<button type="button" class="ev-add" data-action="evAddTask" data-id="'+esc(e.id)+'">+ 이 행사에 업무 추가</button></div>';
+      (isProj(e)&&e.closed?'':'<button type="button" class="ev-add" data-action="evAddTask" data-id="'+esc(e.id)+'">+ 이 '+(isProj(e)?'프로젝트':'행사')+'에 업무 추가</button>')+
+      (isProj(e)?'<button type="button" class="ev-add" style="border-style:solid" data-action="'+(e.closed?'evReopen':'evClose')+'" data-id="'+esc(e.id)+'">'+(e.closed?'↩ 프로젝트 다시 열기':'🏁 프로젝트 종료')+'</button>':'')+'</div>';
   };
   h+='<div class="stl">🎪 진행 중 · 다가오는 행사 ('+up.length+')</div>'+(up.length?up.map(evCard).join(''):'<div class="ev-none">없음</div>');
+  h+='<div class="stl">📂 상시 프로젝트 ('+proj.length+')</div>'+(proj.length?proj.map(evCard).join(''):'<div class="ev-none">없음 — 행사 등록에서 시작일을 비우면 상시 프로젝트가 돼요</div>');
   // 아직 행사에 안 붙은 10월 이후 업무 — 여기서 ✏️로 행사를 골라 연결
   const un=tasks.filter(t=>!t.eventId&&t.status!=='완료'&&(effDeadline(t)>='2026-10-01'||(!effDeadline(t)&&(t.createdAt||'')>='2026-09-01')))
     .sort((a,b)=>(effDeadline(a)||'9').localeCompare(effDeadline(b)||'9'));
   h+='<div class="stl">🔗 행사 미연결 업무 (10월 이후 · '+un.length+'개)</div>'+
     '<div class="hint" style="margin:-4px 0 10px">✏️를 눌러 행사를 고르면 연결돼요. 연결하면 담당자별 완료 체크로 바뀌어요.</div>'+
-    (un.length?un.map(t=>card(t,{showEB:true})).join(''):'<div class="ev-none">없음 ✅</div>');
+    (un.length?un.map(t=>card(t,{showEB:true,teacher:true})).join(''):'<div class="ev-none">없음 ✅</div>');
   if(past.length)h+='<div class="dt" data-done="evpast"><span class="arr">▶</span><span>지난 행사 '+past.length+'개</span></div><div class="dl" id="dl-evpast">'+past.map(evCard).join('')+'</div>';
   area.innerHTML=h;
 }
@@ -1844,7 +1888,7 @@ function renderTEvents(){
 function renderFront(){
   const box=document.getElementById('evFront');if(!box)return;
   const td=todayStr(),lim=addDays(td,31);
-  const list=events.filter(e=>evEnd(e)>=td&&e.start<=lim).sort((a,b)=>a.start.localeCompare(b.start)||a.name.localeCompare(b.name)).slice(0,10);
+  const list=events.filter(e=>!isProj(e)&&evEnd(e)>=td&&e.start<=lim).sort((a,b)=>a.start.localeCompare(b.start)||a.name.localeCompare(b.name)).slice(0,10);
   if(!list.length){box.style.display='none';return;}
   box.innerHTML='<div class="ev-front-t">🎪 다가오는 학생회 행사</div>'+list.map(e=>
     '<div class="ev-front-r"><div class="ev-front-d">'+evRange(e).replace(' ~ ','~<br>')+'</div><div class="ev-front-n">'+esc(e.name)+(e.desc?'<small>'+esc(e.desc)+'</small>':'')+'</div></div>').join('');

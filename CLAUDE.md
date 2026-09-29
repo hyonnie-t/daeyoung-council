@@ -34,7 +34,7 @@ GitHub Pages 무료 요금제는 public 저장소에서만 동작한다. 즉 이
 ### 데이터 모델
 - `MEMBERS`: 학생회 임원 명단(이름/부서/직책), `DEPTS`/`DC`: 부서 목록과 색상.
 - `tasks` 배열이 전체 상태의 단일 소스. 업무(task) 스키마: `{id, assignee, assignees[], dept, title, category, date, deadline, memo, status, subtasks[], createdAt, completedAt}`.
-- `events` 배열: 행사(`{id, name, start, end, dept, desc, createdBy, createdAt}`). Firebase `events/{id}`에 건별 저장, 로컬 캐시 키 `EK`. 등록 권한은 선생님 모드 + 회장단 + 부장(버튼 숨김 수준, 보안 아님). 연결된 업무가 있는 행사는 삭제 불가. `EV_OCT`는 행사가 하나도 없을 때만 쓰는 10월 일괄 등록용 데이터.
+- `events` 배열: 행사(`{id, name, start, end, dept, desc, createdBy, createdAt}`). Firebase `events/{id}`에 건별 저장, 로컬 캐시 키 `EK`. 등록 권한은 선생님 모드 + 회장단 + 부장(버튼 숨김 수준, 보안 아님). 연결된 업무가 있는 행사는 삭제 불가. `EV_OCT`는 행사가 하나도 없을 때만 쓰는 10월 일괄 등록용 데이터. 시작일 없이 등록하면 상시 프로젝트(`kind:'project'`, `closed`, `closedAt`)가 된다 — 달력·다가오는 행사 목록에서 빠지고, 학생에겐 남은 업무가 있을 때만 '진행 중인 프로젝트'로 보이며, 선생님 '행사' 탭에서 종료/다시 열기를 한다. 날짜 비교 코드에서는 `!isProj(e)`로 프로젝트를 먼저 걸러낼 것.
 - 업무의 `eventId`: 행사에 연결된 업무만 **1인별 완료 체크**(`doneBy: {이름: ISO시각}`)를 쓴다. 상태(`status`)는 저장값을 믿지 않고 `derive()`가 `doneBy`로 매번 다시 계산한다(보류만 수동). `eventId`가 없는 3~9월 기존 업무는 예전 방식(상태 버튼, 세부 할 일로 상태 변경) 그대로.
 - `SEED`: 최초 1회(로컬에 저장된 데이터가 없을 때)만 쓰이는 초기 시드 데이터. 이후로는 절대 다시 개입하지 않는다.
 
