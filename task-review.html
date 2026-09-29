@@ -134,7 +134,8 @@ h2{font-size:18px;margin:0 0 6px}
     { k: 'notice', n: '알림부', c: '#0f9d8a' },
     { k: 'promo', n: '홍보기획부', c: '#e08a00' },
     { k: 'event', n: '행사진행부', c: '#d6456f' },
-    { k: 'order', n: '자율질서부', c: '#2f7de1' }
+    { k: 'order', n: '자율질서부', c: '#2f7de1' },
+    { k: 'teacher', n: '교사', c: '#5c6470' }
   ];
 
   var STATUS = {
@@ -492,6 +493,7 @@ h2{font-size:18px;margin:0 0 6px}
   function renderPick() {
     var h = '<div class="card"><h2>어느 부서예요?</h2>';
     h += '<div class="muted">10월 행사 업무를 행사별로 쪼갰어요. 우리 부서 입장에서 필요한 것, 고칠 것, 뺄 것을 알려 주세요.</div>';
+    h += '<div class="ev-note">부서마다 대표 1명만 입력해 주세요. 여러 명이 같이 입력하면 서로의 응답을 덮어써요.</div>';
     DEPTS.forEach(function (d) {
       h += '<button class="dept-btn" style="border-left-color:' + d.c + '" data-act="pick" data-dept="' + d.k + '">' + esc(d.n) + '</button>';
     });
