@@ -378,8 +378,8 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
   <div class="ah">
     <h2 id="sHdr">학생 모드</h2>
     <span class="hbadge" id="sBadge"></span>
-    <button type="button" class="nm-btn" id="sChName" style="display:none">이름 바꾸기</button>
-    <a class="acct-btn" href="https://docs.google.com/spreadsheets/d/1kuBQRMXVZypsh2hL7Fjrtp39hZgQskD_J3oxDOzSmKc/edit#gid=1570826793" target="_blank" rel="noopener">🔑 계정</a>
+    <button type="button" class="nm-btn" id="sChName" style="display:none">로그아웃</button>
+    <button type="button" class="acct-btn" data-action="acct">🔑 계정</button>
   </div>
   <div class="tnav" id="sTnav">
     <button type="button" class="ti active" data-tab="0"><span class="tn">✅</span>해야할 일</button>
@@ -441,7 +441,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
   <div class="ah">
     <button type="button" class="back-btn" id="tBack">←</button>
     <h2>전체 현황</h2>
-    <a class="acct-btn" href="https://docs.google.com/spreadsheets/d/1kuBQRMXVZypsh2hL7Fjrtp39hZgQskD_J3oxDOzSmKc/edit#gid=1570826793" target="_blank" rel="noopener">🔑 계정</a>
+    <button type="button" class="acct-btn" data-action="acct">🔑 계정</button>
     <button type="button" class="lock-btn" id="lockBtn">🔒 잠금</button>
   </div>
   <div class="tnav" id="tTnav">
@@ -588,6 +588,18 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
   </div>
 </div>
   
+<!-- 계정 팝업: 구글 시트를 앱 안에서 바로 보여준다(계정 정보는 코드에 넣지 말 것) -->
+<div class="mov" id="acctMov">
+  <div class="ms" style="max-width:900px;display:flex;flex-direction:column;height:85vh">
+    <div class="mh"></div>
+    <div class="mt" style="display:flex;justify-content:space-between;align-items:center;gap:8px">🔑 학생회 공용 계정
+      <a class="acct-btn" id="acctOpen" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div>
+    <iframe id="acctFrame" title="학생회 공용 계정" style="flex:1;width:100%;border:1px solid var(--border);border-radius:10px;background:var(--surface2)"></iframe>
+    <div class="hint">화면이 비어 있으면 구글 로그인이 필요한 경우예요. '새 창에서 열기'를 눌러주세요.</div>
+    <div class="ma" style="margin-top:12px"><button type="button" class="bc" id="acctClose">닫기</button></div>
+  </div>
+</div>
+
 <!-- 행사 등록/수정 모달 -->
 <div class="mov" id="evMov">
   <div class="ms">
@@ -646,6 +658,7 @@ const SK='daeyoung_v8';
 const PW_HASH='9cd74e8bc3893cbc079e8dc6dfae17b66715e4132296cc45aa7cb9596739d453';
 const FB='https://daeyoung-council-default-rtdb.firebaseio.com';
 const GAS='https://script.google.com/macros/s/AKfycbzcmOgxrmciJN7Uw6Flq7U6KtlP8vtDiI5bexcDmEzYHw8_y129BAiPGZI_NenJfhcE/exec';
+const ACCOUNT_SHEET_URL='https://docs.google.com/spreadsheets/d/1kuBQRMXVZypsh2hL7Fjrtp39hZgQskD_J3oxDOzSmKc/edit#gid=1570826793';
 const EK='daeyoung_events_v1';   // 행사 로컬 캐시
 const ME_KEY='daeyoung_me';      // 이 폰에서 고른 학생 이름
 // 선생님 '행사' 탭의 "10월 일정 한 번에 등록" 버튼용. 행사가 하나도 없을 때만 쓰인다.
@@ -1545,14 +1558,19 @@ function bindStatic(){
   document.querySelectorAll('#tTnav .ti').forEach(ti=>ti.addEventListener('click',()=>swTab('tTnav',T_PANELS,parseInt(ti.dataset.tab),tFns)));
 
   // 행사 모달
+  document.getElementById('acctClose').addEventListener('click',()=>closeMov('acctMov'));
   document.getElementById('evSave').addEventListener('click',saveEv);
   document.getElementById('evCancel').addEventListener('click',()=>closeMov('evMov'));
   document.getElementById('evDelete').addEventListener('click',deleteEv);
-  // 이름 바꾸기
+  // 로그아웃: 이 기기에 기억된 이름을 지우고 이름 선택 화면으로 (같은 기기를 여러 명이 쓸 때)
   document.getElementById('sChName').addEventListener('click',()=>{
-    const w=document.getElementById('s0NameWrap');w.style.display='';
+    saveMe('');
+    ['s0Name','s1Name'].forEach(id=>{document.getElementById(id).value='';});
+    buildCWList('');
     swTab('sTnav',S_PANELS,0,sFns);
-    document.getElementById('s0Name').focus();
+    renderSDept();
+    window.scrollTo(0,0);
+    toast('로그아웃했어요');
   });
   // 행사 선택 시 행사일 자동 채우기
   const evPick=(selId,dateId,catWrapId)=>{
@@ -1629,6 +1647,14 @@ document.addEventListener('click',function(e){
   if(action==='openStu'){openStu(el.dataset.name);return;}
   if(action==='selfAssign'){selfAssign(id);return;}
   if(action==='meDone'){meDone(id);return;}
+  if(action==='acct'){
+    const f=document.getElementById('acctFrame');
+    // 편집 도구 줄을 줄인 보기로 띄움. 처음 열 때만 로드
+    if(!f.src)f.src=ACCOUNT_SHEET_URL.replace('/edit#','/edit?rm=minimal#');
+    document.getElementById('acctOpen').href=ACCOUNT_SHEET_URL;
+    document.getElementById('acctMov').classList.add('open');
+    return;
+  }
   if(action==='evNew'){openEv(null);return;}
   if(action==='evEdit'){openEv(id);return;}
   if(action==='evSeed'){seedOct();return;}
