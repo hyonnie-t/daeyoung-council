@@ -316,10 +316,11 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 <div id="modeSelect">
   <div style="text-align:center">
     <!-- 기존 배너: hero-banner.png (파일은 보관 중, 되돌릴 땐 src만 바꾸면 됨) -->
-    <a href="schedule-2026-10.webp" target="_blank" rel="noopener">
+    <!-- 이미지를 누르면 학생 모드로 바로 진입 -->
+    <button type="button" id="heroS" aria-label="학생 모드로 들어가기" style="background:none;padding:0;display:block;width:100%;max-width:360px;margin:0 auto 8px">
     <img src="schedule-2026-10.webp" alt="2026년 10월 학생회 일정" 
-         style="width:100%;max-width:360px;border-radius:16px;margin-bottom:8px;display:block;margin-left:auto;margin-right:auto">
-    </a>
+         style="width:100%;border-radius:16px;display:block">
+    </button>
     <div class="logo-s">Daeyoung Middle School</div>
     <div class="logo-t">학생회<br>업무 시스템</div>
     <div class="logo-sub">2026학년도 대영중학교</div>
@@ -1366,6 +1367,7 @@ function openDones(){
 // ── 이벤트 바인딩 ──
 function bindStatic(){
   document.getElementById('btnS').addEventListener('click',enterStudent);
+  document.getElementById('heroS').addEventListener('click',enterStudent);
   document.getElementById('btnT').addEventListener('click',showPw);
   document.getElementById('pwOK').addEventListener('click',checkPw);
   document.getElementById('pwBack').addEventListener('click',goHome);
