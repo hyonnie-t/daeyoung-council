@@ -277,6 +277,12 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .ev-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border)}
 .ev-row-ti{font-size:13px;font-weight:600;flex:1;line-height:1.4}
 .ev-row-who{font-size:11px;color:var(--text2);margin-top:2px}
+.evpick{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:4px 10px;max-height:220px;overflow-y:auto}
+.evpick label{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text);margin:0;cursor:pointer;font-weight:400}
+.evpick label:last-child{border-bottom:none}
+.evpick input{flex-shrink:0}
+.evpick .eg{font-size:11px;font-weight:700;color:var(--text2);padding:8px 0 2px}
+.evpick details summary{font-size:11px;font-weight:700;color:var(--text3);padding:8px 0;cursor:pointer}
 .dchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .dchip{font-size:12px;padding:5px 10px;border-radius:16px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-weight:600}
 .dchip.on{background:#ebfbee;border-color:#8ce99a;color:var(--accent3)}
@@ -410,7 +416,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
   <div class="tp" id="sP1">
     <div class="nw"><label>내 이름 <span class="req">*</span></label><select id="s1Name"></select></div>
     <div class="fg"><label>업무명 <span class="req">*</span></label><input type="text" id="fTitle" placeholder="예: 환경의 날 행사 계획서 작성"></div>
-    <div class="fg"><label>행사</label><select id="fEv"></select><div class="hint">💡 행사를 고르면 행사일이 자동으로 채워져요</div></div>
+    <div class="fg"><label>행사 <span style="font-size:11px;color:var(--text3)">(여러 개 선택 가능)</span></label><div class="evpick" id="fEv"></div><div class="hint">💡 행사를 고르면 행사일이 자동으로 채워져요. 두 행사에 같이 해당하는 업무면 둘 다 체크하세요</div></div>
     <div class="fg" id="fCatWrap"><label>카테고리 <span style="font-size:11px;color:var(--text3)">(행사가 없는 업무만)</span></label><input type="text" id="fCat" placeholder="예: 대영알리미"></div>
     <div class="fg"><label>행사일 <span style="font-size:11px;color:var(--text3)">(행사가 진행되는 날)</span></label><input type="date" id="fDate"></div>
     <div class="fg"><label>준비 마감일 <span style="font-size:11px;color:var(--text3)">(업무 완료 기한)</span></label><input type="date" id="fDeadline"></div>
@@ -507,7 +513,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
   <div class="ms">
     <div class="mh"></div><div class="mt">업무 수정</div>
     <div class="fg"><label>업무명</label><input type="text" id="mTi"></div>
-    <div class="fg"><label>행사</label><select id="mEv"></select></div>
+    <div class="fg"><label>행사 <span style="font-size:11px;color:var(--text3)">(여러 개 선택 가능)</span></label><div class="evpick" id="mEv"></div></div>
     <div class="fg"><label>카테고리</label><input type="text" id="mCat"></div>
     <div class="fg"><label>행사일</label><input type="date" id="mDate"></div>
     <div class="fg"><label>준비 마감일</label><input type="date" id="mDead"></div>
@@ -568,7 +574,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
       <div id="tAddAssigneeWrap" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px;max-height:200px;overflow-y:auto"></div>
     </div>
     <div class="fg"><label>업무명 <span class="req">*</span></label><input type="text" id="tAddTitle" placeholder="업무명 입력"></div>
-    <div class="fg"><label>행사</label><select id="tAddEv"></select></div>
+    <div class="fg"><label>행사 <span style="font-size:11px;color:var(--text3)">(여러 개 선택 가능)</span></label><div class="evpick" id="tAddEv"></div></div>
     <div class="fg"><label>카테고리 <span style="font-size:11px;color:var(--text3)">(행사가 없는 업무만)</span></label><input type="text" id="tAddCat" placeholder="예: 리더십 캠프"></div>
     <div class="fg"><label>행사일</label><input type="date" id="tAddDate"></div>
     <div class="fg"><label>준비 마감일</label><input type="date" id="tAddDead"></div>
@@ -610,7 +616,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
     <div class="fg"><label>행사 이름 <span class="req">*</span></label><input type="text" id="evName" placeholder="예: 할로윈 행사"></div>
     <div class="fg"><label>시작일 <span style="font-size:11px;color:var(--text3)">(비워두면 상시 프로젝트 — 예: 디케 프로젝트)</span></label><input type="date" id="evStart"></div>
     <div class="fg"><label>종료일 <span style="font-size:11px;color:var(--text3)">(하루 행사면 비워두기)</span></label><input type="date" id="evEnd"></div>
-    <div class="fg"><label>주관 부서</label><select id="evDept"></select></div>
+    <div class="fg"><label>주관 부서 <span style="font-size:11px;color:var(--text3)">(여러 개 선택 가능)</span></label><div class="evpick" id="evDepts" style="max-height:none"></div></div>
     <div class="fg"><label>설명</label><textarea id="evDesc" rows="2" placeholder="예: 7, 8반쪽 현관 사용 가능"></textarea></div>
     <div class="ma"><button type="button" class="bc" id="evCancel">취소</button><button type="button" class="bs" id="evSave">저장</button></div>
     <button type="button" class="pw-back" id="evDelete" style="color:var(--danger);margin-top:14px;display:none">이 행사 삭제</button>
@@ -713,6 +719,13 @@ function addDays(ds,n){const d=new Date(ds+'T00:00:00');d.setDate(d.getDate()+n)
 // ── 행사 / 1인별 완료 ──
 // 행사(eventId)에 연결된 업무만 1인별 완료 체크를 쓴다. 3~9월 기존 업무는 예전 방식 그대로.
 function isPer(t){return !!t.eventId;}
+// 업무 하나가 여러 행사에 걸칠 수 있다: eventIds(배열), eventId는 첫 번째(예전 코드·데이터 호환)
+function evIdsOf(t){return t.eventIds&&t.eventIds.length?t.eventIds:(t.eventId?[t.eventId]:[]);}
+function inEv(t,id){return evIdsOf(t).includes(id);}
+function setEvIds(t,ids){if(ids.length){t.eventIds=ids;t.eventId=ids[0];}else{delete t.eventIds;delete t.eventId;}}
+// 주관 부서도 여러 개 가능: depts(배열), dept는 첫 번째(색상·호환용)
+function evDeptsOf(e){return e.depts&&e.depts.length?e.depts:(e.dept?[e.dept]:[]);}
+function deptBadges(e){return evDeptsOf(e).map(d=>'<span class="db db-'+esc(d)+'">'+esc(d)+'</span>').join(' ');}
 function assOf(t){return (t.assignees||[t.assignee]).filter(n=>n&&n!=='미지정');}
 function doneNames(t){const db=t.doneBy||{};return assOf(t).filter(n=>db[n]);}
 // 상태는 저장값을 믿지 않고 doneBy에서 매번 다시 계산한다(동시 체크 시 어긋남 방지). 보류만 수동.
@@ -751,16 +764,20 @@ function evSorted(){
   const past=dated.filter(e=>evEnd(e)<td).concat(events.filter(e=>isProj(e)&&e.closed)).sort((a,b)=>pk(b).localeCompare(pk(a)));
   return {up,proj,past};
 }
+// 행사 선택 체크박스 목록. cur: 선택된 행사 id 배열
 function fillEvSel(id,cur){
   const el=document.getElementById(id);if(!el)return;
+  const sel=new Set(Array.isArray(cur)?cur:(cur?[cur]:[]));
   const {up,proj,past}=evSorted();
-  const opt=e=>'<option value="'+esc(e.id)+'">'+esc((isProj(e)?'📂 ':evRange(e)+' ')+e.name)+'</option>';
-  el.innerHTML='<option value="">행사 없음 (기타 업무)</option>'+
-    (up.length?'<optgroup label="다가오는 행사">'+up.map(opt).join('')+'</optgroup>':'')+
-    (proj.length?'<optgroup label="상시 프로젝트">'+proj.map(opt).join('')+'</optgroup>':'')+
-    (past.length?'<optgroup label="지난 행사">'+past.map(opt).join('')+'</optgroup>':'');
-  el.value=cur&&evById(cur)?cur:'';
+  const row=e=>'<label><input type="checkbox" value="'+esc(e.id)+'"'+(sel.has(e.id)?' checked':'')+'>'+esc((isProj(e)?'📂 ':evRange(e)+' ')+e.name)+'</label>';
+  const pastSel=past.some(e=>sel.has(e.id));
+  el.innerHTML=(up.length?'<div class="eg">다가오는 행사</div>'+up.map(row).join(''):'')+
+    (proj.length?'<div class="eg">상시 프로젝트</div>'+proj.map(row).join(''):'')+
+    (past.length?'<details'+(pastSel?' open':'')+'><summary>지난 행사 '+past.length+'개</summary>'+past.map(row).join('')+'</details>':'')+
+    (!events.length?'<div class="ev-none">등록된 행사가 없어요</div>':'');
 }
+function getEvPick(id){return [...document.querySelectorAll('#'+id+' input:checked')].map(x=>x.value).filter(v=>evById(v));}
+function evNames(ids){return ids.map(evById).filter(Boolean).map(e=>e.name).join(' · ');}
 function loadMe(){try{const n=localStorage.getItem(ME_KEY);return n&&gm(n).name?n:'';}catch(e){return '';}}
 function saveMe(n){try{if(n)localStorage.setItem(ME_KEY,n);else localStorage.removeItem(ME_KEY);}catch(e){}}
 
@@ -788,6 +805,7 @@ async function fbPut(t){
   try{
     const {doneBy,...rest}=t;
     rest.eventId=t.eventId||null; // 행사 연결 해제 시 서버에서도 지워지게
+    rest.eventIds=t.eventIds&&t.eventIds.length?t.eventIds:null;
     const r=await fetch(FB+'/tasks/'+t.id+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(rest)});
     if(!r.ok)throw new Error(r.status);
   }catch(e){console.warn('FB put 실패:',e);toast('⚠️ 서버 저장 실패 — 인터넷 연결을 확인해주세요');}
@@ -950,7 +968,7 @@ function enterStudent(){
   fillEvSel('fEv','');
   // 로컬 캐시로 먼저 그리고, 서버 데이터는 도착하면 조용히 갈아끼운다
   renderAll_s();
-  Promise.all([fbLoad(),evLoad()]).then(([a,b])=>{if(a||b){fillEvSel('fEv',document.getElementById('fEv').value);renderAll_s();}});
+  Promise.all([fbLoad(),evLoad()]).then(([a,b])=>{if(a||b){fillEvSel('fEv',getEvPick('fEv'));renderAll_s();}});
 }
 function enterTeacher(){
   document.getElementById('sView').style.display='none';
@@ -1012,7 +1030,7 @@ function card(t,opts){
     </div>`).join('')}</div>`:'' ;
   const addH=showEB?`<div class="add-si"><input type="text" placeholder="세부 할 일 추가" id="ns-${t.id}"><input type="date" class="dm" id="nd-${t.id}"><button type="button" data-action="addSub" data-id="${t.id}">추가</button></div>`:'';
   const per=isPer(t);
-  const ev=per?evById(t.eventId):null;
+  const evs=per?evIdsOf(t).map(evById).filter(Boolean):[];
   let ppH='';
   if(per){
     const left=ass.filter(n=>!(t.doneBy||{})[n]);
@@ -1028,7 +1046,7 @@ function card(t,opts){
   const sbH=(showSB||opts.teacher)&&!per?`<div class="sb">${['예정','진행중','완료','보류'].map(s=>`<button type="button" class="sb-btn${t.status===s?' a-'+s:''}" data-action="chgSt" data-id="${t.id}" data-status="${s}">${s}</button>`).join('')}</div>`:'';
   return `<div class="tc" id="c-${t.id}">
     <div class="tc-top"><div class="tc-ti">${t.title}</div><div class="tc-r">${shB}${eb}${db}<span class="tag tag-${t.status}">${t.status}</span></div></div>
-    <div class="tc-meta">${ev?`<span class="ev-chip">${isProj(ev)?'📂':'🎪'} ${esc(ev.name)}</span>`:t.category?`<span class="db db-${t.dept}">${t.category}</span>`:'<span style="font-size:11px;color:var(--text3);font-style:italic">카테고리 미지정</span>'}${ass.length>1&&!per?`<span style="font-size:11px;color:var(--text2)">${ass.join(', ')}</span>`:''}</div>
+    <div class="tc-meta">${evs.length?evs.map(ev=>`<span class="ev-chip">${isProj(ev)?'📂':'🎪'} ${esc(ev.name)}</span>`).join(''):t.category?`<span class="db db-${t.dept}">${t.category}</span>`:'<span style="font-size:11px;color:var(--text3);font-style:italic">카테고리 미지정</span>'}${ass.length>1&&!per?`<span style="font-size:11px;color:var(--text2)">${ass.join(', ')}</span>`:''}</div>
     ${dateL?`<div class="tc-meta" style="margin-top:2px">${dateL}</div>`:''}
     ${subH}${addH}
     ${t.memo?`<div style="margin-top:8px;font-size:12px;color:var(--text2);line-height:1.6">${t.memo}</div>`:''}
@@ -1088,7 +1106,7 @@ function renderMyTasks(){
   if(!near.length)h+='<div class="ev-none" style="margin-bottom:16px">2주 안에 등록된 행사가 없어요</div>';
   const others=[];
   near.forEach(e=>{
-    const et=tasks.filter(t=>t.eventId===e.id);
+    const et=tasks.filter(t=>inEv(t,e.id));
     const mine=et.filter(t=>assOf(t).includes(name));
     // 내가 맡은 일이 없는 행사는 아래에 한 줄씩만
     if(!mine.length){others.push(e);return;}
@@ -1098,7 +1116,7 @@ function renderMyTasks(){
     const dn=et.filter(t=>t.status==='완료').length;
     const act=mine.filter(t=>t.status!=='완료'),fin=mine.filter(t=>t.status==='완료');
     h+=`<div class="ev" style="border-left-color:${e.dept?dc(e.dept):'var(--accent)'}"><div class="ev-hd"><div class="ev-nm">${esc(e.name)}</div>${canEv(name)?`<button type="button" class="eb" data-action="evEdit" data-id="${esc(e.id)}">✏️</button>`:''}</div>
-      <div class="ev-dt">📅 ${evRange(e)} ${dd}${e.dept?`<span class="db db-${e.dept}">${e.dept}</span>`:''}<span>· 전체 업무 ${dn}/${et.length} 완료</span></div>
+      <div class="ev-dt">📅 ${evRange(e)} ${dd}${deptBadges(e)}<span>· 전체 업무 ${dn}/${et.length} 완료</span></div>
       ${e.desc?`<div class="ev-desc">${esc(e.desc)}</div>`:''}
       <div class="ev-sub">내가 맡은 일</div>
       ${act.map(t=>card(t,opts)).join('')}${fin.length?`<div class="ev-none">✅ 끝낸 일: ${fin.map(t=>esc(t.title)).join(', ')}</div>`:''}
@@ -1108,7 +1126,7 @@ function renderMyTasks(){
     '<div class="ev-front-r"><div class="ev-front-d">'+evRange(e).replace(' ~ ','~<br>')+'</div><div class="ev-front-n">'+esc(e.name)+'</div>'+(canEv(name)?'<button type="button" class="eb" data-action="evEdit" data-id="'+esc(e.id)+'">✏️</button>':'')+'</div>').join('')+'</div>';
   // 1-2) 진행 중인 상시 프로젝트 — 내가 아직 안 끝낸 업무가 있는 것만
   const projH=evSorted().proj.map(e=>{
-    const act=tasks.filter(t=>t.eventId===e.id&&assOf(t).includes(name)&&t.status!=='완료');
+    const act=tasks.filter(t=>inEv(t,e.id)&&assOf(t).includes(name)&&t.status!=='완료');
     if(!act.length)return '';
     act.forEach(t=>shown.add(t.id));
     return `<div class="ev" style="border-left-color:${e.dept?dc(e.dept):'var(--accent)'}"><div class="ev-hd"><div class="ev-nm">📂 ${esc(e.name)}</div>${canEv(name)?`<button type="button" class="eb" data-action="evEdit" data-id="${esc(e.id)}">✏️</button>`:''}</div>
@@ -1141,13 +1159,13 @@ function submitTask(){
   document.querySelectorAll('.sir').forEach(r=>{const tx=r.querySelector('.st').value.trim();const dt=r.querySelector('.sd').value;if(tx)subs.push({text:tx,date:dt,done:false});});
   const cws=[...document.querySelectorAll('.cw-cb:checked')].map(x=>x.value);
   const ass=[name,...cws];
-  const evId=document.getElementById('fEv').value;
-  const ev=evById(evId);
-  const t={id:crypto.randomUUID(),assignee:name,assignees:ass,dept:gd(name),title,category:ev?ev.name:document.getElementById('fCat').value.trim(),date:document.getElementById('fDate').value,deadline:document.getElementById('fDeadline').value,memo:document.getElementById('fMemo').value.trim(),status:'예정',subtasks:subs,createdAt:new Date().toISOString()};
-  if(ev)t.eventId=ev.id;
+  const evIds=getEvPick('fEv');
+  const t={id:crypto.randomUUID(),assignee:name,assignees:ass,dept:gd(name),title,category:evIds.length?evNames(evIds):document.getElementById('fCat').value.trim(),date:document.getElementById('fDate').value,deadline:document.getElementById('fDeadline').value,memo:document.getElementById('fMemo').value.trim(),status:'예정',subtasks:subs,createdAt:new Date().toISOString()};
+  setEvIds(t,evIds);
   tasks.push(t);saveLocal();fbPut(t);
   toast('✅ '+ass.join(', ')+'에게 업무 등록!');
-  ['fTitle','fCat','fMemo','fDate','fDeadline','fEv'].forEach(id=>{document.getElementById(id).value='';});
+  ['fTitle','fCat','fMemo','fDate','fDeadline'].forEach(id=>{document.getElementById(id).value='';});
+  fillEvSel('fEv',[]);
   document.getElementById('fCatWrap').style.display='';
   document.getElementById('subList').innerHTML='<div class="sir"><input type="text" placeholder="예: 행사 장소 섭외" class="st"><input type="date" class="dm sd"><button type="button" class="sdel" data-action="rmSub">×</button></div>';
   document.querySelectorAll('.cw-cb').forEach(x=>x.checked=false);
@@ -1243,7 +1261,7 @@ function openEdit(id){
   _editId=id;_editStatus=t.status;
   document.getElementById('mTi').value=t.title||'';
   document.getElementById('mCat').value=t.category||'';
-  fillEvSel('mEv',t.eventId||'');
+  fillEvSel('mEv',evIdsOf(t));
   document.getElementById('mStHint').style.display=isPer(t)?'block':'none';
   document.getElementById('mDate').value=t.date||'';
   document.getElementById('mDead').value=t.deadline||'';
@@ -1264,8 +1282,9 @@ function saveEdit(){
   t.deadline=document.getElementById('mDead').value;
   t.memo=document.getElementById('mMemo').value.trim();
   const wasPer=isPer(t),wasDone=t.status==='완료';
-  const newEv=document.getElementById('mEv').value;
-  if(newEv){t.eventId=newEv;const ev=evById(newEv);if(ev&&(!t.category||!wasPer))t.category=ev.name;}else delete t.eventId;
+  const newEvs=getEvPick('mEv');
+  if(newEvs.length&&(!t.category||!wasPer))t.category=evNames(newEvs);
+  setEvIds(t,newEvs);
   const panel=document.getElementById('mAssigneePanel');
   if(panel&&panel.style.display!=='none'){
     const sel=[...document.querySelectorAll('.me-cb:checked')].map(x=>x.value);
@@ -1528,14 +1547,14 @@ function bindStatic(){
     const t={
       id:crypto.randomUUID(),assignee,assignees:checked,allAssignees:checked,
       dept:gd(assignee),title,
-      category:(evById(document.getElementById('tAddEv').value)||{}).name||document.getElementById('tAddCat').value.trim(),
+      category:evNames(getEvPick('tAddEv'))||document.getElementById('tAddCat').value.trim(),
       date:document.getElementById('tAddDate').value,
       deadline:document.getElementById('tAddDead').value,
       memo:document.getElementById('tAddMemo').value.trim(),
       status:_tAddStatus,subtasks:subs,createdAt:new Date().toISOString()
     };
-    const tEv=document.getElementById('tAddEv').value;
-    if(tEv&&evById(tEv)){t.eventId=tEv;if(t.status!=='보류')derive(t);}
+    const tEvs=getEvPick('tAddEv');
+    if(tEvs.length){setEvIds(t,tEvs);if(t.status!=='보류')derive(t);}
     tasks.push(t);saveLocal();
     fbPut(t).then(()=>{
       renderDash();
@@ -1601,10 +1620,12 @@ function bindStatic(){
   });
   // 행사 선택 시 행사일 자동 채우기
   const evPick=(selId,dateId,catWrapId)=>{
-    document.getElementById(selId).addEventListener('change',e=>{
-      const ev=evById(e.target.value);
-      if(ev)document.getElementById(dateId).value=ev.start;
-      if(catWrapId)document.getElementById(catWrapId).style.display=ev?'none':'';
+    document.getElementById(selId).addEventListener('change',()=>{
+      const evs=getEvPick(selId).map(evById);
+      // 여러 개면 가장 이른 행사일
+      const starts=evs.map(e=>e.start).filter(Boolean).sort();
+      if(starts.length)document.getElementById(dateId).value=starts[0];
+      if(catWrapId)document.getElementById(catWrapId).style.display=evs.length?'none':'';
     });
   };
   evPick('fEv','fDate','fCatWrap');
@@ -1691,7 +1712,7 @@ document.addEventListener('click',function(e){
   if(action==='evAddTask'){
     document.getElementById('tAddTaskBtn').click();
     const ev=evById(id);
-    if(ev){document.getElementById('tAddEv').value=id;document.getElementById('tAddDate').value=ev.start;}
+    if(ev){fillEvSel('tAddEv',[id]);document.getElementById('tAddDate').value=ev.start;}
     return;
   }
   if(action==='rmSub'){if(document.querySelectorAll('.sir').length<=1){toast('최소 1개 필요');return;}el.closest('.sir').remove();return;}
@@ -1790,8 +1811,8 @@ function openEv(id){
   document.getElementById('evStart').value=e?e.start:'';
   document.getElementById('evEnd').value=e&&e.end!==e.start?e.end:'';
   document.getElementById('evDesc').value=e?(e.desc||''):'';
-  document.getElementById('evDept').innerHTML='<option value="">선택 안 함</option>'+DEPTS.map(d=>'<option value="'+d+'">'+d+'</option>').join('');
-  document.getElementById('evDept').value=e?(e.dept||''):'';
+  const cur=e?evDeptsOf(e):[];
+  document.getElementById('evDepts').innerHTML=DEPTS.map(d=>'<label><input type="checkbox" value="'+d+'"'+(cur.includes(d)?' checked':'')+'><span class="db db-'+d+'">'+d+'</span></label>').join('');
   document.getElementById('evDelete').style.display=e?'block':'none';
   document.getElementById('evMov').classList.add('open');
 }
@@ -1807,14 +1828,14 @@ async function saveEv(){
   const ev={
     id:old?old.id:crypto.randomUUID(),name,start:proj?'':start,end:proj?'':end,
     ...(proj?{kind:'project',closed:!!(old&&old.closed),...(old&&old.closedAt?{closedAt:old.closedAt}:{})}:{}),
-    dept:document.getElementById('evDept').value,
+    ...(()=>{const ds=[...document.querySelectorAll('#evDepts input:checked')].map(x=>x.value);return {dept:ds[0]||'',depts:ds};})(),
     desc:document.getElementById('evDesc').value.trim(),
     createdBy:old?old.createdBy:(inTeacher?'선생님':myName()),
     createdAt:old?old.createdAt:new Date().toISOString()
   };
   if(!await evPut(ev))return;
   events=events.filter(e=>e.id!==ev.id).concat(ev);saveEvLocal();
-  closeMov('evMov');refresh();fillEvSel('fEv',document.getElementById('fEv').value);
+  closeMov('evMov');refresh();fillEvSel('fEv',getEvPick('fEv'));
   toast(old?'✅ 수정 완료':proj?'📂 상시 프로젝트 등록 완료':'🎪 행사 등록 완료');
 }
 async function setEvClosed(id,closed){
@@ -1828,7 +1849,7 @@ async function setEvClosed(id,closed){
 }
 async function deleteEv(){
   const e=evById(_evId);if(!e)return;
-  const n=tasks.filter(t=>t.eventId===e.id).length;
+  const n=tasks.filter(t=>inEv(t,e.id)).length;
   if(n){toast('이 행사에 연결된 업무가 '+n+'개 있어요. 먼저 업무를 옮기거나 지워주세요');return;}
   if(!confirm('"'+e.name+'" 행사를 삭제할까요?'))return;
   if(!await evDel(e.id))return;
@@ -1855,7 +1876,7 @@ function renderTEvents(){
   if(!events.length)h+='<button type="button" class="ev-add" data-action="evSeed" style="margin:0 0 16px;padding:12px;font-weight:700">📥 10월 일정 '+EV_OCT.length+'개 한 번에 등록</button>';
   const {up,proj,past}=evSorted();
   const evCard=e=>{
-    const et=tasks.filter(t=>t.eventId===e.id);
+    const et=tasks.filter(t=>inEv(t,e.id));
     const dn=et.filter(t=>t.status==='완료').length;
     const pct=et.length?Math.round(dn/et.length*100):0;
     const col=e.dept?dc(e.dept):'var(--accent)';
@@ -1865,7 +1886,7 @@ function renderTEvents(){
       return '<div class="ev-row"><div style="flex:1"><div class="ev-row-ti">'+esc(t.title)+'</div><div class="ev-row-who">'+who+'</div>'+(t.status!=='보류'?doneChips(t):'')+'</div><span class="tag tag-'+t.status+'">'+t.status+'</span><button type="button" class="eb" data-action="edit" data-id="'+t.id+'">✏️</button></div>';
     }).join('');
     return '<div class="ev" style="border-left-color:'+col+'"><div class="ev-hd"><div class="ev-nm">'+esc(e.name)+'</div><button type="button" class="eb" data-action="evEdit" data-id="'+esc(e.id)+'">✏️</button></div>'+
-      '<div class="ev-dt">'+(isProj(e)?'📂 ':'📅 ')+evRange(e)+(e.dept?' <span class="db db-'+e.dept+'">'+e.dept+'</span>':'')+'<span>· 업무 '+dn+'/'+et.length+' 완료</span></div>'+
+      '<div class="ev-dt">'+(isProj(e)?'📂 ':'📅 ')+evRange(e)+(evDeptsOf(e).length?' '+deptBadges(e):'')+'<span>· 업무 '+dn+'/'+et.length+' 완료</span></div>'+
       (e.desc?'<div class="ev-desc">'+esc(e.desc)+'</div>':'')+
       '<div class="dp" style="margin-bottom:6px"><div class="dpf" style="width:'+pct+'%;background:'+col+'"></div></div>'+
       (rows||'<div class="ev-none">연결된 업무가 없어요</div>')+

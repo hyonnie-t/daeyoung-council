@@ -34,15 +34,15 @@ GitHub Pages 무료 요금제는 public 저장소에서만 동작한다. 즉 이
 ### 데이터 모델
 - `MEMBERS`: 학생회 임원 명단(이름/부서/직책), `DEPTS`/`DC`: 부서 목록과 색상.
 - `tasks` 배열이 전체 상태의 단일 소스. 업무(task) 스키마: `{id, assignee, assignees[], dept, title, category, date, deadline, memo, status, subtasks[], createdAt, completedAt}`.
-- `events` 배열: 행사(`{id, name, start, end, dept, desc, createdBy, createdAt}`). Firebase `events/{id}`에 건별 저장, 로컬 캐시 키 `EK`. 등록 권한은 선생님 모드 + 회장단 + 부장(버튼 숨김 수준, 보안 아님). 연결된 업무가 있는 행사는 삭제 불가. `EV_OCT`는 행사가 하나도 없을 때만 쓰는 10월 일괄 등록용 데이터. 시작일 없이 등록하면 상시 프로젝트(`kind:'project'`, `closed`, `closedAt`)가 된다 — 달력·다가오는 행사 목록에서 빠지고, 학생에겐 남은 업무가 있을 때만 '진행 중인 프로젝트'로 보이며, 선생님 '행사' 탭에서 종료/다시 열기를 한다. 날짜 비교 코드에서는 `!isProj(e)`로 프로젝트를 먼저 걸러낼 것.
-- 업무의 `eventId`: 행사에 연결된 업무만 **1인별 완료 체크**(`doneBy: {이름: ISO시각}`)를 쓴다. 상태(`status`)는 저장값을 믿지 않고 `derive()`가 `doneBy`로 매번 다시 계산한다(보류만 수동). `eventId`가 없는 3~9월 기존 업무는 예전 방식(상태 버튼, 세부 할 일로 상태 변경) 그대로.
+- `events` 배열: 행사(`{id, name, start, end, dept, depts[], desc, createdBy, createdAt}`). 주관 부서는 여러 개 가능 — `depts`가 원본이고 `dept`는 첫 번째 부서(색상·예전 데이터 호환). 읽을 땐 `evDeptsOf(e)`. Firebase `events/{id}`에 건별 저장, 로컬 캐시 키 `EK`. 등록 권한은 선생님 모드 + 회장단 + 부장(버튼 숨김 수준, 보안 아님). 연결된 업무가 있는 행사는 삭제 불가. `EV_OCT`는 행사가 하나도 없을 때만 쓰는 10월 일괄 등록용 데이터. 시작일 없이 등록하면 상시 프로젝트(`kind:'project'`, `closed`, `closedAt`)가 된다 — 달력·다가오는 행사 목록에서 빠지고, 학생에겐 남은 업무가 있을 때만 '진행 중인 프로젝트'로 보이며, 선생님 '행사' 탭에서 종료/다시 열기를 한다. 날짜 비교 코드에서는 `!isProj(e)`로 프로젝트를 먼저 걸러낼 것.
+- 업무의 `eventId`/`eventIds`: 업무 하나를 여러 행사에 연결할 수 있다 — `eventIds`가 원본, `eventId`는 첫 번째(호환용). 읽을 땐 `evIdsOf(t)`/`inEv(t, id)`, 쓸 땐 `setEvIds(t, ids)`. 행사 선택 UI는 체크박스 목록(`fillEvSel`/`getEvPick`). 행사에 연결된 업무만 **1인별 완료 체크**(`doneBy: {이름: ISO시각}`)를 쓴다. 상태(`status`)는 저장값을 믿지 않고 `derive()`가 `doneBy`로 매번 다시 계산한다(보류만 수동). `eventId`가 없는 3~9월 기존 업무는 예전 방식(상태 버튼, 세부 할 일로 상태 변경) 그대로.
 - `SEED`: 최초 1회(로컬에 저장된 데이터가 없을 때)만 쓰이는 초기 시드 데이터. 이후로는 절대 다시 개입하지 않는다.
 
 ### 저장/동기화 — 여기가 제일 중요
 - 진짜 원본은 Firebase Realtime Database(`FB` 상수, 인증 없이 REST로 직접 fetch). `localStorage`(`SK='daeyoung_v8'`)는 오프라인 캐시/즉시 렌더링용이다.
 - 로드 순서: `initTasks()`가 로컬 캐시로 먼저 그리고, 화면 진입 시 `fbLoad()`가 비동기로 Firebase에서 받아와 통째로 덮어쓴다.
 - **쓰기는 반드시 건별로 한다 (`fbPut(t)` / `fbDel(id)`).** 예전에 신규 업무 등록 시 `tasks` 배열 전체를 Firebase에 통째로 PUT하는 `fbPutAll()`이 있었는데, 두 명이 비슷한 시각에 각자 업무를 등록하면 나중에 저장한 쪽이 먼저 저장한 사람의 데이터를 지워버리는 레이스컨디션이 있었다. 지금은 제거했다 — **이 패턴(배열 전체 PUT)을 다시 만들지 말 것.** 새 기능에서 여러 명이 동시에 쓸 수 있는 데이터는 항상 개별 키 단위로 읽고 써야 한다.
-- `fbPut(t)`은 PUT이 아니라 PATCH이고 `doneBy`를 뺀 필드만 보낸다. `doneBy`는 `fbSetDone(id, 이름, 값)`으로 `tasks/{id}/doneBy/{이름}` 키에만 쓴다 — 업무를 통째로 저장하면 다른 사람이 방금 한 완료 체크가 지워지기 때문.
+- `fbPut(t)`은 PUT이 아니라 PATCH이고 `doneBy`를 뺀 필드만 보낸다. `doneBy`는 `fbSetDone(id, 이름, 값)`으로 `tasks/{id}/doneBy/{이름}` 키에만 쓴다(학생 '내 몫 완료'와 선생님 화면 이름 칩 `tDone` 모두 `toggleDone()` 경유) — 업무를 통째로 저장하면 다른 사람이 방금 한 완료 체크가 지워지기 때문.
 - 업무 id는 `crypto.randomUUID()`로 생성한다(`Date.now()` 기반 id는 동시 생성 시 충돌 가능해서 바꿨다).
 - Firebase 쓰기 실패는 `toast()`로 사용자에게 알린다(과거엔 `catch`에서 조용히 무시했음 — 실패를 삼키지 말 것).
 - Firebase 보안 규칙에서 허용하지 않은 경로는 쓰기가 401/403으로 거부된다. 새 최상위 경로(예: `events`)를 추가하면 Firebase 콘솔 규칙에도 추가해야 한다. 행사 저장 실패 토스트는 권한 문제면 그 이유를 표시한다.
