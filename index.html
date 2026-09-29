@@ -283,6 +283,9 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .evpick input{flex-shrink:0}
 .evpick .eg{font-size:11px;font-weight:700;color:var(--text2);padding:8px 0 2px}
 .evpick details summary{font-size:11px;font-weight:700;color:var(--text3);padding:8px 0;cursor:pointer}
+.subfold summary{font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;padding:10px 12px;border:1px dashed var(--border);border-radius:8px;background:var(--surface2);list-style:none}
+.subfold summary::-webkit-details-marker{display:none}
+.subfold[open] summary{color:var(--accent);border-color:var(--accent)}
 .dchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .dchip{font-size:12px;padding:5px 10px;border-radius:16px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-weight:600}
 .dchip.on{background:#ebfbee;border-color:#8ce99a;color:var(--accent3)}
@@ -415,22 +418,19 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
   </div>
   <div class="tp" id="sP1">
     <div class="nw"><label>내 이름 <span class="req">*</span></label><select id="s1Name"></select></div>
-    <div class="fg"><label>업무명 <span class="req">*</span></label><input type="text" id="fTitle" placeholder="예: 환경의 날 행사 계획서 작성"></div>
-    <div class="fg"><label>행사 <span style="font-size:11px;color:var(--text3)">(여러 개 선택 가능)</span></label><div class="evpick" id="fEv"></div><div class="hint">💡 행사를 고르면 행사일이 자동으로 채워져요. 두 행사에 같이 해당하는 업무면 둘 다 체크하세요</div></div>
-    <div class="fg" id="fCatWrap"><label>카테고리 <span style="font-size:11px;color:var(--text3)">(행사가 없는 업무만)</span></label><input type="text" id="fCat" placeholder="예: 대영알리미"></div>
-    <div class="fg"><label>행사일 <span style="font-size:11px;color:var(--text3)">(행사가 진행되는 날)</span></label><input type="date" id="fDate"></div>
-    <div class="fg"><label>준비 마감일 <span style="font-size:11px;color:var(--text3)">(업무 완료 기한)</span></label><input type="date" id="fDeadline"></div>
+    <div class="fg"><label>업무명 <span class="req">*</span></label><input type="text" id="fTitle" placeholder="예: 디케 프로젝트 3차 회의"></div>
+    <div class="fg"><label>행사 <span style="font-size:11px;color:var(--text3)">(선택 · 여러 개 가능)</span></label><div class="evpick" id="fEv"></div><div class="hint">💡 행사가 없는 업무는 선택하지 않으면 '기타'로 들어가요. 두 행사에 같이 해당하면 둘 다 체크하세요</div></div>
     <div class="fg">
-      <label>같이 할 사람 <span style="font-size:11px;color:var(--text3)">(공유 업무)</span></label>
+      <label>같이 할 사람 <span style="font-size:11px;color:var(--text3)">(선택)</span></label>
       <div id="cwList" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px;max-height:200px;overflow-y:auto"></div>
     </div>
-    <div class="fg">
-      <label>세부 할 일 <span style="font-size:11px;color:var(--text3)">(선택)</span></label>
-      <div id="subList"><div class="sir"><input type="text" placeholder="예: 행사 장소 섭외" class="st"><input type="date" class="dm sd"><button type="button" class="sdel" data-action="rmSub">×</button></div></div>
-      <button type="button" class="asb" id="addSubBtn">+ 세부 할 일 추가</button>
-      <div class="hint">💡 업무를 3~5단계로 쪼개면 진행 상태가 잘 보여요</div>
-    </div>
+    <div class="fg"><label>마감일 <span style="font-size:11px;color:var(--text3)">(회의라면 회의 날짜)</span></label><input type="date" id="fDeadline"></div>
     <div class="fg"><label>메모</label><textarea id="fMemo" rows="3" placeholder="참고사항"></textarea></div>
+    <details class="fg subfold" id="fSubFold">
+      <summary>+ 세부 할 일 (선택)</summary>
+      <div id="subList" style="margin-top:8px"><div class="sir"><input type="text" placeholder="예: 행사 장소 섭외" class="st"><input type="date" class="dm sd"><button type="button" class="sdel" data-action="rmSub">×</button></div></div>
+      <button type="button" class="asb" id="addSubBtn">+ 한 줄 더</button>
+    </details>
     <button type="button" class="bp" id="submitBtn">업무 등록하기</button>
   </div>
   <div class="tp" id="sP3">
@@ -514,9 +514,9 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
     <div class="mh"></div><div class="mt">업무 수정</div>
     <div class="fg"><label>업무명</label><input type="text" id="mTi"></div>
     <div class="fg"><label>행사 <span style="font-size:11px;color:var(--text3)">(여러 개 선택 가능)</span></label><div class="evpick" id="mEv"></div></div>
-    <div class="fg"><label>카테고리</label><input type="text" id="mCat"></div>
-    <div class="fg"><label>행사일</label><input type="date" id="mDate"></div>
-    <div class="fg"><label>준비 마감일</label><input type="date" id="mDead"></div>
+    <!-- 예전 업무의 카테고리·행사일은 입력 칸 없이 값만 보존 -->
+    <input type="hidden" id="mCat"><input type="hidden" id="mDate">
+    <div class="fg"><label>마감일</label><input type="date" id="mDead"></div>
     <div class="fg">
       <label>상태</label>
       <div class="sb" id="mStBtns">
@@ -525,7 +525,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
         <button type="button" class="sb-btn" data-status="완료">완료</button>
         <button type="button" class="sb-btn" data-status="보류">보류</button>
       </div>
-      <div class="hint" id="mStHint" style="display:none">💡 행사 업무는 담당자들의 완료 체크로 상태가 자동 계산돼요. 수동으로는 '보류'만 걸 수 있어요.</div>
+      <div class="hint" id="mStHint" style="display:none">💡 완료는 담당자마다 '내 몫 완료'로 체크해요. 여기서는 '보류'만 걸거나 풀 수 있어요.</div>
     </div>
     <div class="fg">
       <label>담당자</label>
@@ -574,25 +574,14 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
       <div id="tAddAssigneeWrap" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px;max-height:200px;overflow-y:auto"></div>
     </div>
     <div class="fg"><label>업무명 <span class="req">*</span></label><input type="text" id="tAddTitle" placeholder="업무명 입력"></div>
-    <div class="fg"><label>행사 <span style="font-size:11px;color:var(--text3)">(여러 개 선택 가능)</span></label><div class="evpick" id="tAddEv"></div></div>
-    <div class="fg"><label>카테고리 <span style="font-size:11px;color:var(--text3)">(행사가 없는 업무만)</span></label><input type="text" id="tAddCat" placeholder="예: 리더십 캠프"></div>
-    <div class="fg"><label>행사일</label><input type="date" id="tAddDate"></div>
-    <div class="fg"><label>준비 마감일</label><input type="date" id="tAddDead"></div>
-    <div class="fg">
-      <label>상태</label>
-      <div class="sb" id="tAddStBtns">
-        <button type="button" class="sb-btn a-예정" data-status="예정">예정</button>
-        <button type="button" class="sb-btn" data-status="진행중">진행중</button>
-        <button type="button" class="sb-btn" data-status="완료">완료</button>
-        <button type="button" class="sb-btn" data-status="보류">보류</button>
-      </div>
-    </div>
-    <div class="fg">
-      <label>세부 할 일</label>
-      <div id="tAddSubList"><div class="sir"><input type="text" placeholder="예: 행사 장소 섭외" class="st"><input type="date" class="dm sd"><button type="button" class="sdel" data-action="tAddRmSub">×</button></div></div>
-      <button type="button" class="asb" id="tAddSubBtn">+ 세부 할 일 추가</button>
-    </div>
+    <div class="fg"><label>행사 <span style="font-size:11px;color:var(--text3)">(선택 · 여러 개 가능)</span></label><div class="evpick" id="tAddEv"></div></div>
+    <div class="fg"><label>마감일 <span style="font-size:11px;color:var(--text3)">(회의라면 회의 날짜)</span></label><input type="date" id="tAddDead"></div>
     <div class="fg"><label>메모</label><textarea id="tAddMemo" rows="2"></textarea></div>
+    <details class="fg subfold" id="tAddSubFold">
+      <summary>+ 세부 할 일 (선택)</summary>
+      <div id="tAddSubList" style="margin-top:8px"><div class="sir"><input type="text" placeholder="예: 행사 장소 섭외" class="st"><input type="date" class="dm sd"><button type="button" class="sdel" data-action="tAddRmSub">×</button></div></div>
+      <button type="button" class="asb" id="tAddSubBtn">+ 한 줄 더</button>
+    </details>
     <div class="ma"><button type="button" class="bc" id="tAddCancel">취소</button><button type="button" class="bs" id="tAddSave">추가</button></div>
   </div>
 </div>
@@ -614,7 +603,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
   <div class="ms">
     <div class="mh"></div><div class="mt" id="evMovTitle">행사 등록</div>
     <div class="fg"><label>행사 이름 <span class="req">*</span></label><input type="text" id="evName" placeholder="예: 할로윈 행사"></div>
-    <div class="fg"><label>시작일 <span style="font-size:11px;color:var(--text3)">(비워두면 상시 프로젝트 — 예: 디케 프로젝트)</span></label><input type="date" id="evStart"></div>
+    <div class="fg"><label>시작일 <span style="font-size:11px;color:var(--text3)">(비워두면 날짜 없는 상시 행사 — 예: 디케 프로젝트)</span></label><input type="date" id="evStart"></div>
     <div class="fg"><label>종료일 <span style="font-size:11px;color:var(--text3)">(하루 행사면 비워두기)</span></label><input type="date" id="evEnd"></div>
     <div class="fg"><label>주관 부서 <span style="font-size:11px;color:var(--text3)">(여러 개 선택 가능)</span></label><div class="evpick" id="evDepts" style="max-height:none"></div></div>
     <div class="fg"><label>설명</label><textarea id="evDesc" rows="2" placeholder="예: 7, 8반쪽 현관 사용 가능"></textarea></div>
@@ -718,7 +707,8 @@ function addDays(ds,n){const d=new Date(ds+'T00:00:00');d.setDate(d.getDate()+n)
 
 // ── 행사 / 1인별 완료 ──
 // 행사(eventId)에 연결된 업무만 1인별 완료 체크를 쓴다. 3~9월 기존 업무는 예전 방식 그대로.
-function isPer(t){return !!t.eventId;}
+// 1인별 완료 체크 대상: 행사에 연결된 업무 + 새 방식으로 만든 모든 업무(per:true). 3~9월 기존 업무만 예전 상태 버튼
+function isPer(t){return !!t.eventId||!!t.per;}
 // 업무 하나가 여러 행사에 걸칠 수 있다: eventIds(배열), eventId는 첫 번째(예전 코드·데이터 호환)
 function evIdsOf(t){return t.eventIds&&t.eventIds.length?t.eventIds:(t.eventId?[t.eventId]:[]);}
 function inEv(t,id){return evIdsOf(t).includes(id);}
@@ -751,7 +741,7 @@ function evById(id){return events.find(e=>e.id===id);}
 function evEnd(e){return e.end||e.start;}
 // 상시 프로젝트: 시작일 없이 등록한 행사(kind:'project'). 달력·다가오는 행사 목록에는 안 나오고, 끝나면 closed로 종료 처리
 function isProj(e){return e&&e.kind==='project';}
-function evRange(e){if(isProj(e))return e.closed?'종료된 프로젝트':'상시 프로젝트';const a=fD(e.start),b=evEnd(e)!==e.start?fD(evEnd(e)):'';return b?a+' ~ '+b:a;}
+function evRange(e){if(isProj(e))return e.closed?'종료된 상시 행사':'상시 행사';const a=fD(e.start),b=evEnd(e)!==e.start?fD(evEnd(e)):'';return b?a+' ~ '+b:a;}
 function canEv(name){const m=gm(name);return m.dept==='회장단'||m.role==='부장';}
 function myName(){return document.getElementById('s0Name')?.value||'';}
 function evSorted(){
@@ -772,7 +762,7 @@ function fillEvSel(id,cur){
   const row=e=>'<label><input type="checkbox" value="'+esc(e.id)+'"'+(sel.has(e.id)?' checked':'')+'>'+esc((isProj(e)?'📂 ':evRange(e)+' ')+e.name)+'</label>';
   const pastSel=past.some(e=>sel.has(e.id));
   el.innerHTML=(up.length?'<div class="eg">다가오는 행사</div>'+up.map(row).join(''):'')+
-    (proj.length?'<div class="eg">상시 프로젝트</div>'+proj.map(row).join(''):'')+
+    (proj.length?'<div class="eg">📂 상시 행사 (날짜 없음)</div>'+proj.map(row).join(''):'')+
     (past.length?'<details'+(pastSel?' open':'')+'><summary>지난 행사 '+past.length+'개</summary>'+past.map(row).join('')+'</details>':'')+
     (!events.length?'<div class="ev-none">등록된 행사가 없어요</div>':'');
 }
@@ -1016,7 +1006,7 @@ function card(t,opts){
   const db=showDel?`<button type="button" class="del-btn" data-action="del" data-id="${t.id}">🗑</button>`:'';
   const dateL=[
     t.date?`<span class="tc-date">📅 행사일 ${fD(t.date)}</span>`:'',
-    t.deadline?`<span class="tc-date${d!==null&&d<=3&&t.status!=='완료'?' urg':''}">⏰ 준비마감 ${fD(t.deadline)}</span>`:
+    t.deadline?`<span class="tc-date${d!==null&&d<=3&&t.status!=='완료'?' urg':''}">⏰ 마감 ${fD(t.deadline)}</span>`:
     (t.date&&!t.deadline?`<span class="tc-date${d!==null&&d<=3&&t.status!=='완료'?' urg':''}">📅 행사일 ${fD(t.date)}</span>`:''),
     cp
   ].filter(Boolean).join('');
@@ -1046,7 +1036,7 @@ function card(t,opts){
   const sbH=(showSB||opts.teacher)&&!per?`<div class="sb">${['예정','진행중','완료','보류'].map(s=>`<button type="button" class="sb-btn${t.status===s?' a-'+s:''}" data-action="chgSt" data-id="${t.id}" data-status="${s}">${s}</button>`).join('')}</div>`:'';
   return `<div class="tc" id="c-${t.id}">
     <div class="tc-top"><div class="tc-ti">${t.title}</div><div class="tc-r">${shB}${eb}${db}<span class="tag tag-${t.status}">${t.status}</span></div></div>
-    <div class="tc-meta">${evs.length?evs.map(ev=>`<span class="ev-chip">${isProj(ev)?'📂':'🎪'} ${esc(ev.name)}</span>`).join(''):t.category?`<span class="db db-${t.dept}">${t.category}</span>`:'<span style="font-size:11px;color:var(--text3);font-style:italic">카테고리 미지정</span>'}${ass.length>1&&!per?`<span style="font-size:11px;color:var(--text2)">${ass.join(', ')}</span>`:''}</div>
+    <div class="tc-meta">${evs.length?evs.map(ev=>`<span class="ev-chip">${isProj(ev)?'📂':'🎪'} ${esc(ev.name)}</span>`).join(''):t.per?'<span class="ev-chip" style="background:var(--surface2);color:var(--text2)">기타</span>':t.category?`<span class="db db-${t.dept}">${t.category}</span>`:'<span style="font-size:11px;color:var(--text3);font-style:italic">카테고리 미지정</span>'}${ass.length>1&&!per?`<span style="font-size:11px;color:var(--text2)">${ass.join(', ')}</span>`:''}</div>
     ${dateL?`<div class="tc-meta" style="margin-top:2px">${dateL}</div>`:''}
     ${subH}${addH}
     ${t.memo?`<div style="margin-top:8px;font-size:12px;color:var(--text2);line-height:1.6">${t.memo}</div>`:''}
@@ -1133,7 +1123,7 @@ function renderMyTasks(){
       ${e.desc?`<div class="ev-desc">${esc(e.desc)}</div>`:''}
       <div class="ev-sub">내가 맡은 일</div>${act.map(t=>card(t,opts)).join('')}</div>`;
   }).join('');
-  if(projH)h+='<div class="sec-t" style="margin-top:20px"><span>📂 진행 중인 프로젝트</span></div>'+projH;
+  if(projH)h+='<div class="sec-t" style="margin-top:20px"><span>📂 진행 중인 상시 행사</span></div>'+projH;
   // 2) 그 밖의 내 업무
   const rest=all.filter(t=>!shown.has(t.id));
   h+='<div class="sec-t" style="margin-top:20px"><span>📝 그 밖의 내 업무</span></div>';
@@ -1160,13 +1150,13 @@ function submitTask(){
   const cws=[...document.querySelectorAll('.cw-cb:checked')].map(x=>x.value);
   const ass=[name,...cws];
   const evIds=getEvPick('fEv');
-  const t={id:crypto.randomUUID(),assignee:name,assignees:ass,dept:gd(name),title,category:evIds.length?evNames(evIds):document.getElementById('fCat').value.trim(),date:document.getElementById('fDate').value,deadline:document.getElementById('fDeadline').value,memo:document.getElementById('fMemo').value.trim(),status:'예정',subtasks:subs,createdAt:new Date().toISOString()};
+  const t={id:crypto.randomUUID(),assignee:name,assignees:ass,dept:gd(name),title,category:evNames(evIds),date:'',per:true,deadline:document.getElementById('fDeadline').value,memo:document.getElementById('fMemo').value.trim(),status:'예정',subtasks:subs,createdAt:new Date().toISOString()};
   setEvIds(t,evIds);
   tasks.push(t);saveLocal();fbPut(t);
   toast('✅ '+ass.join(', ')+'에게 업무 등록!');
-  ['fTitle','fCat','fMemo','fDate','fDeadline'].forEach(id=>{document.getElementById(id).value='';});
+  ['fTitle','fMemo','fDeadline'].forEach(id=>{document.getElementById(id).value='';});
+  document.getElementById('fSubFold').open=false;
   fillEvSel('fEv',[]);
-  document.getElementById('fCatWrap').style.display='';
   document.getElementById('subList').innerHTML='<div class="sir"><input type="text" placeholder="예: 행사 장소 섭외" class="st"><input type="date" class="dm sd"><button type="button" class="sdel" data-action="rmSub">×</button></div>';
   document.querySelectorAll('.cw-cb').forEach(x=>x.checked=false);
   setTimeout(()=>{['s0Name','s1Name'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=name;});buildCWList(name);swTab('sTnav',S_PANELS,0,sFns);},600);
@@ -1266,7 +1256,10 @@ function openEdit(id){
   document.getElementById('mDate').value=t.date||'';
   document.getElementById('mDead').value=t.deadline||'';
   document.getElementById('mMemo').value=t.memo||'';
-  document.querySelectorAll('#mStBtns .sb-btn').forEach(b=>b.className='sb-btn'+(t.status===b.dataset.status?' a-'+t.status:''));
+  document.querySelectorAll('#mStBtns .sb-btn').forEach(b=>{
+    b.className='sb-btn'+(t.status===b.dataset.status?' a-'+t.status:'');
+    b.style.display=isPer(t)&&b.dataset.status!=='보류'?'none':'';
+  });
   const ass=t.assignees||[t.assignee].filter(Boolean);
   document.getElementById('mAssigneeCur').textContent=ass.length?ass.join(', '):'미지정';
   document.getElementById('mAssigneePanel').style.display='none';
@@ -1300,6 +1293,7 @@ function saveEdit(){
     }
     if(_editStatus==='보류')t.status='보류';
     else{if(t.status==='보류')t.status='예정';derive(t);}
+    if(!t.eventId)t.per=true; // 행사 연결을 모두 풀어도 1인별 체크 유지
   } else if(_editStatus){
     if(_editStatus==='완료'&&t.status!=='완료'){(t.subtasks||[]).forEach(s=>s.done=true);t.completedAt=new Date().toISOString();}
     if(_editStatus==='예정')(t.subtasks||[]).forEach(s=>s.done=false);
@@ -1484,7 +1478,6 @@ function bindStatic(){
   document.getElementById('addSubBtn').addEventListener('click',addSubRow);
 
   // 교사 업무 추가 모달
-  let _tAddStatus='예정';
 
   function buildTAddAssigneeCBs(){
     const c=document.getElementById('tAddAssigneeWrap');if(!c)return;c.innerHTML='';
@@ -1507,12 +1500,10 @@ function bindStatic(){
 
   document.getElementById('tAddTaskBtn').addEventListener('click',()=>{
     buildTAddAssigneeCBs();
-    ['tAddTitle','tAddCat','tAddMemo'].forEach(id=>document.getElementById(id).value='');
+    ['tAddTitle','tAddMemo','tAddDead'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('tAddSubFold').open=false;
     fillEvSel('tAddEv','');
-    ['tAddDate','tAddDead'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('tAddSubList').innerHTML='<div class="sir"><input type="text" placeholder="예: 행사 장소 섭외" class="st"><input type="date" class="dm sd"><button type="button" class="sdel" data-action="tAddRmSub">×</button></div>';
-    _tAddStatus='예정';
-    document.querySelectorAll('#tAddStBtns .sb-btn').forEach(b=>b.className='sb-btn'+(b.dataset.status==='예정'?' a-예정':''));
     document.getElementById('tAddMov').classList.add('open');
   });
 
@@ -1525,12 +1516,6 @@ function bindStatic(){
 
   document.getElementById('tAddCancel').addEventListener('click',()=>closeMov('tAddMov'));
 
-  document.querySelectorAll('#tAddStBtns .sb-btn').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      _tAddStatus=btn.dataset.status;
-      document.querySelectorAll('#tAddStBtns .sb-btn').forEach(b=>b.className='sb-btn'+(b===btn?' a-'+_tAddStatus:''));
-    });
-  });
 
   // [BUG2 FIX] tAddSave 핸들러 단일 등록, 저장 후 renderDash + renderTStu 호출
   document.getElementById('tAddSave').addEventListener('click',()=>{
@@ -1547,14 +1532,14 @@ function bindStatic(){
     const t={
       id:crypto.randomUUID(),assignee,assignees:checked,allAssignees:checked,
       dept:gd(assignee),title,
-      category:evNames(getEvPick('tAddEv'))||document.getElementById('tAddCat').value.trim(),
-      date:document.getElementById('tAddDate').value,
+      category:evNames(getEvPick('tAddEv')),
+      date:'',per:true,
       deadline:document.getElementById('tAddDead').value,
       memo:document.getElementById('tAddMemo').value.trim(),
-      status:_tAddStatus,subtasks:subs,createdAt:new Date().toISOString()
+      status:'예정',subtasks:subs,createdAt:new Date().toISOString()
     };
     const tEvs=getEvPick('tAddEv');
-    if(tEvs.length){setEvIds(t,tEvs);if(t.status!=='보류')derive(t);}
+    setEvIds(t,tEvs);derive(t);
     tasks.push(t);saveLocal();
     fbPut(t).then(()=>{
       renderDash();
@@ -1577,7 +1562,10 @@ function bindStatic(){
   });
   document.querySelectorAll('#mStBtns .sb-btn').forEach(btn=>{
     btn.addEventListener('click',()=>{
-      _editStatus=btn.dataset.status;
+      const et=tasks.find(x=>x.id===_editId);
+      // 1인별 업무: 보류 버튼을 다시 누르면 보류 해제
+      if(et&&isPer(et)&&_editStatus==='보류'&&btn.dataset.status==='보류')_editStatus='';
+      else _editStatus=btn.dataset.status;
       document.querySelectorAll('#mStBtns .sb-btn').forEach(b=>b.className='sb-btn'+(b.dataset.status===_editStatus?' a-'+_editStatus:''));
     });
   });
@@ -1619,17 +1607,6 @@ function bindStatic(){
     toast('로그아웃했어요');
   });
   // 행사 선택 시 행사일 자동 채우기
-  const evPick=(selId,dateId,catWrapId)=>{
-    document.getElementById(selId).addEventListener('change',()=>{
-      const evs=getEvPick(selId).map(evById);
-      // 여러 개면 가장 이른 행사일
-      const starts=evs.map(e=>e.start).filter(Boolean).sort();
-      if(starts.length)document.getElementById(dateId).value=starts[0];
-      if(catWrapId)document.getElementById(catWrapId).style.display=evs.length?'none':'';
-    });
-  };
-  evPick('fEv','fDate','fCatWrap');
-  evPick('tAddEv','tAddDate');
 
   // 필터
   document.querySelectorAll('#filterBar .fc').forEach(fc=>fc.addEventListener('click',()=>{allFilt=fc.dataset.filter;document.querySelectorAll('#filterBar .fc').forEach(c=>c.classList.toggle('active',c===fc));renderAllTasks();}));
@@ -1712,7 +1689,7 @@ document.addEventListener('click',function(e){
   if(action==='evAddTask'){
     document.getElementById('tAddTaskBtn').click();
     const ev=evById(id);
-    if(ev){fillEvSel('tAddEv',[id]);document.getElementById('tAddDate').value=ev.start;}
+    if(ev)fillEvSel('tAddEv',[id]);
     return;
   }
   if(action==='rmSub'){if(document.querySelectorAll('.sir').length<=1){toast('최소 1개 필요');return;}el.closest('.sir').remove();return;}
@@ -1836,16 +1813,16 @@ async function saveEv(){
   if(!await evPut(ev))return;
   events=events.filter(e=>e.id!==ev.id).concat(ev);saveEvLocal();
   closeMov('evMov');refresh();fillEvSel('fEv',getEvPick('fEv'));
-  toast(old?'✅ 수정 완료':proj?'📂 상시 프로젝트 등록 완료':'🎪 행사 등록 완료');
+  toast(old?'✅ 수정 완료':proj?'📂 상시 행사 등록 완료':'🎪 행사 등록 완료');
 }
 async function setEvClosed(id,closed){
   const e=evById(id);if(!e||!isProj(e))return;
-  if(closed&&!confirm('"'+e.name+'" 프로젝트를 종료할까요? 지난 행사로 옮겨져요'))return;
+  if(closed&&!confirm('"'+e.name+'" 행사를 종료할까요? 지난 행사로 옮겨져요'))return;
   const ev={...e,closed};
   if(closed)ev.closedAt=new Date().toISOString();else delete ev.closedAt;
   if(!await evPut(ev))return;
   events=events.map(x=>x.id===id?ev:x);saveEvLocal();refresh();
-  toast(closed?'📂 프로젝트 종료':'📂 프로젝트 다시 열림');
+  toast(closed?'📂 행사 종료':'📂 행사 다시 열림');
 }
 async function deleteEv(){
   const e=evById(_evId);if(!e)return;
@@ -1890,13 +1867,13 @@ function renderTEvents(){
       (e.desc?'<div class="ev-desc">'+esc(e.desc)+'</div>':'')+
       '<div class="dp" style="margin-bottom:6px"><div class="dpf" style="width:'+pct+'%;background:'+col+'"></div></div>'+
       (rows||'<div class="ev-none">연결된 업무가 없어요</div>')+
-      (isProj(e)&&e.closed?'':'<button type="button" class="ev-add" data-action="evAddTask" data-id="'+esc(e.id)+'">+ 이 '+(isProj(e)?'프로젝트':'행사')+'에 업무 추가</button>')+
-      (isProj(e)?'<button type="button" class="ev-add" style="border-style:solid" data-action="'+(e.closed?'evReopen':'evClose')+'" data-id="'+esc(e.id)+'">'+(e.closed?'↩ 프로젝트 다시 열기':'🏁 프로젝트 종료')+'</button>':'')+'</div>';
+      (isProj(e)&&e.closed?'':'<button type="button" class="ev-add" data-action="evAddTask" data-id="'+esc(e.id)+'">+ 이 행사에 업무 추가</button>')+
+      (isProj(e)?'<button type="button" class="ev-add" style="border-style:solid" data-action="'+(e.closed?'evReopen':'evClose')+'" data-id="'+esc(e.id)+'">'+(e.closed?'↩ 다시 열기':'🏁 이 행사 종료')+'</button>':'')+'</div>';
   };
   h+='<div class="stl">🎪 진행 중 · 다가오는 행사 ('+up.length+')</div>'+(up.length?up.map(evCard).join(''):'<div class="ev-none">없음</div>');
-  h+='<div class="stl">📂 상시 프로젝트 ('+proj.length+')</div>'+(proj.length?proj.map(evCard).join(''):'<div class="ev-none">없음 — 행사 등록에서 시작일을 비우면 상시 프로젝트가 돼요</div>');
+  h+='<div class="stl">📂 상시 행사 · 날짜 없음 ('+proj.length+')</div>'+(proj.length?proj.map(evCard).join(''):'<div class="ev-none">없음 — 행사 등록에서 시작일을 비우면 상시 행사가 돼요</div>');
   // 아직 행사에 안 붙은 10월 이후 업무 — 여기서 ✏️로 행사를 골라 연결
-  const un=tasks.filter(t=>!t.eventId&&t.status!=='완료'&&(effDeadline(t)>='2026-10-01'||(!effDeadline(t)&&(t.createdAt||'')>='2026-09-01')))
+  const un=tasks.filter(t=>!t.eventId&&!t.per&&t.status!=='완료'&&(effDeadline(t)>='2026-10-01'||(!effDeadline(t)&&(t.createdAt||'')>='2026-09-01')))
     .sort((a,b)=>(effDeadline(a)||'9').localeCompare(effDeadline(b)||'9'));
   h+='<div class="stl">🔗 행사 미연결 업무 (10월 이후 · '+un.length+'개)</div>'+
     '<div class="hint" style="margin:-4px 0 10px">✏️를 눌러 행사를 고르면 연결돼요. 연결하면 담당자별 완료 체크로 바뀌어요.</div>'+
