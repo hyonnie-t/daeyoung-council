@@ -267,6 +267,44 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .empty p{font-size:13px;line-height:1.8}
 @media(max-width:480px){#myArea .empty,#manArea .empty{padding:8px 24px}}
   
+/* 행사 */
+.ev{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:var(--r);padding:14px 14px 10px;margin-bottom:14px;box-shadow:var(--sh)}
+.ev-hd{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px}
+.ev-nm{font-size:15px;font-weight:700;line-height:1.4;flex:1}
+.ev-dt{font-size:12px;color:var(--text2);font-family:'Space Mono',monospace;margin-bottom:6px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.ev-desc{font-size:12px;color:var(--text2);margin-bottom:8px;line-height:1.6}
+.ev-sub{font-size:11px;font-weight:700;color:var(--text2);margin:10px 0 6px}
+.ev-none{font-size:12px;color:var(--text3);padding:4px 0 6px}
+.ev-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border)}
+.ev-row-ti{font-size:13px;font-weight:600;flex:1;line-height:1.4}
+.ev-row-who{font-size:11px;color:var(--text2);margin-top:2px}
+.ev-add{background:var(--surface2);border:1px dashed var(--border);color:var(--text2);padding:8px;border-radius:8px;width:100%;font-size:12px;margin-top:8px}
+.ev-add:hover{border-color:var(--accent);color:var(--accent)}
+.ev-new{background:#f3f0ff;border:1px solid var(--accent);color:var(--accent);padding:10px;border-radius:10px;width:100%;font-size:13px;font-weight:700;margin-bottom:12px}
+.ev-chip{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;background:#f3f0ff;color:var(--accent)}
+.sec-t{font-size:13px;font-weight:700;color:var(--text);margin:4px 0 10px;display:flex;justify-content:space-between;align-items:center}
+/* 1인별 완료 */
+.pp{margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.pp-line{font-size:12px;color:var(--text2);margin-bottom:8px;line-height:1.6}
+.pp-line b{color:var(--accent3)}
+.pp-left{color:var(--danger);font-weight:600}
+.me-btn{width:100%;padding:10px;border-radius:9px;font-size:14px;font-weight:700;background:var(--accent3);color:#fff}
+.me-btn.undo{background:var(--surface2);color:var(--text2);border:1px solid var(--border);font-size:12px;font-weight:600;padding:7px}
+/* 이름 */
+.nm-btn{font-size:11px;color:var(--text2);background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 8px;white-space:nowrap;flex-shrink:0}
+/* 달력 행사 표시 */
+.evbar{width:80%;height:3px;border-radius:2px;background:var(--accent2);margin:1px 0 2px}
+.cev{display:flex;align-items:center;gap:8px;padding:8px 10px;margin-bottom:8px;border-radius:8px;background:#fff0f6;font-size:13px;font-weight:600}
+/* 메인 화면 행사 목록 */
+.ev-front{width:100%;max-width:360px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh)}
+.ev-front-t{font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px}
+.ev-front-r{display:flex;gap:10px;padding:7px 0;border-top:1px solid var(--border);font-size:13px;line-height:1.5}
+.ev-front-r:first-of-type{border-top:none}
+.ev-front-d{font-family:'Space Mono',monospace;font-size:11px;color:var(--text2);white-space:nowrap;padding-top:2px;min-width:88px}
+.ev-front-n{flex:1;font-weight:600}
+.ev-front-r .eb{align-self:center}
+.ev-front-n small{display:block;font-weight:400;font-size:11px;color:var(--text2)}
+
 /* 토스트 */
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--text);color:var(--bg);padding:12px 24px;border-radius:20px;font-size:13px;font-weight:500;transition:transform .3s;z-index:9999;white-space:nowrap;box-shadow:var(--sh2)}
 #toast.show{transform:translateX(-50%) translateY(0)}
@@ -286,6 +324,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
     <div class="logo-t">학생회<br>업무 시스템</div>
     <div class="logo-sub">2026학년도 대영중학교</div>
   </div>
+  <div id="evFront" class="ev-front" style="display:none"></div>
   <div id="noticeBox" style="display:none;width:100%;max-width:360px;background:#fff9db;border:1px solid #ffd43b;border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh)">
   <div style="font-size:11px;font-weight:700;color:var(--warn);margin-bottom:6px;letter-spacing:1px">📢 공지사항</div>
   <div id="noticeText" style="font-size:14px;color:var(--text);line-height:1.7;white-space:pre-wrap"></div>
@@ -315,24 +354,25 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
     <button type="button" class="back-btn" id="sBack">←</button>
     <h2 id="sHdr">학생 모드</h2>
     <span class="hbadge" id="sBadge"></span>
+    <button type="button" class="nm-btn" id="sChName" style="display:none">이름 바꾸기</button>
     <a class="acct-btn" href="https://docs.google.com/spreadsheets/d/1kuBQRMXVZypsh2hL7Fjrtp39hZgQskD_J3oxDOzSmKc/edit#gid=1570826793" target="_blank" rel="noopener">🔑 계정</a>
   </div>
   <div class="tnav" id="sTnav">
-    <button type="button" class="ti active" data-tab="0"><span class="tn">STEP1</span>해야할 일</button>
-    <button type="button" class="ti" data-tab="1"><span class="tn">STEP2</span>업무 등록</button>
-    <button type="button" class="ti" data-tab="2"><span class="tn">STEP3</span>업무 관리</button>
-    <button type="button" class="ti" data-tab="3"><span class="tn">📅</span>달력</button>
-    <button type="button" class="ti" data-tab="4"><span class="tn">🏢</span>부서 현황</button>
+    <button type="button" class="ti active" data-tab="0"><span class="tn">✅</span>해야할 일</button>
+    <button type="button" class="ti" data-tab="1"><span class="tn">✏️</span>업무 등록</button>
+    <button type="button" class="ti" data-tab="2"><span class="tn">📅</span>달력</button>
+    <button type="button" class="ti" data-tab="3"><span class="tn">🏢</span>부서 현황</button>
   </div>
   <div class="tp active" id="sP0">
     <div id="unNotice"></div>
-    <div class="nw"><label>내 이름</label><select id="s0Name"></select></div>
+    <div class="nw" id="s0NameWrap"><label>내 이름 <span style="font-size:11px;color:var(--text3)">(한 번 고르면 이 폰에 기억돼요)</span></label><select id="s0Name"></select></div>
     <div id="myArea"><div class="empty" style="padding:20px 24px"><div class="ei">👆</div><p>이름을 선택하면<br>내 업무가 나타나요</p><img src="illust-student.png" alt="" style="width:100%;max-width:260px;margin-top:20px;border-radius:16px;opacity:0.9"></div></div>
   </div>
   <div class="tp" id="sP1">
     <div class="nw"><label>내 이름 <span class="req">*</span></label><select id="s1Name"></select></div>
     <div class="fg"><label>업무명 <span class="req">*</span></label><input type="text" id="fTitle" placeholder="예: 환경의 날 행사 계획서 작성"></div>
-    <div class="fg"><label>카테고리</label><input type="text" id="fCat" placeholder="예: 환경의 날 행사"></div>
+    <div class="fg"><label>행사</label><select id="fEv"></select><div class="hint">💡 행사를 고르면 행사일이 자동으로 채워져요</div></div>
+    <div class="fg" id="fCatWrap"><label>카테고리 <span style="font-size:11px;color:var(--text3)">(행사가 없는 업무만)</span></label><input type="text" id="fCat" placeholder="예: 대영알리미"></div>
     <div class="fg"><label>행사일 <span style="font-size:11px;color:var(--text3)">(행사가 진행되는 날)</span></label><input type="date" id="fDate"></div>
     <div class="fg"><label>준비 마감일 <span style="font-size:11px;color:var(--text3)">(업무 완료 기한)</span></label><input type="date" id="fDeadline"></div>
     <div class="fg">
@@ -340,17 +380,13 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
       <div id="cwList" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px;max-height:200px;overflow-y:auto"></div>
     </div>
     <div class="fg">
-      <label>세부 할 일 <span class="req">*</span></label>
+      <label>세부 할 일 <span style="font-size:11px;color:var(--text3)">(선택)</span></label>
       <div id="subList"><div class="sir"><input type="text" placeholder="예: 행사 장소 섭외" class="st"><input type="date" class="dm sd"><button type="button" class="sdel" data-action="rmSub">×</button></div></div>
       <button type="button" class="asb" id="addSubBtn">+ 세부 할 일 추가</button>
       <div class="hint">💡 업무를 3~5단계로 쪼개면 진행 상태가 잘 보여요</div>
     </div>
     <div class="fg"><label>메모</label><textarea id="fMemo" rows="3" placeholder="참고사항"></textarea></div>
     <button type="button" class="bp" id="submitBtn">업무 등록하기</button>
-  </div>
-  <div class="tp" id="sP2">
-    <div class="nw"><label>내 이름</label><select id="s2Name"></select></div>
-  <div id="manArea"><div class="empty" style="padding:20px 24px"><div class="ei">👆</div><p>이름을 선택해주세요</p><img src="illust-student.png" alt="" style="width:100%;max-width:260px;margin-top:20px;border-radius:16px;opacity:0.9"></div></div>
   </div>
   <div class="tp" id="sP3">
     <div class="ch"><button type="button" class="cn" id="sCP">‹</button><div class="ct" id="sCT"></div><button type="button" class="cn" id="sCN">›</button></div>
@@ -369,11 +405,12 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
   </div>
   <div class="tnav" id="tTnav">
     <button type="button" class="ti active" data-tab="0">대시보드</button>
-    <button type="button" class="ti" data-tab="1">달력</button>
-    <button type="button" class="ti" data-tab="2">부서별</button>
-    <button type="button" class="ti" data-tab="3">학생별</button>
-    <button type="button" class="ti" data-tab="4">전체 업무</button>
-    <button type="button" class="ti" data-tab="5">출석 관리</button>
+    <button type="button" class="ti" data-tab="1">행사</button>
+    <button type="button" class="ti" data-tab="2">달력</button>
+    <button type="button" class="ti" data-tab="3">부서별</button>
+    <button type="button" class="ti" data-tab="4">학생별</button>
+    <button type="button" class="ti" data-tab="5">전체 업무</button>
+    <button type="button" class="ti" data-tab="6">출석 관리</button>
   </div>
   <div class="tp active" id="tP0">
     <div class="sg">
@@ -395,6 +432,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
     <div class="stl">✅ 최근 완료</div><div id="feedArea"></div>
     <div class="stl">📊 부서별 진행률</div><div id="dSum"></div>
   </div>
+  <div class="tp" id="tPE"><div id="tEvArea"></div></div>
   <div class="tp" id="tP1">
     <div class="ch"><button type="button" class="cn" id="tCP">‹</button><div class="ct" id="tCT"></div><button type="button" class="cn" id="tCN">›</button></div>
     <div class="cg" id="tCG"></div><div id="tCD"></div>
@@ -425,6 +463,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
   <div class="ms">
     <div class="mh"></div><div class="mt">업무 수정</div>
     <div class="fg"><label>업무명</label><input type="text" id="mTi"></div>
+    <div class="fg"><label>행사</label><select id="mEv"></select></div>
     <div class="fg"><label>카테고리</label><input type="text" id="mCat"></div>
     <div class="fg"><label>행사일</label><input type="date" id="mDate"></div>
     <div class="fg"><label>준비 마감일</label><input type="date" id="mDead"></div>
@@ -436,6 +475,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
         <button type="button" class="sb-btn" data-status="완료">완료</button>
         <button type="button" class="sb-btn" data-status="보류">보류</button>
       </div>
+      <div class="hint" id="mStHint" style="display:none">💡 행사 업무는 담당자들의 완료 체크로 상태가 자동 계산돼요. 수동으로는 '보류'만 걸 수 있어요.</div>
     </div>
     <div class="fg">
       <label>담당자</label>
@@ -484,7 +524,8 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
       <div id="tAddAssigneeWrap" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px;max-height:200px;overflow-y:auto"></div>
     </div>
     <div class="fg"><label>업무명 <span class="req">*</span></label><input type="text" id="tAddTitle" placeholder="업무명 입력"></div>
-    <div class="fg"><label>카테고리</label><input type="text" id="tAddCat" placeholder="예: 리더십 캠프"></div>
+    <div class="fg"><label>행사</label><select id="tAddEv"></select></div>
+    <div class="fg"><label>카테고리 <span style="font-size:11px;color:var(--text3)">(행사가 없는 업무만)</span></label><input type="text" id="tAddCat" placeholder="예: 리더십 캠프"></div>
     <div class="fg"><label>행사일</label><input type="date" id="tAddDate"></div>
     <div class="fg"><label>준비 마감일</label><input type="date" id="tAddDead"></div>
     <div class="fg">
@@ -506,6 +547,20 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
   </div>
 </div>
   
+<!-- 행사 등록/수정 모달 -->
+<div class="mov" id="evMov">
+  <div class="ms">
+    <div class="mh"></div><div class="mt" id="evMovTitle">행사 등록</div>
+    <div class="fg"><label>행사 이름 <span class="req">*</span></label><input type="text" id="evName" placeholder="예: 할로윈 행사"></div>
+    <div class="fg"><label>시작일 <span class="req">*</span></label><input type="date" id="evStart"></div>
+    <div class="fg"><label>종료일 <span style="font-size:11px;color:var(--text3)">(하루 행사면 비워두기)</span></label><input type="date" id="evEnd"></div>
+    <div class="fg"><label>주관 부서</label><select id="evDept"></select></div>
+    <div class="fg"><label>설명</label><textarea id="evDesc" rows="2" placeholder="예: 7, 8반쪽 현관 사용 가능"></textarea></div>
+    <div class="ma"><button type="button" class="bc" id="evCancel">취소</button><button type="button" class="bs" id="evSave">저장</button></div>
+    <button type="button" class="pw-back" id="evDelete" style="color:var(--danger);margin-top:14px;display:none">이 행사 삭제</button>
+  </div>
+</div>
+
 <!-- 삭제 확인 모달 -->
 <div class="mov" id="delMov">
   <div class="ms">
@@ -550,10 +605,24 @@ const SK='daeyoung_v8';
 const PW_HASH='9cd74e8bc3893cbc079e8dc6dfae17b66715e4132296cc45aa7cb9596739d453';
 const FB='https://daeyoung-council-default-rtdb.firebaseio.com';
 const GAS='https://script.google.com/macros/s/AKfycbzcmOgxrmciJN7Uw6Flq7U6KtlP8vtDiI5bexcDmEzYHw8_y129BAiPGZI_NenJfhcE/exec';
+const EK='daeyoung_events_v1';   // 행사 로컬 캐시
+const ME_KEY='daeyoung_me';      // 이 폰에서 고른 학생 이름
+// 선생님 '행사' 탭의 "10월 일정 한 번에 등록" 버튼용. 행사가 하나도 없을 때만 쓰인다.
+const EV_OCT=[
+  {name:'등교길 아침먹기 캠페인',start:'2026-10-06',end:'2026-10-07',desc:''},
+  {name:'학생회 인스타그램 팔로우 이벤트',start:'2026-10-07',end:'2026-10-07',desc:''},
+  {name:'3교시 자치 시간: 한글날 계기교육 및 대영제 준비 학급회의',start:'2026-10-07',end:'2026-10-07',desc:''},
+  {name:'점심시간 애플데이',start:'2026-10-12',end:'2026-10-12',desc:'위클래스 & 학생회 연계'},
+  {name:'계단 사용 독려 캠페인',start:'2026-10-12',end:'2026-10-16',desc:'7, 8반쪽 현관 사용 가능'},
+  {name:'원밀캠페인 (잔반제로 캠페인)',start:'2026-10-14',end:'2026-10-14',desc:''},
+  {name:'할로윈 행사',start:'2026-10-16',end:'2026-10-16',desc:''},
+];
 const SEED=[{"id":"1001","assignee":"박건우","allAssignees":["박건우","이예은","변유빈"],"dept":"회장단","title":"회의안건 제작","category":"학생회 정기회의","date":"","deadline":"2026-03-09","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1002","assignee":"변유빈","allAssignees":["변유빈","박건우","이예은","이윤서","엄희승","서가윤","이지호","강제윤","김지운"],"dept":"회장단","title":"업무 배정 최종 논의","category":"집행단 회의","date":"","deadline":"","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1003","assignee":"미지정","allAssignees":[""],"dept":"전체","title":"홍기부 - 부장,차장 선생님에게로","category":"집행단 회의","date":"","deadline":"2026-03-11","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1004","assignee":"이지호","allAssignees":["이지호","김아민","임다경","백서진"],"dept":"행사진행부","title":"연락처 교환 및 친목도모","category":"행진부-방송부 만남","date":"","deadline":"2026-03-12","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1005","assignee":"변유빈","allAssignees":["변유빈","박건우","이예은"],"dept":"회장단","title":"회의 진행 준비","category":"동아리","date":"","deadline":"","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1006","assignee":"이예은","allAssignees":["이예은"],"dept":"회장단","title":"회의록 정리","category":"학생회 정기회의","date":"2026-03-09","deadline":"2026-03-13","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1007","assignee":"이예은","allAssignees":["이예은"],"dept":"회장단","title":"회의록 정리","category":"집행단 회의","date":"","deadline":"2026-03-13","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1008","assignee":"이예은","allAssignees":["이예은"],"dept":"회장단","title":"회의록 정리","category":"동아리","date":"","deadline":"","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1009","assignee":"미지정","allAssignees":[""],"dept":"전체","title":"상장 정리","category":"임명장 수여식","date":"","deadline":"2026-03-16","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1010","assignee":"김나현","allAssignees":["김나현","김유주","김하윤","지윤정","양소율"],"dept":"홍보기획부","title":"학급 회의 운영 영상 선정","category":"학급자치 회의","date":"","deadline":"2026-03-16","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1011","assignee":"변유빈","allAssignees":["변유빈","박건우","이예은","이윤서","서가윤","김나현","윤강민"],"dept":"회장단","title":"교장 선생님께 드릴 안건 정리","category":"학교장 간담회","date":"","deadline":"2026-03-17","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1012","assignee":"이지호","allAssignees":["이지호"],"dept":"홍보기획부","title":"학급회장단 명단 - 연락처용 제작","category":"리더십 캠프","date":"","deadline":"","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1013","assignee":"변유빈","allAssignees":["변유빈"],"dept":"회장단","title":"학급회장단 단톡 개설","category":"리더십 캠프","date":"","deadline":"","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1015","assignee":"이예은","allAssignees":["이예은"],"dept":"회장단","title":"간담회 안건 정리(학생회 전체 공유)","category":"학교장 간담회","date":"","deadline":"2026-03-17","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1016","assignee":"변유빈","allAssignees":["변유빈","박건우","이예은"],"dept":"회장단","title":"리더십 캠프 준비","category":"동아리(5-7)","date":"2026-03-19","deadline":"2026-05-14","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1017","assignee":"이예은","allAssignees":["이예은"],"dept":"회장단","title":"회의록 정리","category":"동아리(5-7)","date":"","deadline":"2026-05-14","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1018","assignee":"변유빈","allAssignees":["변유빈","서가윤","동윤지","백서진"],"dept":"회장단","title":"계획서 수립 필요","category":"꿈꾸는 디케 프로젝트","date":"","deadline":"2026-03-20","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1019","assignee":"양소율","allAssignees":["양소율"],"dept":"홍보기획부","title":"리더십 캠프 1학기 포스터 제작","category":"리더십 캠프","date":"","deadline":"2026-03-20","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1020","assignee":"미지정","allAssignees":[""],"dept":"전체","title":"리더십 캠프 예행연습","category":"리더십 캠프 예행연습","date":"","deadline":"2026-03-25","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1022","assignee":"이예은","allAssignees":["이예은"],"dept":"회장단","title":"1회 회의록 - 리더십캠프 건의사항 정리","category":"학급자치 회의","date":"","deadline":"2026-03-26","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1023","assignee":"미지정","allAssignees":[""],"dept":"전체","title":"학생회실 내PC 지키미 실행","category":"학급자치 회의","date":"","deadline":"2026-03-26","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1024","assignee":"김나현","allAssignees":["김나현","김유주","김하윤","양소율","지윤정"],"dept":"홍보기획부","title":"포스터 부착","category":"리더십 캠프","date":"","deadline":"2026-03-24","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1026","assignee":"변유빈","allAssignees":["변유빈","박건우"],"dept":"회장단","title":"캠프 진행 멘트 제작 완료","category":"리더십 캠프","date":"","deadline":"2026-03-26","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1027","assignee":"미지정","allAssignees":[""],"dept":"홍보기획부","title":"포스터 내용 수정","category":"리더십 캠프","date":"","deadline":"2026-03-26","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1028","assignee":"서가윤","allAssignees":["서가윤","김나현","김아민","이예은","윤아인","조혜리","양소율"],"dept":"자율질서부","title":"양심생리대 구비","category":"리더십 캠프","date":"","deadline":"2026-03-26","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1029","assignee":"서가윤","allAssignees":["서가윤"],"dept":"행사진행부","title":"디케 초상권 동의서 수합","category":"꿈꾸는 디케 프로젝트","date":"","deadline":"2026-03-31","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1030","assignee":"미지정","allAssignees":[""],"dept":"전체","title":"임원수련회 가정통신문 수합","category":"임원수련회","date":"","deadline":"2026-04-02","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1031","assignee":"변유빈","allAssignees":["변유빈","박건우","이예은","엄희승","이윤서","윤아인","조혜리","서가윤","백서진","이지호","김유주","김하윤","김나현","양소율","윤강민","강제윤","동윤지"],"dept":"회장단","title":"영등포구의회 대본 작성","category":"동아리(4-6)","date":"","deadline":"2026-04-01","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1032","assignee":"이윤서","allAssignees":["이윤서","엄희승"],"dept":"알림부","title":"대영알리미 내용 준비(선생님에게 확인 필요)","category":"대영알리미","date":"","deadline":"2026-03-29","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1033","assignee":"이윤서","allAssignees":["이윤서","엄희승"],"dept":"알림부","title":"대영알리미 내용 최종본 제출","category":"대영알리미","date":"","deadline":"2026-04-01","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1034","assignee":"김아민","allAssignees":["김아민"],"dept":"행사진행부","title":"2회 건의사항 내용 정리","category":"학급자치 회의","date":"","deadline":"2026-04-02","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1036","assignee":"미지정","allAssignees":[""],"dept":"알림부","title":"간담회 내용 피드백 준비(대영알리미)","category":"학교장 간담회","date":"","deadline":"","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1037","assignee":"김나현","allAssignees":["김나현","김유주","김하윤","양소율","지윤정"],"dept":"홍보기획부","title":"포스터 제거","category":"리더십 캠프","date":"","deadline":"2026-03-30","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1038","assignee":"미지정","allAssignees":[""],"dept":"전체","title":"간식비(20만원) - 이마트","category":"동아리","date":"","deadline":"","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1048","assignee":"윤강민","allAssignees":["윤강민"],"dept":"자율질서부","title":"우산대여 사업 관련 회의 - 결과 선생님에게","category":"동아리","date":"","deadline":"2026-04-10","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1055","assignee":"박건우","allAssignees":["박건우"],"dept":"회장단","title":"내피시지킴이 실행","category":"동아리","date":"","deadline":"2026-04-15","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1056","assignee":"변유빈","allAssignees":["변유빈","박건우"],"dept":"회장단","title":"사복데이 실행 논의","category":"교장선생님 간담회(사복데이)","date":"","deadline":"2026-04-20","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1057","assignee":"미지정","allAssignees":[""],"dept":"전체","title":"세월호 추모 행사 공간 정리\n(우천시 실내 공간만 정리)","category":"교장선생님 간담회(사복데이)","date":"","deadline":"2026-04-20","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1058","assignee":"미지정","allAssignees":[""],"dept":"전체","title":"세월호 추모 행사 관련 피드백 및 학생회 운영 관련 회의","category":"세월호 행사 피드백","date":"","deadline":"2026-04-20","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1062","assignee":"변유빈","allAssignees":["변유빈","이예은"],"dept":"알림부","title":"대영알리미 대본 작성 및 PPT 준비","category":"5월 대영알리미","date":"","deadline":"2026-04-27","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1063","assignee":"변유빈","allAssignees":["변유빈","박건우","이예은"],"dept":"회장단","title":"스승의 날 준비(계획 수립)","category":"5월 대영알리미","date":"","deadline":"2026-04-30","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1066","assignee":"미지정","allAssignees":[""],"dept":"알림부","title":"이색 상장 학급 별 선생님 배정","category":"5월 대영알리미","date":"","deadline":"2026-04-30","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1067","assignee":"변유빈","allAssignees":["변유빈"],"dept":"회장단","title":"남부학생정례회 참여","category":"5월 대영알리미","date":"2026-05-06","deadline":"","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1068","assignee":"변유빈","allAssignees":["변유빈"],"dept":"회장단","title":"학생의견 급식 간담회 준비","category":"영양사 선생님과 간담회","date":"2026-05-08","deadline":"2026-05-07","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1069","assignee":"양소율","allAssignees":["양소율"],"dept":"홍보기획부","title":"롤링페이퍼 디자인","category":"스승의 날 행사 준비","date":"","deadline":"","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1070","assignee":"박건우","allAssignees":["박건우","변유빈","이예은"],"dept":"회장단","title":"학생 의견 전달","category":"영양사 선생님과 간담회","date":"2026-05-08","deadline":"","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1071","assignee":"이윤서","allAssignees":["이윤서","엄희승"],"dept":"알림부","title":"대의원회(학급 반장 공지)","category":"대의원회","date":"2026-05-08","deadline":"","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1072","assignee":"박건우","allAssignees":["박건우","지윤정","김유주","동윤지","윤아인"],"dept":"회장단","title":"스승의 날 쿠키 제작 및 포장","category":"스승의 날 행사 준비","date":"2026-05-13","deadline":"2026-05-13","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1073","assignee":"미지정","allAssignees":[""],"dept":"전체","title":"이색 상장 준비","category":"스승의 날 행사 준비","date":"2026-05-12","deadline":"","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1077","assignee":"김지운","allAssignees":["김지운","강제윤"],"dept":"자율질서부","title":"우산대여사업","category":"스승의 날 행사 준비","date":"","deadline":"","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1078","assignee":"이예은","allAssignees":["이예은"],"dept":"회장단","title":"회의록 정리","category":"세월호 행사 피드백","date":"2026-04-20","deadline":"","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1079","assignee":"윤아인","allAssignees":["윤아인"],"dept":"알림부","title":"리더십캠프 상품 지급","category":"세월호 행사 피드백","date":"","deadline":"","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1080","assignee":"김하윤","allAssignees":["김하윤"],"dept":"홍보기획부","title":"사복데이 포스터","category":"사복데이 운영","date":"2026-05-14","deadline":"2026-05-11","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1081","assignee":"백서진","allAssignees":["백서진"],"dept":"행사진행부","title":"쿠키 홍보 포스터","category":"스승의 날 행사 준비","date":"2026-05-12","deadline":"2026-05-11","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1082","assignee":"지윤정","allAssignees":["지윤정"],"dept":"홍보기획부","title":"쿠키 라벨지","category":"스승의 날 행사 준비","date":"2026-05-12","deadline":"2026-05-11","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1085","assignee":"미지정","allAssignees":[""],"dept":"전체","title":"양심생리대 사업 실시 여부 결정","category":"동아리(5-7)","date":"2026-05-14","deadline":"","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1086","assignee":"윤강민","allAssignees":["윤강민","김지운","강제윤","동윤지"],"dept":"자율질서부","title":"사복데이 관련 질서유지 도움(복장 준수 확인)","category":"사복데이 운영","date":"2026-05-14","deadline":"","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1087","assignee":"박건우","allAssignees":["박건우"],"dept":"회장단","title":"내피씨지킴이 실행","category":"사복데이 운영","date":"","deadline":"2026-05-22","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1088","assignee":"김지운","allAssignees":["김지운"],"dept":"자율질서부","title":"금연캠페인 업무 배정","category":"금연캠페인","date":"2026-06-01","deadline":"","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1089","assignee":"변유빈","allAssignees":["변유빈"],"dept":"회장단","title":"기말고사 시간표 의견 수렴","category":"금연캠페인","date":"","deadline":"2026-05-21","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1090","assignee":"김나현","allAssignees":["김나현"],"dept":"홍보기획부","title":"금연 캠페인 포스터 제작","category":"금연캠페인","date":"2026-06-01","deadline":"","memo":"","status":"보류","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1091","assignee":"서가윤","allAssignees":["서가윤"],"dept":"행사진행부","title":"환경의 날 행사 계획","category":"환경의 날 행사","date":"2026-06-09","deadline":"2026-05-22","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1092","assignee":"서가윤","allAssignees":["서가윤"],"dept":"행사진행부","title":"환경의 날 행사 회의 - 점심시간, 방과후","category":"환경의 날 행사","date":"2026-06-09","deadline":"2026-05-22","memo":"","status":"진행중","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1093","assignee":"변유빈","allAssignees":["변유빈","박건우","이예은"],"dept":"회장단","title":"고사 관련 회의 - 점심시간","category":"환경의 날 행사","date":"2026-05-26","deadline":"","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1094","assignee":"서가윤","allAssignees":["서가윤"],"dept":"행사진행부","title":"양심생리대 채우기 총괄","category":"양심생리대","date":"2026-05-27","deadline":"","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1095","assignee":"이예은","allAssignees":["이예은"],"dept":"회장단","title":"모의선거 공약 정리","category":"모의선거 공약 발표","date":"2026-06-01","deadline":"2026-05-26","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1096","assignee":"박건우","allAssignees":["박건우"],"dept":"회장단","title":"모의선거 포스터 제작 총괄","category":"모의선거 공약 발표","date":"2026-06-01","deadline":"2026-05-27","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1097","assignee":"이윤서","allAssignees":["이윤서","양소율","김아민"],"dept":"알림부","title":"대영알리미 준비","category":"대영알리미 (6월)","date":"2026-05-29","deadline":"2026-05-27","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1099","assignee":"변유빈","allAssignees":["변유빈"],"dept":"회장단","title":"선거관리위원회 모집","category":"모의선거 공약 발표","date":"2026-06-01","deadline":"2026-05-27","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1100","assignee":"이윤서","allAssignees":["이윤서","양소율","김아민"],"dept":"알림부","title":"6월 대영알리미 일정 정하기\n- 대영알리미에 들어가야할 내용 전달함","category":"모의선거 공약 발표","date":"","deadline":"","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1101","assignee":"변유빈","allAssignees":["변유빈","박건우","이예은"],"dept":"회장단","title":"6월 지방선거 계획 수립\n- 일정 확인","category":"모의선거 공약 발표","date":"","deadline":"","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1102","assignee":"미지정","allAssignees":[""],"dept":"알림부","title":"스승의 날 상장 작성 방법 공유","category":"스승의 날 행사 준비","date":"2026-05-12","deadline":"2026-05-06","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1103","assignee":"서가윤","allAssignees":["서가윤"],"dept":"행사진행부","title":"디케 1회기 활동 기록","category":"스승의 날 행사 준비","date":"","deadline":"","memo":"","status":"완료","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1104","assignee":"미지정","allAssignees":[""],"dept":"홍보기획부","title":"영상 제작","category":"환경의 날 행사","date":"2026-06-09","deadline":"","memo":"","status":"예정","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true},{"id":"1108","assignee":"김나현","allAssignees":["김나현"],"dept":"홍보기획부","title":"급식캠페인 피켓","category":"환경의 날 행사","date":"2026-06-09","deadline":"","memo":"","status":"보류","subtasks":[],"createdAt":"2026-01-01T00:00:00.000Z","imported":true}];
 
 // ── 상태 ──
 let tasks=[];
+let events=[];
+let _evId=null;
 let sCY=new Date().getFullYear(),sCM=new Date().getMonth(),sCS=null;
 let tCY=new Date().getFullYear(),tCM=new Date().getMonth(),tCS=null;
 let allFilt='전체',sq='';
@@ -579,10 +648,56 @@ function chip(ds,st,fallbackDate){
   return '';
 }
 function isUA(t){return !t.assignee||t.assignee===''||t.assignee==='미지정'||!t.assignees||t.assignees.length===0;}
-function migrate(t){if(!t.assignees){t.assignees=t.allAssignees&&t.allAssignees.length&&t.allAssignees[0]?t.allAssignees:(t.assignee&&t.assignee!=='미지정'?[t.assignee]:[]);}return t;}
+function migrate(t){if(!t.assignees){t.assignees=t.allAssignees&&t.allAssignees.length&&t.allAssignees[0]?t.allAssignees:(t.assignee&&t.assignee!=='미지정'?[t.assignee]:[]);}return derive(t);}
+function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function addDays(ds,n){const d=new Date(ds+'T00:00:00');d.setDate(d.getDate()+n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+
+// ── 행사 / 1인별 완료 ──
+// 행사(eventId)에 연결된 업무만 1인별 완료 체크를 쓴다. 3~9월 기존 업무는 예전 방식 그대로.
+function isPer(t){return !!t.eventId;}
+function assOf(t){return (t.assignees||[t.assignee]).filter(n=>n&&n!=='미지정');}
+function doneNames(t){const db=t.doneBy||{};return assOf(t).filter(n=>db[n]);}
+// 상태는 저장값을 믿지 않고 doneBy에서 매번 다시 계산한다(동시 체크 시 어긋남 방지). 보류만 수동.
+function derive(t){
+  if(!isPer(t)||t.status==='보류')return t;
+  const ass=assOf(t),dn=doneNames(t);
+  if(ass.length&&dn.length===ass.length){
+    t.status='완료';
+    const db=t.doneBy||{};
+    t.completedAt=dn.map(n=>db[n]).sort().pop();
+  } else {
+    t.status=dn.length?'진행중':'예정';
+    delete t.completedAt;
+  }
+  return t;
+}
+function evById(id){return events.find(e=>e.id===id);}
+function evEnd(e){return e.end||e.start;}
+function evRange(e){const a=fD(e.start),b=evEnd(e)!==e.start?fD(evEnd(e)):'';return b?a+' ~ '+b:a;}
+function canEv(name){const m=gm(name);return m.dept==='회장단'||m.role==='부장';}
+function myName(){return document.getElementById('s0Name')?.value||'';}
+function evSorted(){
+  const td=todayStr();
+  const up=events.filter(e=>evEnd(e)>=td).sort((a,b)=>a.start.localeCompare(b.start));
+  const past=events.filter(e=>evEnd(e)<td).sort((a,b)=>b.start.localeCompare(a.start));
+  return {up,past};
+}
+function fillEvSel(id,cur){
+  const el=document.getElementById(id);if(!el)return;
+  const {up,past}=evSorted();
+  const opt=e=>'<option value="'+esc(e.id)+'">'+esc(evRange(e)+' '+e.name)+'</option>';
+  el.innerHTML='<option value="">행사 없음 (기타 업무)</option>'+
+    (up.length?'<optgroup label="다가오는 행사">'+up.map(opt).join('')+'</optgroup>':'')+
+    (past.length?'<optgroup label="지난 행사">'+past.map(opt).join('')+'</optgroup>':'');
+  el.value=cur&&evById(cur)?cur:'';
+}
+function loadMe(){try{const n=localStorage.getItem(ME_KEY);return n&&gm(n).name?n:'';}catch(e){return '';}}
+function saveMe(n){try{if(n)localStorage.setItem(ME_KEY,n);else localStorage.removeItem(ME_KEY);}catch(e){}}
 
 // ── 로컬 저장 ──
 function saveLocal(){localStorage.setItem(SK,JSON.stringify(tasks));}
+function saveEvLocal(){try{localStorage.setItem(EK,JSON.stringify(events));}catch(e){}}
 
 // ── Firebase ──
 async function fbLoad(){
@@ -598,10 +713,44 @@ async function fbLoad(){
     return true;
   }catch(e){console.warn('FB load 실패:',e);return false;}
 }
+// 업무 저장: 통째로 PUT하면 다른 사람이 방금 한 완료 체크(doneBy)를 덮어쓰므로
+// doneBy는 빼고 나머지 필드만 PATCH한다. doneBy는 fbSetDone으로 사람별 키에만 쓴다.
 async function fbPut(t){
   try{
-    await fetch(FB+'/tasks/'+t.id+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(t)});
+    const {doneBy,...rest}=t;
+    rest.eventId=t.eventId||null; // 행사 연결 해제 시 서버에서도 지워지게
+    const r=await fetch(FB+'/tasks/'+t.id+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(rest)});
+    if(!r.ok)throw new Error(r.status);
   }catch(e){console.warn('FB put 실패:',e);toast('⚠️ 서버 저장 실패 — 인터넷 연결을 확인해주세요');}
+}
+async function fbSetDone(id,name,val){
+  const url=FB+'/tasks/'+id+'/doneBy/'+encodeURIComponent(name)+'.json';
+  const r=val?await fetch(url,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(val)}):await fetch(url,{method:'DELETE'});
+  if(!r.ok)throw new Error(r.status);
+}
+async function evLoad(){
+  try{
+    const r=await fetch(FB+'/events.json');
+    if(!r.ok)return false;
+    const data=await r.json();
+    events=data?Object.values(data).filter(e=>e&&e.id&&e.start):[];
+    saveEvLocal();
+    return true;
+  }catch(e){console.warn('행사 로드 실패:',e);return false;}
+}
+async function evPut(ev){
+  try{
+    const r=await fetch(FB+'/events/'+ev.id+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(ev)});
+    if(!r.ok)throw new Error(r.status);
+    return true;
+  }catch(e){toast('⚠️ 행사 저장 실패 — 인터넷 연결을 확인해주세요');return false;}
+}
+async function evDel(id){
+  try{
+    const r=await fetch(FB+'/events/'+id+'.json',{method:'DELETE'});
+    if(!r.ok)throw new Error(r.status);
+    return true;
+  }catch(e){toast('⚠️ 행사 삭제 실패 — 인터넷 연결을 확인해주세요');return false;}
 }
 async function fbDel(id){
   try{await fetch(FB+'/tasks/'+id+'.json',{method:'DELETE'});}catch(e){toast('⚠️ 서버 삭제 실패 — 인터넷 연결을 확인해주세요');}
@@ -620,6 +769,7 @@ function initTasks(){
     tasks=SEED.map(t=>({...t})).map(migrate);
     saveLocal();
   }
+  try{events=JSON.parse(localStorage.getItem(EK)||'[]')||[];}catch(e){events=[];}
 }
 
 // ── 이름 셀렉트 ──
@@ -636,7 +786,7 @@ function fillSel(id){
   });
   if(cur)el.value=cur;
 }
-function fillAllSels(){['s0Name','s1Name','s2Name'].forEach(fillSel);}
+function fillAllSels(){['s0Name','s1Name'].forEach(fillSel);}
 
 function buildCWList(ex){
   const c=document.getElementById('cwList');if(!c)return;c.innerHTML='';
@@ -719,22 +869,26 @@ async function checkPw(){
 function enterStudent(){
   document.getElementById('modeSelect').style.display='none';
   document.getElementById('sView').style.display='block';
-  fillAllSels();buildCWList('');
-  document.getElementById('fDate').value=new Date().toISOString().split('T')[0];
+  fillAllSels();
+  const me=loadMe();
+  if(me)['s0Name','s1Name'].forEach(id=>{document.getElementById(id).value=me;});
+  buildCWList(me);
+  fillEvSel('fEv','');
+  // 로컬 캐시로 먼저 그리고, 서버 데이터는 도착하면 조용히 갈아끼운다
   renderAll_s();
-  fbLoad().then(ok=>{if(ok)renderAll_s();});
+  Promise.all([fbLoad(),evLoad()]).then(([a,b])=>{if(a||b){fillEvSel('fEv',document.getElementById('fEv').value);renderAll_s();}});
 }
 function enterTeacher(){
   document.getElementById('tView').style.display='block';
   renderAll_t();
-  fbLoad().then(ok=>{if(ok)renderAll_t();});
+  Promise.all([fbLoad(),evLoad()]).then(([a,b])=>{if(a||b)renderAll_t();});
 }
 function goHome(){
   ['modeSelect'].forEach(id=>document.getElementById(id).style.display='flex');
   ['sView','tView','pwScreen'].forEach(id=>document.getElementById(id).style.display='none');
 }
-function renderAll_s(){renderUnNotice();renderMyTasks();renderManage();renderSDept();}
-function renderAll_t(){renderDash();renderTDept();renderTStu();renderAllTasks();}
+function renderAll_s(){renderUnNotice();renderMyTasks();renderSDept();}
+function renderAll_t(){renderDash();renderTEvents();renderTDept();renderTStu();renderAllTasks();}
 
 function closeMov(id){document.getElementById(id).classList.remove('open');}
 
@@ -744,8 +898,10 @@ function swTab(navId,panels,n,fns){
   panels.forEach((p,i)=>{const el=document.getElementById(p);if(el)el.classList.toggle('active',i===n);});
   fns[n]&&fns[n]();
 }
-const sFns=[renderMyTasks,()=>{},renderManage,()=>renderCal('s'),renderSDept];
-const tFns=[renderDash,()=>renderCal('t'),renderTDept,renderTStu,renderAllTasks,null];
+const S_PANELS=['sP0','sP1','sP3','sP4'];
+const T_PANELS=['tP0','tPE','tP1','tP2','tP3','tP4','tP5'];
+const sFns=[renderMyTasks,()=>{},()=>renderCal('s'),renderSDept];
+const tFns=[renderDash,()=>renderTEvents(),()=>renderCal('t'),renderTDept,renderTStu,renderAllTasks,null];
 
 // ── 카드 렌더 ──
 function card(t,opts){
@@ -777,14 +933,26 @@ function card(t,opts){
       ${showEB?`<button type="button" class="sdel2" data-action="delSub" data-id="${t.id}" data-idx="${i}">×</button>`:''}
     </div>`).join('')}</div>`:'' ;
   const addH=showEB?`<div class="add-si"><input type="text" placeholder="세부 할 일 추가" id="ns-${t.id}"><input type="date" class="dm" id="nd-${t.id}"><button type="button" data-action="addSub" data-id="${t.id}">추가</button></div>`:'';
-  const sbH=showSB?`<div class="sb">${['예정','진행중','완료','보류'].map(s=>`<button type="button" class="sb-btn${t.status===s?' a-'+s:''}" data-action="chgSt" data-id="${t.id}" data-status="${s}">${s}</button>`).join('')}</div>`:'';
+  const per=isPer(t);
+  const ev=per?evById(t.eventId):null;
+  let ppH='';
+  if(per){
+    const left=ass.filter(n=>!(t.doneBy||{})[n]);
+    const dnc=ass.length-left.length;
+    const me=opts.me;
+    const mine=me&&ass.includes(me);
+    const iDid=mine&&(t.doneBy||{})[me];
+    ppH=`<div class="pp"><div class="pp-line"><b>${ass.length}명 중 ${dnc}명 완료</b>${left.length?` · 남은 사람: <span class="pp-left">${left.map(esc).join(', ')}</span>`:' · 모두 끝났어요 🎉'}</div>`+
+      (mine&&t.status!=='보류'?`<button type="button" class="me-btn${iDid?' undo':''}" data-action="meDone" data-id="${t.id}">${iDid?'↩ 내 완료 취소':'✅ 내 몫 완료'}</button>`:'')+`</div>`;
+  }
+  const sbH=showSB&&!per?`<div class="sb">${['예정','진행중','완료','보류'].map(s=>`<button type="button" class="sb-btn${t.status===s?' a-'+s:''}" data-action="chgSt" data-id="${t.id}" data-status="${s}">${s}</button>`).join('')}</div>`:'';
   return `<div class="tc" id="c-${t.id}">
     <div class="tc-top"><div class="tc-ti">${t.title}</div><div class="tc-r">${shB}${eb}${db}<span class="tag tag-${t.status}">${t.status}</span></div></div>
-    <div class="tc-meta">${t.category?`<span class="db db-${t.dept}">${t.category}</span>`:'<span style="font-size:11px;color:var(--text3);font-style:italic">카테고리 미지정</span>'}${ass.length>1?`<span style="font-size:11px;color:var(--text2)">${ass.join(', ')}</span>`:''}</div>
+    <div class="tc-meta">${ev?`<span class="ev-chip">🎪 ${esc(ev.name)}</span>`:t.category?`<span class="db db-${t.dept}">${t.category}</span>`:'<span style="font-size:11px;color:var(--text3);font-style:italic">카테고리 미지정</span>'}${ass.length>1&&!per?`<span style="font-size:11px;color:var(--text2)">${ass.join(', ')}</span>`:''}</div>
     ${dateL?`<div class="tc-meta" style="margin-top:2px">${dateL}</div>`:''}
     ${subH}${addH}
     ${t.memo?`<div style="margin-top:8px;font-size:12px;color:var(--text2);line-height:1.6">${t.memo}</div>`:''}
-    ${sbH}
+    ${ppH}${sbH}
   </div>`;
 }
 function doneSec(list,opts,id){
@@ -823,12 +991,48 @@ function renderMyTasks(){
   renderUnNotice();
   const name=document.getElementById('s0Name').value;
   const area=document.getElementById('myArea');
+  document.getElementById('s0NameWrap').style.display=name?'none':'';
+  document.getElementById('sChName').style.display=name?'':'none';
+  if(!name){document.getElementById('sHdr').textContent='학생 모드';document.getElementById('sBadge').textContent='';}
   if(!name){area.innerHTML='<div class="empty" style="padding:20px 24px"><div class="ei">👆</div><p>이름을 선택하면<br>내 업무가 나타나요</p><img src="illust-student.png" alt="" style="width:100%;max-width:260px;margin-top:20px;border-radius:16px;opacity:0.9"></div>';return;}
   document.getElementById('sHdr').textContent=name+'의 업무';
   document.getElementById('sBadge').textContent=gd(name);
   const all=tasks.filter(t=>(t.assignees||[t.assignee]).includes(name));
-  if(!all.length){area.innerHTML='<div class="empty"><div class="ei">📝</div><p>등록된 업무가 없어요</p></div>';return;}
-  area.innerHTML=renderGrp(all.filter(t=>t.status!=='완료'),{})+doneSec(all.filter(t=>t.status==='완료'),{},'my');
+  const opts={showSB:true,showEB:true,showDel:true,me:name};
+  // 1) 다가오는 행사(오늘~2주) — 행사마다 내가 맡은 일
+  const td=todayStr(),lim=addDays(td,14);
+  const near=events.filter(e=>evEnd(e)>=td&&e.start<=lim).sort((a,b)=>a.start.localeCompare(b.start));
+  const shown=new Set();
+  let h='<div class="sec-t"><span>🎪 다가오는 행사 (2주)</span></div>';
+  if(canEv(name))h+='<button type="button" class="ev-new" data-action="evNew">+ 행사 등록</button>';
+  if(!near.length)h+='<div class="ev-none" style="margin-bottom:16px">2주 안에 등록된 행사가 없어요</div>';
+  const others=[];
+  near.forEach(e=>{
+    const et=tasks.filter(t=>t.eventId===e.id);
+    const mine=et.filter(t=>assOf(t).includes(name));
+    // 내가 맡은 일이 없는 행사는 아래에 한 줄씩만
+    if(!mine.length){others.push(e);return;}
+    mine.forEach(t=>shown.add(t.id));
+    const d=dU(e.start);
+    const dd=d>0?`<span class="chip chip-soon">D-${d}</span>`:(evEnd(e)>=td?'<span class="chip chip-today">진행 중</span>':'');
+    const dn=et.filter(t=>t.status==='완료').length;
+    const act=mine.filter(t=>t.status!=='완료'),fin=mine.filter(t=>t.status==='완료');
+    h+=`<div class="ev" style="border-left-color:${e.dept?dc(e.dept):'var(--accent)'}"><div class="ev-hd"><div class="ev-nm">${esc(e.name)}</div>${canEv(name)?`<button type="button" class="eb" data-action="evEdit" data-id="${esc(e.id)}">✏️</button>`:''}</div>
+      <div class="ev-dt">📅 ${evRange(e)} ${dd}${e.dept?`<span class="db db-${e.dept}">${e.dept}</span>`:''}<span>· 전체 업무 ${dn}/${et.length} 완료</span></div>
+      ${e.desc?`<div class="ev-desc">${esc(e.desc)}</div>`:''}
+      <div class="ev-sub">내가 맡은 일</div>
+      ${act.map(t=>card(t,opts)).join('')}${fin.length?`<div class="ev-none">✅ 끝낸 일: ${fin.map(t=>esc(t.title)).join(', ')}</div>`:''}
+    </div>`;
+  });
+  if(others.length)h+='<div class="ev-front" style="max-width:none;margin-bottom:8px"><div class="ev-front-t" style="color:var(--text2)">내가 맡은 일이 없는 행사</div>'+others.map(e=>
+    '<div class="ev-front-r"><div class="ev-front-d">'+evRange(e).replace(' ~ ','~<br>')+'</div><div class="ev-front-n">'+esc(e.name)+'</div>'+(canEv(name)?'<button type="button" class="eb" data-action="evEdit" data-id="'+esc(e.id)+'">✏️</button>':'')+'</div>').join('')+'</div>';
+  // 2) 그 밖의 내 업무
+  const rest=all.filter(t=>!shown.has(t.id));
+  h+='<div class="sec-t" style="margin-top:20px"><span>📝 그 밖의 내 업무</span></div>';
+  const ra=rest.filter(t=>t.status!=='완료');
+  h+=ra.length?renderGrp(ra,opts):'<div class="ev-none">남은 업무가 없어요 🎉</div>';
+  h+=doneSec(rest.filter(t=>t.status==='완료'),opts,'my');
+  area.innerHTML=h;
 }
 
 // ── 학생: 업무 등록 ──
@@ -845,27 +1049,19 @@ function submitTask(){
   if(!title){toast('업무명을 입력해주세요');return;}
   const subs=[];
   document.querySelectorAll('.sir').forEach(r=>{const tx=r.querySelector('.st').value.trim();const dt=r.querySelector('.sd').value;if(tx)subs.push({text:tx,date:dt,done:false});});
-  if(!subs.length){toast('세부 할 일을 1개 이상 입력해주세요');return;}
   const cws=[...document.querySelectorAll('.cw-cb:checked')].map(x=>x.value);
   const ass=[name,...cws];
-  const t={id:crypto.randomUUID(),assignee:name,assignees:ass,dept:gd(name),title,category:document.getElementById('fCat').value.trim(),date:document.getElementById('fDate').value,deadline:document.getElementById('fDeadline').value,memo:document.getElementById('fMemo').value.trim(),status:'예정',subtasks:subs,createdAt:new Date().toISOString()};
+  const evId=document.getElementById('fEv').value;
+  const ev=evById(evId);
+  const t={id:crypto.randomUUID(),assignee:name,assignees:ass,dept:gd(name),title,category:ev?ev.name:document.getElementById('fCat').value.trim(),date:document.getElementById('fDate').value,deadline:document.getElementById('fDeadline').value,memo:document.getElementById('fMemo').value.trim(),status:'예정',subtasks:subs,createdAt:new Date().toISOString()};
+  if(ev)t.eventId=ev.id;
   tasks.push(t);saveLocal();fbPut(t);
   toast('✅ '+ass.join(', ')+'에게 업무 등록!');
-  document.getElementById('fTitle').value='';document.getElementById('fCat').value='';document.getElementById('fMemo').value='';
+  ['fTitle','fCat','fMemo','fDate','fDeadline','fEv'].forEach(id=>{document.getElementById(id).value='';});
+  document.getElementById('fCatWrap').style.display='';
   document.getElementById('subList').innerHTML='<div class="sir"><input type="text" placeholder="예: 행사 장소 섭외" class="st"><input type="date" class="dm sd"><button type="button" class="sdel" data-action="rmSub">×</button></div>';
   document.querySelectorAll('.cw-cb').forEach(x=>x.checked=false);
-  setTimeout(()=>{['s0Name','s1Name','s2Name'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=name;});buildCWList(name);swTab('sTnav',['sP0','sP1','sP2','sP3','sP4'],0,sFns);},600);
-}
-
-// ── 학생: 업무 관리 ──
-function renderManage(){
-  const name=document.getElementById('s2Name').value;
-  const area=document.getElementById('manArea');
-  if(!name){area.innerHTML='<div class="empty" style="padding:20px 24px"><div class="ei">👆</div><p>이름을 선택해주세요</p><img src="illust-student.png" alt="" style="width:100%;max-width:260px;margin-top:20px;border-radius:16px;opacity:0.9"></div>';return;}
-  const all=tasks.filter(t=>(t.assignees||[t.assignee]).includes(name));
-  if(!all.length){area.innerHTML='<div class="empty"><div class="ei">📝</div><p>등록된 업무가 없어요</p></div>';return;}
-  const opts={showSB:true,showEB:true,showDel:true};
-  area.innerHTML=renderGrp(all.filter(t=>t.status!=='완료'),opts)+doneSec(all.filter(t=>t.status==='완료'),opts,'man');
+  setTimeout(()=>{['s0Name','s1Name'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=name;});buildCWList(name);swTab('sTnav',S_PANELS,0,sFns);},600);
 }
 
 // ── 상태 변경 ──
@@ -883,7 +1079,8 @@ function togSub(id,idx){
   const t=tasks.find(x=>x.id===id);if(!t||!t.subtasks)return;
   t.subtasks[idx].done=!t.subtasks[idx].done;
   const cnt=t.subtasks.filter(s=>s.done).length;
-  if(cnt===0)t.status='예정';
+  if(isPer(t)){} // 행사 업무: 세부 할 일은 체크리스트일 뿐, 완료는 1인별 체크로
+  else if(cnt===0)t.status='예정';
   else if(cnt===t.subtasks.length){t.status='완료';t.completedAt=new Date().toISOString();}
   else t.status='진행중';
   saveLocal();fbPut(t);gasLog(t);refresh();
@@ -919,7 +1116,8 @@ function delSub(id,idx){
   const t=tasks.find(x=>x.id===id);if(!t||!t.subtasks)return;
   t.subtasks.splice(idx,1);
   const cnt=t.subtasks.filter(s=>s.done).length;
-  if(!t.subtasks.length)t.status='예정';
+  if(isPer(t)){}
+  else if(!t.subtasks.length)t.status='예정';
   else if(cnt===t.subtasks.length)t.status='완료';
   else if(cnt>0)t.status='진행중';
   else t.status='예정';
@@ -928,7 +1126,7 @@ function delSub(id,idx){
 
 // ── 자기 배정 ──
 function selfAssign(id){
-  const name=['s0Name','s1Name','s2Name'].map(x=>document.getElementById(x)?.value).find(x=>x);
+  const name=['s0Name','s1Name'].map(x=>document.getElementById(x)?.value).find(x=>x);
   if(!name){toast('먼저 내 이름을 선택해주세요');return;}
   const t=tasks.find(x=>x.id===id);if(!t)return;
   t.assignee=name;t.assignees=[name];t.dept=gd(name);
@@ -955,6 +1153,8 @@ function openEdit(id){
   _editId=id;_editStatus=t.status;
   document.getElementById('mTi').value=t.title||'';
   document.getElementById('mCat').value=t.category||'';
+  fillEvSel('mEv',t.eventId||'');
+  document.getElementById('mStHint').style.display=isPer(t)?'block':'none';
   document.getElementById('mDate').value=t.date||'';
   document.getElementById('mDead').value=t.deadline||'';
   document.getElementById('mMemo').value=t.memo||'';
@@ -973,17 +1173,31 @@ function saveEdit(){
   t.date=document.getElementById('mDate').value;
   t.deadline=document.getElementById('mDead').value;
   t.memo=document.getElementById('mMemo').value.trim();
-  if(_editStatus){
-    if(_editStatus==='완료'&&t.status!=='완료'){(t.subtasks||[]).forEach(s=>s.done=true);t.completedAt=new Date().toISOString();}
-    if(_editStatus==='예정')(t.subtasks||[]).forEach(s=>s.done=false);
-    t.status=_editStatus;
-  }
+  const wasPer=isPer(t),wasDone=t.status==='완료';
+  const newEv=document.getElementById('mEv').value;
+  if(newEv){t.eventId=newEv;const ev=evById(newEv);if(ev&&(!t.category||!wasPer))t.category=ev.name;}else delete t.eventId;
   const panel=document.getElementById('mAssigneePanel');
   if(panel&&panel.style.display!=='none'){
     const sel=[...document.querySelectorAll('.me-cb:checked')].map(x=>x.value);
     if(sel.length){t.assignees=sel;t.assignee=sel[0];t.dept=gd(sel[0]);}
   }
-  saveLocal();fbPut(t);gasLog(t);closeMov('editMov');refresh();
+  const doneWrites=[];
+  if(isPer(t)){
+    // 이미 완료된 기존 업무를 행사에 새로 붙이면, 완료 상태가 풀리지 않게 담당자 전원을 완료 처리
+    if(!wasPer&&wasDone){
+      t.doneBy=t.doneBy||{};
+      const at=t.completedAt||new Date().toISOString();
+      assOf(t).forEach(n=>{if(!t.doneBy[n]){t.doneBy[n]=at;doneWrites.push([n,at]);}});
+    }
+    if(_editStatus==='보류')t.status='보류';
+    else{if(t.status==='보류')t.status='예정';derive(t);}
+  } else if(_editStatus){
+    if(_editStatus==='완료'&&t.status!=='완료'){(t.subtasks||[]).forEach(s=>s.done=true);t.completedAt=new Date().toISOString();}
+    if(_editStatus==='예정')(t.subtasks||[]).forEach(s=>s.done=false);
+    t.status=_editStatus;
+  }
+  saveLocal();fbPut(t);gasLog(t);
+  doneWrites.forEach(([n,at])=>fbSetDone(t.id,n,at).catch(()=>toast('⚠️ 서버 저장 실패 — 인터넷 연결을 확인해주세요')));closeMov('editMov');refresh();
   toast('✅ 수정 완료!');
   if(t.status==='완료')setTimeout(openDones,100);
 }
@@ -1021,7 +1235,8 @@ function renderCal(mode){
     const iS=sel===ds;
     const dt=tasks.filter(t=>t.deadline===ds||t.date===ds);
     const dots=[...new Set(dt.map(t=>dc(t.dept)))].slice(0,4);
-    h+='<div class="cday'+(iT?' today':'')+(iS?' sel':'')+'" data-cal="'+mode+'" data-date="'+ds+'"><div class="dnum">'+d+'</div><div class="ddots">'+dots.map(c=>'<div class="ddot" style="background:'+c+'"></div>').join('')+'</div></div>';
+    const hasEv=events.some(e=>e.start<=ds&&ds<=evEnd(e));
+    h+='<div class="cday'+(iT?' today':'')+(iS?' sel':'')+'" data-cal="'+mode+'" data-date="'+ds+'"><div class="dnum">'+d+'</div>'+(hasEv?'<div class="evbar"></div>':'')+'<div class="ddots">'+dots.map(c=>'<div class="ddot" style="background:'+c+'"></div>').join('')+'</div></div>';
   }
   const rem=(fd+ld)%7===0?0:7-(fd+ld)%7;
   for(let d=1;d<=rem;d++)h+='<div class="cday other"><div class="dnum">'+d+'</div></div>';
@@ -1033,8 +1248,10 @@ function renderCalDet(mode){
   const det=document.getElementById(mode+'CD');
   if(!sel){det.innerHTML='';return;}
   const dt=tasks.filter(t=>t.deadline===sel||t.date===sel);
-  if(!dt.length){det.innerHTML='<div class="cdet"><div class="cdet-d">'+fD(sel)+'</div><div style="font-size:13px;color:var(--text3)">업무 없음</div></div>';return;}
-  det.innerHTML='<div class="cdet"><div class="cdet-d">'+fD(sel)+' — '+dt.length+'개</div>'+dt.map(t=>'<div class="ctr"><div class="cbar" style="background:'+dc(t.dept)+'"></div><div style="flex:1"><div style="font-size:13px;font-weight:600;margin-bottom:3px">'+t.title+'</div><div style="font-size:11px;color:var(--text2)">'+(t.assignees||[t.assignee]).join(', ')+' · '+t.dept+'</div></div><span class="tag tag-'+t.status+'">'+t.status+'</span></div>').join('')+'</div>';
+  const evs=events.filter(e=>e.start<=sel&&sel<=evEnd(e));
+  const evH=evs.map(e=>'<div class="cev">🎪 '+esc(e.name)+'</div>').join('');
+  if(!dt.length){det.innerHTML='<div class="cdet"><div class="cdet-d">'+fD(sel)+'</div>'+evH+'<div style="font-size:13px;color:var(--text3)">업무 없음</div></div>';return;}
+  det.innerHTML='<div class="cdet"><div class="cdet-d">'+fD(sel)+' — '+dt.length+'개</div>'+evH+dt.map(t=>'<div class="ctr"><div class="cbar" style="background:'+dc(t.dept)+'"></div><div style="flex:1"><div style="font-size:13px;font-weight:600;margin-bottom:3px">'+t.title+'</div><div style="font-size:11px;color:var(--text2)">'+(t.assignees||[t.assignee]).join(', ')+' · '+t.dept+'</div></div><span class="tag tag-'+t.status+'">'+t.status+'</span></div>').join('')+'</div>';
 }
 
 // ── 부서 현황 ──
@@ -1132,13 +1349,11 @@ function renderAllTasks(){
 
 // ── refresh ──
 function refresh(){
-  const s0=document.getElementById('s0Name');
-  const s2=document.getElementById('s2Name');
   renderUnNotice();
-  if(s0&&s0.value)renderMyTasks();
-  if(s2&&s2.value)renderManage();
+  renderMyTasks();
   renderSDept();
-  if(document.getElementById('tView').style.display!=='none'){renderDash();renderTDept();renderTStu();renderAllTasks();}
+  renderFront();
+  if(document.getElementById('tView').style.display!=='none'){renderDash();renderTEvents();renderTDept();renderTStu();renderAllTasks();}
 }
 function openDones(){
   ['my','man','all'].forEach(id=>{
@@ -1186,6 +1401,7 @@ function bindStatic(){
   document.getElementById('tAddTaskBtn').addEventListener('click',()=>{
     buildTAddAssigneeCBs();
     ['tAddTitle','tAddCat','tAddMemo'].forEach(id=>document.getElementById(id).value='');
+    fillEvSel('tAddEv','');
     ['tAddDate','tAddDead'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('tAddSubList').innerHTML='<div class="sir"><input type="text" placeholder="예: 행사 장소 섭외" class="st"><input type="date" class="dm sd"><button type="button" class="sdel" data-action="tAddRmSub">×</button></div>';
     _tAddStatus='예정';
@@ -1224,15 +1440,18 @@ function bindStatic(){
     const t={
       id:crypto.randomUUID(),assignee,assignees:checked,allAssignees:checked,
       dept:gd(assignee),title,
-      category:document.getElementById('tAddCat').value.trim(),
+      category:(evById(document.getElementById('tAddEv').value)||{}).name||document.getElementById('tAddCat').value.trim(),
       date:document.getElementById('tAddDate').value,
       deadline:document.getElementById('tAddDead').value,
       memo:document.getElementById('tAddMemo').value.trim(),
       status:_tAddStatus,subtasks:subs,createdAt:new Date().toISOString()
     };
+    const tEv=document.getElementById('tAddEv').value;
+    if(tEv&&evById(tEv)){t.eventId=tEv;if(t.status!=='보류')derive(t);}
     tasks.push(t);saveLocal();
     fbPut(t).then(()=>{
       renderDash();
+      renderTEvents();
       renderTStu();
       renderAllTasks();
     });
@@ -1274,8 +1493,29 @@ function bindStatic(){
   document.getElementById('tCN').addEventListener('click',()=>{tCM++;if(tCM>11){tCM=0;tCY++;}renderCal('t');});
 
   // 탭
-  document.querySelectorAll('#sTnav .ti').forEach(ti=>ti.addEventListener('click',()=>swTab('sTnav',['sP0','sP1','sP2','sP3','sP4'],parseInt(ti.dataset.tab),sFns)));
-  document.querySelectorAll('#tTnav .ti').forEach(ti=>ti.addEventListener('click',()=>swTab('tTnav',['tP0','tP1','tP2','tP3','tP4','tP5'],parseInt(ti.dataset.tab),tFns)));
+  document.querySelectorAll('#sTnav .ti').forEach(ti=>ti.addEventListener('click',()=>swTab('sTnav',S_PANELS,parseInt(ti.dataset.tab),sFns)));
+  document.querySelectorAll('#tTnav .ti').forEach(ti=>ti.addEventListener('click',()=>swTab('tTnav',T_PANELS,parseInt(ti.dataset.tab),tFns)));
+
+  // 행사 모달
+  document.getElementById('evSave').addEventListener('click',saveEv);
+  document.getElementById('evCancel').addEventListener('click',()=>closeMov('evMov'));
+  document.getElementById('evDelete').addEventListener('click',deleteEv);
+  // 이름 바꾸기
+  document.getElementById('sChName').addEventListener('click',()=>{
+    const w=document.getElementById('s0NameWrap');w.style.display='';
+    swTab('sTnav',S_PANELS,0,sFns);
+    document.getElementById('s0Name').focus();
+  });
+  // 행사 선택 시 행사일 자동 채우기
+  const evPick=(selId,dateId,catWrapId)=>{
+    document.getElementById(selId).addEventListener('change',e=>{
+      const ev=evById(e.target.value);
+      if(ev)document.getElementById(dateId).value=ev.start;
+      if(catWrapId)document.getElementById(catWrapId).style.display=ev?'none':'';
+    });
+  };
+  evPick('fEv','fDate','fCatWrap');
+  evPick('tAddEv','tAddDate');
 
   // 필터
   document.querySelectorAll('#filterBar .fc').forEach(fc=>fc.addEventListener('click',()=>{allFilt=fc.dataset.filter;document.querySelectorAll('#filterBar .fc').forEach(c=>c.classList.toggle('active',c===fc));renderAllTasks();}));
@@ -1340,18 +1580,29 @@ document.addEventListener('click',function(e){
   if(action==='assign'){openAssign(id);return;}
   if(action==='openStu'){openStu(el.dataset.name);return;}
   if(action==='selfAssign'){selfAssign(id);return;}
+  if(action==='meDone'){meDone(id);return;}
+  if(action==='evNew'){openEv(null);return;}
+  if(action==='evEdit'){openEv(id);return;}
+  if(action==='evSeed'){seedOct();return;}
+  if(action==='evAddTask'){
+    document.getElementById('tAddTaskBtn').click();
+    const ev=evById(id);
+    if(ev){document.getElementById('tAddEv').value=id;document.getElementById('tAddDate').value=ev.start;}
+    return;
+  }
   if(action==='rmSub'){if(document.querySelectorAll('.sir').length<=1){toast('최소 1개 필요');return;}el.closest('.sir').remove();return;}
   if(action==='tAddRmSub'){if(document.querySelectorAll('#tAddSubList .sir').length<=1){toast('최소 1개 필요');return;}el.closest('.sir').remove();return;}
 });
 
 // 이름 change
 document.addEventListener('change',function(e){
-  if(['s0Name','s1Name','s2Name'].includes(e.target.id)){
+  if(['s0Name','s1Name'].includes(e.target.id)){
     const name=e.target.value;
-    ['s0Name','s1Name','s2Name'].forEach(id=>{const el=document.getElementById(id);if(el&&el.value!==name)el.value=name;});
+    ['s0Name','s1Name'].forEach(id=>{const el=document.getElementById(id);if(el&&el.value!==name)el.value=name;});
+    saveMe(name);
     buildCWList(name);
-    if(e.target.id==='s0Name')renderMyTasks();
-    if(e.target.id==='s2Name')renderManage();
+    renderMyTasks();
+    renderSDept();
   }
 });
 
@@ -1389,7 +1640,7 @@ function renderSDept(){
   html+='</div>';
   area.innerHTML=html;
 }
-sFns[4]=renderSDept;
+sFns[3]=renderSDept;
 
 // ── 공지 로드 ──
 async function loadNotice(){
@@ -1404,8 +1655,130 @@ async function loadNotice(){
   }catch(e){}
 }
 
+// ── 1인별 완료 체크 ──
+async function meDone(id){
+  const name=myName();
+  const t=tasks.find(x=>x.id===id);if(!t||!name)return;
+  if(!assOf(t).includes(name)){toast('내가 담당한 업무가 아니에요');return;}
+  t.doneBy=t.doneBy||{};
+  const val=t.doneBy[name]?null:new Date().toISOString();
+  if(val)t.doneBy[name]=val;else delete t.doneBy[name];
+  derive(t);saveLocal();refresh();
+  toast(val?'✅ 내 몫 완료!':'↩ 완료 취소');
+  try{
+    await fbSetDone(id,name,val);
+    // 다른 사람이 방금 체크했을 수도 있으니 서버의 최신 체크 현황으로 다시 계산
+    const r=await fetch(FB+'/tasks/'+id+'/doneBy.json');
+    if(r.ok){t.doneBy=(await r.json())||{};derive(t);saveLocal();refresh();}
+    await fetch(FB+'/tasks/'+id+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:t.status,completedAt:t.completedAt||null})});
+    gasLog(t);
+  }catch(e){toast('⚠️ 서버 저장 실패 — 인터넷 연결을 확인해주세요');}
+}
+
+// ── 행사 등록/수정/삭제 ──
+function openEv(id){
+  const e=id?evById(id):null;
+  _evId=e?e.id:null;
+  document.getElementById('evMovTitle').textContent=e?'행사 수정':'행사 등록';
+  document.getElementById('evName').value=e?e.name:'';
+  document.getElementById('evStart').value=e?e.start:'';
+  document.getElementById('evEnd').value=e&&e.end!==e.start?e.end:'';
+  document.getElementById('evDesc').value=e?(e.desc||''):'';
+  document.getElementById('evDept').innerHTML='<option value="">선택 안 함</option>'+DEPTS.map(d=>'<option value="'+d+'">'+d+'</option>').join('');
+  document.getElementById('evDept').value=e?(e.dept||''):'';
+  document.getElementById('evDelete').style.display=e?'block':'none';
+  document.getElementById('evMov').classList.add('open');
+}
+async function saveEv(){
+  const name=document.getElementById('evName').value.trim();
+  const start=document.getElementById('evStart').value;
+  const end=document.getElementById('evEnd').value||start;
+  if(!name){toast('행사 이름을 입력해주세요');return;}
+  if(!start){toast('시작일을 입력해주세요');return;}
+  if(end<start){toast('종료일이 시작일보다 빨라요');return;}
+  const old=_evId?evById(_evId):null;
+  const inTeacher=document.getElementById('tView').style.display!=='none';
+  const ev={
+    id:old?old.id:crypto.randomUUID(),name,start,end,
+    dept:document.getElementById('evDept').value,
+    desc:document.getElementById('evDesc').value.trim(),
+    createdBy:old?old.createdBy:(inTeacher?'선생님':myName()),
+    createdAt:old?old.createdAt:new Date().toISOString()
+  };
+  if(!await evPut(ev))return;
+  events=events.filter(e=>e.id!==ev.id).concat(ev);saveEvLocal();
+  closeMov('evMov');refresh();fillEvSel('fEv',document.getElementById('fEv').value);
+  toast(old?'✅ 행사 수정 완료':'🎪 행사 등록 완료');
+}
+async function deleteEv(){
+  const e=evById(_evId);if(!e)return;
+  const n=tasks.filter(t=>t.eventId===e.id).length;
+  if(n){toast('이 행사에 연결된 업무가 '+n+'개 있어요. 먼저 업무를 옮기거나 지워주세요');return;}
+  if(!confirm('"'+e.name+'" 행사를 삭제할까요?'))return;
+  if(!await evDel(e.id))return;
+  events=events.filter(x=>x.id!==e.id);saveEvLocal();
+  closeMov('evMov');refresh();toast('🗑 행사 삭제됨');
+}
+async function seedOct(){
+  if(events.length){toast('이미 등록된 행사가 있어요');return;}
+  if(!confirm('10월 일정 '+EV_OCT.length+'개를 한 번에 등록할까요?'))return;
+  const now=new Date().toISOString();
+  const list=EV_OCT.map(e=>({...e,id:crypto.randomUUID(),dept:'',createdBy:'선생님',createdAt:now}));
+  const ok=await Promise.all(list.map(evPut));
+  list.forEach((e,i)=>{if(ok[i])events.push(e);});
+  saveEvLocal();refresh();
+  toast('🎪 행사 '+ok.filter(Boolean).length+'개 등록 완료');
+}
+
+// ── 교사: 행사 탭 ──
+function renderTEvents(){
+  const area=document.getElementById('tEvArea');if(!area)return;
+  let h='<button type="button" class="ev-new" data-action="evNew">+ 행사 등록</button>';
+  if(!events.length)h+='<button type="button" class="ev-add" data-action="evSeed" style="margin:0 0 16px;padding:12px;font-weight:700">📥 10월 일정 '+EV_OCT.length+'개 한 번에 등록</button>';
+  const {up,past}=evSorted();
+  const evCard=e=>{
+    const et=tasks.filter(t=>t.eventId===e.id);
+    const dn=et.filter(t=>t.status==='완료').length;
+    const pct=et.length?Math.round(dn/et.length*100):0;
+    const col=e.dept?dc(e.dept):'var(--accent)';
+    const rows=et.sort((a,b)=>(a.status==='완료')-(b.status==='완료')).map(t=>{
+      const ass=assOf(t),left=ass.filter(n=>!(t.doneBy||{})[n]);
+      const who=!ass.length?'<span class="pp-left">담당자 미배정</span>':t.status==='완료'?'모두 완료':'남은 사람: <span class="pp-left">'+left.map(esc).join(', ')+'</span> ('+(ass.length-left.length)+'/'+ass.length+')';
+      return '<div class="ev-row"><div style="flex:1"><div class="ev-row-ti">'+esc(t.title)+'</div><div class="ev-row-who">'+who+'</div></div><span class="tag tag-'+t.status+'">'+t.status+'</span><button type="button" class="eb" data-action="edit" data-id="'+t.id+'">✏️</button></div>';
+    }).join('');
+    return '<div class="ev" style="border-left-color:'+col+'"><div class="ev-hd"><div class="ev-nm">'+esc(e.name)+'</div><button type="button" class="eb" data-action="evEdit" data-id="'+esc(e.id)+'">✏️</button></div>'+
+      '<div class="ev-dt">📅 '+evRange(e)+(e.dept?' <span class="db db-'+e.dept+'">'+e.dept+'</span>':'')+'<span>· 업무 '+dn+'/'+et.length+' 완료</span></div>'+
+      (e.desc?'<div class="ev-desc">'+esc(e.desc)+'</div>':'')+
+      '<div class="dp" style="margin-bottom:6px"><div class="dpf" style="width:'+pct+'%;background:'+col+'"></div></div>'+
+      (rows||'<div class="ev-none">연결된 업무가 없어요</div>')+
+      '<button type="button" class="ev-add" data-action="evAddTask" data-id="'+esc(e.id)+'">+ 이 행사에 업무 추가</button></div>';
+  };
+  h+='<div class="stl">🎪 진행 중 · 다가오는 행사 ('+up.length+')</div>'+(up.length?up.map(evCard).join(''):'<div class="ev-none">없음</div>');
+  // 아직 행사에 안 붙은 10월 이후 업무 — 여기서 ✏️로 행사를 골라 연결
+  const un=tasks.filter(t=>!t.eventId&&t.status!=='완료'&&(effDeadline(t)>='2026-10-01'||(!effDeadline(t)&&(t.createdAt||'')>='2026-09-01')))
+    .sort((a,b)=>(effDeadline(a)||'9').localeCompare(effDeadline(b)||'9'));
+  h+='<div class="stl">🔗 행사 미연결 업무 (10월 이후 · '+un.length+'개)</div>'+
+    '<div class="hint" style="margin:-4px 0 10px">✏️를 눌러 행사를 고르면 연결돼요. 연결하면 담당자별 완료 체크로 바뀌어요.</div>'+
+    (un.length?un.map(t=>card(t,{showEB:true})).join(''):'<div class="ev-none">없음 ✅</div>');
+  if(past.length)h+='<div class="dt" data-done="evpast"><span class="arr">▶</span><span>지난 행사 '+past.length+'개</span></div><div class="dl" id="dl-evpast">'+past.map(evCard).join('')+'</div>';
+  area.innerHTML=h;
+}
+
+// ── 메인 화면: 다가오는 행사 목록 ──
+function renderFront(){
+  const box=document.getElementById('evFront');if(!box)return;
+  const td=todayStr(),lim=addDays(td,31);
+  const list=events.filter(e=>evEnd(e)>=td&&e.start<=lim).sort((a,b)=>a.start.localeCompare(b.start)||a.name.localeCompare(b.name)).slice(0,10);
+  if(!list.length){box.style.display='none';return;}
+  box.innerHTML='<div class="ev-front-t">🎪 다가오는 학생회 행사</div>'+list.map(e=>
+    '<div class="ev-front-r"><div class="ev-front-d">'+evRange(e).replace(' ~ ','~<br>')+'</div><div class="ev-front-n">'+esc(e.name)+(e.desc?'<small>'+esc(e.desc)+'</small>':'')+'</div></div>').join('');
+  box.style.display='block';
+}
+
 // ── 시스템 시작 ──
 initTasks();
+renderFront();
+evLoad().then(ok=>{if(ok)renderFront();});
 loadNotice();
 fillAllSels();
 buildCWList('');
@@ -1464,7 +1837,7 @@ bindStatic();
   }
 
   function _initAttTabSystem(){
-    tFns[5]=_attRenderCore;
+    tFns[6]=_attRenderCore;
   }
 
   // 화면/토스트/확인창에 공통으로 쓰는 "구분 · 활동명 (날짜)" 표기

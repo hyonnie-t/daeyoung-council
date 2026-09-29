@@ -25,17 +25,22 @@ GitHub Pages 무료 요금제는 public 저장소에서만 동작한다. 즉 이
 ### 화면 구조
 모드 선택(`#modeSelect`) → 학생 모드(`#sView`, 이름 선택만으로 진입, 로그인 없음) / 선생님 모드(`#tView`, 클라이언트 사이드 SHA-256 비밀번호 체크로 진입). **이 비밀번호 체크는 실질적 보안장치가 아니다** — 콘솔에서 `enterTeacher()`를 직접 호출하면 그냥 우회된다. 접근 제어가 아니라 "학생이 실수로 안 들어가게 하는 정도"로만 취급할 것.
 
-각 화면 내부는 탭(`.tnav`/`.ti`) 전환 방식이고, 탭마다 별도 `render*` 함수가 있다(`sFns`, `tFns` 배열에 인덱스로 매핑). 새 탭을 추가하면 이 배열과 `swTab` 호출부(`bindStatic` 안의 탭 이벤트 바인딩)를 같이 손봐야 한다.
+각 화면 내부는 탭(`.tnav`/`.ti`) 전환 방식이고, 탭마다 별도 `render*` 함수가 있다(`sFns`, `tFns` 배열에 인덱스로 매핑, 패널 id 목록은 `S_PANELS`/`T_PANELS`). 새 탭을 추가하면 이 배열들과 HTML의 `data-tab` 번호를 같이 손봐야 하고, 출석 IIFE가 `tFns[6]`에 자기 렌더 함수를 꽂으므로 출석 탭 인덱스가 바뀌면 거기도 고쳐야 한다.
+
+학생 모드는 고른 이름을 `localStorage`(`ME_KEY`)에 기억해서 다음 방문 때 이름 선택 없이 바로 '해야할 일'을 보여준다. 메인 화면(`#evFront`)에는 31일 안의 행사 목록이 텍스트로 나온다.
 
 ### 데이터 모델
 - `MEMBERS`: 학생회 임원 명단(이름/부서/직책), `DEPTS`/`DC`: 부서 목록과 색상.
 - `tasks` 배열이 전체 상태의 단일 소스. 업무(task) 스키마: `{id, assignee, assignees[], dept, title, category, date, deadline, memo, status, subtasks[], createdAt, completedAt}`.
+- `events` 배열: 행사(`{id, name, start, end, dept, desc, createdBy, createdAt}`). Firebase `events/{id}`에 건별 저장, 로컬 캐시 키 `EK`. 등록 권한은 선생님 모드 + 회장단 + 부장(버튼 숨김 수준, 보안 아님). 연결된 업무가 있는 행사는 삭제 불가. `EV_OCT`는 행사가 하나도 없을 때만 쓰는 10월 일괄 등록용 데이터.
+- 업무의 `eventId`: 행사에 연결된 업무만 **1인별 완료 체크**(`doneBy: {이름: ISO시각}`)를 쓴다. 상태(`status`)는 저장값을 믿지 않고 `derive()`가 `doneBy`로 매번 다시 계산한다(보류만 수동). `eventId`가 없는 3~9월 기존 업무는 예전 방식(상태 버튼, 세부 할 일로 상태 변경) 그대로.
 - `SEED`: 최초 1회(로컬에 저장된 데이터가 없을 때)만 쓰이는 초기 시드 데이터. 이후로는 절대 다시 개입하지 않는다.
 
 ### 저장/동기화 — 여기가 제일 중요
 - 진짜 원본은 Firebase Realtime Database(`FB` 상수, 인증 없이 REST로 직접 fetch). `localStorage`(`SK='daeyoung_v8'`)는 오프라인 캐시/즉시 렌더링용이다.
 - 로드 순서: `initTasks()`가 로컬 캐시로 먼저 그리고, 화면 진입 시 `fbLoad()`가 비동기로 Firebase에서 받아와 통째로 덮어쓴다.
 - **쓰기는 반드시 건별로 한다 (`fbPut(t)` / `fbDel(id)`).** 예전에 신규 업무 등록 시 `tasks` 배열 전체를 Firebase에 통째로 PUT하는 `fbPutAll()`이 있었는데, 두 명이 비슷한 시각에 각자 업무를 등록하면 나중에 저장한 쪽이 먼저 저장한 사람의 데이터를 지워버리는 레이스컨디션이 있었다. 지금은 제거했다 — **이 패턴(배열 전체 PUT)을 다시 만들지 말 것.** 새 기능에서 여러 명이 동시에 쓸 수 있는 데이터는 항상 개별 키 단위로 읽고 써야 한다.
+- `fbPut(t)`은 PUT이 아니라 PATCH이고 `doneBy`를 뺀 필드만 보낸다. `doneBy`는 `fbSetDone(id, 이름, 값)`으로 `tasks/{id}/doneBy/{이름}` 키에만 쓴다 — 업무를 통째로 저장하면 다른 사람이 방금 한 완료 체크가 지워지기 때문.
 - 업무 id는 `crypto.randomUUID()`로 생성한다(`Date.now()` 기반 id는 동시 생성 시 충돌 가능해서 바꿨다).
 - Firebase 쓰기 실패는 `toast()`로 사용자에게 알린다(과거엔 `catch`에서 조용히 무시했음 — 실패를 삼키지 말 것).
 - `GAS`(Google Apps Script) 엔드포인트는 업무가 "완료" 상태가 될 때만 `no-cors` POST로 로그를 남기는 부가 기능(`gasLog`)이라 실패해도 앱 동작에 영향 없음.
