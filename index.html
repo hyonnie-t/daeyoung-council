@@ -42,7 +42,6 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .bs{padding:12px;background:var(--accent);border:none;color:#fff;border-radius:10px;font-size:14px;font-weight:700;transition:all .2s;flex:2}
 
 /* 모드 선택 */
-#modeSelect{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 24px;gap:32px;background:linear-gradient(135deg,#f8f9fa,#e9ecef)}
 .logo-s{font-size:11px;color:var(--text3);letter-spacing:3px;font-family:'Space Mono',monospace;margin-bottom:8px}
 .logo-t{font-size:32px;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.2}
 .logo-sub{font-size:13px;color:var(--text2);margin-top:8px}
@@ -305,37 +304,62 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .ev-front-r .eb{align-self:center}
 .ev-front-n small{display:block;font-weight:400;font-size:11px;color:var(--text2)}
 
+/* ── 반응형: 모바일 기본 → 태블릿(768px~) → 컴퓨터(1024px~) ── */
+.tp{max-width:1180px;margin:0 auto}
+@media(max-width:420px){
+  .hbadge{display:none}
+  .ah{gap:8px;padding:12px 14px}
+  .tp{padding:16px 14px}
+}
+@media(min-width:768px){
+  .tp{padding:24px 32px}
+  .tnav{justify-content:center}
+  .ti{flex:0 1 150px;font-size:13px;padding:14px 8px}
+  .ah{padding:14px 32px}
+  /* 모달: 바닥 시트 대신 가운데 창 */
+  .mov{align-items:center}
+  .ms{border-radius:20px;max-width:560px;padding:24px 28px 28px}
+  .mh{display:none}
+  .sg{grid-template-columns:repeat(4,1fr)}
+  /* 폼·달력은 너무 넓어지지 않게 */
+  #sP1,.tp .fb,.tp .sw{max-width:720px;margin-left:auto;margin-right:auto}
+  #sP1{padding-left:32px;padding-right:32px}
+  .ch,.cg,#sCD,#tCD,#evFront{max-width:720px;margin-left:auto;margin-right:auto}
+  .cday{aspect-ratio:auto;min-height:64px}
+  .dnum{font-size:13px}
+  .ddot{width:6px;height:6px}
+  .s0-side a{max-width:560px;margin-left:auto;margin-right:auto}
+  #noticeBox{max-width:560px;margin-left:auto;margin-right:auto}
+  /* 업무 카드·행사 카드 2열 */
+  .tg{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;align-items:start}
+  .tg>.tgl{grid-column:1/-1;margin-bottom:0}
+  .tg>.tc{margin-bottom:0}
+  .dl.open{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;align-items:start}
+  .dl>.tc,.dl>.ev{margin-bottom:0}
+  #tEvArea{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;align-items:start}
+  #tEvArea>*{grid-column:1/-1}
+  #tEvArea>.ev,#tEvArea>.tc{grid-column:auto;margin-bottom:0}
+  #tDept{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;align-items:start}
+  #tDept>.ds{margin-bottom:0}
+  #sDept>div{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;align-items:start}
+  #sDept>div>h3{grid-column:1/-1;margin-bottom:0!important}
+  #sDept .dept-card{margin-bottom:0!important}
+}
+@media(min-width:1024px){
+  /* 해야할 일: 왼쪽 공지·일정표 고정, 오른쪽 내 업무 */
+  #sP0.active{display:grid;grid-template-columns:360px 1fr;gap:28px;align-items:start}
+  .s0-side{position:sticky;top:130px}
+  .s0-side a,#noticeBox{max-width:none}
+  #myArea .ev .tc{box-shadow:none}
+  .sg{gap:16px}
+}
+
 /* 토스트 */
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--text);color:var(--bg);padding:12px 24px;border-radius:20px;font-size:13px;font-weight:500;transition:transform .3s;z-index:9999;white-space:nowrap;box-shadow:var(--sh2)}
 #toast.show{transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
-
-<!-- 모드 선택 -->
-<div id="modeSelect">
-  <div style="text-align:center">
-    <!-- 기존 배너: hero-banner.png (파일은 보관 중, 되돌릴 땐 src만 바꾸면 됨) -->
-    <!-- 이미지를 누르면 학생 모드로 바로 진입 -->
-    <button type="button" id="heroS" aria-label="학생 모드로 들어가기" style="background:none;padding:0;display:block;width:100%;max-width:360px;margin:0 auto 8px">
-    <img src="schedule-2026-10.webp" alt="2026년 10월 학생회 일정" 
-         style="width:100%;border-radius:16px;display:block">
-    </button>
-    <div class="logo-s">Daeyoung Middle School</div>
-    <div class="logo-t">학생회<br>업무 시스템</div>
-    <div class="logo-sub">2026학년도 대영중학교</div>
-  </div>
-  <div id="evFront" class="ev-front" style="display:none"></div>
-  <div id="noticeBox" style="display:none;width:100%;max-width:360px;background:#fff9db;border:1px solid #ffd43b;border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh)">
-  <div style="font-size:11px;font-weight:700;color:var(--warn);margin-bottom:6px;letter-spacing:1px">📢 공지사항</div>
-  <div id="noticeText" style="font-size:14px;color:var(--text);line-height:1.7;white-space:pre-wrap"></div>
-</div>
-  <div class="mode-wrap">
-    <button type="button" class="mc" id="btnS"><div class="mc-i">✋</div><div class="mc-t">학생 모드</div><div class="mc-d">업무 등록 · 진행 체크 · 일정 확인</div></button>
-    <button type="button" class="mc t" id="btnT"><div class="mc-i">📋</div><div class="mc-t">선생님 모드</div><div class="mc-d">전체 현황 · 업무 배정 · 완료 피드</div></button>
-    <a class="mc-link" href="https://docs.google.com/document/d/184Tscu9FSgxyeuxSgPnjnkRiOwjqS60pak2y8cuw9cQ/edit" target="_blank" rel="noopener">📝 회의록 바로가기 <span class="mc-link-ext">↗</span></a>
-  </div>
-</div>
 
 <!-- 비밀번호 -->
 <div id="pwScreen" style="display:none">
@@ -352,7 +376,6 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 <!-- 학생 화면 -->
 <div id="sView" style="display:none">
   <div class="ah">
-    <button type="button" class="back-btn" id="sBack">←</button>
     <h2 id="sHdr">학생 모드</h2>
     <span class="hbadge" id="sBadge"></span>
     <button type="button" class="nm-btn" id="sChName" style="display:none">이름 바꾸기</button>
@@ -365,9 +388,21 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
     <button type="button" class="ti" data-tab="3"><span class="tn">🏢</span>부서 현황</button>
   </div>
   <div class="tp active" id="sP0">
+   <div class="s0-side">
+    <div id="noticeBox" style="display:none;background:#fff9db;border:1px solid #ffd43b;border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh);margin-bottom:14px">
+      <div style="font-size:11px;font-weight:700;color:var(--warn);margin-bottom:6px;letter-spacing:1px">📢 공지사항</div>
+      <div id="noticeText" style="font-size:14px;color:var(--text);line-height:1.7;white-space:pre-wrap"></div>
+    </div>
+    <!-- 이번 달 일정표. 기존 배너 hero-banner.png는 보관 중(되돌릴 땐 src만 바꾸면 됨). 누르면 원본 크기로 열림 -->
+    <a href="schedule-2026-10.webp" target="_blank" rel="noopener" style="display:block;margin-bottom:16px">
+      <img src="schedule-2026-10.webp" alt="2026년 10월 학생회 일정" style="width:100%;border-radius:14px;display:block">
+    </a>
+   </div>
+   <div class="s0-main">
     <div id="unNotice"></div>
     <div class="nw" id="s0NameWrap"><label>내 이름 <span style="font-size:11px;color:var(--text3)">(한 번 고르면 이 폰에 기억돼요)</span></label><select id="s0Name"></select></div>
     <div id="myArea"><div class="empty" style="padding:20px 24px"><div class="ei">👆</div><p>이름을 선택하면<br>내 업무가 나타나요</p><img src="illust-student.png" alt="" style="width:100%;max-width:260px;margin-top:20px;border-radius:16px;opacity:0.9"></div></div>
+   </div>
   </div>
   <div class="tp" id="sP1">
     <div class="nw"><label>내 이름 <span class="req">*</span></label><select id="s1Name"></select></div>
@@ -390,10 +425,15 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
     <button type="button" class="bp" id="submitBtn">업무 등록하기</button>
   </div>
   <div class="tp" id="sP3">
+    <div id="evFront" class="ev-front" style="display:none;max-width:none;margin-bottom:16px"></div>
     <div class="ch"><button type="button" class="cn" id="sCP">‹</button><div class="ct" id="sCT"></div><button type="button" class="cn" id="sCN">›</button></div>
     <div class="cg" id="sCG"></div><div id="sCD"></div>
   </div>
   <div class="tp" id="sP4"><div id="sDept"></div></div>
+  <div style="display:flex;gap:8px;padding:8px 20px 32px">
+    <a class="mc-link" style="flex:1" href="https://docs.google.com/document/d/184Tscu9FSgxyeuxSgPnjnkRiOwjqS60pak2y8cuw9cQ/edit" target="_blank" rel="noopener">📝 회의록 <span class="mc-link-ext">↗</span></a>
+    <button type="button" class="mc-link" style="flex:1;background:none" id="btnT">🔒 선생님 모드</button>
+  </div>
 </div>
 
 <!-- 교사 화면 -->
@@ -739,12 +779,18 @@ async function evLoad(){
     return true;
   }catch(e){console.warn('행사 로드 실패:',e);return false;}
 }
-async function evPut(ev){
+// 실패 이유 문자열(성공이면 ''). 401/403은 Firebase 보안 규칙에서 events 경로 쓰기가 막힌 경우.
+async function evPutRaw(ev){
   try{
     const r=await fetch(FB+'/events/'+ev.id+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(ev)});
-    if(!r.ok)throw new Error(r.status);
-    return true;
-  }catch(e){toast('⚠️ 행사 저장 실패 — 인터넷 연결을 확인해주세요');return false;}
+    if(r.ok)return '';
+    return (r.status===401||r.status===403)?'서버 권한 없음('+r.status+') — Firebase 규칙에 events 쓰기 허용 필요':'서버 오류('+r.status+')';
+  }catch(e){return '인터넷 연결을 확인해주세요';}
+}
+async function evPut(ev){
+  const err=await evPutRaw(ev);
+  if(err){toast('⚠️ 행사 저장 실패 — '+err);return false;}
+  return true;
 }
 async function evDel(id){
   try{
@@ -848,7 +894,7 @@ function updMAssignee(){
 
 // ── 화면 전환 ──
 function showPw(){
-  document.getElementById('modeSelect').style.display='none';
+  document.getElementById('sView').style.display='none';
   document.getElementById('pwScreen').style.display='flex';
   document.getElementById('pwInput').value='';
   document.getElementById('pwErr').textContent='';
@@ -868,7 +914,6 @@ async function checkPw(){
   }
 }
 function enterStudent(){
-  document.getElementById('modeSelect').style.display='none';
   document.getElementById('sView').style.display='block';
   fillAllSels();
   const me=loadMe();
@@ -880,13 +925,17 @@ function enterStudent(){
   Promise.all([fbLoad(),evLoad()]).then(([a,b])=>{if(a||b){fillEvSel('fEv',document.getElementById('fEv').value);renderAll_s();}});
 }
 function enterTeacher(){
+  document.getElementById('sView').style.display='none';
   document.getElementById('tView').style.display='block';
   renderAll_t();
   Promise.all([fbLoad(),evLoad()]).then(([a,b])=>{if(a||b)renderAll_t();});
 }
+// 선생님 화면/비밀번호 화면에서 나가면 학생 화면(기본 화면)으로
 function goHome(){
-  ['modeSelect'].forEach(id=>document.getElementById(id).style.display='flex');
-  ['sView','tView','pwScreen'].forEach(id=>document.getElementById(id).style.display='none');
+  ['tView','pwScreen'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('sView').style.display='block';
+  window.scrollTo(0,0);
+  renderAll_s();
 }
 function renderAll_s(){renderUnNotice();renderMyTasks();renderSDept();}
 function renderAll_t(){renderDash();renderTEvents();renderTDept();renderTStu();renderAllTasks();}
@@ -1366,13 +1415,10 @@ function openDones(){
 
 // ── 이벤트 바인딩 ──
 function bindStatic(){
-  document.getElementById('btnS').addEventListener('click',enterStudent);
-  document.getElementById('heroS').addEventListener('click',enterStudent);
   document.getElementById('btnT').addEventListener('click',showPw);
   document.getElementById('pwOK').addEventListener('click',checkPw);
   document.getElementById('pwBack').addEventListener('click',goHome);
   document.getElementById('pwInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkPw();});
-  document.getElementById('sBack').addEventListener('click',goHome);
   document.getElementById('tBack').addEventListener('click',goHome);
   document.getElementById('lockBtn').addEventListener('click',goHome);
   document.getElementById('submitBtn').addEventListener('click',submitTask);
@@ -1726,10 +1772,12 @@ async function seedOct(){
   if(!confirm('10월 일정 '+EV_OCT.length+'개를 한 번에 등록할까요?'))return;
   const now=new Date().toISOString();
   const list=EV_OCT.map(e=>({...e,id:crypto.randomUUID(),dept:'',createdBy:'선생님',createdAt:now}));
-  const ok=await Promise.all(list.map(evPut));
-  list.forEach((e,i)=>{if(ok[i])events.push(e);});
+  const errs=await Promise.all(list.map(evPutRaw));
+  list.forEach((e,i)=>{if(!errs[i])events.push(e);});
   saveEvLocal();refresh();
-  toast('🎪 행사 '+ok.filter(Boolean).length+'개 등록 완료');
+  const fail=errs.filter(Boolean);
+  if(fail.length)toast('⚠️ '+(list.length-fail.length)+'개 등록, '+fail.length+'개 실패 — '+fail[0]);
+  else toast('🎪 행사 '+list.length+'개 등록 완료');
 }
 
 // ── 교사: 행사 탭 ──
@@ -1785,6 +1833,7 @@ loadNotice();
 fillAllSels();
 buildCWList('');
 bindStatic();
+enterStudent();
 
 // =================================================================
 // 출석 관리 탭 (격리형 IIFE)
