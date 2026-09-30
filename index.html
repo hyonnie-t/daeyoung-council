@@ -256,6 +256,14 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .tc-act{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
 .tc-act button{flex:1;min-width:88px;padding:8px 6px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
 .tc-act button.danger,.ev-row-act button.danger{color:#d64545}
+.bulk-open{width:100%;margin-bottom:12px;padding:11px;border-radius:9px;border:1px dashed var(--accent);background:var(--surface2);color:var(--accent);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+.bk-row{display:flex;align-items:flex-start;gap:10px;padding:10px 4px;border-bottom:1px solid var(--border);cursor:pointer}
+.bk-row input{width:20px;height:20px;margin-top:2px;flex-shrink:0}
+.bk-main{display:flex;flex-direction:column;gap:2px;font-size:13px}
+.bk-main small{font-size:11px;color:var(--text2)}
+.bk-all{background:var(--surface2);border-radius:8px;margin-bottom:4px}
+.bk-bar{display:flex;gap:8px;position:sticky;bottom:0;padding-top:12px;background:var(--surface)}
+.bk-bar button{flex:1}
 .ev-row-act{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
 .ev-row-act button{padding:5px 10px;border-radius:7px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
 .self-btn{background:var(--accent);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0}
@@ -687,7 +695,7 @@ let _evId=null;
 let sCY=new Date().getFullYear(),sCM=new Date().getMonth(),sCS=null;
 let tCY=new Date().getFullYear(),tCM=new Date().getMonth(),tCS=null;
 let allFilt='전체',sq='';
-let _editId=null,_editStatus=null,_assignId=null,_delId=null;
+let _editId=null,_editStatus=null,_assignId=null,_delId=null,_bulk=null;
 
 // ── 유틸 ──
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
@@ -1339,7 +1347,7 @@ function saveEdit(){
 
 // ── 배정 모달 ──
 function openAssign(id){
-  _assignId=id;
+  _assignId=id;_bulk=null;
   const t=tasks.find(x=>x.id===id);
   document.getElementById('assignTitle').textContent='"'+t.title+'" 담당자 배정';
   buildAssignCBs();
@@ -1348,8 +1356,9 @@ function openAssign(id){
   document.getElementById('assignMov').classList.add('open');
 }
 function saveAssign(){
-  const t=tasks.find(x=>x.id===_assignId);
   const sel=[...document.querySelectorAll('.as-cb:checked')].map(x=>x.value);
+  if(_bulk){if(!sel.length){toast('담당자를 선택해주세요');return;}saveBulk(sel);return;}
+  const t=tasks.find(x=>x.id===_assignId);
   if(!t||!sel.length){toast('담당자를 선택해주세요');return;}
   t.assignees=sel;t.assignee=sel[0];t.dept=gd(sel[0]);
   saveLocal();fbPut(t);closeMov('assignMov');refresh();
@@ -1458,7 +1467,8 @@ function openStu(name){
   const done=mt.filter(t=>t.status==='완료');
   // [BUG1 FIX] 완료 토글 섹션에 고유 id 부여 후 직접 클릭 핸들러 바인딩
   const doneId='stu_'+name;
-  document.getElementById('stuBody').innerHTML=renderGrp(active,opts)+doneSec(done,opts,doneId);
+  const bulkBtn=active.length?`<button type="button" class="bulk-open" data-action="bulkStart" data-name="${esc(name)}">☑ 업무 여러 개 골라서 다른 사람에게 넘기기</button>`:'';
+  document.getElementById('stuBody').innerHTML=bulkBtn+renderGrp(active,opts)+doneSec(done,opts,doneId);
   // 모달 내부에서 data-done 토글을 직접 핸들링 (stopPropagation 우회)
   const dt=document.querySelector('#stuBody [data-done="'+doneId+'"]');
   if(dt){
@@ -1470,6 +1480,48 @@ function openStu(name){
     });
   }
   document.getElementById('stuMov').classList.add('open');
+}
+
+// ── 일괄 이동: 한 학생의 남은 업무를 여러 개 골라 다른 사람에게 넘긴다 ──
+function openBulk(name){
+  _stuName=name;
+  const list=tasks.filter(t=>assOf(t).includes(name)&&t.status!=='완료')
+    .sort((a,b)=>(effDeadline(a)||'9').localeCompare(effDeadline(b)||'9'));
+  document.getElementById('stuTitle').textContent=name+' 업무 일괄 이동';
+  const row=t=>{
+    const evs=evIdsOf(t).map(evById).filter(Boolean).map(e=>e.name).join(', ')||t.category||'기타';
+    const co=assOf(t).filter(n=>n!==name);
+    return `<label class="bk-row"><input type="checkbox" class="bk-cb" value="${t.id}"><span class="bk-main"><b>${esc(t.title)}</b><small>${esc(evs)}${effDeadline(t)?' · ⏰ '+fD(effDeadline(t)):''}${co.length?' · 같이: '+esc(co.join(', ')):''}</small></span></label>`;
+  };
+  document.getElementById('stuBody').innerHTML=
+    `<div class="hint" style="margin-bottom:10px">넘길 업무를 체크하고 '담당자 지정'을 누르세요. ${esc(name)} 님만 빠지고, 같이 맡은 다른 사람은 그대로 남아요.</div>`+
+    `<label class="bk-row bk-all"><input type="checkbox" id="bkAll"><span class="bk-main"><b>전체 선택 (${list.length}개)</b></span></label>`+
+    (list.length?list.map(row).join(''):'<div class="ev-none">남은 업무가 없어요</div>')+
+    `<div class="bk-bar"><button type="button" class="bc" data-action="bulkCancel" data-name="${esc(name)}">취소</button><button type="button" class="bs" data-action="bulkPick" data-name="${esc(name)}">담당자 지정</button></div>`;
+  document.getElementById('bkAll').addEventListener('change',e=>{
+    document.querySelectorAll('#stuBody .bk-cb').forEach(c=>c.checked=e.target.checked);
+  });
+  document.getElementById('stuMov').classList.add('open');
+}
+function bulkPick(name){
+  const ids=[...document.querySelectorAll('#stuBody .bk-cb:checked')].map(c=>c.value);
+  if(!ids.length){toast('넘길 업무를 먼저 체크해주세요');return;}
+  _assignId=null;_bulk={ids,from:name};
+  document.getElementById('assignTitle').textContent=name+' → 업무 '+ids.length+'개를 넘길 사람';
+  buildAssignCBs();
+  document.getElementById('assignMov').classList.add('open');
+}
+function saveBulk(sel){
+  const {ids,from}=_bulk;_bulk=null;
+  let n=0;
+  ids.forEach(id=>{
+    const t=tasks.find(x=>x.id===id);if(!t)return;
+    const next=[...new Set([...assOf(t).filter(x=>x!==from),...sel])];
+    t.assignees=next;t.assignee=next[0];t.dept=gd(next[0]);
+    derive(t);fbPut(t);n++;
+  });
+  saveLocal();closeMov('assignMov');refresh();
+  toast('✅ '+n+'개 업무를 '+sel.join(', ')+'에게 넘겼어요');
 }
 
 // ── 교사: 전체 업무 ──
@@ -1707,6 +1759,8 @@ document.addEventListener('click',function(e){
   if(action==='delSub'){delSub(id,idx);return;}
   if(action==='assign'){openAssign(id);return;}
   if(action==='dropMe'){dropMe(id);return;}
+  if(action==='bulkStart'||action==='bulkCancel'){action==='bulkStart'?openBulk(el.dataset.name):openStu(el.dataset.name);return;}
+  if(action==='bulkPick'){bulkPick(el.dataset.name);return;}
   if(action==='openStu'){openStu(el.dataset.name);return;}
   if(action==='selfAssign'){selfAssign(id);return;}
   if(action==='meDone'){meDone(id);return;}
