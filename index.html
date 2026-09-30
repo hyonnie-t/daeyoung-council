@@ -1113,7 +1113,8 @@ function renderMyTasks(){
   const td=todayStr(),lim=addDays(td,14);
   const near=events.filter(e=>!isProj(e)&&evEnd(e)>=td&&e.start<=lim).sort((a,b)=>a.start.localeCompare(b.start));
   const shown=new Set();
-  let h='<div class="sec-t"><span>🎪 다가오는 행사 (2주)</span></div>';
+  let h=all.some(t=>t.status!=='완료')?'<button type="button" class="bulk-open" data-action="bulkSelf">☑ 내 업무 여러 개 한 번에 넘기기</button>':'';
+  h+='<div class="sec-t"><span>🎪 다가오는 행사 (2주)</span></div>';
   if(canEv(name))h+='<button type="button" class="ev-new" data-action="evNew">+ 행사 등록</button>';
   if(!near.length)h+='<div class="ev-none" style="margin-bottom:16px">2주 안에 등록된 행사가 없어요</div>';
   const others=[];
@@ -1483,11 +1484,13 @@ function openStu(name){
 }
 
 // ── 일괄 이동: 한 학생의 남은 업무를 여러 개 골라 다른 사람에게 넘긴다 ──
-function openBulk(name){
-  _stuName=name;
+let _bulkSelf=false; // 학생이 자기 업무를 넘기는 중(선생님 학생별 상세 창이 아님)
+function openBulk(name,self){
+  _bulkSelf=!!self;
+  _stuName=self?'':name;
   const list=tasks.filter(t=>assOf(t).includes(name)&&t.status!=='완료')
     .sort((a,b)=>(effDeadline(a)||'9').localeCompare(effDeadline(b)||'9'));
-  document.getElementById('stuTitle').textContent=name+' 업무 일괄 이동';
+  document.getElementById('stuTitle').textContent=self?'내 업무 넘기기':name+' 업무 일괄 이동';
   const row=t=>{
     const evs=evIdsOf(t).map(evById).filter(Boolean).map(e=>e.name).join(', ')||t.category||'기타';
     const co=assOf(t).filter(n=>n!==name);
@@ -1520,7 +1523,9 @@ function saveBulk(sel){
     t.assignees=next;t.assignee=next[0];t.dept=gd(next[0]);
     derive(t);fbPut(t);n++;
   });
-  saveLocal();closeMov('assignMov');refresh();
+  saveLocal();closeMov('assignMov');
+  if(_bulkSelf){closeMov('stuMov');_bulkSelf=false;}
+  refresh();
   toast('✅ '+n+'개 업무를 '+sel.join(', ')+'에게 넘겼어요');
 }
 
@@ -1759,7 +1764,9 @@ document.addEventListener('click',function(e){
   if(action==='delSub'){delSub(id,idx);return;}
   if(action==='assign'){openAssign(id);return;}
   if(action==='dropMe'){dropMe(id);return;}
-  if(action==='bulkStart'||action==='bulkCancel'){action==='bulkStart'?openBulk(el.dataset.name):openStu(el.dataset.name);return;}
+  if(action==='bulkStart'){openBulk(el.dataset.name);return;}
+  if(action==='bulkSelf'){openBulk(myName(),true);return;}
+  if(action==='bulkCancel'){if(_bulkSelf){closeMov('stuMov');_bulkSelf=false;}else openStu(el.dataset.name);return;}
   if(action==='bulkPick'){bulkPick(el.dataset.name);return;}
   if(action==='openStu'){openStu(el.dataset.name);return;}
   if(action==='selfAssign'){selfAssign(id);return;}
