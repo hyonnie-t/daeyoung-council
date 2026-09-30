@@ -2,10 +2,11 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>환경의 날 — 담당자 확인</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Black+Han+Sans&display=swap" rel="stylesheet">
 <style>
+body{word-break:keep-all;overflow-wrap:break-word}
 /* ── 변수 ── */
 :root {
   --bg:#f2f7f4; --white:#fff; --border:#daeae0;
@@ -16,7 +17,7 @@
   --radius:12px;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:14px;min-height:100vh;}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:15px;min-height:100vh;}
 button{font-family:'Noto Sans KR',sans-serif;cursor:pointer;border:none;background:none;}
 
 .wrap{max-width:640px;margin:0 auto;padding-bottom:60px;}
@@ -26,11 +27,11 @@ button{font-family:'Noto Sans KR',sans-serif;cursor:pointer;border:none;backgrou
 .top-row{display:flex;align-items:center;justify-content:space-between;}
 .top-title{font-family:'Black Han Sans',sans-serif;font-size:1.15rem;color:#fff;}
 .top-title em{color:#7de8a0;font-style:normal;}
-.top-badge{background:rgba(255,255,255,.15);border-radius:20px;padding:3px 12px;font-size:11px;color:rgba(255,255,255,.8);font-weight:600;}
+.top-badge{background:rgba(255,255,255,.15);border-radius:20px;padding:3px 12px;font-size:12px;color:rgba(255,255,255,.8);font-weight:600;}
 
 /* ── 탭바 ── */
 .tabbar{display:flex;background:var(--white);border-bottom:2px solid var(--border);position:sticky;top:56px;z-index:90;}
-.tab{flex:1;padding:12px 0;font-size:13px;font-weight:700;color:var(--muted);border-bottom:2.5px solid transparent;margin-bottom:-2px;transition:all .2s;}
+.tab{flex:1;padding:12px 0;font-size:14px;font-weight:700;color:var(--muted);border-bottom:2.5px solid transparent;margin-bottom:-2px;transition:all .2s;}
 .tab.on{color:var(--g1);border-bottom-color:var(--g3);}
 
 /* ── 공통 패널 ── */
@@ -40,14 +41,14 @@ button{font-family:'Noto Sans KR',sans-serif;cursor:pointer;border:none;backgrou
 /* ════════════════
    TAB 1 내 역할
 ════════════════ */
-.hint{background:var(--white);border-radius:var(--radius);padding:14px 16px;border:1.5px solid var(--border);margin-bottom:16px;font-size:13px;color:var(--muted);line-height:1.7;}
+.hint{background:var(--white);border-radius:var(--radius);padding:14px 16px;border:1.5px solid var(--border);margin-bottom:16px;font-size:14px;color:var(--muted);line-height:1.7;}
 .hint strong{color:var(--g1);}
 
-.sec-label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1px;margin-bottom:10px;}
+.sec-label{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:1px;margin-bottom:10px;}
 
 /* 이름 그리드 */
 .name-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:20px;}
-.nbtn{background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:9px 4px;font-size:13px;font-weight:700;color:var(--text);text-align:center;transition:all .18s;}
+.nbtn{background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:9px 4px;font-size:14px;font-weight:700;color:var(--text);text-align:center;transition:all .18s;}
 .nbtn:hover{border-color:var(--g3);color:var(--g2);}
 .nbtn.on{background:var(--g2);border-color:var(--g2);color:#fff;}
 
@@ -56,18 +57,18 @@ button{font-family:'Noto Sans KR',sans-serif;cursor:pointer;border:none;backgrou
 .result-box.show{display:block;}
 .result-head{background:var(--g1);padding:14px 18px;display:flex;align-items:center;gap:10px;}
 .result-name{font-family:'Black Han Sans',sans-serif;font-size:1.1rem;color:#fff;}
-.result-dept{font-size:11px;color:rgba(255,255,255,.6);}
+.result-dept{font-size:12px;color:rgba(255,255,255,.6);}
 
 /* 역할 테이블 */
 .rtable{width:100%;border-collapse:collapse;}
-.rtable th{background:var(--g4);padding:9px 14px;font-size:11px;font-weight:700;color:var(--g1);text-align:left;border-bottom:1.5px solid var(--border);white-space:nowrap;}
+.rtable th{background:var(--g4);padding:9px 14px;font-size:12px;font-weight:700;color:var(--g1);text-align:left;border-bottom:1.5px solid var(--border);white-space:nowrap;}
 .rtable td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:top;}
 .rtable tr:last-child td{border-bottom:none;}
-.td-date{font-weight:700;font-size:13px;color:var(--g1);white-space:nowrap;width:86px;}
-.td-role{font-weight:700;font-size:13px;color:var(--text);}
-.td-time{font-size:11px;color:var(--sky);font-weight:700;margin-top:2px;}
-.td-note{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.6;}
-.no-role{padding:20px;text-align:center;color:var(--tbd);font-size:13px;}
+.td-date{font-weight:700;font-size:14px;color:var(--g1);white-space:nowrap;width:86px;}
+.td-role{font-weight:700;font-size:14px;color:var(--text);}
+.td-time{font-size:12px;color:var(--sky);font-weight:700;margin-top:2px;}
+.td-note{font-size:13px;color:var(--muted);margin-top:2px;line-height:1.6;}
+.no-role{padding:20px;text-align:center;color:var(--tbd);font-size:14px;}
 
 /* ════════════════
    TAB 2 전체 일정
@@ -75,9 +76,9 @@ button{font-family:'Noto Sans KR',sans-serif;cursor:pointer;border:none;backgrou
 
 /* 배치도 카드 */
 .map-card{background:var(--white);border-radius:var(--radius);border:1.5px solid var(--border);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow);}
-.map-head{padding:12px 16px;background:var(--g4);border-bottom:1.5px solid var(--border);font-size:13px;font-weight:700;color:var(--g1);}
+.map-head{padding:12px 16px;background:var(--g4);border-bottom:1.5px solid var(--border);font-size:14px;font-weight:700;color:var(--g1);}
 .map-img{width:100%;display:block;cursor:zoom-in;}
-.map-foot{padding:8px 14px;font-size:11px;color:var(--muted);border-top:1px solid var(--border);line-height:1.6;}
+.map-foot{padding:8px 14px;font-size:12px;color:var(--muted);border-top:1px solid var(--border);line-height:1.6;}
 
 /* 모달 */
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;align-items:center;justify-content:center;}
@@ -93,8 +94,8 @@ button{font-family:'Noto Sans KR',sans-serif;cursor:pointer;border:none;backgrou
 .day.open .day-dot{background:var(--g3);}
 .day-txt{flex:1;}
 .day-name{font-family:'Black Han Sans',sans-serif;font-size:.95rem;color:var(--text);}
-.day-sub{font-size:11px;color:var(--muted);margin-top:1px;}
-.day-chev{font-size:15px;color:var(--muted);transition:transform .25s;}
+.day-sub{font-size:12px;color:var(--muted);margin-top:1px;}
+.day-chev{font-size:16px;color:var(--muted);transition:transform .25s;}
 .day.open .day-chev{transform:rotate(180deg);}
 
 .day-body{display:none;background:var(--white);border:1.5px solid var(--g3);border-top:none;border-bottom-left-radius:var(--radius);border-bottom-right-radius:var(--radius);overflow:hidden;}
@@ -105,16 +106,16 @@ button{font-family:'Noto Sans KR',sans-serif;cursor:pointer;border:none;backgrou
 .rrow:last-child{border-bottom:none;}
 .rico{width:36px;height:36px;border-radius:9px;background:var(--g4);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
 .rbody{flex:1;min-width:0;}
-.rtitle{font-weight:700;font-size:13px;color:var(--text);}
-.rtime{font-size:11px;color:var(--sky);font-weight:700;margin-top:2px;}
-.rnote{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.6;}
+.rtitle{font-weight:700;font-size:14px;color:var(--text);}
+.rtime{font-size:12px;color:var(--sky);font-weight:700;margin-top:2px;}
+.rnote{font-size:13px;color:var(--muted);margin-top:2px;line-height:1.6;}
 .ptags{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px;}
-.ptag{background:var(--g4);border:1px solid #b8ddc5;border-radius:7px;padding:2px 9px;font-size:11px;font-weight:700;color:var(--g1);}
+.ptag{background:var(--g4);border:1px solid #b8ddc5;border-radius:7px;padding:2px 9px;font-size:12px;font-weight:700;color:var(--g1);}
 .ptag.tbd{background:var(--ybg);border:1px dashed var(--yborder);color:var(--yellow);}
 
-.no-ev{padding:16px;text-align:center;font-size:13px;color:var(--tbd);}
+.no-ev{padding:16px;text-align:center;font-size:14px;color:var(--tbd);}
 
-.foot{padding:24px 16px 0;text-align:center;font-size:11px;color:#a0b8a8;}
+.foot{padding:24px 16px 0;text-align:center;font-size:12px;color:#a0b8a8;}
 
 /* GitHub 배포 안내 주석은 파일 하단 참고 */
 </style>
