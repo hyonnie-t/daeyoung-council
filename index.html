@@ -251,6 +251,9 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .un-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #ffe066;font-size:13px}
 .un-item:last-child{border-bottom:none}
 .un-item .un-name{flex:1;font-weight:600}
+.tc-act{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.tc-act button{flex:1;min-width:88px;padding:8px 6px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+.tc-act button.danger{color:#d64545}
 .self-btn{background:var(--accent);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0}
 
 /* 검색 */
@@ -1007,7 +1010,7 @@ function card(t,opts){
   const ass=t.assignees||[t.assignee].filter(Boolean);
   const shB=ass.length>1?'<span class="shared-b">공유 '+ass.length+'명</span>':'';
   const eb=showEB?`<button type="button" class="eb" data-action="edit" data-id="${t.id}">✏️</button>`:'';
-  const db=showDel?`<button type="button" class="del-btn" data-action="del" data-id="${t.id}">🗑</button>`:'';
+  const db=''; // 삭제는 카드 아래 '🗑 삭제' 버튼 줄로 옮김
   const dateL=[
     t.date?`<span class="tc-date">📅 행사일 ${fD(t.date)}</span>`:'',
     t.deadline?`<span class="tc-date${d!==null&&d<=3&&t.status!=='완료'?' urg':''}">⏰ 마감 ${fD(t.deadline)}</span>`:
@@ -1038,13 +1041,16 @@ function card(t,opts){
   }
   // 선생님 화면: 기존(행사 없는) 업무도 상태 버튼으로 바로 완료 처리
   const sbH=(showSB||opts.teacher)&&!per?`<div class="sb">${['예정','진행중','완료','보류'].map(s=>`<button type="button" class="sb-btn${t.status===s?' a-'+s:''}" data-action="chgSt" data-id="${t.id}" data-status="${s}">${s}</button>`).join('')}</div>`:'';
+  // 담당자 변경 / 내 업무 아님 / 삭제를 라벨 붙은 버튼으로 바로 노출 (학생·선생님 공통)
+  const meIn=opts.me&&ass.includes(opts.me);
+  const actH=showEB?`<div class="tc-act"><button type="button" data-action="assign" data-id="${t.id}">👤 담당자 변경</button>${meIn?`<button type="button" data-action="dropMe" data-id="${t.id}">🙅 내 업무 아님</button>`:''}${showDel?`<button type="button" class="danger" data-action="del" data-id="${t.id}">🗑 삭제</button>`:''}</div>`:'';
   return `<div class="tc" id="c-${t.id}">
     <div class="tc-top"><div class="tc-ti">${t.title}</div><div class="tc-r">${shB}${eb}${db}<span class="tag tag-${t.status}">${t.status}</span></div></div>
     <div class="tc-meta">${evs.length?evs.map(ev=>`<span class="ev-chip">${isProj(ev)?'📂':'🎪'} ${esc(ev.name)}</span>`).join(''):t.per?'<span class="ev-chip" style="background:var(--surface2);color:var(--text2)">기타</span>':t.category?`<span class="db db-${t.dept}">${t.category}</span>`:'<span style="font-size:11px;color:var(--text3);font-style:italic">카테고리 미지정</span>'}${ass.length>1&&!per?`<span style="font-size:11px;color:var(--text2)">${ass.join(', ')}</span>`:''}</div>
     ${dateL?`<div class="tc-meta" style="margin-top:2px">${dateL}</div>`:''}
     ${subH}${addH}
     ${t.memo?`<div style="margin-top:8px;font-size:12px;color:var(--text2);line-height:1.6">${t.memo}</div>`:''}
-    ${ppH}${sbH}
+    ${ppH}${sbH}${actH}
   </div>`;
 }
 function doneSec(list,opts,id){
@@ -1234,6 +1240,18 @@ function selfAssign(id){
   t.assignee=name;t.assignees=[name];t.dept=gd(name);
   saveLocal();fbPut(t);refresh();
   toast('✅ '+name+'이(가) "'+t.title+'" 담당자로 배정됐어요');
+}
+
+// ── 내 업무 아님: 나만 담당자에서 빼기. 혼자였다면 미배정이 돼서 '내가 할게요' 목록에 뜬다 ──
+function dropMe(id){
+  const name=myName();
+  const t=tasks.find(x=>x.id===id);if(!t||!name)return;
+  const left=assOf(t).filter(n=>n!==name);
+  t.assignees=left;t.assignee=left[0]||'미지정';
+  if(left.length)t.dept=gd(left[0]);
+  derive(t);
+  saveLocal();fbPut(t);refresh();
+  toast(left.length?'✅ 담당자에서 빠졌어요':'✅ 담당자에서 빠졌어요 — 미배정 업무로 옮겨졌어요');
 }
 
 // ── 업무 삭제 ──
@@ -1679,6 +1697,7 @@ document.addEventListener('click',function(e){
   if(action==='addSub'){addSub(id);return;}
   if(action==='delSub'){delSub(id,idx);return;}
   if(action==='assign'){openAssign(id);return;}
+  if(action==='dropMe'){dropMe(id);return;}
   if(action==='openStu'){openStu(el.dataset.name);return;}
   if(action==='selfAssign'){selfAssign(id);return;}
   if(action==='meDone'){meDone(id);return;}
