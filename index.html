@@ -425,6 +425,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
     <div class="pw-sub">비밀번호를 입력하세요</div>
     <input type="password" id="pwInput" maxlength="6" placeholder="••••">
     <div class="pw-err" id="pwErr"></div>
+    <label style="display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;color:#666;margin:2px 0 8px"><input type="checkbox" id="pwRemember"> 이 기기에서 기억하기</label>
     <button type="button" class="bp" id="pwOK" style="margin-top:4px">확인</button>
     <button type="button" class="pw-back" id="pwBack">← 돌아가기</button>
   </div>
@@ -976,11 +977,14 @@ function updMAssignee(){
 }
 
 // ── 화면 전환 ──
-// 로컬 작업용: localhost/127.0.0.1/file:// 로 열었을 때만 비번 화면을 건너뛴다(배포 URL에선 그대로 비번 요구).
-// 비번·해시를 새로 저장하는 게 아니라 접속 주소만 본다. 어차피 enterTeacher() 직접 호출로 우회되는 체크라 보안 손실은 없음.
-const IS_LOCAL_DEV=['localhost','127.0.0.1','[::1]',''].includes(location.hostname);
+// '이 기기에서 기억하기': 한 번 맞게 입력하면 이 브라우저 localStorage에만 표시를 남겨 다음부터 비번 화면을 건너뛴다.
+// 저장소(코드)에는 아무것도 안 들어가고, PW_HASH가 바뀌면 저장된 표시도 자동으로 무효가 된다. '🔒 잠금'을 누르면 지운다.
+// 어차피 enterTeacher() 직접 호출로 우회되는 체크라 보안 손실은 없지만, 공용 기기에선 체크하지 말 것.
+const PW_OK_KEY='daeyoung_t_ok';
+function isPwRemembered(){try{return localStorage.getItem(PW_OK_KEY)===PW_HASH;}catch(e){return false;}}
+function setPwRemembered(on){try{if(on)localStorage.setItem(PW_OK_KEY,PW_HASH);else localStorage.removeItem(PW_OK_KEY);}catch(e){}}
 function showPw(){
-  if(IS_LOCAL_DEV){enterTeacher();return;}
+  if(isPwRemembered()){enterTeacher();return;}
   document.getElementById('sView').style.display='none';
   document.getElementById('pwScreen').style.display='flex';
   document.getElementById('pwInput').value='';
@@ -992,6 +996,7 @@ async function checkPw(){
   const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(input));
   const hash=[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
   if(hash===PW_HASH){
+    if(document.getElementById('pwRemember').checked)setPwRemembered(true);
     document.getElementById('pwScreen').style.display='none';
     enterTeacher();
   } else {
@@ -1600,7 +1605,7 @@ function bindStatic(){
   document.getElementById('pwBack').addEventListener('click',goHome);
   document.getElementById('pwInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkPw();});
   document.getElementById('tBack').addEventListener('click',goHome);
-  document.getElementById('lockBtn').addEventListener('click',goHome);
+  document.getElementById('lockBtn').addEventListener('click',()=>{setPwRemembered(false);goHome();});
   document.getElementById('submitBtn').addEventListener('click',submitTask);
   document.getElementById('addSubBtn').addEventListener('click',addSubRow);
 
