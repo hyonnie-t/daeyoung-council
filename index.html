@@ -10,7 +10,7 @@
   --bg:#f8f9fa;--surface:#fff;--surface2:#f1f3f5;--border:#dee2e6;
   --accent:#6c63ff;--accent2:#ff6b9d;--accent3:#2f9e44;
   --warn:#e67700;--danger:#c92a2a;--info:#1971c2;
-  --text:#212529;--text2:#495057;--text3:#adb5bd;--r:12px;
+  --text:#212529;--text2:#495057;--text3:#868e96;--r:12px;
   --sh:0 1px 3px rgba(0,0,0,.08);--sh2:0 4px 12px rgba(0,0,0,.1);
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -253,7 +253,13 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .un-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #ffe066;font-size:13px}
 .un-item:last-child{border-bottom:none}
 .un-item .un-name{flex:1;font-weight:600}
-.tc-act{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.tc-more{margin-top:10px;border-top:1px solid var(--border)}
+.tc-more summary{list-style:none;cursor:pointer;padding:9px 0 2px;font-size:12px;font-weight:600;color:var(--text2);-webkit-tap-highlight-color:transparent}
+.tc-more summary::-webkit-details-marker{display:none}
+.tc-more summary small{font-weight:400;color:var(--text3);margin-left:4px}
+.tc-more[open] summary{color:var(--accent)}
+.tc-more .add-si{margin-top:6px}
+.tc-act{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px dashed var(--border)}
 .tc-act button{flex:1;min-width:88px;padding:8px 6px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
 .tc-act button.danger,.ev-row-act button.danger{color:#d64545}
 .bulk-open{width:100%;margin-bottom:12px;padding:11px;border-radius:9px;border:1px dashed var(--accent);background:var(--surface2);color:var(--accent);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
@@ -374,7 +380,27 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
   #sDept>div>h3{grid-column:1/-1;margin-bottom:0!important}
   #sDept .dept-card{margin-bottom:0!important}
 }
+/* 터치 화면: 작은 버튼 누르기 편하게 */
+@media(pointer:coarse){
+  .eb,.del-btn,.nm-btn,.lock-btn,.acct-btn{padding-top:7px;padding-bottom:7px;min-height:32px}
+  .sb-btn{padding:8px 14px}
+  .tc-act button,.ev-row-act button{min-height:38px}
+  .tc-more summary{padding:12px 0 6px}
+}
+/* 탭 줄: 넘칠 땐 옆으로 밀리게 하되 스크롤바는 숨김 */
+.tnav{scrollbar-width:none}.tnav::-webkit-scrollbar{display:none}
+#tTnav .ti{flex:1 0 auto;padding-left:12px;padding-right:12px}
+.foot-links{display:flex;gap:8px;padding:8px 20px 32px;max-width:1180px;margin:0 auto}
+.foot-links>*{flex:1}
+@media(max-width:420px){.foot-links{padding:8px 14px 28px}}
+@media(min-width:768px){
+  /* 헤더·하단 버튼을 본문 폭에 맞춰 정렬 */
+  .ah{padding-left:max(32px,calc((100vw - 1180px)/2 + 32px));padding-right:max(32px,calc((100vw - 1180px)/2 + 32px))}
+  .foot-links{padding:8px 32px 40px}
+  #tTnav .ti{flex:0 1 150px}
+}
 @media(min-width:1024px){
+  #tP0,#tP3{max-width:860px}
   /* 해야할 일: 왼쪽 공지·일정표 고정, 오른쪽 내 업무 */
   #sP0.active{display:grid;grid-template-columns:360px 1fr;gap:28px;align-items:start}
   .s0-side{position:sticky;top:130px}
@@ -456,7 +482,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
     <div class="cg" id="sCG"></div><div id="sCD"></div>
   </div>
   <div class="tp" id="sP4"><div id="sDept"></div></div>
-  <div style="display:flex;gap:8px;padding:8px 20px 32px">
+  <div class="foot-links">
     <a class="mc-link" style="flex:1" href="https://docs.google.com/document/d/184Tscu9FSgxyeuxSgPnjnkRiOwjqS60pak2y8cuw9cQ/edit" target="_blank" rel="noopener">📝 회의록 <span class="mc-link-ext">↗</span></a>
     <button type="button" class="mc-link" style="flex:1;background:none" id="btnT">🔒 선생님 모드</button>
   </div>
@@ -1004,6 +1030,7 @@ function closeMov(id){document.getElementById(id).classList.remove('open');}
 // ── 탭 전환 ──
 function swTab(navId,panels,n,fns){
   document.querySelectorAll('#'+navId+' .ti').forEach((t,i)=>t.classList.toggle('active',i===n));
+  const act=document.querySelector('#'+navId+' .ti.active');if(act){const bar=act.parentElement;bar.scrollLeft=act.offsetLeft-(bar.clientWidth-act.offsetWidth)/2;}
   panels.forEach((p,i)=>{const el=document.getElementById(p);if(el)el.classList.toggle('active',i===n);});
   fns[n]&&fns[n]();
 }
@@ -1064,9 +1091,10 @@ function card(t,opts){
     <div class="tc-top"><div class="tc-ti">${t.title}</div><div class="tc-r">${shB}${eb}${db}<span class="tag tag-${t.status}">${t.status}</span></div></div>
     <div class="tc-meta">${evs.length?evs.map(ev=>`<span class="ev-chip">${isProj(ev)?'📂':'🎪'} ${esc(ev.name)}</span>`).join(''):t.per?'<span class="ev-chip" style="background:var(--surface2);color:var(--text2)">기타</span>':t.category?`<span class="db db-${t.dept}">${t.category}</span>`:'<span style="font-size:11px;color:var(--text3);font-style:italic">카테고리 미지정</span>'}${ass.length>1&&!per?`<span style="font-size:11px;color:var(--text2)">${ass.join(', ')}</span>`:''}</div>
     ${dateL?`<div class="tc-meta" style="margin-top:2px">${dateL}</div>`:''}
-    ${subH}${addH}
+    ${subH}
     ${t.memo?`<div style="margin-top:8px;font-size:12px;color:var(--text2);line-height:1.6">${t.memo}</div>`:''}
-    ${ppH}${sbH}${actH}
+    ${ppH}${sbH}
+    ${addH||actH?`<details class="tc-more"><summary>+ 더보기 <small>세부 할 일 · 담당자 · 삭제</small></summary>${addH}${actH}</details>`:''}
   </div>`;
 }
 function doneSec(list,opts,id){
