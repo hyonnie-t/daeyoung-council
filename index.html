@@ -933,7 +933,11 @@ function updMAssignee(){
 }
 
 // ── 화면 전환 ──
+// 로컬 작업용: localhost/127.0.0.1/file:// 로 열었을 때만 비번 화면을 건너뛴다(배포 URL에선 그대로 비번 요구).
+// 비번·해시를 새로 저장하는 게 아니라 접속 주소만 본다. 어차피 enterTeacher() 직접 호출로 우회되는 체크라 보안 손실은 없음.
+const IS_LOCAL_DEV=['localhost','127.0.0.1','[::1]',''].includes(location.hostname);
 function showPw(){
+  if(IS_LOCAL_DEV){enterTeacher();return;}
   document.getElementById('sView').style.display='none';
   document.getElementById('pwScreen').style.display='flex';
   document.getElementById('pwInput').value='';
