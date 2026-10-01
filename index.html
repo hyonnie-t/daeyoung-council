@@ -311,6 +311,27 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .dchip{font-size:13px;padding:5px 10px;border-radius:16px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-weight:600}
 .dchip-all{background:transparent;border:1px dashed var(--border);color:var(--text3);font-size:12px;font-weight:500;padding:4px 9px;margin-left:auto}
 .dchip-all:hover{color:var(--text2);border-color:var(--text3)}
+.sc2.clk{cursor:pointer;transition:transform .12s,box-shadow .12s}
+.sc2.clk:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.1)}
+.todo-n{font-size:13px;font-weight:600;color:var(--text3);margin-left:6px}
+.todo-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:10px;margin-bottom:8px}
+.todo-row{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;box-shadow:var(--sh)}
+.todo-d{flex-shrink:0;min-width:58px;text-align:center;font-size:12px;font-weight:800;padding:4px 6px;border-radius:8px;font-family:'Noto Sans KR',sans-serif}
+.todo-d.red{background:#fff0f0;color:#d64545}.todo-d.warn{background:#fff4e6;color:#d9480f}.todo-d.gray{background:var(--surface2);color:var(--text2)}
+.todo-main{flex:1;min-width:0}
+.todo-ti{font-size:14px;font-weight:700;line-height:1.4}
+.todo-sub{font-size:12px;color:var(--text2);margin-top:2px}
+.todo-act{display:flex;gap:6px;flex-shrink:0}
+.todo-act button{padding:5px 10px;border-radius:7px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+.todo-act button.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.sr-left{font-size:13px;font-weight:700;color:var(--text2);white-space:nowrap}
+.sr-left.hot{color:#d64545}.sr-left.zero{color:var(--text3);font-weight:500}
+.sr-sub{font-size:12px;color:var(--text2);margin-top:2px}
+.sr-copy{padding:5px 9px;border-radius:7px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0}
+.sr.dim{opacity:.55}
+.dchips-fold{margin-top:6px}
+.dchips-fold>summary{list-style:none;cursor:pointer;font-size:12px;color:var(--text3)}
+.dchips-fold>summary::-webkit-details-marker{display:none}
 .evd{padding:0;overflow:hidden}
 .evd>summary{list-style:none;cursor:pointer;padding:12px 14px;display:flex;align-items:center;gap:8px;-webkit-tap-highlight-color:transparent}
 .evd>summary::-webkit-details-marker{display:none}
@@ -528,11 +549,13 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
   </div>
   <div class="tp active" id="tP0">
     <div class="sg">
-      <div class="sc2 c1"><div class="sn" id="stT">0</div><div class="sl2">전체 업무</div></div>
-      <div class="sc2 c2"><div class="sn" id="stD">0</div><div class="sl2">완료</div></div>
-      <div class="sc2 c3"><div class="sn" id="stI">0</div><div class="sl2">진행중</div></div>
-      <div class="sc2 c4"><div class="sn" id="stU">0</div><div class="sl2">마감 임박</div></div>
+      <div class="sc2 c1 clk" data-action="goFilter" data-filter="전체"><div class="sn" id="stT">0</div><div class="sl2">전체 업무</div></div>
+      <div class="sc2 c2 clk" data-action="goFilter" data-filter="완료"><div class="sn" id="stD">0</div><div class="sl2">완료</div></div>
+      <div class="sc2 c3 clk" data-action="goFilter" data-filter="진행중"><div class="sn" id="stI">0</div><div class="sl2">진행중</div></div>
+      <div class="sc2 c4 clk" data-action="goFilter" data-filter="임박"><div class="sn" id="stU">0</div><div class="sl2">마감 임박</div></div>
     </div>
+    <div class="stl">🎯 오늘 처리할 것 <span id="todoN" class="todo-n"></span></div>
+    <div id="todoArea"></div>
     <div class="stl">📢 공지사항 관리</div>
 <div id="noticeAdmin" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:8px;box-shadow:var(--sh)">
   <textarea id="noticeInput" rows="3" placeholder="공지 내용을 입력하세요. 비워두면 공지가 숨겨집니다." style="margin-bottom:8px"></textarea>
@@ -541,8 +564,6 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
     <button type="button" class="bc" id="noticeClear">공지 삭제</button>
   </div>
 </div>
-    <div class="stl">⚠️ 담당자 미배정</div><div id="uaArea"></div>
-    <div class="stl">🔴 마감 임박</div><div id="urgArea"></div>
     <div class="stl">✅ 최근 완료</div><div id="feedArea"></div>
     <div class="stl">📊 부서별 진행률</div><div id="dSum"></div>
   </div>
@@ -562,6 +583,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
       <button type="button" class="fc" data-filter="진행중">진행중</button>
       <button type="button" class="fc" data-filter="완료">완료</button>
       <button type="button" class="fc" data-filter="보류">보류</button>
+      <button type="button" class="fc" data-filter="임박">🔴 마감 임박</button>
     </div>
     <div id="allArea"></div>
   </div>
@@ -800,8 +822,13 @@ function derive(t){
 function doneChips(t){
   const db=t.doneBy||{};
   const ass=assOf(t),all=ass.length&&ass.every(n=>db[n]);
-  return '<div class="dchips">'+ass.map(n=>'<button type="button" class="dchip'+(db[n]?' on':'')+'" data-action="tDone" data-id="'+t.id+'" data-name="'+esc(n)+'">'+(db[n]?'✅ ':'⬜ ')+esc(n)+'</button>').join('')+
-    (ass.length>0?'<button type="button" class="dchip dchip-all" data-action="tAll" data-id="'+t.id+'" data-val="'+(all?'0':'1')+'">'+(all?'전체 해제':'전체 체크')+'</button>':'')+'</div>';
+  const chip=n=>'<button type="button" class="dchip'+(db[n]?' on':'')+'" data-action="tDone" data-id="'+t.id+'" data-name="'+esc(n)+'">'+(db[n]?'✅ ':'⬜ ')+esc(n)+'</button>';
+  const allBtn=ass.length>0?'<button type="button" class="dchip dchip-all" data-action="tAll" data-id="'+t.id+'" data-val="'+(all?'0':'1')+'">'+(all?'전체 해제':'전체 체크')+'</button>':'';
+  const fold=ass.length>=5&&!all;
+  const doneL=fold?ass.filter(n=>db[n]):[];
+  const shown=fold?ass.filter(n=>!db[n]):ass;
+  return '<div class="dchips">'+shown.map(chip).join('')+allBtn+'</div>'+
+    (doneL.length?'<details class="dchips-fold"><summary>✓ 완료한 '+doneL.length+'명 보기</summary><div class="dchips">'+doneL.map(chip).join('')+'</div></details>':'');
 }
 function evById(id){return events.find(e=>e.id===id);}
 function evEnd(e){return e.end||e.start;}
@@ -1479,10 +1506,30 @@ function renderDash(){
   document.getElementById('stD').textContent=done;
   document.getElementById('stI').textContent=ing;
   document.getElementById('stU').textContent=urg;
-  const ua=tasks.filter(t=>isUA(t)&&t.status!=='완료');
-  document.getElementById('uaArea').innerHTML=ua.length===0?'<div style="font-size:14px;color:var(--text3);padding:8px 0">미배정 없음 ✅</div>':ua.map(t=>'<div class="ua"><div class="ua-top"><div class="ua-ti">'+t.title+'</div><div class="ua-btns"><button type="button" class="eb" data-action="edit" data-id="'+t.id+'">✏️</button><button type="button" class="abtn" data-action="assign" data-id="'+t.id+'">배정</button><button type="button" class="eb" style="color:#d64545" data-action="del" data-id="'+t.id+'">🗑</button></div></div><div class="tc-meta">'+(t.category?'<span class="db db-'+t.dept+'">'+t.category+'</span>':'')+'<span class="db db-'+t.dept+'">'+t.dept+'</span>'+(t.deadline?'<span style="font-size:12px;color:var(--text2)">⏰ '+fD(t.deadline)+'</span>':'')+'</div></div>').join('');
-  const ul=tasks.filter(t=>{const d=dU(effDeadline(t));return d!==null&&d<=3&&t.status!=='완료';}).sort((a,b)=>new Date(effDeadline(a))-new Date(effDeadline(b)));
-  document.getElementById('urgArea').innerHTML=ul.length===0?'<div style="font-size:14px;color:var(--text3);padding:8px 0">마감 임박 없음 ✅</div>':ul.map(t=>card(t,{showEB:true,showDel:true,teacher:true})).join('');
+  const todo=tasks.filter(t=>{
+    if(t.status==='완료')return false;
+    const d=dU(effDeadline(t));
+    return isUA(t)||(d!==null&&d<=3);
+  }).sort((a,b)=>{
+    // 오늘·임박 → 최근에 지난 것 → 오래 지난 것 → 마감 없는 미배정 순
+    const k=t=>{const d=dU(effDeadline(t));return d===null?1e6:d>=0?d:1000+(-d);};
+    return k(a)-k(b);
+  });
+  document.getElementById('todoN').textContent=todo.length?todo.length+'건':'';
+  const todoRow=t=>{
+    const d=dU(effDeadline(t)),ua=isUA(t);
+    let lb,cl;
+    if(d===null){lb='미배정';cl='gray';}
+    else if(d<0){lb=(-d)+'일 지남';cl='red';}
+    else if(d===0){lb='오늘';cl='red';}
+    else{lb='D-'+d;cl='warn';}
+    const ass=assOf(t);
+    const sub=[esc(t.category||'기타'),ua?'담당자 없음':ass.map(esc).join(', ')].join(' · ');
+    const chips=!ua&&isPer(t)&&t.status!=='보류'?doneChips(t):(!ua?'<span class="tag tag-'+t.status+'" style="margin-top:6px;display:inline-block">'+t.status+'</span>':'');
+    return '<div class="todo-row"><span class="todo-d '+cl+'">'+lb+'</span><div class="todo-main"><div class="todo-ti">'+esc(t.title)+'</div><div class="todo-sub">'+sub+'</div>'+chips+'</div><div class="todo-act">'+
+      '<button type="button"'+(ua?' class="pri"':'')+' data-action="assign" data-id="'+t.id+'">'+(ua?'배정':'👤')+'</button><button type="button" data-action="edit" data-id="'+t.id+'">✏️</button></div></div>';
+  };
+  document.getElementById('todoArea').innerHTML=todo.length?'<div class="todo-list">'+todo.slice(0,10).map(todoRow).join('')+'</div>'+(todo.length>10?'<details class="tc-more" style="margin:0 0 8px"><summary>나머지 '+(todo.length-10)+'건 더 보기</summary><div class="todo-list" style="margin-top:10px">'+todo.slice(10).map(todoRow).join('')+'</div></details>':''):'<div style="font-size:14px;color:var(--text3);padding:8px 0">지금 처리할 업무가 없어요 ✅</div>';
   const now=new Date();now.setHours(0,0,0,0);const wk=new Date(now);wk.setDate(wk.getDate()-7);
   const recent=tasks.filter(t=>t.status==='완료'&&t.completedAt&&new Date(t.completedAt)>=wk).sort((a,b)=>new Date(b.completedAt)-new Date(a.completedAt)).slice(0,15);
   const todayL=recent.filter(t=>new Date(t.completedAt)>=now);
@@ -1507,12 +1554,32 @@ function renderDash(){
 }
 
 // ── 교사: 학생별 ──
+function stuLeft(name){
+  return tasks.filter(t=>assOf(t).includes(name)&&t.status!=='완료'&&t.status!=='보류'&&!(isPer(t)&&(t.doneBy||{})[name]))
+    .sort((a,b)=>(effDeadline(a)||'9').localeCompare(effDeadline(b)||'9'));
+}
 function renderTStu(){
-  document.getElementById('tStu').innerHTML='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:4px 16px;box-shadow:var(--sh)">'+MEMBERS.map(m=>{
-    const mt=tasks.filter(t=>(t.assignees||[t.assignee]).includes(m.name));
-    const done=mt.filter(t=>t.status==='완료').length;const pct=mt.length>0?Math.round(done/mt.length*100):0;const col=dc(m.dept);
-    return '<div class="sr" data-action="openStu" data-name="'+m.name+'"><div class="sav" style="background:'+col+'22;color:'+col+'">'+m.name.slice(-1)+'</div><div style="flex:1"><div style="font-size:14px;font-weight:600;margin-bottom:3px">'+m.name+'</div><span class="db db-'+m.dept+'">'+m.dept+'</span></div><div style="text-align:right"><div style="font-size:13px;color:var(--text2)">'+done+'/'+mt.length+'</div><div class="mb"><div class="mf" style="width:'+pct+'%;background:'+col+'"></div></div></div></div>';
+  const rows=MEMBERS.map(m=>{
+    const mt=tasks.filter(t=>assOf(t).includes(m.name));
+    const left=stuLeft(m.name);
+    const dls=left.map(t=>dU(effDeadline(t))).filter(d=>d!==null);
+    const od=dls.filter(d=>d<0).length;
+    return {m,mt,left,od,min:dls.length?Math.min(...dls):null};
+  }).sort((a,b)=>(b.od-a.od)||(b.left.length-a.left.length)||((a.min===null?999:a.min)-(b.min===null?999:b.min)));
+  document.getElementById('tStu').innerHTML='<div class="hint" style="margin:0 0 8px">밀린 업무가 많은 사람부터 보여요. 이름을 누르면 상세, 📋 버튼은 카톡용 안내 문구를 복사해요.</div><div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:4px 16px;box-shadow:var(--sh)">'+rows.map(({m,mt,left,od,min})=>{
+    const col=dc(m.dept);
+    const n=left.length;
+    const near=min===null?'':min<0?'<span style="color:#d64545;font-weight:700"> · ⏰ '+(-min)+'일 지남</span>':' · ⏰ '+(min===0?'오늘':'D-'+min);
+    return '<div class="sr'+(n?'':' dim')+'" data-action="openStu" data-name="'+esc(m.name)+'"><div class="sav" style="background:'+col+'22;color:'+col+'">'+esc(m.name.slice(-1))+'</div><div style="flex:1"><div style="font-size:14px;font-weight:600">'+esc(m.name)+' <span class="db db-'+m.dept+'" style="margin-left:4px">'+m.dept+'</span></div><div class="sr-sub">'+(n?'<b class="sr-left'+(od?' hot':'')+'">남은 '+n+'건</b>'+near:'<span class="sr-left zero">남은 업무 없음</span>')+' · 전체 '+mt.length+'건</div></div>'+
+      (n?'<button type="button" class="sr-copy" data-action="copyNag" data-name="'+esc(m.name)+'">📋 안내 복사</button>':'')+'</div>';
   }).join('')+'</div>';
+}
+function copyNag(name){
+  const left=stuLeft(name);if(!left.length){toast('남은 업무가 없어요');return;}
+  const txt=name+'님, 남은 업무 알려드려요.\n'+left.map(t=>'- '+t.title+(effDeadline(t)?' ('+fD(effDeadline(t))+' 마감)':'')).join('\n');
+  const ok=()=>toast('📋 '+name+' 님 안내 문구를 복사했어요');
+  const fb=()=>{const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok();}catch(e){toast('복사에 실패했어요');}ta.remove();};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(ok,fb);else fb();
 }
 let _stuName='';
 function openStu(name){
@@ -1588,7 +1655,7 @@ function saveBulk(sel){
 
 // ── 교사: 전체 업무 ──
 function renderAllTasks(){
-  let list=allFilt==='전체'?[...tasks]:tasks.filter(t=>t.status===allFilt);
+  let list=allFilt==='전체'?[...tasks]:allFilt==='임박'?tasks.filter(t=>{const d=dU(effDeadline(t));return d!==null&&d<=3&&t.status!=='완료';}):tasks.filter(t=>t.status===allFilt);
   if(sq){const q=sq.toLowerCase();list=list.filter(t=>(t.title||'').toLowerCase().includes(q)||(t.category||'').toLowerCase().includes(q)||((t.assignees||[t.assignee]).join(' ')).toLowerCase().includes(q)||(t.dept||'').toLowerCase().includes(q));}
   list.sort((a,b)=>{if(a.status==='완료'&&b.status!=='완료')return 1;if(a.status!=='완료'&&b.status==='완료')return -1;if(!a.deadline)return 1;if(!b.deadline)return -1;return new Date(a.deadline)-new Date(b.deadline);});
   const opts={showEB:true,showDel:true,teacher:true};
@@ -1826,6 +1893,13 @@ document.addEventListener('click',function(e){
   if(action==='bulkCancel'){if(_bulkSelf){closeMov('stuMov');_bulkSelf=false;}else openStu(el.dataset.name);return;}
   if(action==='bulkPick'){bulkPick(el.dataset.name);return;}
   if(action==='openStu'){openStu(el.dataset.name);return;}
+  if(action==='copyNag'){copyNag(el.dataset.name);return;}
+  if(action==='goFilter'){
+    allFilt=el.dataset.filter;sq='';
+    const si=document.getElementById('searchInput');if(si)si.value='';
+    document.querySelectorAll('#filterBar .fc').forEach(c=>c.classList.toggle('active',c.dataset.filter===allFilt));
+    swTab('tTnav',T_PANELS,5,tFns);return;
+  }
   if(action==='selfAssign'){selfAssign(id);return;}
   if(action==='meDone'){meDone(id);return;}
   if(action==='tDone'){tDone(id,el.dataset.name);return;}
@@ -2042,6 +2116,8 @@ function renderTEvents(){
   let h='<button type="button" class="ev-new" data-action="evNew">+ 행사 등록</button>';
   if(!events.length)h+='<button type="button" class="ev-add" data-action="evSeed" style="margin:0 0 16px;padding:12px;font-weight:700">📥 10월 일정 '+EV_OCT.length+'개 한 번에 등록</button>';
   const {up,proj,past}=evSorted();
+  const evLeft=e=>{const et=tasks.filter(t=>inEv(t,e.id));return et.length&&et.every(t=>t.status==='완료')?1:0;};
+  up.sort((a,b)=>evLeft(a)-evLeft(b)||a.start.localeCompare(b.start));
   const rowHtml=t=>{
     const ass=assOf(t),left=ass.filter(n=>!(t.doneBy||{})[n]);
     const who=!ass.length?'<span class="pp-left">담당자 미배정</span>':t.status==='완료'?'모두 완료':'남은 사람: <span class="pp-left">'+left.map(esc).join(', ')+'</span> ('+(ass.length-left.length)+'/'+ass.length+')';
