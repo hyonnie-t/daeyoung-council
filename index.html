@@ -172,6 +172,15 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .feed-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
 .feed-info{flex:1}.feed-nm{font-size:13px;font-weight:600;margin-bottom:2px}
 .feed-tk{font-size:14px}.feed-tm{font-size:12px;color:var(--text3);font-family:'Noto Sans KR',sans-serif;white-space:nowrap}
+.hm-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:8px 10px;margin-bottom:8px;box-shadow:var(--sh);overflow-x:auto}
+.hm{width:100%;border-collapse:separate;border-spacing:3px;font-family:'Noto Sans KR',sans-serif;font-size:12px}
+.hm th{font-weight:600;color:var(--text3);text-align:center;padding:2px 0;white-space:nowrap}
+.hm th.today{color:var(--accent)}
+.hm td.nm{white-space:nowrap;font-size:13px;font-weight:600;padding-right:6px}
+.hm td.c{width:30px;min-width:26px;height:26px;text-align:center;border-radius:6px;background:var(--surface2);color:var(--text3)}
+.hm td.last{white-space:nowrap;text-align:right;color:var(--text3);padding-left:6px}
+.hm td.last.cold{color:#e03131;font-weight:700}
+.hm-note{font-size:12px;color:var(--text3);margin:2px 2px 8px;font-family:'Noto Sans KR',sans-serif}
 
 /* 달력 */
 .ch{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
@@ -634,7 +643,8 @@ details.un-notice[open]>summary{margin-bottom:8px}
     <button type="button" class="bc" id="noticeClear">공지 삭제</button>
   </div>
 </div>
-    <details class="fold"><summary class="stl">✅ 최근 완료</summary><div id="feedArea"></div></details>
+    <details class="fold"><summary class="stl">🔥 학생별 활동 (최근 7일)</summary><div id="heatArea"></div></details>
+    <details class="fold"><summary class="stl">🕘 최근 활동</summary><div id="feedArea"></div></details>
     <details class="fold"><summary class="stl">📊 부서별 진행률</summary><div id="dSum"></div></details>
   </div>
   <div class="tp" id="tPW">
@@ -1009,6 +1019,35 @@ async function evDel(id){
 async function fbDel(id){
   try{await fetch(FB+'/tasks/'+id+'.json',{method:'DELETE'});}catch(e){toast('⚠️ 서버 삭제 실패 — 인터넷 연결을 확인해주세요');}
 }
+// ── 활동 로그 ──
+// Firebase activity/{푸시키}에 건별 POST. 배열을 통째로 쓰지 않으므로 동시에 기록해도 서로 덮어쓰지 않는다.
+// 항목: {at, who(한 사람), type, tid, title, name(완료 체크 대상), to(상태·배정 결과)}
+// type: done/undo(1인별 완료 체크·취소), add, edit, status, sub, assign, del
+let ACT_LOG=[],_actLoadedAt=0,_actWarned=false;
+function actor(){return document.getElementById('tView').style.display!=='none'?'선생님':myName();}
+function logAct(type,t,o){
+  o=o||{};
+  const e={at:o.at||new Date().toISOString(),who:o.who||actor()||'',type,tid:t.id,title:t.title||''};
+  if(o.name)e.name=o.name;
+  if(o.to)e.to=o.to;
+  ACT_LOG.push(e);
+  fetch(FB+'/activity.json',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(e)})
+    .then(r=>{if(!r.ok)throw new Error(r.status);})
+    .catch(err=>{console.warn('활동 기록 실패:',err);if(!_actWarned){_actWarned=true;toast('⚠️ 활동 기록 저장 실패 — Firebase 규칙에 activity 쓰기 허용 필요');}});
+}
+function logDoneWrites(t,writes,who){
+  writes.forEach(([n,v])=>logAct(v?'done':'undo',t,{name:n,at:v||undefined,who}));
+}
+async function loadActivity(){
+  _actLoadedAt=Date.now();
+  try{
+    const r=await fetch(FB+'/activity.json?orderBy=%22%24key%22&limitToLast=400');
+    if(!r.ok)return;
+    const d=await r.json();
+    ACT_LOG=d?Object.values(d).filter(e=>e&&e.at&&e.type):[];
+    renderActivity();
+  }catch(e){console.warn('활동 로그 로드 실패:',e);}
+}
 function gasLog(t){
   if(!GAS||t.status!=='완료')return;
   fetch(GAS,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'updateTask',task:t})}).catch(()=>{});
@@ -1367,6 +1406,7 @@ function submitTask(){
   const t={id:crypto.randomUUID(),assignee:name,assignees:ass,dept:gd(name),title,category:evNames(evIds),date:'',per:true,deadline:document.getElementById('fDeadline').value,memo:document.getElementById('fMemo').value.trim(),status:'예정',subtasks:subs,createdAt:new Date().toISOString()};
   setEvIds(t,evIds);
   tasks.push(t);saveLocal();fbPut(t);
+  logAct('add',t,{at:t.createdAt,who:name});
   toast('✅ '+ass.join(', ')+'에게 업무 등록!');
   ['fTitle','fMemo','fDeadline'].forEach(id=>{document.getElementById(id).value='';});
   document.getElementById('fSubFold').open=false;
@@ -1382,6 +1422,7 @@ function chgSt(id,ns){
   if(ns==='완료'){(t.subtasks||[]).forEach(s=>s.done=true);t.completedAt=new Date().toISOString();}
   if(ns==='예정')(t.subtasks||[]).forEach(s=>s.done=false);
   t.status=ns;saveLocal();fbPut(t);gasLog(t);refresh();
+  logAct('status',t,{to:ns});
   toast('"'+ns+'"으로 변경');
   if(ns==='완료')setTimeout(openDones,100);
 }
@@ -1396,6 +1437,7 @@ function togSub(id,idx){
   else if(cnt===t.subtasks.length){t.status='완료';t.completedAt=new Date().toISOString();}
   else t.status='진행중';
   saveLocal();fbPut(t);gasLog(t);refresh();
+  if(t.subtasks[idx].done)logAct('sub',t,{to:t.subtasks[idx].text});
   toast(t.subtasks[idx].done?'✅ 완료!':'↩ 해제');
   if(t.status==='완료')setTimeout(openDones,100);
 }
@@ -1466,6 +1508,8 @@ function openDel(id){
   document.getElementById('delMov').classList.add('open');
 }
 function confirmDel(){
+  const dt=tasks.find(t=>t.id===_delId);
+  if(dt)logAct('del',dt);
   fbDel(_delId);
   tasks=tasks.filter(t=>t.id!==_delId);
   saveLocal();closeMov('delMov');refresh();toast('🗑 삭제됐어요');
@@ -1532,7 +1576,9 @@ function saveEdit(){
     t.status=_editStatus;
   }
   saveLocal();fbPut(t);gasLog(t);
-  doneWrites.forEach(([n,at])=>fbSetDone(t.id,n,at).catch(()=>toast('⚠️ 서버 저장 실패 — 인터넷 연결을 확인해주세요')));closeMov('editMov');refresh();
+  doneWrites.forEach(([n,at])=>fbSetDone(t.id,n,at).catch(()=>toast('⚠️ 서버 저장 실패 — 인터넷 연결을 확인해주세요')));
+  logAct('edit',t);logDoneWrites(t,doneWrites);
+  closeMov('editMov');refresh();
   toast('✅ 수정 완료!');
   if(t.status==='완료')setTimeout(openDones,100);
 }
@@ -1554,6 +1600,7 @@ function saveAssign(){
   if(!t||!sel.length){toast('담당자를 선택해주세요');return;}
   t.assignees=sel;t.assignee=sel[0];t.dept=gd(sel[0]);
   saveLocal();fbPut(t);closeMov('assignMov');refresh();
+  logAct('assign',t,{to:sel.join(', ')});
   toast('✅ '+sel.join(', ')+' 배정 완료');
 }
 
@@ -1637,27 +1684,91 @@ function renderDash(){
       '<button type="button"'+(ua?' class="pri"':'')+' data-action="assign" data-id="'+t.id+'">'+(ua?'배정':'👤')+'</button><button type="button" data-action="edit" data-id="'+t.id+'">✏️</button></div></div>';
   };
   document.getElementById('todoArea').innerHTML=todo.length?'<div class="todo-list">'+todo.slice(0,10).map(todoRow).join('')+'</div>'+(todo.length>10?'<details class="tc-more" style="margin:0 0 8px"><summary>나머지 '+(todo.length-10)+'건 더 보기</summary><div class="todo-list" style="margin-top:10px">'+todo.slice(10).map(todoRow).join('')+'</div></details>':''):'<div style="font-size:14px;color:var(--text3);padding:8px 0">지금 처리할 업무가 없어요 ✅</div>';
-  const now=new Date();now.setHours(0,0,0,0);const wk=new Date(now);wk.setDate(wk.getDate()-7);
-  const recent=tasks.filter(t=>t.status==='완료'&&t.completedAt&&new Date(t.completedAt)>=wk).sort((a,b)=>new Date(b.completedAt)-new Date(a.completedAt)).slice(0,15);
-  const todayL=recent.filter(t=>new Date(t.completedAt)>=now);
-  const wkL=recent.filter(t=>new Date(t.completedAt)<now);
-  function feedFn(list){
-    return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:4px 16px;margin-bottom:8px;box-shadow:var(--sh)">'+list.map(t=>{
-      const a=t.assignees||[t.assignee].filter(Boolean);const col=dc(t.dept);
-      const diff=t.completedAt?Math.floor((new Date()-new Date(t.completedAt))/60000):0;
-      const ts=diff<1?'방금':diff<60?diff+'분 전':diff<1440?Math.floor(diff/60)+'시간 전':Math.floor(diff/1440)+'일 전';
-      return '<div class="feed-item"><div class="feed-av" style="background:'+col+'22;color:'+col+'">'+(a[0]||'?').slice(-1)+'</div><div class="feed-info"><div class="feed-nm">'+a.join(', ')+' <span class="db db-'+t.dept+'" style="font-size:12px">'+t.dept+'</span></div><div class="feed-tk">'+t.title+'</div></div><div class="feed-tm">'+ts+'</div></div>';
-    }).join('')+'</div>';
-  }
-  let fh='';
-  if(todayL.length)fh+='<div style="font-size:12px;color:var(--accent3);font-weight:700;font-family:\'Noto Sans KR\',sans-serif;margin-bottom:8px">TODAY ('+todayL.length+')</div>'+feedFn(todayL);
-  if(wkL.length)fh+='<div style="font-size:12px;color:var(--text2);font-weight:700;font-family:\'Noto Sans KR\',sans-serif;margin:12px 0 8px">이번 주 ('+wkL.length+')</div>'+feedFn(wkL);
-  document.getElementById('feedArea').innerHTML=fh||'<div style="font-size:14px;color:var(--text3);padding:8px 0">이번 주 완료 없음</div>';
+  renderActivity();
+  if(Date.now()-_actLoadedAt>60000)loadActivity();
   document.getElementById('dSum').innerHTML=DEPTS.map(dept=>{
     const dt=tasks.filter(t=>t.dept===dept);const d=dt.filter(t=>t.status==='완료').length;
     const pct=dt.length>0?Math.round(d/dt.length*100):0;const col=dc(dept);
     return '<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span class="db db-'+dept+'">'+dept+'</span><span style="font-size:13px;color:'+col+';font-family:\'Noto Sans KR\',sans-serif;font-weight:600">'+d+'/'+dt.length+' '+pct+'%</span></div><div class="dp"><div class="dpf" style="width:'+pct+'%;background:'+col+'"></div></div></div>';
   }).join('');
+}
+
+// ── 교사: 최근 활동 피드 + 학생별 활동 히트맵 ──
+const ACT_DAYS=7;
+const ACT_TXT={done:'✅ 완료',undo:'↩ 완료 취소',add:'➕ 업무 등록',edit:'✏️ 수정',status:'🔄 상태 변경',sub:'☑ 세부 할 일',assign:'👤 배정',del:'🗑 삭제'};
+function agoTxt(at){
+  const m=Math.floor((Date.now()-new Date(at))/60000);
+  return m<1?'방금':m<60?m+'분 전':m<1440?Math.floor(m/60)+'시간 전':Math.floor(m/1440)+'일 전';
+}
+function actDay(at){const d=new Date(at);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function actPerson(e){return e.type==='done'||e.type==='undo'?e.name:e.who;}
+// 로그(activity)와 기존 데이터(doneBy 완료 시각, createdAt)를 합친다. 로그가 생기기 전의 완료·등록도 여기서 복원된다.
+function activityEvents(){
+  const m=new Map();
+  const put=e=>{
+    const k=e.type==='done'?'done|'+e.tid+'|'+e.name+'|'+e.at:e.type==='add'?'add|'+e.tid:e.type+'|'+e.tid+'|'+e.at+'|'+(e.name||'');
+    if(!m.has(k))m.set(k,e);
+  };
+  ACT_LOG.forEach(put);
+  tasks.forEach(t=>{
+    if(t.createdAt)put({at:t.createdAt,who:t.assignee||'',type:'add',tid:t.id,title:t.title});
+    Object.entries(t.doneBy||{}).forEach(([n,at])=>put({at,who:n,type:'done',name:n,tid:t.id,title:t.title}));
+  });
+  return [...m.values()].sort((a,b)=>new Date(b.at)-new Date(a.at));
+}
+function renderActivity(){
+  const feed=document.getElementById('feedArea'),heat=document.getElementById('heatArea');
+  if(!feed||!heat)return;
+  const evs=activityEvents();
+  const byId=new Map(tasks.map(t=>[t.id,t]));
+  // 취소·삭제된 활동은 '한 일'로 세지 않는다 (완료 체크는 지금도 체크돼 있어야 인정)
+  const live=e=>{
+    if(e.type==='undo'||e.type==='del')return false;
+    if(e.type!=='done')return true;
+    const t=byId.get(e.tid);return !!(t&&(t.doneBy||{})[e.name]===e.at);
+  };
+
+  // 피드
+  const today=todayStr(),from=addDays(today,-(ACT_DAYS-1));
+  const recent=evs.filter(e=>actDay(e.at)>=from).slice(0,40);
+  const row=e=>{
+    const p=actPerson(e),dept=gd(p),col=dc(dept);
+    const proxy=(e.type==='done'||e.type==='undo')&&e.who&&e.who!==e.name?' <span style="font-weight:400;color:var(--text3)">('+esc(e.who)+'이 처리)</span>':'';
+    const tail=e.to?' <span style="color:var(--text3)">('+esc(e.to)+')</span>':'';
+    return '<div class="feed-item"><div class="feed-av" style="background:'+col+'22;color:'+col+'">'+esc((p||'?').slice(-1))+'</div><div class="feed-info"><div class="feed-nm">'+esc(p||'누군가')+proxy+(dept?' <span class="db db-'+dept+'" style="font-size:12px">'+dept+'</span>':'')+'</div><div class="feed-tk">'+ACT_TXT[e.type]+' · '+esc(e.title)+tail+'</div></div><div class="feed-tm">'+agoTxt(e.at)+'</div></div>';
+  };
+  const box=list=>'<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:4px 16px;margin-bottom:8px;box-shadow:var(--sh)">'+list.map(row).join('')+'</div>';
+  const todayL=recent.filter(e=>actDay(e.at)===today),wkL=recent.filter(e=>actDay(e.at)<today);
+  let fh='';
+  if(todayL.length)fh+='<div style="font-size:12px;color:var(--accent3);font-weight:700;font-family:\'Noto Sans KR\',sans-serif;margin-bottom:8px">TODAY ('+todayL.length+')</div>'+box(todayL);
+  if(wkL.length)fh+='<div style="font-size:12px;color:var(--text2);font-weight:700;font-family:\'Noto Sans KR\',sans-serif;margin:12px 0 8px">이번 주 ('+wkL.length+')</div>'+box(wkL);
+  feed.innerHTML=fh||'<div style="font-size:14px;color:var(--text3);padding:8px 0">이번 주 활동 없음</div>';
+
+  // 히트맵: 학생 × 최근 7일, 조용한 학생이 위로
+  const days=[];for(let i=ACT_DAYS-1;i>=0;i--)days.push(addDays(today,-i));
+  const cnt={},last={};
+  evs.forEach(e=>{
+    const p=actPerson(e);
+    if(!p||!gm(p).name||!live(e))return;
+    if(!last[p])last[p]=e.at; // evs는 최신순
+    const d=actDay(e.at);
+    if(days.includes(d)){(cnt[p]=cnt[p]||{})[d]=((cnt[p]||{})[d]||0)+1;}
+  });
+  const total=n=>Object.values(cnt[n]||{}).reduce((a,b)=>a+b,0);
+  const rows=MEMBERS.map(m=>m.name).sort((a,b)=>total(a)-total(b)||(last[a]||'').localeCompare(last[b]||''));
+  const th=days.map(d=>'<th'+(d===today?' class="today"':'')+'>'+DKO[new Date(d+'T00:00:00').getDay()]+'<br>'+Number(d.slice(8))+'</th>').join('');
+  const body=rows.map(n=>{
+    const cells=days.map(d=>{
+      const c=(cnt[n]||{})[d]||0;
+      if(!c)return '<td class="c"></td>';
+      const a=Math.min(.18+c*.17,.85);
+      return '<td class="c" style="background:rgba(91,82,232,'+a+');color:'+(a>.5?'#fff':'var(--text)')+';font-weight:700">'+c+'</td>';
+    }).join('');
+    const cold=!last[n]||(Date.now()-new Date(last[n]))>3*86400000;
+    return '<tr><td class="nm"><span style="color:'+dc(gd(n))+'">●</span> '+esc(n)+'</td>'+cells+'<td class="last'+(cold?' cold':'')+'">'+(last[n]?agoTxt(last[n]):'기록 없음')+'</td></tr>';
+  }).join('');
+  heat.innerHTML='<div class="hm-wrap"><table class="hm"><thead><tr><th></th>'+th+'<th></th></tr></thead><tbody>'+body+'</tbody></table></div>'
+    +'<div class="hm-note">칸의 숫자는 그날 한 일(완료 체크·등록·수정 등)의 개수예요. 위쪽일수록 최근 활동이 적은 학생이고, 마지막 활동이 3일 넘으면 빨간색이에요.</div>';
 }
 
 // ── 교사: 학생별 ──
@@ -1753,6 +1864,7 @@ function saveBulk(sel){
     const next=[...new Set([...assOf(t).filter(x=>x!==from),...sel])];
     t.assignees=next;t.assignee=next[0];t.dept=gd(next[0]);
     derive(t);fbPut(t);n++;
+    logAct('assign',t,{to:sel.join(', ')});
   });
   saveLocal();closeMov('assignMov');
   if(_bulkSelf){closeMov('stuMov');_bulkSelf=false;}
@@ -1865,6 +1977,7 @@ function bindStatic(){
     const tEvs=getEvPick('tAddEv');
     setEvIds(t,tEvs);derive(t);
     tasks.push(t);saveLocal();
+    logAct('add',t,{at:t.createdAt,who:'선생님'});
     fbPut(t).then(()=>{
       renderDash();
       renderTEvents();
@@ -2117,6 +2230,7 @@ async function setAllDone(id,val){
   const writes=applyAllDone(t,val);
   saveLocal();refresh();
   toast(val?'✅ 전원 완료 처리':'↩ 전원 완료 취소');
+  logDoneWrites(t,writes,'선생님');
   try{
     await Promise.all(writes.map(([n,v])=>fbSetDone(id,n,v)));
     await fetch(FB+'/tasks/'+id+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:t.status,completedAt:t.completedAt||null})});
@@ -2133,6 +2247,7 @@ async function toggleDone(id,name,byTeacher){
   const val=t.doneBy[name]?null:new Date().toISOString();
   if(val)t.doneBy[name]=val;else delete t.doneBy[name];
   derive(t);saveLocal();refresh();
+  logDoneWrites(t,[[name,val]],byTeacher?'선생님':name);
   toast(byTeacher?(val?'✅ '+name+' 완료 처리':'↩ '+name+' 완료 취소'):(val?'✅ 내 몫 완료!':'↩ 완료 취소'));
   try{
     await fbSetDone(id,name,val);

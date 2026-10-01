@@ -48,6 +48,7 @@ GitHub Pages 무료 요금제는 public 저장소에서만 동작한다. 즉 이
 - 업무 id는 `crypto.randomUUID()`로 생성한다(`Date.now()` 기반 id는 동시 생성 시 충돌 가능해서 바꿨다).
 - Firebase 쓰기 실패는 `toast()`로 사용자에게 알린다(과거엔 `catch`에서 조용히 무시했음 — 실패를 삼키지 말 것).
 - Firebase 보안 규칙에서 허용하지 않은 경로는 쓰기가 401/403으로 거부된다. 새 최상위 경로(예: `events`)를 추가하면 Firebase 콘솔 규칙에도 추가해야 한다. 행사 저장 실패 토스트는 권한 문제면 그 이유를 표시한다.
+- **활동 로그(`activity`)**: 업무 등록·수정·삭제, 상태 변경, 세부 할 일 체크, 배정, 1인별 완료 체크/취소를 `logAct(type, t, {at, who, name, to})`가 `${FB}/activity.json`에 건별 POST한다(푸시키라 동시 기록이 안 겹친다). 새 쓰기 동작을 추가하면 `logAct`도 같이 부를 것. Firebase 규칙에 `activity` 읽기/쓰기 허용이 필요하고, 막혀 있으면 토스트를 세션당 한 번 띄운다. 선생님 대시보드의 '🔥 학생별 활동'(히트맵)과 '🕘 최근 활동'(피드)은 `renderActivity()`가 로그 최근 400건에 `doneBy`·`createdAt`을 합쳐서(`activityEvents()`) 그린다. 그래서 로그가 생기기 전의 완료·등록도 보이고, 중복은 키(`done|tid|이름|시각`, `add|tid`)로 걸러낸다. 로그는 지우는 코드가 없어 계속 쌓인다.
 - `GAS`(Google Apps Script) 엔드포인트는 업무가 "완료" 상태가 될 때만 `no-cors` POST로 로그를 남기는 부가 기능(`gasLog`)이라 실패해도 앱 동작에 영향 없음.
 
 ### 이벤트 처리 패턴
