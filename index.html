@@ -311,10 +311,21 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .dchip{font-size:13px;padding:5px 10px;border-radius:16px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-weight:600}
 .dchip-all{background:transparent;border:1px dashed var(--border);color:var(--text3);font-size:12px;font-weight:500;padding:4px 9px;margin-left:auto}
 .dchip-all:hover{color:var(--text2);border-color:var(--text3)}
+.seg{display:flex;gap:4px;background:var(--surface2);border-radius:12px;padding:4px;margin:0 auto 16px;max-width:560px}
+.seg button{flex:1;padding:9px 6px;border-radius:9px;border:none;background:transparent;color:var(--text2);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}
+.seg button.on{background:var(--surface);color:var(--accent);box-shadow:var(--sh)}
+.wv{display:none}.wv.on{display:block}
+#tP3{max-width:860px;margin:0 auto}
+.fold>summary{list-style:none;cursor:pointer}
+.fold>summary::-webkit-details-marker{display:none}
+.fold>summary::before{content:'▸ ';color:var(--text3)}
+.fold[open]>summary::before{content:'▾ '}
+.qdone{padding:2px 10px;border-radius:20px;border:1px solid #8ce99a;background:#fff;color:#2f9e44;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+.qdone:hover{background:#ebfbee}
 .sc2.clk{cursor:pointer;transition:transform .12s,box-shadow .12s}
 .sc2.clk:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.1)}
 .todo-n{font-size:13px;font-weight:600;color:var(--text3);margin-left:6px}
-.todo-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:10px;margin-bottom:8px}
+.todo-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(420px,100%),1fr));gap:10px;margin-bottom:8px}
 .todo-row{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;box-shadow:var(--sh)}
 .todo-d{flex-shrink:0;min-width:58px;text-align:center;font-size:12px;font-weight:800;padding:4px 6px;border-radius:8px;font-family:'Noto Sans KR',sans-serif}
 .todo-d.red{background:#fff0f0;color:#d64545}.todo-d.warn{background:#fff4e6;color:#d9480f}.todo-d.gray{background:var(--surface2);color:var(--text2)}
@@ -428,6 +439,18 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
   .tc-act button,.ev-row-act button{min-height:38px}
   .tc-more summary{padding:12px 0 6px}
 }
+/* 폰: 눌러야 하는 작은 버튼 키우기 */
+@media(max-width:767px){
+  .dchip{padding:9px 13px;font-size:14px}
+  .dchip-all{padding:8px 11px;font-size:13px}
+  .sb-btn{padding:10px 14px}
+  .todo-act button,.sr-copy,.ev-row-act button,.tc-act button,.qdone{min-height:40px;padding-left:12px;padding-right:12px}
+  .eb{min-height:38px;min-width:38px}
+  .seg button{padding:11px 4px;font-size:13px}
+  .todo-row{flex-wrap:wrap}
+  .todo-main{flex-basis:calc(100% - 92px)}
+  .todo-act{width:100%;justify-content:flex-end}
+}
 /* 탭 줄: 넘칠 땐 옆으로 밀리게 하되 스크롤바는 숨김 */
 .tnav{scrollbar-width:none}.tnav::-webkit-scrollbar{display:none}
 #tTnav .ti{flex:1 0 auto;padding-left:12px;padding-right:12px}
@@ -540,12 +563,9 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
   </div>
   <div class="tnav" id="tTnav">
     <button type="button" class="ti active" data-tab="0">대시보드</button>
-    <button type="button" class="ti" data-tab="1">행사</button>
+    <button type="button" class="ti" data-tab="1">업무</button>
     <button type="button" class="ti" data-tab="2">달력</button>
-    <button type="button" class="ti" data-tab="3">부서별</button>
-    <button type="button" class="ti" data-tab="4">학생별</button>
-    <button type="button" class="ti" data-tab="5">전체 업무</button>
-    <button type="button" class="ti" data-tab="6">출석 관리</button>
+    <button type="button" class="ti" data-tab="3">출석 관리</button>
   </div>
   <div class="tp active" id="tP0">
     <div class="sg">
@@ -564,17 +584,20 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
     <button type="button" class="bc" id="noticeClear">공지 삭제</button>
   </div>
 </div>
-    <div class="stl">✅ 최근 완료</div><div id="feedArea"></div>
-    <div class="stl">📊 부서별 진행률</div><div id="dSum"></div>
+    <details class="fold"><summary class="stl">✅ 최근 완료</summary><div id="feedArea"></div></details>
+    <details class="fold"><summary class="stl">📊 부서별 진행률</summary><div id="dSum"></div></details>
   </div>
-  <div class="tp" id="tPE"><div id="tEvArea"></div></div>
-  <div class="tp" id="tP1">
-    <div class="ch"><button type="button" class="cn" id="tCP">‹</button><div class="ct" id="tCT"></div><button type="button" class="cn" id="tCN">›</button></div>
-    <div class="cg" id="tCG"></div><div id="tCD"></div>
+  <div class="tp" id="tPW">
+  <div class="seg" id="workSeg">
+    <button type="button" class="on" data-wv="0">🎪 행사별</button>
+    <button type="button" data-wv="1">🏢 부서별</button>
+    <button type="button" data-wv="2">👤 학생별</button>
+    <button type="button" data-wv="3">📋 전체 목록</button>
   </div>
-  <div class="tp" id="tP2"><div id="tDept"></div></div>
-  <div class="tp" id="tP3"><div id="tStu"></div></div>
-  <div class="tp" id="tP4">
+  <div class="wv on" id="tPE"><div id="tEvArea"></div></div>
+  <div class="wv" id="tP2"><div id="tDept"></div></div>
+  <div class="wv" id="tP3"><div id="tStu"></div></div>
+  <div class="wv" id="tP4">
 <button type="button" id="tAddTaskBtn" class="fc active" style="width:100%;margin-bottom:10px;padding:10px;border-radius:10px;font-size:15px;font-weight:700;">➕ 업무 추가</button>
     <div class="sw"><span class="si2">🔍</span><input type="text" id="searchInput" placeholder="업무명, 담당자, 카테고리 검색..."><button type="button" class="sc3" id="searchClear">×</button></div>
     <div class="fb" id="filterBar">
@@ -586,6 +609,11 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
       <button type="button" class="fc" data-filter="임박">🔴 마감 임박</button>
     </div>
     <div id="allArea"></div>
+    </div>
+  </div>
+  <div class="tp" id="tP1">
+    <div class="ch"><button type="button" class="cn" id="tCP">‹</button><div class="ct" id="tCT"></div><button type="button" class="cn" id="tCN">›</button></div>
+    <div class="cg" id="tCG"></div><div id="tCD"></div>
   </div>
 
   <div class="tp" id="tP5">
@@ -1087,9 +1115,19 @@ function swTab(navId,panels,n,fns){
   fns[n]&&fns[n]();
 }
 const S_PANELS=['sP0','sP1','sP3','sP4'];
-const T_PANELS=['tP0','tPE','tP1','tP2','tP3','tP4','tP5'];
+const T_PANELS=['tP0','tPW','tP1','tP5'];
 const sFns=[renderMyTasks,()=>{},()=>renderCal('s'),renderSDept];
-const tFns=[renderDash,()=>renderTEvents(),()=>renderCal('t'),renderTDept,renderTStu,renderAllTasks,null];
+// 업무 탭 안의 보기 전환: 행사별 · 부서별 · 학생별 · 전체 목록
+let workView=0;
+const WV_IDS=['tPE','tP2','tP3','tP4'];
+const WV_FNS=[()=>renderTEvents(),renderTDept,renderTStu,renderAllTasks];
+function setWork(n){
+  workView=n;
+  document.querySelectorAll('#workSeg button').forEach((b,i)=>b.classList.toggle('on',i===n));
+  WV_IDS.forEach((id,i)=>document.getElementById(id).classList.toggle('on',i===n));
+  WV_FNS[n]();
+}
+const tFns=[renderDash,()=>setWork(workView),()=>renderCal('t'),null];
 
 // ── 카드 렌더 ──
 function card(t,opts){
@@ -1097,7 +1135,6 @@ function card(t,opts){
   const {showSB,showEB,showDel}=opts;
   const eff=effDeadline(t);
   const d=dU(eff);
-  const cp=chip(t.deadline,t.status,t.date);
   const subs=t.subtasks||[];
   const dn=subs.filter(s=>s.done).length;
   const pct=subs.length>0?Math.round(dn/subs.length*100):0;
@@ -1106,11 +1143,12 @@ function card(t,opts){
   const shB=ass.length>1?'<span class="shared-b">공유 '+ass.length+'명</span>':'';
   const eb=showEB?`<button type="button" class="eb" data-action="edit" data-id="${t.id}">✏️</button>`:'';
   const db=''; // 삭제는 카드 아래 '🗑 삭제' 버튼 줄로 옮김
+  // '기한 초과' 칩을 따로 두지 않고 날짜 뒤에 한 번만 붙인다 (같은 말이 두 번 빨갛게 보이던 것 정리)
+  const dsuf=d!==null&&t.status!=='완료'?(d<0?' · '+(-d)+'일 지남':d===0?' · 오늘':d<=3?' · D-'+d:''):'';
   const dateL=[
     t.date?`<span class="tc-date">📅 행사일 ${fD(t.date)}</span>`:'',
-    t.deadline?`<span class="tc-date${d!==null&&d<=3&&t.status!=='완료'?' urg':''}">⏰ 마감 ${fD(t.deadline)}</span>`:
-    (t.date&&!t.deadline?`<span class="tc-date${d!==null&&d<=3&&t.status!=='완료'?' urg':''}">📅 행사일 ${fD(t.date)}</span>`:''),
-    cp
+    t.deadline?`<span class="tc-date${d!==null&&d<=3&&t.status!=='완료'?' urg':''}">⏰ 마감 ${fD(t.deadline)}${dsuf}</span>`:
+    (t.date&&!t.deadline?`<span class="tc-date${d!==null&&d<=3&&t.status!=='완료'?' urg':''}">📅 행사일 ${fD(t.date)}${dsuf}</span>`:'')
   ].filter(Boolean).join('');
   const subH=subs.length?`
     <div class="pw2"><div class="pl"><span>세부 진행</span><span>${dn}/${subs.length}</span></div><div class="pb"><div class="pf" style="width:${pct}%;background:${col}"></div></div></div>
@@ -1135,18 +1173,22 @@ function card(t,opts){
       (opts.teacher?doneChips(t):'')+`</div>`;
   }
   // 선생님 화면: 기존(행사 없는) 업무도 상태 버튼으로 바로 완료 처리
-  const sbH=(showSB||opts.teacher)&&!per?`<div class="sb">${['예정','진행중','완료','보류'].map(s=>`<button type="button" class="sb-btn${t.status===s?' a-'+s:''}" data-action="chgSt" data-id="${t.id}" data-status="${s}">${s}</button>`).join('')}</div>`:'';
+  const compact=!!opts.teacher&&!per; // 선생님 목록: 상태 버튼 4개를 '더보기' 안으로, 카드엔 '✓ 완료'만
+  const qd=compact&&t.status!=='완료'?`<button type="button" class="qdone" data-action="chgSt" data-id="${t.id}" data-status="완료">✓ 완료</button>`:'';
+  const sbH0=(showSB||opts.teacher)&&!per?`<div class="sb">${['예정','진행중','완료','보류'].map(s=>`<button type="button" class="sb-btn${t.status===s?' a-'+s:''}" data-action="chgSt" data-id="${t.id}" data-status="${s}">${s}</button>`).join('')}</div>`:'';
+  const sbH=compact?'':sbH0;
+  const sbIn=compact?sbH0:'';
   // 담당자 변경 / 내 업무 아님 / 삭제를 라벨 붙은 버튼으로 바로 노출 (학생·선생님 공통)
   const meIn=opts.me&&ass.includes(opts.me);
   const actH=showEB?`<div class="tc-act"><button type="button" data-action="assign" data-id="${t.id}">👤 담당자 변경</button>${meIn?`<button type="button" data-action="dropMe" data-id="${t.id}">🙅 내 업무 아님</button>`:''}${showDel?`<button type="button" class="danger" data-action="del" data-id="${t.id}">🗑 삭제</button>`:''}</div>`:'';
   return `<div class="tc" id="c-${t.id}">
-    <div class="tc-top"><div class="tc-ti">${t.title}</div><div class="tc-r">${shB}${eb}${db}<span class="tag tag-${t.status}">${t.status}</span></div></div>
+    <div class="tc-top"><div class="tc-ti">${t.title}</div><div class="tc-r">${shB}${qd}${eb}${db}<span class="tag tag-${t.status}">${t.status}</span></div></div>
     <div class="tc-meta">${evs.length?evs.map(ev=>`<span class="ev-chip">${isProj(ev)?'📂':'🎪'} ${esc(ev.name)}</span>`).join(''):t.per?'<span class="ev-chip" style="background:var(--surface2);color:var(--text2)">기타</span>':t.category?`<span class="db db-${t.dept}">${t.category}</span>`:'<span style="font-size:12px;color:var(--text3);font-style:italic">카테고리 미지정</span>'}${ass.length>1&&!per?`<span style="font-size:12px;color:var(--text2)">${ass.join(', ')}</span>`:''}</div>
     ${dateL?`<div class="tc-meta" style="margin-top:2px">${dateL}</div>`:''}
     ${subH}
     ${t.memo?`<div style="margin-top:8px;font-size:13px;color:var(--text2);line-height:1.6">${t.memo}</div>`:''}
     ${ppH}${sbH}
-    ${addH||actH?`<details class="tc-more"><summary>+ 더보기 <small>세부 할 일 · 담당자 · 삭제</small></summary>${addH}${actH}</details>`:''}
+    ${addH||actH?`<details class="tc-more"><summary>+ 더보기 <small>${compact?'상태 · ':''}세부 할 일 · 담당자 · 삭제</small></summary>${sbIn}${addH}${actH}</details>`:''}
   </div>`;
 }
 function doneSec(list,opts,id){
@@ -1807,6 +1849,7 @@ function bindStatic(){
   // 탭
   document.querySelectorAll('#sTnav .ti').forEach(ti=>ti.addEventListener('click',()=>swTab('sTnav',S_PANELS,parseInt(ti.dataset.tab),sFns)));
   document.querySelectorAll('#tTnav .ti').forEach(ti=>ti.addEventListener('click',()=>swTab('tTnav',T_PANELS,parseInt(ti.dataset.tab),tFns)));
+  document.querySelectorAll('#workSeg button').forEach(b=>b.addEventListener('click',()=>setWork(parseInt(b.dataset.wv))));
 
   // 행사 모달
   document.getElementById('acctClose').addEventListener('click',()=>closeMov('acctMov'));
@@ -1898,7 +1941,7 @@ document.addEventListener('click',function(e){
     allFilt=el.dataset.filter;sq='';
     const si=document.getElementById('searchInput');if(si)si.value='';
     document.querySelectorAll('#filterBar .fc').forEach(c=>c.classList.toggle('active',c.dataset.filter===allFilt));
-    swTab('tTnav',T_PANELS,5,tFns);return;
+    workView=3;swTab('tTnav',T_PANELS,1,tFns);return;
   }
   if(action==='selfAssign'){selfAssign(id);return;}
   if(action==='meDone'){meDone(id);return;}
@@ -2227,7 +2270,7 @@ enterStudent();
   }
 
   function _initAttTabSystem(){
-    tFns[6]=_attRenderCore;
+    tFns[3]=_attRenderCore;
   }
 
   // 화면/토스트/확인창에 공통으로 쓰는 "구분 · 활동명 (날짜)" 표기
