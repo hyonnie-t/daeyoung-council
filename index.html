@@ -369,6 +369,11 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .ms b{display:block;font-size:22px;font-weight:900;line-height:1.15;font-family:'Noto Sans KR',sans-serif}
 .ms span{font-size:12px;color:var(--text2)}
 .ms.red b{color:var(--danger)}.ms.warn b{color:var(--warn)}
+.ms.clk{cursor:pointer;border-color:var(--danger)}.ms.clk:active{transform:scale(.97)}
+.ov-t{margin-top:0;color:var(--danger)}
+.ov-box{border-left:3px solid var(--danger);padding-left:8px;margin-bottom:16px;border-radius:2px}
+.ov-box.flash{animation:ovf 1.2s ease}
+@keyframes ovf{0%,60%{background:rgba(214,69,69,.12)}100%{background:transparent}}
 details.un-notice>summary{list-style:none;cursor:pointer;margin-bottom:0}
 details.un-notice>summary::-webkit-details-marker{display:none}
 details.un-notice>summary small{font-weight:400;color:var(--text3);margin-left:6px}
@@ -1408,9 +1413,14 @@ function renderMyTasks(){
   const evOpts=Object.assign({},opts,{inEv:true});
   const myDone=t=>isPer(t)?!!(t.doneBy||{})[name]:t.status==='완료';
   const myLeft=all.filter(t=>t.status!=='완료'&&t.status!=='보류'&&!(isPer(t)&&(t.doneBy||{})[name]));
-  const nOver=myLeft.filter(t=>{const d=dU(effDeadline(t));return d!==null&&d<0;}).length;
+  // 기한 지난 내 업무는 행사·시간대 구분과 상관없이 맨 위에 모아서 먼저 보여준다 (오래된 것부터)
+  const ovList=myLeft.filter(t=>{const d=dU(effDeadline(t));return d!==null&&d<0;}).sort((a,b)=>effDeadline(a).localeCompare(effDeadline(b)));
+  const ovIds=new Set(ovList.map(t=>t.id));
+  ovIds.forEach(i=>shown.add(i));
+  const nOver=ovList.length;
   const nSoon=myLeft.filter(t=>{const d=dU(effDeadline(t));return d!==null&&d>=0&&d<=3;}).length;
-  let h=cheerHtml(name,all,nOver,nSoon,myLeft.length)+'<div class="my-strip"><div class="ms'+(nOver?' red':'')+'"><b>'+nOver+'</b><span>기한 지남</span></div><div class="ms'+(nSoon?' warn':'')+'"><b>'+nSoon+'</b><span>3일 이내</span></div><div class="ms"><b>'+myLeft.length+'</b><span>남은 업무</span></div></div>';
+  let h=cheerHtml(name,all,nOver,nSoon,myLeft.length)+'<div class="my-strip"><div class="ms'+(nOver?' red clk':'')+'"'+(nOver?' data-action="goOver" role="button"':'')+'><b>'+nOver+'</b><span>기한 지남'+(nOver?' ›':'')+'</span></div><div class="ms'+(nSoon?' warn':'')+'"><b>'+nSoon+'</b><span>3일 이내</span></div><div class="ms"><b>'+myLeft.length+'</b><span>남은 업무</span></div></div>';
+  if(nOver)h+='<div class="sec-t ov-t" id="myOverdue"><span>⏰ 기한 지난 업무 ('+nOver+')</span></div><div class="ov-box">'+ovList.map(t=>card(t,opts)).join('')+'</div>';
   h+=all.some(t=>t.status!=='완료')?'<button type="button" class="bulk-open" data-action="bulkSelf">☑ 내 업무 여러 개 한 번에 넘기기</button>':'';
   h+='<div class="sec-t"><span>🎪 다가오는 행사 (2주)</span></div>';
   if(canEv(name))h+='<button type="button" class="ev-new" data-action="evNew">+ 행사 등록</button>';
@@ -1425,19 +1435,19 @@ function renderMyTasks(){
     const d=dU(e.start);
     const dd=d>0?`<span class="chip chip-soon">D-${d}</span>`:(evEnd(e)>=td?'<span class="chip chip-today">진행 중</span>':'');
     const dn=et.filter(t=>t.status==='완료').length;
-    const act=mine.filter(t=>!myDone(t)),fin=mine.filter(myDone);
+    const act=mine.filter(t=>!myDone(t)&&!ovIds.has(t.id)),fin=mine.filter(myDone);
     h+=`<div class="ev" style="border-left-color:${e.dept?dc(e.dept):'var(--accent)'}"><div class="ev-hd"><div class="ev-nm">${esc(e.name)}</div>${canEv(name)?`<button type="button" class="eb" data-action="evEdit" data-id="${esc(e.id)}">✏️</button>`:''}</div>
       <div class="ev-dt">📅 ${evRange(e)} ${dd}${deptBadges(e)}<span>· 전체 업무 ${dn}/${et.length} 완료</span></div>
       ${e.desc?`<div class="ev-desc">${esc(e.desc)}</div>`:''}
       <div class="ev-sub">내가 맡은 일</div>
-      <div class="ev-tasks">${act.map(t=>card(t,evOpts)).join('')}</div>${act.length?'':'<div class="ev-none">내 몫은 모두 끝냈어요 🎉</div>'}${fin.length?`<details class="tc-more"><summary>✅ 내가 끝낸 일 ${fin.length}개 <small>눌러서 보기</small></summary><div style="margin-top:8px">${fin.map(t=>card(t,evOpts)).join('')}</div></details>`:''}
+      <div class="ev-tasks">${act.map(t=>card(t,evOpts)).join('')}</div>${act.length?'':mine.some(t=>ovIds.has(t.id))?'<div class="ev-none">남은 일은 위 \'기한 지난 업무\'에 있어요</div>':'<div class="ev-none">내 몫은 모두 끝냈어요 🎉</div>'}${fin.length?`<details class="tc-more"><summary>✅ 내가 끝낸 일 ${fin.length}개 <small>눌러서 보기</small></summary><div style="margin-top:8px">${fin.map(t=>card(t,evOpts)).join('')}</div></details>`:''}
     </div>`;
   });
   if(others.length)h+='<div class="ev-front" style="max-width:none;margin-bottom:8px"><div class="ev-front-t" style="color:var(--text2)">내가 맡은 일이 없는 행사</div>'+others.map(e=>
     '<div class="ev-front-r"><div class="ev-front-d">'+evRange(e).replace(' ~ ','~<br>')+'</div><div class="ev-front-n">'+esc(e.name)+'</div>'+(canEv(name)?'<button type="button" class="eb" data-action="evEdit" data-id="'+esc(e.id)+'">✏️</button>':'')+'</div>').join('')+'</div>';
   // 1-2) 진행 중인 상시 프로젝트 — 내가 아직 안 끝낸 업무가 있는 것만
   const projH=evSorted().proj.map(e=>{
-    const act=tasks.filter(t=>inEv(t,e.id)&&assOf(t).includes(name)&&!myDone(t));
+    const act=tasks.filter(t=>inEv(t,e.id)&&assOf(t).includes(name)&&!myDone(t)&&!ovIds.has(t.id));
     if(!act.length)return '';
     act.forEach(t=>shown.add(t.id));
     return `<div class="ev" style="border-left-color:${e.dept?dc(e.dept):'var(--accent)'}"><div class="ev-hd"><div class="ev-nm">📂 ${esc(e.name)}</div>${canEv(name)?`<button type="button" class="eb" data-action="evEdit" data-id="${esc(e.id)}">✏️</button>`:''}</div>
@@ -2223,6 +2233,12 @@ document.addEventListener('click',function(e){
   if(action==='openStu'){openStu(el.dataset.name);return;}
   if(action==='copyNag'){copyNag(el.dataset.name);return;}
   if(action==='actRange'){actRange=el.dataset.range;renderActivity();return;}
+  if(action==='goOver'){
+    const o=document.getElementById('myOverdue');if(!o)return;
+    o.scrollIntoView({behavior:'smooth',block:'start'});
+    const b=o.nextElementSibling;if(b){b.classList.remove('flash');void b.offsetWidth;b.classList.add('flash');}
+    return;
+  }
   if(action==='goFilter'){
     allFilt=el.dataset.filter;sq='';
     const si=document.getElementById('searchInput');if(si)si.value='';
