@@ -190,6 +190,10 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .hm-alert{background:#fff5f5;border:1px solid #ffc9c9;border-radius:var(--r);padding:10px 14px;margin-bottom:8px;font-size:13px;font-family:'Noto Sans KR',sans-serif;color:#c92a2a;line-height:1.6}
 .hm-alert div{color:var(--text);font-weight:600}
 .hm-alert.ok{background:#f4fce3;border-color:#d8f5a2;color:#2b8a3e}
+.cheer{margin:0 0 12px;padding:12px 14px;border-radius:var(--r);background:var(--surface);border:1px solid var(--border);border-left:5px solid var(--accent);font-size:14px;line-height:1.55;box-shadow:var(--sh)}
+.cheer.over{border-left-color:#e03131;background:#fff5f5}
+.cheer.soon{border-left-color:#f08c00;background:#fff9db}
+.cheer.good{border-left-color:var(--accent3);background:#f4fce3}
 .hm-note{font-size:12px;color:var(--text3);margin:2px 2px 8px;font-family:'Noto Sans KR',sans-serif}
 
 /* 달력 */
@@ -1331,6 +1335,60 @@ document.addEventListener('toggle',e=>{if(e.target&&e.target.id==='unDet')unOpen
 (function(){const f=document.getElementById('schedFold');if(f&&window.innerWidth>=1024)f.open=true;})();
 
 // ── 학생: 해야할 일 ──
+// ── 학생 응원 메시지 ──
+// 본인 업무 상황만 근거로 한다(다른 사람과 비교하지 않음). 기본은 아래 문구 은행(규칙으로 선택).
+// CHEER_URL에 앱스크립트 웹앱 주소를 넣으면 상황 숫자(이름 제외)를 보내 AI 문구로 바꾸고, 실패·지연 시 문구 은행을 그대로 쓴다.
+const CHEER_URL='';
+const CHEER={
+  praise:['최근에 {n}개를 끝냈어요. 꾸준함이 보여요 👏','{n}개 완료! 학생회가 한 걸음 더 나아갔어요 🌱','손이 빠르네요, {n}개나 끝냈어요 ✨'],
+  over:['기한이 지난 업무가 {n}개 있어요. 오늘 하나만 먼저 정리해볼까요?','{n}개가 기한을 넘겼어요. 어려운 점이 있으면 선생님께 말해줘요.','지난 업무 {n}개가 기다리고 있어요. 하나씩 해도 괜찮아요.'],
+  soon:['마감이 3일 안에 있는 업무가 {n}개예요. 지금 시작하면 여유 있어요.','곧 마감인 업무 {n}개! 오늘 조금만 해둬요.'],
+  idle:['한동안 소식이 없었어요. 남은 업무 {n}개 중 하나만 열어볼까요?','남은 업무가 {n}개예요. 가장 쉬운 것부터 시작해봐요.'],
+  clear:['내 몫은 전부 끝났어요. 정말 수고했어요 🎉','남은 업무가 없어요! 친구가 도움이 필요한지 물어봐도 좋겠어요.'],
+  steady:['남은 업무는 {n}개, 마감도 여유 있어요. 차근차근 해요.']
+};
+const _cheerMem={},_cheerBusy=new Set();
+function cheerPick(key,n,seed){
+  const b=CHEER[key];let h=0;
+  for(const c of seed+key)h=(h*31+c.charCodeAt(0))>>>0;
+  return b[h%b.length].replace('{n}',n);
+}
+function cheerHtml(name,all,nOver,nSoon,nLeft){
+  if(!all.length)return '';
+  const DAY=86400000,now=Date.now();
+  const ds=all.map(t=>isPer(t)?(t.doneBy||{})[name]:(t.status==='완료'?t.completedAt:null)).filter(Boolean).map(x=>new Date(x).getTime()).filter(x=>!isNaN(x));
+  const recent=ds.filter(x=>now-x<2*DAY).length;
+  const idle=ds.length?Math.floor((now-Math.max(...ds))/DAY):99;
+  const seed=name+todayStr(); // 하루 동안은 같은 문구, 날이 바뀌면 다른 문구
+  const parts=[];
+  if(recent)parts.push(cheerPick('praise',recent,seed));
+  if(nOver)parts.push(cheerPick('over',nOver,seed));
+  else if(nSoon)parts.push(cheerPick('soon',nSoon,seed));
+  if(!nOver&&!nSoon&&!recent)parts.push(!nLeft?cheerPick('clear',0,seed):idle>=3?cheerPick('idle',nLeft,seed):cheerPick('steady',nLeft,seed));
+  const cls=nOver?'over':nSoon?'soon':(recent||!nLeft)?'good':'';
+  const ctx={over:nOver,soon:nSoon,left:nLeft,recent,idle:Math.min(idle,99)};
+  const key=name+'|'+todayStr()+'|'+JSON.stringify(ctx);
+  const text=_cheerMem[key]||parts.join(' ');
+  if(CHEER_URL&&!_cheerMem[key])cheerAI(key,ctx);
+  return '<div class="cheer '+cls+'"><span id="cheerTxt">'+esc(text)+'</span></div>';
+}
+async function cheerAI(key,ctx){
+  if(_cheerBusy.has(key))return;
+  try{const c=localStorage.getItem('cheer_'+key);if(c){_cheerMem[key]=c;return;}}catch(e){}
+  _cheerBusy.add(key);
+  try{
+    const ac=new AbortController(),to=setTimeout(()=>ac.abort(),6000);
+    const r=await fetch(CHEER_URL+(CHEER_URL.includes('?')?'&':'?')+'action=cheer&'+new URLSearchParams(ctx),{signal:ac.signal});
+    clearTimeout(to);
+    const d=await r.json();
+    const tx=d&&typeof d.text==='string'?d.text.trim():'';
+    if(!tx||tx.length>120)return;
+    _cheerMem[key]=tx;
+    try{localStorage.setItem('cheer_'+key,tx);}catch(e){}
+    const el=document.getElementById('cheerTxt');if(el)el.textContent=tx;
+  }catch(e){console.warn('응원 메시지 AI 실패(문구 은행 사용):',e);}
+  finally{_cheerBusy.delete(key);}
+}
 function renderMyTasks(){
   renderUnNotice();
   const name=document.getElementById('s0Name').value;
@@ -1352,7 +1410,7 @@ function renderMyTasks(){
   const myLeft=all.filter(t=>t.status!=='완료'&&t.status!=='보류'&&!(isPer(t)&&(t.doneBy||{})[name]));
   const nOver=myLeft.filter(t=>{const d=dU(effDeadline(t));return d!==null&&d<0;}).length;
   const nSoon=myLeft.filter(t=>{const d=dU(effDeadline(t));return d!==null&&d>=0&&d<=3;}).length;
-  let h='<div class="my-strip"><div class="ms'+(nOver?' red':'')+'"><b>'+nOver+'</b><span>기한 지남</span></div><div class="ms'+(nSoon?' warn':'')+'"><b>'+nSoon+'</b><span>3일 이내</span></div><div class="ms"><b>'+myLeft.length+'</b><span>남은 업무</span></div></div>';
+  let h=cheerHtml(name,all,nOver,nSoon,myLeft.length)+'<div class="my-strip"><div class="ms'+(nOver?' red':'')+'"><b>'+nOver+'</b><span>기한 지남</span></div><div class="ms'+(nSoon?' warn':'')+'"><b>'+nSoon+'</b><span>3일 이내</span></div><div class="ms"><b>'+myLeft.length+'</b><span>남은 업무</span></div></div>';
   h+=all.some(t=>t.status!=='완료')?'<button type="button" class="bulk-open" data-action="bulkSelf">☑ 내 업무 여러 개 한 번에 넘기기</button>':'';
   h+='<div class="sec-t"><span>🎪 다가오는 행사 (2주)</span></div>';
   if(canEv(name))h+='<button type="button" class="ev-new" data-action="evNew">+ 행사 등록</button>';
