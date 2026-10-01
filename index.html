@@ -311,6 +311,9 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .dchip{font-size:13px;padding:5px 10px;border-radius:16px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-weight:600}
 .dchip-all{background:transparent;border:1px dashed var(--border);color:var(--text3);font-size:12px;font-weight:500;padding:4px 9px;margin-left:auto}
 .dchip-all:hover{color:var(--text2);border-color:var(--text3)}
+.ev .tc{box-shadow:none;background:var(--surface2);border-color:transparent;padding:14px}
+.ev .tc .tc-more{border-top-color:var(--border)}
+@media(max-width:767px){.tc-more summary small{display:none}}
 .sd-wrap{max-width:720px;margin:0 auto}
 .sd-dept{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);margin-bottom:10px;overflow:hidden}
 .sd-dept>summary{list-style:none;cursor:pointer;padding:13px 14px;display:flex;align-items:center;gap:8px;-webkit-tap-highlight-color:transparent}
@@ -483,7 +486,7 @@ details.un-notice[open]>summary{margin-bottom:8px}
   .todo-act button,.sr-copy,.ev-row-act button,.tc-act button,.qdone{min-height:40px;padding-left:12px;padding-right:12px}
   .eb{min-height:38px;min-width:38px}
   .seg button{padding:11px 4px;font-size:13px}
-  .tc-top{flex-wrap:wrap}.tc-ti{flex-basis:100%}.tc-r{width:100%;justify-content:flex-end}
+  .tc-top{flex-wrap:wrap}.tc-ti{flex:1 1 55%}.tc-r{margin-left:auto;justify-content:flex-end}
   .todo-row{flex-wrap:wrap}
   .todo-main{flex-basis:calc(100% - 92px)}
   .todo-act{width:100%;justify-content:flex-end}
@@ -1180,7 +1183,7 @@ function card(t,opts){
   const pct=subs.length>0?Math.round(dn/subs.length*100):0;
   const col=dc(t.dept);
   const ass=t.assignees||[t.assignee].filter(Boolean);
-  const shB=ass.length>1?'<span class="shared-b">공유 '+ass.length+'명</span>':'';
+  const shB=ass.length>1&&!isPer(t)?'<span class="shared-b">공유 '+ass.length+'명</span>':'';
   const eb=showEB?`<button type="button" class="eb" data-action="edit" data-id="${t.id}">✏️</button>`:'';
   const db=''; // 삭제는 카드 아래 '🗑 삭제' 버튼 줄로 옮김
   // '기한 초과' 칩을 따로 두지 않고 날짜 뒤에 한 번만 붙인다 (같은 말이 두 번 빨갛게 보이던 것 정리)
@@ -1207,7 +1210,9 @@ function card(t,opts){
     const me=opts.me;
     const mine=me&&ass.includes(me);
     const iDid=mine&&(t.doneBy||{})[me];
-    ppH=`<div class="pp"><div class="pp-line"><b>${ass.length}명 중 ${dnc}명 완료</b>${left.length?` · 남은 사람: <span class="pp-left">${left.map(esc).join(', ')}</span>`:' · 모두 끝났어요 🎉'}</div>`+
+    const leftTxt=left.length>3?left.slice(0,3).map(esc).join(', ')+' 외 '+(left.length-3)+'명':left.map(esc).join(', ');
+    const solo=ass.length===1&&!opts.teacher;
+    ppH=`<div class="pp">`+(solo?'':`<div class="pp-line"><b>${ass.length}명 중 ${dnc}명 완료</b>${left.length?` · 남은 사람: <span class="pp-left">${leftTxt}</span>`:' · 모두 끝났어요 🎉'}</div>`)+
       (mine&&t.status!=='보류'?`<button type="button" class="me-btn${iDid?' undo':''}" data-action="meDone" data-id="${t.id}">${iDid?'↩ 내 완료 취소':'✅ 내 몫 완료'}</button>`:'')+
       (opts.teacher?doneChips(t):'')+`</div>`;
   }
@@ -1220,9 +1225,14 @@ function card(t,opts){
   // 담당자 변경 / 내 업무 아님 / 삭제를 라벨 붙은 버튼으로 바로 노출 (학생·선생님 공통)
   const meIn=opts.me&&ass.includes(opts.me);
   const actH=showEB?`<div class="tc-act"><button type="button" data-action="assign" data-id="${t.id}">👤 담당자 변경</button>${meIn?`<button type="button" data-action="dropMe" data-id="${t.id}">🙅 내 업무 아님</button>`:''}${showDel?`<button type="button" class="danger" data-action="del" data-id="${t.id}">🗑 삭제</button>`:''}</div>`:'';
+  // 행사 카드 안에 들어간 업무는 행사 칩을 생략(바로 위 제목과 같은 말)
+  const assTxt=ass.length>1&&!per?`<span style="font-size:12px;color:var(--text2)">${ass.length>3?esc(ass.slice(0,2).join(', '))+' 외 '+(ass.length-2)+'명':ass.join(', ')}</span>`:'';
+  const evTxt=evs.length?(opts.inEv?'':evs.map(ev=>`<span class="ev-chip">${isProj(ev)?'📂':'🎪'} ${esc(ev.name)}</span>`).join('')):t.per?'<span class="ev-chip" style="background:var(--surface2);color:var(--text2)">기타</span>':t.category?`<span class="db db-${t.dept}">${t.category}</span>`:'<span style="font-size:12px;color:var(--text3);font-style:italic">카테고리 미지정</span>';
+  const metaH=(evTxt||assTxt)?`<div class="tc-meta">${evTxt}${assTxt}</div>`:'';
+  const hideTag=!!opts.me&&per&&t.status==='예정'; // 학생 화면: '예정'은 버튼 상태로 이미 알 수 있어 생략
   return `<div class="tc" id="c-${t.id}">
-    <div class="tc-top"><div class="tc-ti">${t.title}</div><div class="tc-r">${shB}${qd}${eb}${db}<span class="tag tag-${t.status}">${t.status}</span></div></div>
-    <div class="tc-meta">${evs.length?evs.map(ev=>`<span class="ev-chip">${isProj(ev)?'📂':'🎪'} ${esc(ev.name)}</span>`).join(''):t.per?'<span class="ev-chip" style="background:var(--surface2);color:var(--text2)">기타</span>':t.category?`<span class="db db-${t.dept}">${t.category}</span>`:'<span style="font-size:12px;color:var(--text3);font-style:italic">카테고리 미지정</span>'}${ass.length>1&&!per?`<span style="font-size:12px;color:var(--text2)">${ass.length>3?esc(ass.slice(0,2).join(', '))+' 외 '+(ass.length-2)+'명':ass.join(', ')}</span>`:''}</div>
+    <div class="tc-top"><div class="tc-ti">${t.title}</div><div class="tc-r">${shB}${qd}${eb}${db}${hideTag?'':`<span class="tag tag-${t.status}">${t.status}</span>`}</div></div>
+    ${metaH}
     ${dateL?`<div class="tc-meta" style="margin-top:2px">${dateL}</div>`:''}
     ${subH}
     ${t.memo?`<div style="margin-top:8px;font-size:13px;color:var(--text2);line-height:1.6">${t.memo}</div>`:''}
@@ -1281,6 +1291,7 @@ function renderMyTasks(){
   const td=todayStr(),lim=addDays(td,14);
   const near=events.filter(e=>!isProj(e)&&evEnd(e)>=td&&e.start<=lim).sort((a,b)=>a.start.localeCompare(b.start));
   const shown=new Set();
+  const evOpts=Object.assign({},opts,{inEv:true});
   const myDone=t=>isPer(t)?!!(t.doneBy||{})[name]:t.status==='완료';
   const myLeft=all.filter(t=>t.status!=='완료'&&t.status!=='보류'&&!(isPer(t)&&(t.doneBy||{})[name]));
   const nOver=myLeft.filter(t=>{const d=dU(effDeadline(t));return d!==null&&d<0;}).length;
@@ -1305,7 +1316,7 @@ function renderMyTasks(){
       <div class="ev-dt">📅 ${evRange(e)} ${dd}${deptBadges(e)}<span>· 전체 업무 ${dn}/${et.length} 완료</span></div>
       ${e.desc?`<div class="ev-desc">${esc(e.desc)}</div>`:''}
       <div class="ev-sub">내가 맡은 일</div>
-      ${act.map(t=>card(t,opts)).join('')}${act.length?'':'<div class="ev-none">내 몫은 모두 끝냈어요 🎉</div>'}${fin.length?`<details class="tc-more"><summary>✅ 내가 끝낸 일 ${fin.length}개 <small>눌러서 보기</small></summary><div style="margin-top:8px">${fin.map(t=>card(t,opts)).join('')}</div></details>`:''}
+      ${act.map(t=>card(t,evOpts)).join('')}${act.length?'':'<div class="ev-none">내 몫은 모두 끝냈어요 🎉</div>'}${fin.length?`<details class="tc-more"><summary>✅ 내가 끝낸 일 ${fin.length}개 <small>눌러서 보기</small></summary><div style="margin-top:8px">${fin.map(t=>card(t,evOpts)).join('')}</div></details>`:''}
     </div>`;
   });
   if(others.length)h+='<div class="ev-front" style="max-width:none;margin-bottom:8px"><div class="ev-front-t" style="color:var(--text2)">내가 맡은 일이 없는 행사</div>'+others.map(e=>
@@ -1317,7 +1328,7 @@ function renderMyTasks(){
     act.forEach(t=>shown.add(t.id));
     return `<div class="ev" style="border-left-color:${e.dept?dc(e.dept):'var(--accent)'}"><div class="ev-hd"><div class="ev-nm">📂 ${esc(e.name)}</div>${canEv(name)?`<button type="button" class="eb" data-action="evEdit" data-id="${esc(e.id)}">✏️</button>`:''}</div>
       ${e.desc?`<div class="ev-desc">${esc(e.desc)}</div>`:''}
-      <div class="ev-sub">내가 맡은 일</div>${act.map(t=>card(t,opts)).join('')}</div>`;
+      <div class="ev-sub">내가 맡은 일</div>${act.map(t=>card(t,evOpts)).join('')}</div>`;
   }).join('');
   if(projH)h+='<div class="sec-t" style="margin-top:20px"><span>📂 진행 중인 상시 행사</span></div>'+projH;
   // 2) 그 밖의 내 업무
