@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6c63f0"/>
+      <stop offset="1" stop-color="#5b52e8"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#g)"/>
+  <circle cx="400" cy="112" r="34" fill="#ff6b9d"/>
+  <text x="256" y="300" text-anchor="middle" font-family="'Noto Sans CJK KR','WenQuanYi Zen Hei','Noto Sans KR','Malgun Gothic',sans-serif" font-weight="900" font-size="190" fill="#fff">대영</text>
+  <text x="256" y="400" text-anchor="middle" font-family="'Noto Sans CJK KR','WenQuanYi Zen Hei','Noto Sans KR','Malgun Gothic',sans-serif" font-weight="700" font-size="72" fill="#fff" fill-opacity="0.85">학생회</text>
+</svg>
