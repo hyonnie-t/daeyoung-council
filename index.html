@@ -311,6 +311,27 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .dchip{font-size:13px;padding:5px 10px;border-radius:16px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-weight:600}
 .dchip-all{background:transparent;border:1px dashed var(--border);color:var(--text3);font-size:12px;font-weight:500;padding:4px 9px;margin-left:auto}
 .dchip-all:hover{color:var(--text2);border-color:var(--text3)}
+.sched-fold>summary{font-size:14px;font-weight:700;color:var(--text2);padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);margin-bottom:12px}
+.sched-fold>summary small{font-weight:400;color:var(--text3);margin-left:6px;font-size:12px}
+.sched-fold>summary::before{content:'▸ ';color:var(--text3)}
+.sched-fold[open]>summary::before{content:'▾ '}
+.sched-fold[open]>summary small{display:none}
+.my-strip{display:flex;gap:8px;margin-bottom:16px}
+.ms{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px 4px;text-align:center;box-shadow:var(--sh)}
+.ms b{display:block;font-size:22px;font-weight:900;line-height:1.15;font-family:'Noto Sans KR',sans-serif}
+.ms span{font-size:12px;color:var(--text2)}
+.ms.red b{color:var(--danger)}.ms.warn b{color:var(--warn)}
+details.un-notice>summary{list-style:none;cursor:pointer;margin-bottom:0}
+details.un-notice>summary::-webkit-details-marker{display:none}
+details.un-notice>summary small{font-weight:400;color:var(--text3);margin-left:6px}
+details.un-notice[open]>summary small{display:none}
+details.un-notice[open]>summary{margin-bottom:8px}
+@media(max-width:1023px){
+  /* 폰·태블릿: 내 업무를 위로, 일정표·미배정은 아래로 */
+  #sP0.active{display:flex;flex-direction:column}
+  .s0-side,.s0-main{display:contents}
+  #noticeBox{order:0}#s0NameWrap{order:1}#myArea{order:2}#unNotice{order:3}#schedFold{order:4}
+}
 .seg{display:flex;gap:4px;background:var(--surface2);border-radius:12px;padding:4px;margin:0 auto 16px;max-width:560px}
 .seg button{flex:1;padding:9px 6px;border-radius:9px;border:none;background:transparent;color:var(--text2);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}
 .seg button.on{background:var(--surface);color:var(--accent);box-shadow:var(--sh)}
@@ -447,6 +468,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
   .todo-act button,.sr-copy,.ev-row-act button,.tc-act button,.qdone{min-height:40px;padding-left:12px;padding-right:12px}
   .eb{min-height:38px;min-width:38px}
   .seg button{padding:11px 4px;font-size:13px}
+  .tc-top{flex-wrap:wrap}.tc-ti{flex-basis:100%}.tc-r{width:100%;justify-content:flex-end}
   .todo-row{flex-wrap:wrap}
   .todo-main{flex-basis:calc(100% - 92px)}
   .todo-act{width:100%;justify-content:flex-end}
@@ -514,9 +536,12 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
       <div id="noticeText" style="font-size:15px;color:var(--text);line-height:1.7;white-space:pre-wrap"></div>
     </div>
     <!-- 이번 달 일정표. 기존 배너 hero-banner.png는 보관 중(되돌릴 땐 src만 바꾸면 됨). 누르면 원본 크기로 열림 -->
-    <a href="schedule-2026-10.webp" target="_blank" rel="noopener" style="display:block;margin-bottom:16px">
-      <img src="schedule-2026-10.webp" alt="2026년 10월 학생회 일정" style="width:100%;border-radius:14px;display:block">
-    </a>
+    <details class="fold sched-fold" id="schedFold">
+      <summary>📅 이번 달 일정표 <small>눌러서 펼치기</small></summary>
+      <a href="schedule-2026-10.webp" target="_blank" rel="noopener" style="display:block;margin:8px 0 16px">
+        <img src="schedule-2026-10.webp" alt="2026년 10월 학생회 일정" style="width:100%;border-radius:14px;display:block">
+      </a>
+    </details>
    </div>
    <div class="s0-main">
     <div id="unNotice"></div>
@@ -1173,7 +1198,7 @@ function card(t,opts){
       (opts.teacher?doneChips(t):'')+`</div>`;
   }
   // 선생님 화면: 기존(행사 없는) 업무도 상태 버튼으로 바로 완료 처리
-  const compact=!!opts.teacher&&!per; // 선생님 목록: 상태 버튼 4개를 '더보기' 안으로, 카드엔 '✓ 완료'만
+  const compact=(!!opts.teacher||!!showSB)&&!per; // 선생님 목록: 상태 버튼 4개를 '더보기' 안으로, 카드엔 '✓ 완료'만
   const qd=compact&&t.status!=='완료'?`<button type="button" class="qdone" data-action="chgSt" data-id="${t.id}" data-status="완료">✓ 완료</button>`:'';
   const sbH0=(showSB||opts.teacher)&&!per?`<div class="sb">${['예정','진행중','완료','보류'].map(s=>`<button type="button" class="sb-btn${t.status===s?' a-'+s:''}" data-action="chgSt" data-id="${t.id}" data-status="${s}">${s}</button>`).join('')}</div>`:'';
   const sbH=compact?'':sbH0;
@@ -1183,7 +1208,7 @@ function card(t,opts){
   const actH=showEB?`<div class="tc-act"><button type="button" data-action="assign" data-id="${t.id}">👤 담당자 변경</button>${meIn?`<button type="button" data-action="dropMe" data-id="${t.id}">🙅 내 업무 아님</button>`:''}${showDel?`<button type="button" class="danger" data-action="del" data-id="${t.id}">🗑 삭제</button>`:''}</div>`:'';
   return `<div class="tc" id="c-${t.id}">
     <div class="tc-top"><div class="tc-ti">${t.title}</div><div class="tc-r">${shB}${qd}${eb}${db}<span class="tag tag-${t.status}">${t.status}</span></div></div>
-    <div class="tc-meta">${evs.length?evs.map(ev=>`<span class="ev-chip">${isProj(ev)?'📂':'🎪'} ${esc(ev.name)}</span>`).join(''):t.per?'<span class="ev-chip" style="background:var(--surface2);color:var(--text2)">기타</span>':t.category?`<span class="db db-${t.dept}">${t.category}</span>`:'<span style="font-size:12px;color:var(--text3);font-style:italic">카테고리 미지정</span>'}${ass.length>1&&!per?`<span style="font-size:12px;color:var(--text2)">${ass.join(', ')}</span>`:''}</div>
+    <div class="tc-meta">${evs.length?evs.map(ev=>`<span class="ev-chip">${isProj(ev)?'📂':'🎪'} ${esc(ev.name)}</span>`).join(''):t.per?'<span class="ev-chip" style="background:var(--surface2);color:var(--text2)">기타</span>':t.category?`<span class="db db-${t.dept}">${t.category}</span>`:'<span style="font-size:12px;color:var(--text3);font-style:italic">카테고리 미지정</span>'}${ass.length>1&&!per?`<span style="font-size:12px;color:var(--text2)">${ass.length>3?esc(ass.slice(0,2).join(', '))+' 외 '+(ass.length-2)+'명':ass.join(', ')}</span>`:''}</div>
     ${dateL?`<div class="tc-meta" style="margin-top:2px">${dateL}</div>`:''}
     ${subH}
     ${t.memo?`<div style="margin-top:8px;font-size:13px;color:var(--text2);line-height:1.6">${t.memo}</div>`:''}
@@ -1219,8 +1244,11 @@ function renderUnNotice(){
   const ua=tasks.filter(t=>isUA(t)&&t.status!=='완료');
   const el=document.getElementById('unNotice');if(!el)return;
   if(!ua.length){el.innerHTML='';return;}
-  el.innerHTML=`<div class="un-notice"><div class="un-hd">📢 담당자 배정이 필요한 업무 (${ua.length}개)</div>${ua.map(t=>`<div class="un-item"><span class="un-name">${t.title}${t.category?` <span style="font-size:12px;color:var(--text3)">(${t.category})</span>`:''}</span><span class="db db-${t.dept}">${t.dept}</span><button type="button" class="self-btn" data-action="selfAssign" data-id="${t.id}">내가 할게요</button></div>`).join('')}</div>`;
+  el.innerHTML=`<details class="un-notice" id="unDet"${unOpen?' open':''}><summary class="un-hd">📢 담당자 배정이 필요한 업무 (${ua.length}개) <small>눌러서 보기</small></summary>${ua.map(t=>`<div class="un-item"><span class="un-name">${t.title}${t.category?` <span style="font-size:12px;color:var(--text3)">(${t.category})</span>`:''}</span><span class="db db-${t.dept}">${t.dept}</span><button type="button" class="self-btn" data-action="selfAssign" data-id="${t.id}">내가 할게요</button></div>`).join('')}</details>`;
 }
+let unOpen=false;
+document.addEventListener('toggle',e=>{if(e.target&&e.target.id==='unDet')unOpen=e.target.open;},true);
+(function(){const f=document.getElementById('schedFold');if(f&&window.innerWidth>=1024)f.open=true;})();
 
 // ── 학생: 해야할 일 ──
 function renderMyTasks(){
@@ -1239,7 +1267,11 @@ function renderMyTasks(){
   const td=todayStr(),lim=addDays(td,14);
   const near=events.filter(e=>!isProj(e)&&evEnd(e)>=td&&e.start<=lim).sort((a,b)=>a.start.localeCompare(b.start));
   const shown=new Set();
-  let h=all.some(t=>t.status!=='완료')?'<button type="button" class="bulk-open" data-action="bulkSelf">☑ 내 업무 여러 개 한 번에 넘기기</button>':'';
+  const myLeft=all.filter(t=>t.status!=='완료'&&t.status!=='보류'&&!(isPer(t)&&(t.doneBy||{})[name]));
+  const nOver=myLeft.filter(t=>{const d=dU(effDeadline(t));return d!==null&&d<0;}).length;
+  const nSoon=myLeft.filter(t=>{const d=dU(effDeadline(t));return d!==null&&d>=0&&d<=3;}).length;
+  let h='<div class="my-strip"><div class="ms'+(nOver?' red':'')+'"><b>'+nOver+'</b><span>기한 지남</span></div><div class="ms'+(nSoon?' warn':'')+'"><b>'+nSoon+'</b><span>3일 이내</span></div><div class="ms"><b>'+myLeft.length+'</b><span>남은 업무</span></div></div>';
+  h+=all.some(t=>t.status!=='완료')?'<button type="button" class="bulk-open" data-action="bulkSelf">☑ 내 업무 여러 개 한 번에 넘기기</button>':'';
   h+='<div class="sec-t"><span>🎪 다가오는 행사 (2주)</span></div>';
   if(canEv(name))h+='<button type="button" class="ev-new" data-action="evNew">+ 행사 등록</button>';
   if(!near.length)h+='<div class="ev-none" style="margin-bottom:16px">2주 안에 등록된 행사가 없어요</div>';
