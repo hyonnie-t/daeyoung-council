@@ -1378,7 +1378,7 @@ async function cheerAI(key,ctx){
   _cheerBusy.add(key);
   try{
     const ac=new AbortController(),to=setTimeout(()=>ac.abort(),6000);
-    const r=await fetch(CHEER_URL+(CHEER_URL.includes('?')?'&':'?')+'action=cheer&'+new URLSearchParams(ctx),{signal:ac.signal});
+    const r=await fetch(CHEER_URL+(CHEER_URL.includes('?')?'&':'?')+'mode=cheer&'+new URLSearchParams(ctx),{signal:ac.signal});
     clearTimeout(to);
     const d=await r.json();
     const tx=d&&typeof d.text==='string'?d.text.trim():'';
