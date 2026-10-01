@@ -309,8 +309,26 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .subfold[open] summary{color:var(--accent);border-color:var(--accent)}
 .dchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .dchip{font-size:13px;padding:5px 10px;border-radius:16px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-weight:600}
-.dchip-all{background:var(--accent);border-color:var(--accent);color:#fff}
-.dchip-all[data-val="0"]{background:var(--surface);color:var(--text2);border-color:var(--border)}
+.dchip-all{background:transparent;border:1px dashed var(--border);color:var(--text3);font-size:12px;font-weight:500;padding:4px 9px;margin-left:auto}
+.dchip-all:hover{color:var(--text2);border-color:var(--text3)}
+.evd{padding:0;overflow:hidden}
+.evd>summary{list-style:none;cursor:pointer;padding:12px 14px;display:flex;align-items:center;gap:8px;-webkit-tap-highlight-color:transparent}
+.evd>summary::-webkit-details-marker{display:none}
+.evd>summary .arr{font-size:11px;color:var(--text3);transition:transform .15s}
+.evd[open]>summary .arr{transform:rotate(90deg)}
+.evd-main{flex:1;min-width:0}
+.evd-nm{font-size:15px;font-weight:700;line-height:1.4}
+.evd-sub{font-size:12px;color:var(--text2);margin-top:2px}
+.evd-bd{padding:0 14px 10px}
+.evd-badge{font-size:12px;font-weight:700;padding:3px 9px;border-radius:12px;background:#fff4e6;color:#d9480f;white-space:nowrap}
+.evd-badge.ok{background:#ebfbee;color:var(--accent3)}
+.evd-bar{height:3px;background:var(--surface2)}
+.evd-bar>div{height:100%}
+.ev-tools{display:flex;gap:8px;margin:-2px 0 12px}
+.ev-tools button{flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer}
+.ev-donegrp{margin-top:6px;border-top:1px solid var(--border)}
+.ev-donegrp>summary{list-style:none;cursor:pointer;padding:8px 0 2px;font-size:12px;color:var(--text3)}
+.ev-donegrp>summary::-webkit-details-marker{display:none}
 .dchip.on{background:#ebfbee;border-color:#8ce99a;color:var(--accent3)}
 .ev-add{background:var(--surface2);border:1px dashed var(--border);color:var(--text2);padding:8px;border-radius:8px;width:100%;font-size:13px;margin-top:8px}
 .ev-add:hover{border-color:var(--accent);color:var(--accent)}
@@ -783,7 +801,7 @@ function doneChips(t){
   const db=t.doneBy||{};
   const ass=assOf(t),all=ass.length&&ass.every(n=>db[n]);
   return '<div class="dchips">'+ass.map(n=>'<button type="button" class="dchip'+(db[n]?' on':'')+'" data-action="tDone" data-id="'+t.id+'" data-name="'+esc(n)+'">'+(db[n]?'✅ ':'⬜ ')+esc(n)+'</button>').join('')+
-    (ass.length>0?'<button type="button" class="dchip dchip-all" data-action="tAll" data-id="'+t.id+'" data-val="'+(all?'0':'1')+'">'+(all?'↩ 전원 취소':'✅ 전원 완료')+'</button>':'')+'</div>';
+    (ass.length>0?'<button type="button" class="dchip dchip-all" data-action="tAll" data-id="'+t.id+'" data-val="'+(all?'0':'1')+'">'+(all?'전체 해제':'전체 체크')+'</button>':'')+'</div>';
 }
 function evById(id){return events.find(e=>e.id===id);}
 function evEnd(e){return e.end||e.start;}
@@ -2009,29 +2027,44 @@ async function seedOct(){
 }
 
 // ── 교사: 행사 탭 ──
+const evOpen=new Set();
 function renderTEvents(){
   const area=document.getElementById('tEvArea');if(!area)return;
+  if(!area._evBound){
+    area._evBound=1;
+    area.addEventListener('toggle',ev=>{const d=ev.target;if(d.classList&&d.classList.contains('evd')){d.open?evOpen.add(d.dataset.evid):evOpen.delete(d.dataset.evid);}},true);
+    area.addEventListener('click',ev=>{
+      const b=ev.target.closest('[data-evtog]');if(!b)return;
+      const open=b.dataset.evtog==='1';
+      area.querySelectorAll('details.evd').forEach(d=>{d.open=open;});
+    });
+  }
   let h='<button type="button" class="ev-new" data-action="evNew">+ 행사 등록</button>';
   if(!events.length)h+='<button type="button" class="ev-add" data-action="evSeed" style="margin:0 0 16px;padding:12px;font-weight:700">📥 10월 일정 '+EV_OCT.length+'개 한 번에 등록</button>';
   const {up,proj,past}=evSorted();
+  const rowHtml=t=>{
+    const ass=assOf(t),left=ass.filter(n=>!(t.doneBy||{})[n]);
+    const who=!ass.length?'<span class="pp-left">담당자 미배정</span>':t.status==='완료'?'모두 완료':'남은 사람: <span class="pp-left">'+left.map(esc).join(', ')+'</span> ('+(ass.length-left.length)+'/'+ass.length+')';
+    return '<div class="ev-row"><div style="flex:1"><div class="ev-row-ti">'+esc(t.title)+'</div><div class="ev-row-who">'+who+'</div>'+(t.status!=='보류'?doneChips(t):'')+'<div class="ev-row-act"><button type="button" data-action="assign" data-id="'+t.id+'">👤 담당자 변경</button><button type="button" class="danger" data-action="del" data-id="'+t.id+'">🗑 삭제</button></div></div><span class="tag tag-'+t.status+'">'+t.status+'</span><button type="button" class="eb" data-action="edit" data-id="'+t.id+'">✏️</button></div>';
+  };
   const evCard=e=>{
     const et=tasks.filter(t=>inEv(t,e.id));
     const dn=et.filter(t=>t.status==='완료').length;
+    const left=et.length-dn;
     const pct=et.length?Math.round(dn/et.length*100):0;
     const col=e.dept?dc(e.dept):'var(--accent)';
-    const rows=et.sort((a,b)=>(a.status==='완료')-(b.status==='완료')).map(t=>{
-      const ass=assOf(t),left=ass.filter(n=>!(t.doneBy||{})[n]);
-      const who=!ass.length?'<span class="pp-left">담당자 미배정</span>':t.status==='완료'?'모두 완료':'남은 사람: <span class="pp-left">'+left.map(esc).join(', ')+'</span> ('+(ass.length-left.length)+'/'+ass.length+')';
-      return '<div class="ev-row"><div style="flex:1"><div class="ev-row-ti">'+esc(t.title)+'</div><div class="ev-row-who">'+who+'</div>'+(t.status!=='보류'?doneChips(t):'')+'<div class="ev-row-act"><button type="button" data-action="assign" data-id="'+t.id+'">👤 담당자 변경</button><button type="button" class="danger" data-action="del" data-id="'+t.id+'">🗑 삭제</button></div></div><span class="tag tag-'+t.status+'">'+t.status+'</span><button type="button" class="eb" data-action="edit" data-id="'+t.id+'">✏️</button></div>';
-    }).join('');
-    return '<div class="ev" style="border-left-color:'+col+'"><div class="ev-hd"><div class="ev-nm">'+esc(e.name)+'</div><button type="button" class="eb" data-action="evEdit" data-id="'+esc(e.id)+'">✏️</button></div>'+
-      '<div class="ev-dt">'+(isProj(e)?'📂 ':'📅 ')+evRange(e)+(evDeptsOf(e).length?' '+deptBadges(e):'')+'<span>· 업무 '+dn+'/'+et.length+' 완료</span></div>'+
+    const todo=et.filter(t=>t.status!=='완료'),fin=et.filter(t=>t.status==='완료');
+    const rows=todo.map(rowHtml).join('')+(fin.length?'<details class="ev-donegrp"><summary>✓ 완료된 업무 '+fin.length+'개 보기</summary>'+fin.map(rowHtml).join('')+'</details>':'');
+    const badge=!et.length?'<span class="evd-badge ok" style="background:var(--surface2);color:var(--text3)">업무 없음</span>':left?'<span class="evd-badge">남은 업무 '+left+'</span>':'<span class="evd-badge ok">모두 완료</span>';
+    return '<details class="ev evd" data-evid="'+esc(e.id)+'" style="border-left-color:'+col+'"'+(evOpen.has(e.id)?' open':'')+'><summary><span class="arr">▶</span><div class="evd-main"><div class="evd-nm">'+esc(e.name)+'</div><div class="evd-sub">'+(isProj(e)?'📂 ':'📅 ')+evRange(e)+' · '+dn+'/'+et.length+' 완료</div></div>'+badge+'</summary>'+
+      '<div class="evd-bar"><div style="width:'+pct+'%;background:'+col+'"></div></div><div class="evd-bd">'+
+      '<div class="ev-dt" style="margin-top:8px">'+(evDeptsOf(e).length?deptBadges(e):'')+'<button type="button" class="eb" style="margin-left:auto" data-action="evEdit" data-id="'+esc(e.id)+'">✏️ 행사 수정</button></div>'+
       (e.desc?'<div class="ev-desc">'+esc(e.desc)+'</div>':'')+
-      '<div class="dp" style="margin-bottom:6px"><div class="dpf" style="width:'+pct+'%;background:'+col+'"></div></div>'+
       (rows||'<div class="ev-none">연결된 업무가 없어요</div>')+
       (isProj(e)&&e.closed?'':'<button type="button" class="ev-add" data-action="evAddTask" data-id="'+esc(e.id)+'">+ 이 행사에 업무 추가</button>')+
-      (isProj(e)?'<button type="button" class="ev-add" style="border-style:solid" data-action="'+(e.closed?'evReopen':'evClose')+'" data-id="'+esc(e.id)+'">'+(e.closed?'↩ 다시 열기':'🏁 이 행사 종료')+'</button>':'')+'</div>';
+      (isProj(e)?'<button type="button" class="ev-add" style="border-style:solid" data-action="'+(e.closed?'evReopen':'evClose')+'" data-id="'+esc(e.id)+'">'+(e.closed?'↩ 다시 열기':'🏁 이 행사 종료')+'</button>':'')+'</div></details>';
   };
+  if(up.length+proj.length>1)h=h.replace('</button>','</button><div class="ev-tools"><button type="button" data-evtog="1">모두 펼치기</button><button type="button" data-evtog="0">모두 접기</button></div>');
   h+='<div class="stl">🎪 진행 중 · 다가오는 행사 ('+up.length+')</div>'+(up.length?up.map(evCard).join(''):'<div class="ev-none">없음</div>');
   h+='<div class="stl">📂 상시 행사 · 날짜 없음 ('+proj.length+')</div>'+(proj.length?proj.map(evCard).join(''):'<div class="ev-none">없음 — 행사 등록에서 시작일을 비우면 상시 행사가 돼요</div>');
   // 아직 행사에 안 붙은 10월 이후 업무 — 여기서 ✏️로 행사를 골라 연결
