@@ -311,6 +311,21 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .dchip{font-size:13px;padding:5px 10px;border-radius:16px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-weight:600}
 .dchip-all{background:transparent;border:1px dashed var(--border);color:var(--text3);font-size:12px;font-weight:500;padding:4px 9px;margin-left:auto}
 .dchip-all:hover{color:var(--text2);border-color:var(--text3)}
+.sd-wrap{max-width:720px;margin:0 auto}
+.sd-dept{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);margin-bottom:10px;overflow:hidden}
+.sd-dept>summary{list-style:none;cursor:pointer;padding:13px 14px;display:flex;align-items:center;gap:8px;-webkit-tap-highlight-color:transparent}
+.sd-dept>summary::-webkit-details-marker{display:none}
+.sd-dept>summary .arr{font-size:11px;color:var(--text3);transition:transform .15s}
+.sd-dept[open]>summary .arr{transform:rotate(90deg)}
+.sd-mine{font-size:11px;font-weight:700;color:var(--accent);background:#f3f0ff;padding:2px 7px;border-radius:10px}
+.sd-cnt{margin-left:auto;font-size:13px;font-weight:700;color:var(--text2);white-space:nowrap}
+.sd-cnt small{font-weight:500;color:var(--text3);margin-left:3px}
+.sd-body{padding:2px 14px 12px}
+.sd-row{display:flex;gap:8px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--border)}
+.sd-row:first-child{border-top:none}
+.sd-ti{font-size:14px;font-weight:600;line-height:1.4}
+.sd-sub{font-size:12px;color:var(--text2);margin-top:2px;line-height:1.5}
+.sd-me{display:inline-block;font-size:11px;font-weight:700;color:#fff;background:var(--accent);padding:1px 7px;border-radius:10px;margin-right:6px;vertical-align:1px}
 .sched-fold>summary{font-size:14px;font-weight:700;color:var(--text2);padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);margin-bottom:12px}
 .sched-fold>summary small{font-weight:400;color:var(--text3);margin-left:6px;font-size:12px}
 .sched-fold>summary::before{content:'▸ ';color:var(--text3)}
@@ -1170,11 +1185,10 @@ function card(t,opts){
   const db=''; // 삭제는 카드 아래 '🗑 삭제' 버튼 줄로 옮김
   // '기한 초과' 칩을 따로 두지 않고 날짜 뒤에 한 번만 붙인다 (같은 말이 두 번 빨갛게 보이던 것 정리)
   const dsuf=d!==null&&t.status!=='완료'?(d<0?' · '+(-d)+'일 지남':d===0?' · 오늘':d<=3?' · D-'+d:''):'';
-  const dateL=[
-    t.date?`<span class="tc-date">📅 행사일 ${fD(t.date)}</span>`:'',
-    t.deadline?`<span class="tc-date${d!==null&&d<=3&&t.status!=='완료'?' urg':''}">⏰ 마감 ${fD(t.deadline)}${dsuf}</span>`:
-    (t.date&&!t.deadline?`<span class="tc-date${d!==null&&d<=3&&t.status!=='완료'?' urg':''}">📅 행사일 ${fD(t.date)}${dsuf}</span>`:'')
-  ].filter(Boolean).join('');
+  const urgC=d!==null&&d<=3&&t.status!=='완료'?' urg':'';
+  const dateL=t.deadline
+    ?(t.date?`<span class="tc-date">📅 행사일 ${fD(t.date)}</span>`:'')+`<span class="tc-date${urgC}">⏰ 마감 ${fD(t.deadline)}${dsuf}</span>`
+    :(t.date?`<span class="tc-date${urgC}">📅 행사일 ${fD(t.date)}${dsuf}</span>`:'');
   const subH=subs.length?`
     <div class="pw2"><div class="pl"><span>세부 진행</span><span>${dn}/${subs.length}</span></div><div class="pb"><div class="pf" style="width:${pct}%;background:${col}"></div></div></div>
     <div class="sl">${subs.map((s,i)=>`<div class="si">
@@ -1267,6 +1281,7 @@ function renderMyTasks(){
   const td=todayStr(),lim=addDays(td,14);
   const near=events.filter(e=>!isProj(e)&&evEnd(e)>=td&&e.start<=lim).sort((a,b)=>a.start.localeCompare(b.start));
   const shown=new Set();
+  const myDone=t=>isPer(t)?!!(t.doneBy||{})[name]:t.status==='완료';
   const myLeft=all.filter(t=>t.status!=='완료'&&t.status!=='보류'&&!(isPer(t)&&(t.doneBy||{})[name]));
   const nOver=myLeft.filter(t=>{const d=dU(effDeadline(t));return d!==null&&d<0;}).length;
   const nSoon=myLeft.filter(t=>{const d=dU(effDeadline(t));return d!==null&&d>=0&&d<=3;}).length;
@@ -1285,19 +1300,19 @@ function renderMyTasks(){
     const d=dU(e.start);
     const dd=d>0?`<span class="chip chip-soon">D-${d}</span>`:(evEnd(e)>=td?'<span class="chip chip-today">진행 중</span>':'');
     const dn=et.filter(t=>t.status==='완료').length;
-    const act=mine.filter(t=>t.status!=='완료'),fin=mine.filter(t=>t.status==='완료');
+    const act=mine.filter(t=>!myDone(t)),fin=mine.filter(myDone);
     h+=`<div class="ev" style="border-left-color:${e.dept?dc(e.dept):'var(--accent)'}"><div class="ev-hd"><div class="ev-nm">${esc(e.name)}</div>${canEv(name)?`<button type="button" class="eb" data-action="evEdit" data-id="${esc(e.id)}">✏️</button>`:''}</div>
       <div class="ev-dt">📅 ${evRange(e)} ${dd}${deptBadges(e)}<span>· 전체 업무 ${dn}/${et.length} 완료</span></div>
       ${e.desc?`<div class="ev-desc">${esc(e.desc)}</div>`:''}
       <div class="ev-sub">내가 맡은 일</div>
-      ${act.map(t=>card(t,opts)).join('')}${fin.length?`<div class="ev-none">✅ 끝낸 일: ${fin.map(t=>esc(t.title)).join(', ')}</div>`:''}
+      ${act.map(t=>card(t,opts)).join('')}${act.length?'':'<div class="ev-none">내 몫은 모두 끝냈어요 🎉</div>'}${fin.length?`<details class="tc-more"><summary>✅ 내가 끝낸 일 ${fin.length}개 <small>눌러서 보기</small></summary><div style="margin-top:8px">${fin.map(t=>card(t,opts)).join('')}</div></details>`:''}
     </div>`;
   });
   if(others.length)h+='<div class="ev-front" style="max-width:none;margin-bottom:8px"><div class="ev-front-t" style="color:var(--text2)">내가 맡은 일이 없는 행사</div>'+others.map(e=>
     '<div class="ev-front-r"><div class="ev-front-d">'+evRange(e).replace(' ~ ','~<br>')+'</div><div class="ev-front-n">'+esc(e.name)+'</div>'+(canEv(name)?'<button type="button" class="eb" data-action="evEdit" data-id="'+esc(e.id)+'">✏️</button>':'')+'</div>').join('')+'</div>';
   // 1-2) 진행 중인 상시 프로젝트 — 내가 아직 안 끝낸 업무가 있는 것만
   const projH=evSorted().proj.map(e=>{
-    const act=tasks.filter(t=>inEv(t,e.id)&&assOf(t).includes(name)&&t.status!=='완료');
+    const act=tasks.filter(t=>inEv(t,e.id)&&assOf(t).includes(name)&&!myDone(t));
     if(!act.length)return '';
     act.forEach(t=>shown.add(t.id));
     return `<div class="ev" style="border-left-color:${e.dept?dc(e.dept):'var(--accent)'}"><div class="ev-hd"><div class="ev-nm">📂 ${esc(e.name)}</div>${canEv(name)?`<button type="button" class="eb" data-action="evEdit" data-id="${esc(e.id)}">✏️</button>`:''}</div>
@@ -1308,9 +1323,9 @@ function renderMyTasks(){
   // 2) 그 밖의 내 업무
   const rest=all.filter(t=>!shown.has(t.id));
   h+='<div class="sec-t" style="margin-top:20px"><span>📝 그 밖의 내 업무</span></div>';
-  const ra=rest.filter(t=>t.status!=='완료');
+  const ra=rest.filter(t=>!myDone(t));
   h+=ra.length?renderGrp(ra,opts):'<div class="ev-none">남은 업무가 없어요 🎉</div>';
-  h+=doneSec(rest.filter(t=>t.status==='완료'),opts,'my');
+  h+=doneSec(rest.filter(myDone),opts,'my');
   area.innerHTML=h;
 }
 
@@ -2015,35 +2030,38 @@ document.addEventListener('change',function(e){
 });
 
 // ── 학생 부서 현황 ──
+const sdOpen=new Set(),sdTouched={v:false};
+document.addEventListener('toggle',e=>{const d=e.target;if(d&&d.classList&&d.classList.contains('sd-dept')){sdTouched.v=true;d.open?sdOpen.add(d.dataset.dept):sdOpen.delete(d.dataset.dept);}},true);
 function renderSDept(){
   const area=document.getElementById('sDept');if(!area)return;
   const myName=document.getElementById('s0Name')?.value||'';
   const myDept=(MEMBERS.find(m=>m.name===myName))?.dept||'';
-  let html='<div style="padding:16px;"><h3 style="margin-bottom:16px;font-size:16px;">👥 부서별 업무 현황</h3>';
+  if(!sdTouched.v&&myDept)sdOpen.add(myDept); // 처음엔 내 부서만 펼침
+  const key=t=>{const d=dU(effDeadline(t));return d===null?1e6:d>=0?d:1000+(-d);};
+  const row=t=>{
+    const ass=assOf(t),d=dU(effDeadline(t));
+    const mine=myName&&ass.includes(myName);
+    const dl=effDeadline(t)&&t.status!=='완료'?(d<0?'<span style="color:var(--danger);font-weight:700">⏰ '+fD(effDeadline(t))+' · '+(-d)+'일 지남</span>':'⏰ '+fD(effDeadline(t))+(d<=3?' · '+(d===0?'오늘':'D-'+d):'')):'';
+    const who=!ass.length?'담당자 없음':ass.length>3?esc(ass.slice(0,2).join(', '))+' 외 '+(ass.length-2)+'명':ass.map(esc).join(', ');
+    const prog=isPer(t)&&ass.length?ass.length+'명 중 '+doneNames(t).length+'명 완료':'';
+    return '<div class="sd-row"><div style="flex:1;min-width:0"><div class="sd-ti">'+(mine?'<span class="sd-me">내 업무</span>':'')+esc(t.title)+'</div><div class="sd-sub">'+[who,prog,dl].filter(Boolean).join(' · ')+'</div></div><span class="tag tag-'+t.status+'">'+t.status+'</span></div>';
+  };
+  let html='<div class="sd-wrap"><div class="hint" style="margin:0 0 10px">부서 이름을 누르면 업무가 펼쳐져요.</div>';
   DEPTS.forEach(dept=>{
     const isMyDept=dept===myDept;
     const dt=tasks.filter(t=>t.dept===dept);
     const done=dt.filter(t=>t.status==='완료').length;
+    const left=dt.length-done;
     const pct=dt.length>0?Math.round(done/dt.length*100):0;
     const col=dc(dept);
-    const active=dt.filter(t=>t.status!=='완료');
+    const active=dt.filter(t=>t.status!=='완료').sort((a,b)=>key(a)-key(b));
     const doneL=dt.filter(t=>t.status==='완료');
-    html+=`<div class="dept-card" style="background:var(--surface);border-radius:var(--r);box-shadow:var(--sh);border:1px solid var(--border);margin-bottom:12px;overflow:hidden;">
-      <div class="dept-toggle-hdr" onclick="const b=this.nextElementSibling;b.style.display=b.style.display==='none'?'block':'none';" style="padding:12px 14px;background:var(--surface2);cursor:pointer;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);">
-        <div style="display:flex;align-items:center;gap:6px;">
-          <span class="db db-${dept}" style="background:${col};color:#fff;padding:2px 6px;border-radius:4px;font-size:12px;">${dept}</span>
-          ${isMyDept?'<span style="color:var(--accent);font-size:12px;font-weight:bold;">[내 부서]</span>':''}
-        </div>
-        <span style="font-size:13px;color:var(--text3);font-weight:bold;">진행률 ${done}/${dt.length} (${pct}%) ▼</span>
-      </div>
-      <div class="dept-body" style="padding:12px;display:${isMyDept?'block':'none'};">
-        <div class="dp" style="height:4px;background:var(--surface2);border-radius:2px;margin-bottom:10px;overflow:hidden;">
-          <div style="width:${pct}%;background:${col};height:100%;"></div>
-        </div>
-        ${active.length?active.map(t=>card(t,{})).join(''):'<div style="font-size:14px;color:var(--text3);padding:4px 0">진행 중 없음</div>'}
-        ${doneSec(doneL,{},dept+'_s')}
-      </div>
-    </div>`;
+    html+='<details class="sd-dept" data-dept="'+esc(dept)+'"'+(sdOpen.has(dept)?' open':'')+'><summary><span class="arr">▶</span><span class="db db-'+dept+'">'+dept+'</span>'+(isMyDept?'<span class="sd-mine">내 부서</span>':'')+
+      '<span class="sd-cnt">'+(left?'남은 '+left+'건':'모두 완료')+' <small>'+done+'/'+dt.length+'</small></span></summary>'+
+      '<div class="evd-bar"><div style="width:'+pct+'%;background:'+col+'"></div></div><div class="sd-body">'+
+      (active.length?active.map(row).join(''):'<div class="ev-none">진행 중인 업무가 없어요</div>')+
+      (doneL.length?'<details class="ev-donegrp"><summary>✓ 완료된 업무 '+doneL.length+'개 보기</summary>'+doneL.map(row).join('')+'</details>':'')+
+      '</div></details>';
   });
   html+='</div>';
   area.innerHTML=html;
