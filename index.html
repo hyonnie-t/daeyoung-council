@@ -311,6 +311,8 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .dchip{font-size:13px;padding:5px 10px;border-radius:16px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-weight:600}
 .dchip-all{background:transparent;border:1px dashed var(--border);color:var(--text3);font-size:12px;font-weight:500;padding:4px 9px;margin-left:auto}
 .dchip-all:hover{color:var(--text2);border-color:var(--text3)}
+.ev-tasks{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:10px;align-items:start}
+.ev-tasks>.tc{margin-bottom:0}
 .ev .tc{box-shadow:none;background:var(--surface2);border-color:transparent;padding:14px}
 .ev .tc .tc-more{border-top-color:var(--border)}
 @media(max-width:767px){.tc-more summary small{display:none}}
@@ -1316,7 +1318,7 @@ function renderMyTasks(){
       <div class="ev-dt">📅 ${evRange(e)} ${dd}${deptBadges(e)}<span>· 전체 업무 ${dn}/${et.length} 완료</span></div>
       ${e.desc?`<div class="ev-desc">${esc(e.desc)}</div>`:''}
       <div class="ev-sub">내가 맡은 일</div>
-      ${act.map(t=>card(t,evOpts)).join('')}${act.length?'':'<div class="ev-none">내 몫은 모두 끝냈어요 🎉</div>'}${fin.length?`<details class="tc-more"><summary>✅ 내가 끝낸 일 ${fin.length}개 <small>눌러서 보기</small></summary><div style="margin-top:8px">${fin.map(t=>card(t,evOpts)).join('')}</div></details>`:''}
+      <div class="ev-tasks">${act.map(t=>card(t,evOpts)).join('')}</div>${act.length?'':'<div class="ev-none">내 몫은 모두 끝냈어요 🎉</div>'}${fin.length?`<details class="tc-more"><summary>✅ 내가 끝낸 일 ${fin.length}개 <small>눌러서 보기</small></summary><div style="margin-top:8px">${fin.map(t=>card(t,evOpts)).join('')}</div></details>`:''}
     </div>`;
   });
   if(others.length)h+='<div class="ev-front" style="max-width:none;margin-bottom:8px"><div class="ev-front-t" style="color:var(--text2)">내가 맡은 일이 없는 행사</div>'+others.map(e=>
@@ -1328,7 +1330,7 @@ function renderMyTasks(){
     act.forEach(t=>shown.add(t.id));
     return `<div class="ev" style="border-left-color:${e.dept?dc(e.dept):'var(--accent)'}"><div class="ev-hd"><div class="ev-nm">📂 ${esc(e.name)}</div>${canEv(name)?`<button type="button" class="eb" data-action="evEdit" data-id="${esc(e.id)}">✏️</button>`:''}</div>
       ${e.desc?`<div class="ev-desc">${esc(e.desc)}</div>`:''}
-      <div class="ev-sub">내가 맡은 일</div>${act.map(t=>card(t,evOpts)).join('')}</div>`;
+      <div class="ev-sub">내가 맡은 일</div><div class="ev-tasks">${act.map(t=>card(t,evOpts)).join('')}</div></div>`;
   }).join('');
   if(projH)h+='<div class="sec-t" style="margin-top:20px"><span>📂 진행 중인 상시 행사</span></div>'+projH;
   // 2) 그 밖의 내 업무
