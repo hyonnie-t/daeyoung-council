@@ -1886,9 +1886,15 @@ function renderActivity(){
   const inRange=evs.filter(e=>actDay(e.at)>=from);
   const recent=inRange.slice(0,CAP);
   // 되돌리기: 지금도 유효한 가장 최근 완료만 (1인별 체크는 그 사람 체크 해제, 예전 방식은 상태를 이전으로)
-  const seenSt=new Set();
+  const seenSt=new Set(),seenUn=new Set();
   const undoBtn=e=>{
     const t=byId.get(e.tid);if(!t)return '';
+    if(e.type==='undo'&&e.name){
+      const k=e.tid+'|'+e.name;
+      if(seenUn.has(k))return '';
+      seenUn.add(k);
+      return !(t.doneBy||{})[e.name]&&assOf(t).includes(e.name)?'<button type="button" class="feed-undo" data-action="undoDone" data-id="'+esc(e.tid)+'" data-name="'+esc(e.name)+'">↩ 다시 완료로</button>':'';
+    }
     if(e.type==='done'&&!e.legacy){
       return (t.doneBy||{})[e.name]===e.at?'<button type="button" class="feed-undo" data-action="undoDone" data-id="'+esc(e.tid)+'" data-name="'+esc(e.name)+'">↩ 되돌리기</button>':'';
     }
@@ -2464,7 +2470,12 @@ async function setAllDone(id,val){
     gasLog(t);
   }catch(e){toast('⚠️ 서버 저장 실패 — 인터넷 연결을 확인해주세요');}
 }
-function meDone(id){return toggleDone(id,myName(),false);}
+function meDone(id){
+  const t=tasks.find(x=>x.id===id),me=myName();
+  // 이미 체크한 걸 실수로 풀지 않게 한 번 확인
+  if(t&&me&&(t.doneBy||{})[me]&&!confirm('"'+t.title+'" 완료 체크를 취소할까요?'))return;
+  return toggleDone(id,me,false);
+}
 // 선생님 화면에서 학생 이름 칩을 눌러 대신 체크/해제
 function tDone(id,name){return toggleDone(id,name,true);}
 async function toggleDone(id,name,byTeacher){
