@@ -321,6 +321,16 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .ev-nm{font-size:16px;font-weight:700;line-height:1.4;flex:1}
 .ev-dt{font-size:13px;color:var(--text2);font-family:'Noto Sans KR',sans-serif;margin-bottom:6px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .ev-desc{font-size:13px;color:var(--text2);margin-bottom:8px;line-height:1.6}
+.ev-fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;margin-bottom:4px;-webkit-tap-highlight-color:transparent}
+.ev-fold>summary::-webkit-details-marker{display:none}
+.ev-fold>summary::before{content:'▸';color:var(--text3);font-size:13px}
+.ev-fold[open]>summary::before{content:'▾'}
+.ev-cnt{font-size:12px;font-weight:700;color:var(--warn);background:var(--surface2);border-radius:12px;padding:3px 9px;white-space:nowrap}
+.ev-cnt.ok{color:var(--text3)}
+.add-fold{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);padding:12px 14px;margin-bottom:14px}
+.add-fold>summary{font-size:15px;font-weight:700;color:var(--accent)}
+.add-fold>summary small{font-weight:400;color:var(--text3);margin-left:4px}
+.add-body{margin-top:12px}
 .ev-sub{font-size:12px;font-weight:700;color:var(--text2);margin:10px 0 6px}
 .ev-none{font-size:13px;color:var(--text3);padding:4px 0 6px}
 .ev-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border)}
@@ -481,8 +491,7 @@ details.un-notice[open]>summary{margin-bottom:8px}
   .mh{display:none}
   .sg{grid-template-columns:repeat(4,1fr)}
   /* 폼·달력은 너무 넓어지지 않게 */
-  #sP1,.tp .fb,.tp .sw{max-width:720px;margin-left:auto;margin-right:auto}
-  #sP1{padding-left:32px;padding-right:32px}
+  .tp .fb,.tp .sw{max-width:720px;margin-left:auto;margin-right:auto}
   .ch,.cg,#sCD,#tCD,#evFront{max-width:720px;margin-left:auto;margin-right:auto}
   .cday{aspect-ratio:auto;min-height:64px}
   .dnum{font-size:14px}
@@ -578,9 +587,8 @@ details.un-notice[open]>summary{margin-bottom:8px}
   </div>
   <div class="tnav" id="sTnav">
     <button type="button" class="ti active" data-tab="0"><span class="tn">✅</span>해야할 일</button>
-    <button type="button" class="ti" data-tab="1"><span class="tn">✏️</span>업무 등록</button>
-    <button type="button" class="ti" data-tab="2"><span class="tn">📅</span>달력</button>
-    <button type="button" class="ti" data-tab="3"><span class="tn">🏢</span>부서 현황</button>
+    <button type="button" class="ti" data-tab="1"><span class="tn">📅</span>달력</button>
+    <button type="button" class="ti" data-tab="2"><span class="tn">🏢</span>부서 현황</button>
   </div>
   <div class="tp active" id="sP0">
    <div class="s0-side">
@@ -599,25 +607,29 @@ details.un-notice[open]>summary{margin-bottom:8px}
    <div class="s0-main">
     <div id="unNotice"></div>
     <div class="nw" id="s0NameWrap"><label>내 이름 <span style="font-size:12px;color:var(--text3)">(한 번 고르면 이 폰에 기억돼요)</span></label><select id="s0Name"></select></div>
+    <!-- 업무 등록: 이름을 고르면 나타나는 접이식 폼. 이름 select(s1Name)는 s0Name과 값만 맞추는 숨김용 -->
+    <details class="fold add-fold" id="addFold" style="display:none">
+      <summary>✏️ 새 업무 등록 <small>눌러서 펼치기</small></summary>
+      <div class="add-body">
+        <select id="s1Name" style="display:none"></select>
+        <div class="fg"><label>업무명 <span class="req">*</span></label><input type="text" id="fTitle" placeholder="예: 디케 프로젝트 3차 회의"></div>
+        <div class="fg"><label>행사 <span style="font-size:12px;color:var(--text3)">(선택 · 여러 개 가능)</span></label><div class="evpick" id="fEv"></div><div class="hint">💡 행사가 없는 업무는 선택하지 않으면 '기타'로 들어가요. 두 행사에 같이 해당하면 둘 다 체크하세요</div></div>
+        <div class="fg">
+          <label>같이 할 사람 <span style="font-size:12px;color:var(--text3)">(선택)</span></label>
+          <div id="cwList" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px;max-height:200px;overflow-y:auto"></div>
+        </div>
+        <div class="fg"><label>마감일 <span style="font-size:12px;color:var(--text3)">(회의라면 회의 날짜)</span></label><input type="date" id="fDeadline"></div>
+        <div class="fg"><label>메모</label><textarea id="fMemo" rows="3" placeholder="참고사항"></textarea></div>
+        <details class="fg subfold" id="fSubFold">
+          <summary>+ 세부 할 일 (선택)</summary>
+          <div id="subList" style="margin-top:8px"><div class="sir"><input type="text" placeholder="예: 행사 장소 섭외" class="st"><input type="date" class="dm sd"><button type="button" class="sdel" data-action="rmSub">×</button></div></div>
+          <button type="button" class="asb" id="addSubBtn">+ 한 줄 더</button>
+        </details>
+        <button type="button" class="bp" id="submitBtn">업무 등록하기</button>
+      </div>
+    </details>
     <div id="myArea"><div class="empty" style="padding:20px 24px"><div class="ei">👆</div><p>이름을 선택하면<br>내 업무가 나타나요</p><img src="illust-student.png" alt="" style="width:100%;max-width:260px;margin-top:20px;border-radius:16px;opacity:0.9"></div></div>
    </div>
-  </div>
-  <div class="tp" id="sP1">
-    <div class="nw"><label>내 이름 <span class="req">*</span></label><select id="s1Name"></select></div>
-    <div class="fg"><label>업무명 <span class="req">*</span></label><input type="text" id="fTitle" placeholder="예: 디케 프로젝트 3차 회의"></div>
-    <div class="fg"><label>행사 <span style="font-size:12px;color:var(--text3)">(선택 · 여러 개 가능)</span></label><div class="evpick" id="fEv"></div><div class="hint">💡 행사가 없는 업무는 선택하지 않으면 '기타'로 들어가요. 두 행사에 같이 해당하면 둘 다 체크하세요</div></div>
-    <div class="fg">
-      <label>같이 할 사람 <span style="font-size:12px;color:var(--text3)">(선택)</span></label>
-      <div id="cwList" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px;max-height:200px;overflow-y:auto"></div>
-    </div>
-    <div class="fg"><label>마감일 <span style="font-size:12px;color:var(--text3)">(회의라면 회의 날짜)</span></label><input type="date" id="fDeadline"></div>
-    <div class="fg"><label>메모</label><textarea id="fMemo" rows="3" placeholder="참고사항"></textarea></div>
-    <details class="fg subfold" id="fSubFold">
-      <summary>+ 세부 할 일 (선택)</summary>
-      <div id="subList" style="margin-top:8px"><div class="sir"><input type="text" placeholder="예: 행사 장소 섭외" class="st"><input type="date" class="dm sd"><button type="button" class="sdel" data-action="rmSub">×</button></div></div>
-      <button type="button" class="asb" id="addSubBtn">+ 한 줄 더</button>
-    </details>
-    <button type="button" class="bp" id="submitBtn">업무 등록하기</button>
   </div>
   <div class="tp" id="sP3">
     <div id="evFront" class="ev-front" style="display:none;max-width:none;margin-bottom:16px"></div>
@@ -1222,9 +1234,9 @@ function swTab(navId,panels,n,fns){
   panels.forEach((p,i)=>{const el=document.getElementById(p);if(el)el.classList.toggle('active',i===n);});
   fns[n]&&fns[n]();
 }
-const S_PANELS=['sP0','sP1','sP3','sP4'];
+const S_PANELS=['sP0','sP3','sP4'];
 const T_PANELS=['tP0','tPW','tP1','tP5'];
-const sFns=[renderMyTasks,()=>{},()=>renderCal('s'),renderSDept];
+const sFns=[renderMyTasks,()=>renderCal('s'),renderSDept];
 // 업무 탭 안의 보기 전환: 행사별 · 부서별 · 학생별 · 전체 목록
 let workView=0;
 const WV_IDS=['tPE','tP2','tP3','tP4'];
@@ -1394,9 +1406,12 @@ async function cheerAI(key,ctx){
   }catch(e){console.warn('응원 메시지 AI 실패(문구 은행 사용):',e);}
   finally{_cheerBusy.delete(key);}
 }
+const sEvOpen=new Map();
+document.addEventListener('toggle',e=>{const d=e.target;if(d&&d.classList&&d.classList.contains('ev-fold'))sEvOpen.set(d.dataset.evid,d.open);},true);
 function renderMyTasks(){
   renderUnNotice();
   const name=document.getElementById('s0Name').value;
+  document.getElementById('addFold').style.display=name?'':'none';
   const area=document.getElementById('myArea');
   document.getElementById('s0NameWrap').style.display=name?'none':'';
   document.getElementById('sChName').style.display=name?'':'none';
@@ -1436,12 +1451,14 @@ function renderMyTasks(){
     const dd=d>0?`<span class="chip chip-soon">D-${d}</span>`:(evEnd(e)>=td?'<span class="chip chip-today">진행 중</span>':'');
     const dn=et.filter(t=>t.status==='완료').length;
     const act=mine.filter(t=>!myDone(t)&&!ovIds.has(t.id)),fin=mine.filter(myDone);
-    h+=`<div class="ev" style="border-left-color:${e.dept?dc(e.dept):'var(--accent)'}"><div class="ev-hd"><div class="ev-nm">${esc(e.name)}</div>${canEv(name)?`<button type="button" class="eb" data-action="evEdit" data-id="${esc(e.id)}">✏️</button>`:''}</div>
-      <div class="ev-dt">📅 ${evRange(e)} ${dd}${deptBadges(e)}<span>· 전체 업무 ${dn}/${et.length} 완료</span></div>
+    // 행사 카드는 접을 수 있다. 처음엔 내 남은 일이 있는 행사만 펼치고, 직접 접고 편 건 sEvOpen에 기억
+    const isOpen=sEvOpen.has(e.id)?sEvOpen.get(e.id):act.length>0;
+    h+=`<details class="ev ev-fold" data-evid="${esc(e.id)}"${isOpen?' open':''} style="border-left-color:${e.dept?dc(e.dept):'var(--accent)'}"><summary class="ev-sum"><span class="ev-nm">${esc(e.name)}</span><span class="ev-cnt${act.length?'':' ok'}">${act.length?'남은 일 '+act.length:'✔ 완료'}</span></summary>
+      <div class="ev-dt">📅 ${evRange(e)} ${dd}${deptBadges(e)}<span>· 전체 업무 ${dn}/${et.length} 완료</span>${canEv(name)?`<button type="button" class="eb" data-action="evEdit" data-id="${esc(e.id)}">✏️</button>`:''}</div>
       ${e.desc?`<div class="ev-desc">${esc(e.desc)}</div>`:''}
       <div class="ev-sub">내가 맡은 일</div>
       <div class="ev-tasks">${act.map(t=>card(t,evOpts)).join('')}</div>${act.length?'':mine.some(t=>ovIds.has(t.id))?'<div class="ev-none">남은 일은 위 \'기한 지난 업무\'에 있어요</div>':'<div class="ev-none">내 몫은 모두 끝냈어요 🎉</div>'}${fin.length?`<details class="tc-more"><summary>✅ 내가 끝낸 일 ${fin.length}개 <small>눌러서 보기</small></summary><div style="margin-top:8px">${fin.map(t=>card(t,evOpts)).join('')}</div></details>`:''}
-    </div>`;
+    </details>`;
   });
   if(others.length)h+='<div class="ev-front" style="max-width:none;margin-bottom:8px"><div class="ev-front-t" style="color:var(--text2)">내가 맡은 일이 없는 행사</div>'+others.map(e=>
     '<div class="ev-front-r"><div class="ev-front-d">'+evRange(e).replace(' ~ ','~<br>')+'</div><div class="ev-front-n">'+esc(e.name)+'</div>'+(canEv(name)?'<button type="button" class="eb" data-action="evEdit" data-id="'+esc(e.id)+'">✏️</button>':'')+'</div>').join('')+'</div>';
@@ -1491,7 +1508,9 @@ function submitTask(){
   fillEvSel('fEv',[]);
   document.getElementById('subList').innerHTML='<div class="sir"><input type="text" placeholder="예: 행사 장소 섭외" class="st"><input type="date" class="dm sd"><button type="button" class="sdel" data-action="rmSub">×</button></div>';
   document.querySelectorAll('.cw-cb').forEach(x=>x.checked=false);
-  setTimeout(()=>{['s0Name','s1Name'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=name;});buildCWList(name);swTab('sTnav',S_PANELS,0,sFns);},600);
+  buildCWList(name);
+  document.getElementById('addFold').open=false;
+  renderMyTasks();
 }
 
 // ── 상태 변경 ──
@@ -2321,7 +2340,7 @@ function renderSDept(){
   html+='</div>';
   area.innerHTML=html;
 }
-sFns[3]=renderSDept;
+sFns[2]=renderSDept;
 
 // ── 공지 로드 ──
 async function loadNotice(){
