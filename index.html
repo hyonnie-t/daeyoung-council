@@ -1624,7 +1624,7 @@ function submitTask(){
 //    날짜로 못 바꾸므로(어느 금요일인지 모름) 날짜 칸을 비워두고 말한 표현만 보여준다.
 // ⚠️ 이름·학번은 서버로 안 보낸다(행사 이름·구술·기존 업무 제목만).
 const BRK_MAX=600,BRK_MAX_SERVER=1200,BRK_TIMEOUT=35000;
-let BRK=null; // {evId,text,res,round,busy}
+let BRK=null; // {evId,text,res,round,busy,nExisting}
 
 /* ── 순수 함수(DOM·전역 상태 없음, Node에서 그대로 시험 가능) ── */
 function brkDow(ds){return new Date(ds+'T00:00:00').getDay();}
@@ -1693,7 +1693,7 @@ function brkRenderResult(){
   let h=brkEvHead(e);
   if(tight)h+='<div class="brk-warn">⏰ 행사까지 '+brkDaysLeft(base,today)+'일 남았어요. 일부 업무는 AI가 권한 준비 기간보다 짧아서 마감이 오늘로 잡혔어요. 마감을 꼭 확인해 주세요.</div>';
   if(rows.length){
-    h+='<div class="hint" style="margin:-4px 0 12px">내가 쓴 내용을 AI가 정리한 초안이에요. 필요한 것만 체크하고, 제목·마감·담당자를 고쳐서 등록해요.</div>';
+    h+='<div class="hint" style="margin:-4px 0 12px">내가 쓴 내용을 AI가 정리한 초안이에요. 필요한 것만 체크하고, 제목·마감·담당자를 고쳐서 등록해요.'+(BRK.nExisting?' 이 행사에 이미 등록된 업무 '+BRK.nExisting+'개와 겹치는 건 빼고 보여줘요.':'')+'</div>';
     let i=0;
     res.activities.forEach(a=>{
       h+='<div class="brk-card"><div class="brk-ah">'+esc(a.name)+'</div><div class="brk-q0">“'+esc(a.quote)+'”</div><div class="brk-rows">';
@@ -1701,7 +1701,7 @@ function brkRenderResult(){
       h+='</div></div>';
     });
     h+='<button type="button" class="asb" data-action="brkAll" style="margin:0 0 12px">전체 선택 / 해제</button>';
-  } else h+='<div class="brk-warn">아직 업무로 정리할 만큼 구체적이지 않아요. 아래 질문에 답하거나 ‘다시 쓰기’로 내용을 더 적어봐요.</div>';
+  } else h+='<div class="brk-warn">'+brkNoRowsMsg()+(qs.length?' 아래 질문에 답하거나 ‘다시 쓰기’로 내용을 더 적어봐요.':' ‘다시 쓰기’로 내용을 더 적어봐요.')+'</div>';
   if(qs.length){
     h+='<div class="brk-q"><div class="brk-qt">💬 이것도 정해두면 좋아요</div>'+
       qs.map((q,i)=>'<div class="fg"><label>'+esc(q)+'</label><textarea class="brk-ans" data-i="'+i+'" rows="2" maxlength="200" placeholder="생각이 났으면 적어요 (선택)"></textarea></div>').join('')+
@@ -1731,11 +1731,15 @@ function brkSetBusy(on){
     b.disabled=on;b.textContent=on?'정리하는 중… (잠깐만요)':(b.dataset.label||b.textContent);
   });
 }
+// 새로 정리할 업무가 없을 때의 안내 — 이미 등록된 업무가 있으면 그 때문일 수 있다(AI가 겹치는 건 뺀다)
+function brkNoRowsMsg(){
+  return BRK&&BRK.nExisting?'새로 정리할 업무가 없어요. 이 행사에 이미 등록된 업무 '+BRK.nExisting+'개와 겹치거나, 내용이 아직 구체적이지 않을 수 있어요.':'아직 업무로 정리할 만큼 구체적이지 않아요.';
+}
 function brkErrMsg(err){
   if(err&&err.name==='AbortError')return '시간이 너무 오래 걸려요. 다시 해보거나 “＋ 업무 추가”로 직접 등록해 주세요';
   switch(err&&err.code){
     case 'busy':return '지금 쓰는 사람이 많아요. 1분쯤 뒤에 다시 해봐요';
-    case 'empty':return '조금만 더 자세히 말해줄래요?';
+    case 'empty':return BRK&&BRK.nExisting?'새로 정리할 업무가 없어요. 이미 등록된 업무와 겹치거나 내용이 부족할 수 있어요':'조금만 더 자세히 말해줄래요?';
     case 'no_context':return '조금만 더 써줘요';
     case 'too_long':return '내용이 너무 길어요. 조금 줄여줘요';
     default:return '정리에 실패했어요. 다시 해보거나 “＋ 업무 추가”로 직접 등록해 주세요';
@@ -1752,6 +1756,7 @@ async function brkCall(sendText,round){
   const st=BRK,e=evById(st.evId);if(!e)return;
   st.busy=true;brkSetBusy(true);
   const existing=tasks.filter(t=>inEv(t,e.id)).map(t=>t.title).slice(0,30);
+  st.nExisting=existing.length; // 이미 등록된 업무와 겹치는 건 AI가 빼므로, 결과가 비거나 묶음이 안 보여도 이유를 알려주려고 기억해 둔다
   try{
     const ac=new AbortController(),to=setTimeout(()=>ac.abort(),BRK_TIMEOUT);
     // 헤더를 안 붙인 POST(text/plain)라 preflight 없이 응답을 읽을 수 있다 — history26 포털이 같은 백엔드를 부르는 방식과 같다
