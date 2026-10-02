@@ -263,6 +263,29 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .mt{font-size:16px;font-weight:700;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border)}
 .ma{display:flex;gap:8px;margin-top:20px}
 
+/* 말로 쪼개기 모달 */
+/* .ms는 요약 카드용 text-align:center 규칙과 이름이 겹쳐서 모달 안 글자가 가운데로 모인다 — 이 모달은 본문만 왼쪽 정렬 */
+#brkBody{text-align:left}
+#brkBody .add-ev{text-align:center}
+.brk-card{border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:12px;background:var(--surface)}
+.brk-ah{font-size:14px;font-weight:700;margin-bottom:2px}
+.brk-q0{font-size:12px;color:var(--text3);margin-bottom:8px;line-height:1.5;word-break:keep-all}
+.brk-row{padding:10px 0;border-top:1px solid var(--border)}
+.brk-rows .brk-row:first-child{border-top:none}
+.brk-r1{display:flex;gap:10px;align-items:center;margin-bottom:6px}
+.brk-r1 .brk-title{flex:1;min-width:0}
+.brk-r2{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.brk-r2 .brk-due{width:140px;flex:0 0 auto}
+.brk-r2 .brk-who{flex:1;min-width:120px;width:auto}
+.brk-tag{font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;white-space:nowrap}
+.brk-tag.you{background:#ebfbee;color:var(--accent3)}
+.brk-tag.ai{background:#f3f0ff;color:var(--accent)}
+.brk-note{font-size:12px;color:var(--warn);margin-top:5px;line-height:1.5}
+.brk-warn{background:#fff9db;border:1px solid #ffd43b;border-radius:8px;padding:10px 12px;font-size:13px;color:var(--text);margin-bottom:12px;line-height:1.6}
+.brk-q{background:var(--surface2);border-radius:var(--r);padding:12px;margin-bottom:12px}
+.brk-qt{font-size:13px;font-weight:700;margin-bottom:10px}
+.brk-q .fg{margin-bottom:10px}
+
 /* 체크박스 그룹 */
 .cb-group{display:flex;flex-direction:column}
 .cb-dh{font-size:13px;font-weight:700;color:var(--text2);padding:10px 0 6px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;cursor:pointer;-webkit-tap-highlight-color:transparent}
@@ -482,6 +505,8 @@ details.un-notice[open]>summary{margin-bottom:8px}
 .dchip.on{background:#ebfbee;border-color:#8ce99a;color:var(--accent3)}
 .ev-add{background:var(--surface2);border:1px dashed var(--border);color:var(--text2);padding:8px;border-radius:8px;width:100%;font-size:13px;margin-top:8px}
 .ev-add:hover{border-color:var(--accent);color:var(--accent)}
+.ev-add.ev-brk{margin-top:6px;border:1.5px solid var(--accent);background:#f3f0ff;color:var(--accent);font-weight:700}
+.ev-brk small{display:block;font-weight:400;font-size:12px;color:var(--text3);margin-top:2px}
 .ev-new{background:#f3f0ff;border:1px solid var(--accent);color:var(--accent);padding:10px;border-radius:10px;width:100%;font-size:14px;font-weight:700;margin-bottom:12px}
 .ev-chip{display:inline-block;padding:2px 8px;border-radius:6px;font-size:12px;font-weight:700;background:#f3f0ff;color:var(--accent)}
 .sec-t{font-size:14px;font-weight:700;color:var(--text);margin:4px 0 10px;display:flex;justify-content:space-between;align-items:center}
@@ -855,6 +880,14 @@ details.un-notice[open]>summary{margin-bottom:8px}
       <button type="button" class="asb" id="addSubBtn">+ 한 줄 더</button>
     </details>
     <div class="ma"><button type="button" class="bc" id="addCancel">취소</button><button type="button" class="bs" id="submitBtn">업무 등록하기</button></div>
+  </div>
+</div>
+
+<!-- 말로 쪼개기 모달: 행사 카드의 '🗣 말로 쪼개기'에서 열린다. 계획을 말하듯 쓰면 AI가 업무 체크리스트 초안을 주고, 학생이 체크한 것만 업무로 등록된다. 내용은 brkRender* 가 그린다 -->
+<div class="mov" id="brkMov">
+  <div class="ms">
+    <div class="mh"></div><div class="mt">🗣 말로 쪼개기</div>
+    <div id="brkBody"></div>
   </div>
 </div>
 
@@ -1486,7 +1519,7 @@ function renderMyTasks(){
   h+='<div class="sec-t"><span>🎪 다가오는 행사 (2주)</span></div>';
   if(canEv(name))h+='<button type="button" class="ev-new" data-action="evNew">+ 행사 등록</button>';
   if(!near.length)h+='<div class="ev-none" style="margin-bottom:16px">2주 안에 등록된 행사가 없어요</div>';
-  const addBtn=id=>`<button type="button" class="ev-add" data-action="addTask" data-id="${esc(id||'')}">＋ ${id?'이 행사에':'행사 없이'} 업무 추가</button>`;
+  const addBtn=id=>`<button type="button" class="ev-add" data-action="addTask" data-id="${esc(id||'')}">＋ ${id?'이 행사에':'행사 없이'} 업무 추가</button>`+(id&&CHEER_URL?`<button type="button" class="ev-add ev-brk" data-action="brkOpen" data-id="${esc(id)}">🗣 말로 쪼개기<small>계획을 말하듯 쓰면 업무 체크리스트로 정리해줘요</small></button>`:'');
   // 내 남은 일이 있는 행사 카드는 기본으로 펼쳐지고, 없으면 접힌다. 직접 접고 편 상태는 sEvOpen에 기억
   const evCard=e=>{
     const et=tasks.filter(t=>inEv(t,e.id));
@@ -1550,6 +1583,14 @@ function openAdd(evId){
   document.getElementById('addMov').classList.add('open');
   setTimeout(()=>document.getElementById('fTitle').focus(),50);
 }
+// 업무 객체 생성 — 수동 등록(submitTask)과 말로 쪼개기 일괄 등록이 같이 쓴다.
+// assignees가 비면 '담당자 없음'(isUA)으로 등록된다. 이때 dept가 비면 어느 부서 현황에도 안 잡히므로 호출부가 등록한 사람의 부서를 넘긴다.
+function newTask(o){
+  const ass=o.assignees||[];
+  const t={id:crypto.randomUUID(),assignee:ass[0]||'',assignees:ass,dept:o.dept!=null?o.dept:gd(ass[0]||''),title:o.title,category:evNames(o.evIds||[]),date:'',per:true,deadline:o.deadline||'',memo:o.memo||'',status:'예정',subtasks:o.subtasks||[],createdAt:new Date().toISOString()};
+  setEvIds(t,o.evIds||[]);
+  return t;
+}
 function submitTask(){
   const name=document.getElementById('s1Name').value;
   const title=document.getElementById('fTitle').value.trim();
@@ -1560,8 +1601,7 @@ function submitTask(){
   const cws=[...document.querySelectorAll('.cw-cb:checked')].map(x=>x.value);
   const ass=[name,...cws];
   const evIds=getEvPick('fEv');
-  const t={id:crypto.randomUUID(),assignee:name,assignees:ass,dept:gd(name),title,category:evNames(evIds),date:'',per:true,deadline:document.getElementById('fDeadline').value,memo:document.getElementById('fMemo').value.trim(),status:'예정',subtasks:subs,createdAt:new Date().toISOString()};
-  setEvIds(t,evIds);
+  const t=newTask({title,assignees:ass,evIds,deadline:document.getElementById('fDeadline').value,memo:document.getElementById('fMemo').value.trim(),subtasks:subs});
   tasks.push(t);saveLocal();fbPut(t);
   logAct('add',t,{at:t.createdAt,who:name});
   toast('✅ '+ass.join(', ')+'에게 업무 등록!');
@@ -1574,6 +1614,197 @@ function submitTask(){
   closeMov('addMov');
   renderMyTasks();
 }
+
+// ── 말로 쪼개기 ──
+// 학생이 계획을 말하듯 쓰면 history26_backend(action=breakdown, 서버 규칙은 그 레포 CLAUDE.md)가 업무 후보·되묻기 질문을 돌려준다.
+// 서버 주소는 응원 문구와 같은 CHEER_URL을 재사용한다(같은 백엔드라 URL을 따로 옮겨 적다 생기는 오타를 피한다). CHEER_URL이 비면 버튼 자체가 안 나온다.
+// ⚠️ AI 결과는 초안이다 — 기본 체크는 전부 해제이고 학생이 체크·수정한 것만 업무로 등록한다. fromStudent("내가 말한 것")는 서버가 걸러줘도
+//    모델의 자기신고라 라벨로만 쓰고, 이 값으로 자동 체크하지 않는다.
+// ⚠️ 날짜는 서버가 안 정한다 — 모델은 '행사 첫날 며칠 전'(daysBefore)만 주고 환산·보정은 brkSuggestDue가 한다. 학생이 말한 마감(dueText)은
+//    날짜로 못 바꾸므로(어느 금요일인지 모름) 날짜 칸을 비워두고 말한 표현만 보여준다.
+// ⚠️ 이름·학번은 서버로 안 보낸다(행사 이름·구술·기존 업무 제목만).
+const BRK_MAX=600,BRK_MAX_SERVER=1200,BRK_TIMEOUT=35000;
+let BRK=null; // {evId,text,res,round,busy}
+
+/* ── 순수 함수(DOM·전역 상태 없음, Node에서 그대로 시험 가능) ── */
+function brkDow(ds){return new Date(ds+'T00:00:00').getDay();}
+function brkDaysLeft(base,today){return Math.round((Date.parse(base+'T00:00:00Z')-Date.parse(today+'T00:00:00Z'))/86400000);}
+// 행사 첫날(base)에서 daysBefore일 앞을 마감 제안으로 바꾼다. 반환 {date,tight}.
+// 오늘보다 앞이면 오늘로 올리고 tight(빠듯함) 표시, 토·일이면 직전 금요일로 당긴다(그 금요일이 이미 지났으면 원래 날짜 유지).
+// base가 없거나(상시 행사) 이미 시작한 행사거나 daysBefore가 숫자가 아니면 날짜를 제안하지 않는다. 공휴일·재량휴업일은 모른다.
+function brkSuggestDue(daysBefore,base,today){
+  if(typeof daysBefore!=='number'||!base||base<today)return {date:'',tight:false};
+  const d=addDays(base,-daysBefore);
+  if(d<today)return {date:today,tight:true};
+  const w=brkDow(d),p=w===6?addDays(d,-1):w===0?addDays(d,-2):d;
+  return {date:p<today?d:p,tight:false};
+}
+// 되묻기 답을 구술 뒤에 붙인다. 서버 상한(max)을 넘으면 null
+function brkMergeAnswers(text,qs,answers,max){
+  let out=text;
+  qs.forEach((q,i)=>{const a=String(answers[i]||'').trim();if(a)out+='\n[질문] '+q+'\n[답] '+a;});
+  return out.length>max?null:out;
+}
+function brkBuildRows(res,base,today){
+  const rows=[];
+  (res.activities||[]).forEach(a=>{(a.tasks||[]).forEach(t=>{
+    const s=t.dueText?{date:'',tight:false}:brkSuggestDue(t.daysBefore,base,today);
+    rows.push({title:t.title,fromStudent:!!t.fromStudent,dueText:t.dueText||'',due:s.date,tight:s.tight});
+  });});
+  return rows;
+}
+/* ── /순수 함수 ── */
+
+function brkOpen(evId){
+  const name=myName();
+  if(!name){toast('이름을 먼저 선택해주세요');return;}
+  const e=evById(evId);if(!e)return;
+  if(!BRK||BRK.evId!==evId)BRK={evId,text:'',res:null,round:1,busy:false}; // 같은 행사로 다시 열면 쓰던 글을 살려둔다(바깥을 눌러 실수로 닫힌 경우)
+  BRK.res=null;BRK.round=1;
+  brkRenderInput();
+  document.getElementById('brkMov').classList.add('open');
+  setTimeout(()=>{const ta=document.getElementById('brkText');if(ta)ta.focus();},50);
+}
+function brkEvHead(e){return '<div class="add-ev">🎪 '+esc(e.name)+(isProj(e)?'':' · '+evRange(e))+'</div>';}
+function brkRenderInput(){
+  const e=evById(BRK.evId);
+  document.getElementById('brkBody').innerHTML=brkEvHead(e)+
+    '<div class="fg"><label>어떤 일을 하려고 해요? 생각나는 대로 말하듯이 써줘요</label>'+
+    '<textarea id="brkText" rows="7" maxlength="'+BRK_MAX+'" placeholder="예: 점심시간에 책 소개 방송을 하고 싶어. 사서쌤이랑 같이 하고, 홍보 포스터도 만들어서 붙일 거야">'+esc(BRK.text)+'</textarea>'+
+    '<div class="hint"><span id="brkCnt">'+BRK.text.length+'</span>/'+BRK_MAX+' · 이름 같은 개인정보는 쓰지 마세요. AI는 쓴 내용을 정리해줄 뿐이고, 계획은 내가 정해요.</div></div>'+
+    '<div class="ma"><button type="button" class="bc" data-action="brkClose">취소</button><button type="button" class="bs" data-action="brkRun" data-label="정리하기">정리하기</button></div>';
+}
+function brkWhoOptions(){
+  const me=myName();
+  let h='<option value="">담당자 없음</option>'+(me?'<option value="'+esc(me)+'">나 ('+esc(me)+')</option>':'');
+  DEPTS.forEach(d=>{const ms=MEMBERS.filter(m=>m.dept===d);if(!ms.length)return;h+='<optgroup label="'+esc(d)+'">'+ms.map(m=>'<option value="'+esc(m.name)+'">'+esc(m.name)+'</option>').join('')+'</optgroup>';});
+  return h;
+}
+function brkRowHtml(r,who){
+  const note=[r.dueText?'말한 마감: '+esc(r.dueText)+' — 날짜를 직접 골라 주세요':'',r.tight?'⚠️ 일정이 빠듯해요':''].filter(Boolean).join(' · ');
+  return '<div class="brk-row"><div class="brk-r1"><input type="checkbox" class="brk-cb" aria-label="이 업무 등록"><input type="text" class="brk-title" maxlength="60" value="'+esc(r.title)+'"></div>'+
+    '<div class="brk-r2"><span class="brk-tag '+(r.fromStudent?'you':'ai')+'">'+(r.fromStudent?'내가 말한 것':'AI 제안')+'</span><input type="date" class="brk-due" value="'+esc(r.due)+'"><select class="brk-who">'+who+'</select></div>'+
+    (note?'<div class="brk-note">'+note+'</div>':'')+'</div>';
+}
+function brkRenderResult(){
+  const e=evById(BRK.evId),today=todayStr(),base=isProj(e)?'':(e.start||'');
+  const res=BRK.res,rows=brkBuildRows(res,base,today),qs=res.questions||[],who=brkWhoOptions();
+  const tight=rows.some(r=>r.tight);
+  let h=brkEvHead(e);
+  if(tight)h+='<div class="brk-warn">⏰ 행사까지 '+brkDaysLeft(base,today)+'일 남았어요. 일부 업무는 AI가 권한 준비 기간보다 짧아서 마감이 오늘로 잡혔어요. 마감을 꼭 확인해 주세요.</div>';
+  if(rows.length){
+    h+='<div class="hint" style="margin:-4px 0 12px">내가 쓴 내용을 AI가 정리한 초안이에요. 필요한 것만 체크하고, 제목·마감·담당자를 고쳐서 등록해요.</div>';
+    let i=0;
+    res.activities.forEach(a=>{
+      h+='<div class="brk-card"><div class="brk-ah">'+esc(a.name)+'</div><div class="brk-q0">“'+esc(a.quote)+'”</div><div class="brk-rows">';
+      a.tasks.forEach(()=>{h+=brkRowHtml(rows[i++],who);});
+      h+='</div></div>';
+    });
+    h+='<button type="button" class="asb" data-action="brkAll" style="margin:0 0 12px">전체 선택 / 해제</button>';
+  } else h+='<div class="brk-warn">아직 업무로 정리할 만큼 구체적이지 않아요. 아래 질문에 답하거나 ‘다시 쓰기’로 내용을 더 적어봐요.</div>';
+  if(qs.length){
+    h+='<div class="brk-q"><div class="brk-qt">💬 이것도 정해두면 좋아요</div>'+
+      qs.map((q,i)=>'<div class="fg"><label>'+esc(q)+'</label><textarea class="brk-ans" data-i="'+i+'" rows="2" maxlength="200" placeholder="생각이 났으면 적어요 (선택)"></textarea></div>').join('')+
+      (BRK.round<2?'<button type="button" class="asb" data-action="brkReask" data-label="답 넣고 다시 정리하기 (한 번만)">답 넣고 다시 정리하기 (한 번만)</button><div class="hint">다시 정리하면 지금 고친 내용은 사라져요</div>'
+        :'<div class="hint">다시 정리는 한 번만 할 수 있어요. 답은 업무에 직접 반영해 주세요.</div>')+'</div>';
+  }
+  h+='<div class="ma"><button type="button" class="bc" data-action="brkBack">← 다시 쓰기</button>'+(rows.length?'<button type="button" class="bs" id="brkRegBtn" data-action="brkReg" disabled>체크한 0개 등록</button>':'')+'</div>';
+  document.getElementById('brkBody').innerHTML=h;
+  brkUpdCount();
+  document.getElementById('brkMov').querySelector('.ms').scrollTop=0;
+}
+function brkUpdCount(){
+  const b=document.getElementById('brkRegBtn');if(!b)return;
+  const n=document.querySelectorAll('#brkBody .brk-cb:checked').length;
+  b.textContent='체크한 '+n+'개 등록';b.disabled=!n;
+}
+function brkAll(){
+  const cbs=[...document.querySelectorAll('#brkBody .brk-cb')],on=cbs.some(c=>!c.checked);
+  cbs.forEach(c=>c.checked=on);brkUpdCount();
+}
+function brkBack(){
+  if(!BRK||BRK.busy)return;
+  BRK.res=null;BRK.round=1;brkRenderInput();
+}
+function brkSetBusy(on){
+  document.querySelectorAll('#brkBody [data-action="brkRun"],#brkBody [data-action="brkReask"]').forEach(b=>{
+    b.disabled=on;b.textContent=on?'정리하는 중… (잠깐만요)':(b.dataset.label||b.textContent);
+  });
+}
+function brkErrMsg(err){
+  if(err&&err.name==='AbortError')return '시간이 너무 오래 걸려요. 다시 해보거나 “＋ 업무 추가”로 직접 등록해 주세요';
+  switch(err&&err.code){
+    case 'busy':return '지금 쓰는 사람이 많아요. 1분쯤 뒤에 다시 해봐요';
+    case 'empty':return '조금만 더 자세히 말해줄래요?';
+    case 'no_context':return '조금만 더 써줘요';
+    case 'too_long':return '내용이 너무 길어요. 조금 줄여줘요';
+    default:return '정리에 실패했어요. 다시 해보거나 “＋ 업무 추가”로 직접 등록해 주세요';
+  }
+}
+async function brkRun(){
+  if(!BRK||BRK.busy)return;
+  const ta=document.getElementById('brkText');
+  BRK.text=(ta?ta.value:BRK.text).trim();
+  if(BRK.text.length<4){toast('조금만 더 써줘요');return;}
+  await brkCall(BRK.text,1);
+}
+async function brkCall(sendText,round){
+  const st=BRK,e=evById(st.evId);if(!e)return;
+  st.busy=true;brkSetBusy(true);
+  const existing=tasks.filter(t=>inEv(t,e.id)).map(t=>t.title).slice(0,30);
+  try{
+    const ac=new AbortController(),to=setTimeout(()=>ac.abort(),BRK_TIMEOUT);
+    // 헤더를 안 붙인 POST(text/plain)라 preflight 없이 응답을 읽을 수 있다 — history26 포털이 같은 백엔드를 부르는 방식과 같다
+    const r=await fetch(CHEER_URL,{method:'POST',body:JSON.stringify({action:'breakdown',text:sendText,eventName:e.name,existing}),signal:ac.signal});
+    clearTimeout(to);
+    const d=await r.json();
+    if(!d||d.ok!==true)throw {code:d&&d.error};
+    if(BRK!==st)return; // 기다리는 사이 등록·초기화돼서 이 결과는 쓸모없다
+    st.res=d;st.round=round;
+    brkRenderResult();
+  }catch(err){
+    console.warn('말로 쪼개기 실패:',err);
+    if(BRK===st)toast(brkErrMsg(err));
+  }finally{
+    st.busy=false;if(BRK===st)brkSetBusy(false);
+  }
+}
+function brkReask(){
+  if(!BRK||BRK.busy||BRK.round>=2||!BRK.res)return;
+  const answers=[...document.querySelectorAll('#brkBody .brk-ans')].map(a=>a.value);
+  const merged=brkMergeAnswers(BRK.text,BRK.res.questions||[],answers,BRK_MAX_SERVER);
+  if(merged===null){toast('내용이 너무 길어요. 답을 조금 줄여줘요');return;}
+  if(merged===BRK.text){toast('답을 하나라도 적어 주세요');return;}
+  if(!confirm('다시 정리하면 지금 고친 내용은 사라져요. 계속할까요?'))return;
+  brkCall(merged,2);
+}
+function brkReg(){
+  if(!BRK)return;
+  const name=myName();
+  if(!name){toast('이름을 먼저 선택해주세요');return;}
+  const picks=[...document.querySelectorAll('#brkBody .brk-row')].filter(r=>r.querySelector('.brk-cb').checked);
+  if(!picks.length){toast('등록할 업무를 체크해 주세요');return;}
+  const list=[];
+  for(const r of picks){
+    const title=r.querySelector('.brk-title').value.trim();
+    if(!title){toast('제목이 비어 있는 업무가 있어요');return;}
+    const who=r.querySelector('.brk-who').value;
+    // 담당자를 비우면 등록한 사람의 부서로 넣어 부서 현황에서 '담당자 없음'으로 보이게 한다
+    list.push(newTask({title,assignees:who?[who]:[],dept:gd(who||name),evIds:[BRK.evId],deadline:r.querySelector('.brk-due').value}));
+  }
+  // 건별 저장(배열 통째 PUT 금지 — 동시에 등록하는 다른 사람 데이터를 지우는 레이스컨디션이 있었다)
+  list.forEach(t=>{tasks.push(t);fbPut(t);logAct('add',t,{at:t.createdAt,who:name});});
+  saveLocal();
+  BRK=null;
+  closeMov('brkMov');
+  toast('✅ 업무 '+list.length+'개를 등록했어요');
+  refresh();
+}
+document.addEventListener('input',e=>{
+  if(e.target&&e.target.id==='brkText'){const c=document.getElementById('brkCnt');if(c)c.textContent=e.target.value.length;}
+  if(e.target&&e.target.classList&&e.target.classList.contains('brk-title')){const cb=e.target.closest('.brk-row').querySelector('.brk-cb');if(!cb.checked){cb.checked=true;brkUpdCount();}} // 제목을 고쳤다는 건 쓰겠다는 뜻
+});
+document.addEventListener('change',e=>{if(e.target&&e.target.closest&&e.target.closest('#brkBody'))brkUpdCount();});
 
 // ── 상태 변경 ──
 function chgSt(id,ns){
@@ -2370,6 +2601,13 @@ document.addEventListener('click',function(e){
     return;
   }
   if(action==='addTask'){openAdd(id);return;}
+  if(action==='brkOpen'){brkOpen(id);return;}
+  if(action==='brkClose'){closeMov('brkMov');return;}
+  if(action==='brkRun'){brkRun();return;}
+  if(action==='brkReask'){brkReask();return;}
+  if(action==='brkBack'){brkBack();return;}
+  if(action==='brkAll'){brkAll();return;}
+  if(action==='brkReg'){brkReg();return;}
   if(action==='evNew'){openEv(null);return;}
   if(action==='evEdit'){openEv(id);return;}
   if(action==='evSeed'){seedOct();return;}
