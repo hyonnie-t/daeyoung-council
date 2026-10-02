@@ -370,6 +370,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .sd-row:first-child{border-top:none}
 .sd-ti{font-size:14px;font-weight:600;line-height:1.4}
 .sd-sub{font-size:12px;color:var(--text2);margin-top:2px;line-height:1.5}
+.sd-head{margin-bottom:16px;padding-bottom:6px;border-bottom:2px dashed var(--border)}
 .sd-me{display:inline-block;font-size:11px;font-weight:700;color:#fff;background:var(--accent);padding:1px 7px;border-radius:10px;margin-right:6px;vertical-align:1px}
 .sched-fold>summary{font-size:14px;font-weight:700;color:var(--text2);padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);margin-bottom:12px}
 .sched-fold>summary small{font-weight:400;color:var(--text3);margin-left:6px;font-size:12px}
@@ -2343,7 +2344,36 @@ function renderSDept(){
     const prog=isPer(t)&&ass.length?ass.length+'명 중 '+doneNames(t).length+'명 완료':'';
     return '<div class="sd-row"><div style="flex:1;min-width:0"><div class="sd-ti">'+(mine?'<span class="sd-me">내 업무</span>':'')+esc(t.title)+'</div><div class="sd-sub">'+[who,prog,dl].filter(Boolean).join(' · ')+'</div></div><span class="tag tag-'+t.status+'">'+t.status+'</span></div>';
   };
-  let html='<div class="sd-wrap"><div class="hint" style="margin:0 0 10px">부서 이름을 누르면 업무가 펼쳐져요.</div>';
+  // 부장 전용: 우리 부서 부원별 진행 상황 (부원에게 배정된 업무 기준)
+  const headHtml=()=>{
+    const mdone=(t,n)=>isPer(t)?!!(t.doneBy&&t.doneBy[n]):t.status==='완료';
+    const late=t=>{const d=dU(effDeadline(t));return d!==null&&d<0;};
+    const members=MEMBERS.filter(m=>m.dept===myDept);
+    const roleOrd={'부장':0,'차장':1};
+    members.sort((a,b)=>(roleOrd[a.role]??2)-(roleOrd[b.role]??2));
+    const unassigned=tasks.filter(t=>t.dept===myDept&&!assOf(t).length&&t.status!=='완료');
+    const mrow=t=>{
+      const ass=assOf(t),dl=effDeadline(t),d=dU(dl);
+      const dlH=dl?(d<0?'<span style="color:var(--danger);font-weight:700">⏰ '+fD(dl)+' · '+(-d)+'일 지남</span>':'⏰ '+fD(dl)+(d<=3?' · '+(d===0?'오늘':'D-'+d):'')):'';
+      const prog=isPer(t)&&ass.length>1?ass.length+'명 중 '+doneNames(t).length+'명 완료':'';
+      return '<div class="sd-row"><div style="flex:1;min-width:0"><div class="sd-ti">'+esc(t.title)+'</div><div class="sd-sub">'+[prog,dlH].filter(Boolean).join(' · ')+'</div></div><span class="tag tag-'+t.status+'">'+t.status+'</span></div>';
+    };
+    let tot=0,totDone=0,totLate=0,body='';
+    members.forEach(m=>{
+      const mt=tasks.filter(t=>assOf(t).includes(m.name));
+      const dn=mt.filter(t=>mdone(t,m.name)).length;
+      const act=mt.filter(t=>!mdone(t,m.name)).sort((a,b)=>key(a)-key(b));
+      const lt=act.filter(late).length;
+      tot+=mt.length;totDone+=dn;totLate+=lt;
+      body+='<details class="sd-dept" data-dept="m:'+esc(m.name)+'"'+(sdOpen.has('m:'+m.name)?' open':'')+'><summary><span class="arr">▶</span><b>'+esc(m.name)+'</b><small style="color:var(--text3)">'+esc(m.role)+'</small>'+
+        (lt?'<span class="sd-mine" style="color:var(--danger);background:#fff0f0">기한 지남 '+lt+'</span>':'')+
+        '<span class="sd-cnt">'+(act.length?'남은 '+act.length+'건':(mt.length?'모두 완료':'업무 없음'))+' <small>'+dn+'/'+mt.length+'</small></span></summary><div class="sd-body">'+
+        (act.length?act.map(mrow).join(''):'<div class="ev-none">'+(mt.length?'남은 업무가 없어요':'배정된 업무가 없어요')+'</div>')+'</div></details>';
+    });
+    if(unassigned.length)body+='<details class="sd-dept" data-dept="m:__none"'+(sdOpen.has('m:__none')?' open':'')+'><summary><span class="arr">▶</span><b>담당자 없음</b><span class="sd-cnt">'+unassigned.length+'건</span></summary><div class="sd-body">'+unassigned.sort((a,b)=>key(a)-key(b)).map(mrow).join('')+'</div></details>';
+    return '<div class="sd-head"><div class="hint" style="margin:0 0 8px">👑 부장 전용 · <b>'+esc(myDept)+'</b> 부원별 진행 상황 <small style="color:var(--text3)">(부원에게 배정된 업무 기준, 완료 '+totDone+'/'+tot+(totLate?' · 기한 지남 '+totLate+'건':'')+')</small></div>'+body+'</div>';
+  };
+  let html='<div class="sd-wrap">'+(gm(myName).role==='부장'&&myDept?headHtml():'')+'<div class="hint" style="margin:0 0 10px">부서 이름을 누르면 업무가 펼쳐져요.</div>';
   DEPTS.forEach(dept=>{
     const isMyDept=dept===myDept;
     const dt=tasks.filter(t=>t.dept===dept);
