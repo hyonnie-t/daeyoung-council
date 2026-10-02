@@ -403,7 +403,15 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .ms.clk{cursor:pointer;border-color:var(--danger)}.ms.clk:active{transform:scale(.97)}
 .ov-t{margin-top:0;color:var(--danger)}
 .ov-box{border-left:3px solid var(--danger);padding-left:8px;margin-bottom:16px;border-radius:2px}
-.ov-box.flash{animation:ovf 1.2s ease}
+.ov-box.flash,.tc.flash{animation:ovf 1.2s ease}
+.next-box{background:var(--surface);border:1px solid var(--border);border-left:5px solid var(--accent);border-radius:var(--r);padding:12px 14px 6px;margin-bottom:16px;box-shadow:var(--sh)}
+.next-t{font-size:13px;font-weight:700;color:var(--accent);margin-bottom:4px}
+.next-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--border);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.next-row:first-of-type{border-top:none}
+.next-row b{font-size:15px;font-weight:700;line-height:1.4;flex:1}
+.next-row span{font-size:13px;font-weight:600;color:var(--text2);white-space:nowrap}
+.next-row span.urg{color:var(--danger);font-weight:700}
+.next-row:active{background:var(--surface2)}
 @keyframes ovf{0%,60%{background:rgba(214,69,69,.12)}100%{background:transparent}}
 details.un-notice>summary{list-style:none;cursor:pointer;margin-bottom:0}
 details.un-notice>summary::-webkit-details-marker{display:none}
@@ -1394,7 +1402,7 @@ const CHEER={
   soon:['마감이 3일 안에 있는 업무가 {n}개예요. 지금 시작하면 여유 있어요.','곧 마감인 업무 {n}개! 오늘 조금만 해둬요.'],
   idle:['한동안 소식이 없었어요. 남은 업무 {n}개 중 하나만 열어볼까요?','남은 업무가 {n}개예요. 가장 쉬운 것부터 시작해봐요.'],
   clear:['내 몫은 전부 끝났어요. 정말 수고했어요 🎉','남은 업무가 없어요! 친구가 도움이 필요한지 물어봐도 좋겠어요.'],
-  steady:['남은 업무는 {n}개, 마감도 여유 있어요. 차근차근 해요.']
+  steady:['남은 업무는 {n}개예요. 마감이 멀어도 하나씩 미리 해둬요.','아직 {n}개 남았어요. 시간 있을 때 하나만 끝내둬요.']
 };
 const _cheerMem={},_cheerBusy=new Set();
 function cheerPick(key,n,seed){
@@ -1413,7 +1421,7 @@ function cheerHtml(name,all,nOver,nSoon,nLeft){
   if(recent)parts.push(cheerPick('praise',recent,seed));
   if(nOver)parts.push(cheerPick('over',nOver,seed));
   else if(nSoon)parts.push(cheerPick('soon',nSoon,seed));
-  if(!nOver&&!nSoon&&!recent)parts.push(!nLeft?cheerPick('clear',0,seed):idle>=3?cheerPick('idle',nLeft,seed):cheerPick('steady',nLeft,seed));
+  if(!nOver&&!nSoon)parts.push(!nLeft?cheerPick('clear',0,seed):idle>=3?cheerPick('idle',nLeft,seed):cheerPick('steady',nLeft,seed));
   const cls=nOver?'over':nSoon?'soon':(recent||!nLeft)?'good':'';
   const ctx={over:nOver,soon:nSoon,left:nLeft,recent,idle:Math.min(idle,99)};
   const key=name+'|'+todayStr()+'|'+JSON.stringify(ctx);
@@ -1466,13 +1474,15 @@ function renderMyTasks(){
   const nOver=ovList.length;
   const nSoon=myLeft.filter(t=>{const d=dU(effDeadline(t));return d!==null&&d>=0&&d<=3;}).length;
   let h=cheerHtml(name,all,nOver,nSoon,myLeft.length)+'<div class="my-strip"><div class="ms'+(nOver?' red clk':'')+'"'+(nOver?' data-action="goOver" role="button"':'')+'><b>'+nOver+'</b><span>기한 지남'+(nOver?' ›':'')+'</span></div><div class="ms'+(nSoon?' warn':'')+'"><b>'+nSoon+'</b><span>3일 이내</span></div><div class="ms"><b>'+myLeft.length+'</b><span>남은 업무</span></div></div>';
+  const nextL=myLeft.filter(t=>!ovIds.has(t.id)).sort(byDl).slice(0,2);
+  if(nextL.length)h+='<div class="next-box"><div class="next-t">👉 다음 할 일</div>'+nextL.map(t=>{const dl=effDeadline(t),d=dU(dl);return '<div class="next-row" role="button" data-action="goTask" data-id="'+t.id+'"><b>'+esc(t.title)+'</b><span'+(d!==null&&d<=3?' class="urg"':'')+'>'+(dl?fD(dl)+' · '+(d===0?'오늘':'D-'+d):'마감 미정')+'</span></div>';}).join('')+'</div>';
   if(nOver)h+='<div class="sec-t ov-t" id="myOverdue"><span>⏰ 기한 지난 업무 ('+nOver+')</span></div><div class="ov-box">'+ovList.map(t=>card(t,opts)).join('')+'</div>';
   h+=all.some(t=>t.status!=='완료')?'<button type="button" class="bulk-open" data-action="bulkSelf">☑ 내 업무 여러 개 한 번에 넘기기</button>':'';
   h+='<div class="sec-t"><span>🎪 다가오는 행사 (2주)</span></div>';
   if(canEv(name))h+='<button type="button" class="ev-new" data-action="evNew">+ 행사 등록</button>';
   if(!near.length)h+='<div class="ev-none" style="margin-bottom:16px">2주 안에 등록된 행사가 없어요</div>';
   const addBtn=id=>`<button type="button" class="ev-add" data-action="addTask" data-id="${esc(id||'')}">＋ ${id?'이 행사에':'행사 없이'} 업무 추가</button>`;
-  // 행사 카드는 기본으로 접혀 있다. 직접 접고 편 상태는 sEvOpen에 기억
+  // 내 남은 일이 있는 행사 카드는 기본으로 펼쳐지고, 없으면 접힌다. 직접 접고 편 상태는 sEvOpen에 기억
   const evCard=e=>{
     const et=tasks.filter(t=>inEv(t,e.id));
     const mine=et.filter(t=>assOf(t).includes(name));
@@ -1481,7 +1491,7 @@ function renderMyTasks(){
     const dd=d>0?`<span class="chip chip-soon">D-${d}</span>`:(evEnd(e)>=td?'<span class="chip chip-today">진행 중</span>':'');
     const act=mine.filter(t=>!myDone(t)&&!ovIds.has(t.id)).sort(byDl),fin=mine.filter(myDone).sort(byDl);
     const cnt=act.length?'남은 일 '+act.length:(mine.length?'✔ 완료':'내 일 없음');
-    return `<details class="ev ev-fold ev-s" data-evid="${esc(e.id)}"${sEvOpen.get(e.id)?' open':''} style="border-left-color:${e.dept?dc(e.dept):'var(--accent)'}"><summary class="ev-sum"><span class="ev-nm">${esc(e.name)}</span><span class="ev-cnt${act.length?'':' ok'}">${cnt}</span></summary>
+    return `<details class="ev ev-fold ev-s" data-evid="${esc(e.id)}"${(sEvOpen.has(e.id)?sEvOpen.get(e.id):act.length>0)?' open':''} style="border-left-color:${e.dept?dc(e.dept):'var(--accent)'}"><summary class="ev-sum"><span class="ev-nm">${esc(e.name)}</span><span class="ev-cnt${act.length?'':' ok'}">${cnt}</span></summary>
       <div class="ev-dt">📅 ${evRange(e)} ${dd}${deptBadges(e)}${canEv(name)?`<button type="button" class="eb" data-action="evEdit" data-id="${esc(e.id)}">✏️</button>`:''}</div>
       ${e.desc?`<div class="ev-desc">${esc(e.desc)}</div>`:''}
       <div class="ev-tasks">${act.map(t=>card(t,evOpts)).join('')}</div>${act.length?'':!mine.length?'<div class="ev-none">아직 내가 맡은 일이 없어요</div>':mine.some(t=>ovIds.has(t.id))?'<div class="ev-none">남은 일은 위 \'기한 지난 업무\'에 있어요</div>':'<div class="ev-none">내 몫은 모두 끝냈어요 🎉</div>'}${fin.length?`<details class="tc-more"><summary>✅ 내가 끝낸 일 ${fin.length}개 <small>눌러서 보기</small></summary><div style="margin-top:8px">${fin.map(t=>card(t,evOpts)).join('')}</div></details>`:''}
@@ -1498,7 +1508,7 @@ function renderMyTasks(){
     const act=tasks.filter(t=>inEv(t,e.id)&&assOf(t).includes(name)&&!myDone(t)&&!ovIds.has(t.id)).sort(byDl);
     if(!act.length)return '';
     act.forEach(t=>shown.add(t.id));
-    return `<details class="ev ev-fold ev-s" data-evid="${esc(e.id)}"${sEvOpen.get(e.id)?' open':''} style="border-left-color:${e.dept?dc(e.dept):'var(--accent)'}"><summary class="ev-sum"><span class="ev-nm">📂 ${esc(e.name)}</span><span class="ev-cnt">남은 일 ${act.length}</span></summary>
+    return `<details class="ev ev-fold ev-s" data-evid="${esc(e.id)}"${(sEvOpen.has(e.id)?sEvOpen.get(e.id):true)?' open':''} style="border-left-color:${e.dept?dc(e.dept):'var(--accent)'}"><summary class="ev-sum"><span class="ev-nm">📂 ${esc(e.name)}</span><span class="ev-cnt">남은 일 ${act.length}</span></summary>
       ${canEv(name)?`<div class="ev-dt"><button type="button" class="eb" data-action="evEdit" data-id="${esc(e.id)}">✏️</button></div>`:''}
       ${e.desc?`<div class="ev-desc">${esc(e.desc)}</div>`:''}
       <div class="ev-tasks">${act.map(t=>card(t,evOpts)).join('')}</div>${addBtn(e.id)}</details>`;
@@ -2323,6 +2333,13 @@ document.addEventListener('click',function(e){
   if(action==='copyNag'){copyNag(el.dataset.name);return;}
   if(action==='sdDept'){sdSel=el.dataset.dept;renderSDept();return;}
   if(action==='actRange'){actRange=el.dataset.range;renderActivity();return;}
+  if(action==='goTask'){
+    const c=document.getElementById('c-'+el.dataset.id);if(!c)return;
+    for(let p=c.parentElement;p;p=p.parentElement)if(p.tagName==='DETAILS')p.open=true;
+    c.scrollIntoView({behavior:'smooth',block:'center'});
+    c.classList.remove('flash');void c.offsetWidth;c.classList.add('flash');
+    return;
+  }
   if(action==='goOver'){
     const o=document.getElementById('myOverdue');if(!o)return;
     o.scrollIntoView({behavior:'smooth',block:'start'});
