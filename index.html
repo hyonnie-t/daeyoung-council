@@ -1454,7 +1454,7 @@ function renderMyTasks(){
   if(!near.length)h+='<div class="ev-none" style="margin-bottom:16px">2주 안에 등록된 행사가 없어요</div>';
   const addBtn=id=>`<button type="button" class="ev-add" data-action="addTask" data-id="${esc(id||'')}">＋ ${id?'이 행사에':'행사 없이'} 업무 추가</button>`;
   // 행사 카드는 기본으로 접혀 있다. 직접 접고 편 상태는 sEvOpen에 기억
-  near.forEach(e=>{
+  const evCard=e=>{
     const et=tasks.filter(t=>inEv(t,e.id));
     const mine=et.filter(t=>assOf(t).includes(name));
     mine.forEach(t=>shown.add(t.id));
@@ -1463,14 +1463,19 @@ function renderMyTasks(){
     const dn=et.filter(t=>t.status==='완료').length;
     const act=mine.filter(t=>!myDone(t)&&!ovIds.has(t.id)),fin=mine.filter(myDone);
     const cnt=act.length?'남은 일 '+act.length:(mine.length?'✔ 완료':'내 일 없음');
-    h+=`<details class="ev ev-fold" data-evid="${esc(e.id)}"${sEvOpen.get(e.id)?' open':''} style="border-left-color:${e.dept?dc(e.dept):'var(--accent)'}"><summary class="ev-sum"><span class="ev-nm">${esc(e.name)}</span><span class="ev-cnt${act.length?'':' ok'}">${cnt}</span></summary>
+    return `<details class="ev ev-fold" data-evid="${esc(e.id)}"${sEvOpen.get(e.id)?' open':''} style="border-left-color:${e.dept?dc(e.dept):'var(--accent)'}"><summary class="ev-sum"><span class="ev-nm">${esc(e.name)}</span><span class="ev-cnt${act.length?'':' ok'}">${cnt}</span></summary>
       <div class="ev-dt">📅 ${evRange(e)} ${dd}${deptBadges(e)}<span>· 전체 업무 ${dn}/${et.length} 완료</span>${canEv(name)?`<button type="button" class="eb" data-action="evEdit" data-id="${esc(e.id)}">✏️</button>`:''}</div>
       ${e.desc?`<div class="ev-desc">${esc(e.desc)}</div>`:''}
       <div class="ev-sub">내가 맡은 일</div>
       <div class="ev-tasks">${act.map(t=>card(t,evOpts)).join('')}</div>${act.length?'':!mine.length?'<div class="ev-none">아직 내가 맡은 일이 없어요</div>':mine.some(t=>ovIds.has(t.id))?'<div class="ev-none">남은 일은 위 \'기한 지난 업무\'에 있어요</div>':'<div class="ev-none">내 몫은 모두 끝냈어요 🎉</div>'}${fin.length?`<details class="tc-more"><summary>✅ 내가 끝낸 일 ${fin.length}개 <small>눌러서 보기</small></summary><div style="margin-top:8px">${fin.map(t=>card(t,evOpts)).join('')}</div></details>`:''}
       ${addBtn(e.id)}
     </details>`;
-  });
+  };
+  // 내 일이 있는 행사는 위에 그대로, 내 일이 없는 행사는 아래 접힌 묶음으로 내린다
+  const hasMine=e=>tasks.some(t=>inEv(t,e.id)&&assOf(t).includes(name));
+  const evMine=near.filter(hasMine),evNone=near.filter(e=>!hasMine(e));
+  h+=evMine.map(evCard).join('');
+  if(evNone.length)h+='<details class="tc-more ev-nomine"><summary>🗂 내 일이 없는 행사 '+evNone.length+'개 <small>눌러서 보기</small></summary><div style="margin-top:10px">'+evNone.map(evCard).join('')+'</div></details>';
   // 1-2) 진행 중인 상시 프로젝트 — 내가 아직 안 끝낸 업무가 있는 것만
   const projH=evSorted().proj.map(e=>{
     const act=tasks.filter(t=>inEv(t,e.id)&&assOf(t).includes(name)&&!myDone(t)&&!ovIds.has(t.id));
