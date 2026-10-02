@@ -169,6 +169,9 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 /* 피드 */
 .feed-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
 .feed-item:last-child{border-bottom:none}
+.feed-tm{text-align:right}
+.feed-undo{display:block;margin:4px 0 0 auto;padding:4px 9px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:12px;font-weight:600;font-family:inherit;cursor:pointer}
+.feed-undo:hover{border-color:var(--accent);color:var(--accent)}
 .feed-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
 .feed-info{flex:1}.feed-nm{font-size:13px;font-weight:600;margin-bottom:2px}
 .feed-tk{font-size:14px}.feed-tm{font-size:12px;color:var(--text3);font-family:'Noto Sans KR',sans-serif;white-space:nowrap}
@@ -1077,6 +1080,7 @@ function logAct(type,t,o){
   const e={at:o.at||new Date().toISOString(),who:o.who||actor()||'',type,tid:t.id,title:t.title||''};
   if(o.name)e.name=o.name;
   if(o.to)e.to=o.to;
+  if(o.from)e.from=o.from;
   ACT_LOG.push(e);
   fetch(FB+'/activity.json',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(e)})
     .then(r=>{if(!r.ok)throw new Error(r.status);})
@@ -1551,8 +1555,9 @@ function chgSt(id,ns){
   const t=tasks.find(x=>x.id===id);if(!t)return;
   if(ns==='완료'){(t.subtasks||[]).forEach(s=>s.done=true);t.completedAt=new Date().toISOString();}
   if(ns==='예정')(t.subtasks||[]).forEach(s=>s.done=false);
+  const prev=t.status;
   t.status=ns;saveLocal();fbPut(t);gasLog(t);refresh();
-  logAct('status',t,{to:ns});
+  logAct('status',t,{to:ns,from:prev});
   toast('"'+ns+'"으로 변경');
   if(ns==='완료')setTimeout(openDones,100);
 }
@@ -1880,12 +1885,25 @@ function renderActivity(){
   const CAP=40;
   const inRange=evs.filter(e=>actDay(e.at)>=from);
   const recent=inRange.slice(0,CAP);
+  // 되돌리기: 지금도 유효한 가장 최근 완료만 (1인별 체크는 그 사람 체크 해제, 예전 방식은 상태를 이전으로)
+  const seenSt=new Set();
+  const undoBtn=e=>{
+    const t=byId.get(e.tid);if(!t)return '';
+    if(e.type==='done'&&!e.legacy){
+      return (t.doneBy||{})[e.name]===e.at?'<button type="button" class="feed-undo" data-action="undoDone" data-id="'+esc(e.tid)+'" data-name="'+esc(e.name)+'">↩ 되돌리기</button>':'';
+    }
+    const isSt=e.type==='status'&&e.to==='완료',isLeg=e.type==='done'&&e.legacy;
+    if(!isSt&&!isLeg)return '';
+    if(isPer(t)||t.status!=='완료'||seenSt.has(e.tid))return '';
+    seenSt.add(e.tid);
+    return '<button type="button" class="feed-undo" data-action="undoSt" data-id="'+esc(e.tid)+'" data-status="'+esc(e.from&&e.from!=='완료'?e.from:'진행중')+'">↩ 되돌리기</button>';
+  };
   const row=e=>{
     const p=actPerson(e),dept=gd(p),col=dc(dept);
     const proxy=(e.type==='done'||e.type==='undo')&&e.who&&e.who!==e.name?' <span style="font-weight:400;color:var(--text3)">('+esc(e.who)+'이 처리)</span>':'';
     const tail=e.to?' <span style="color:var(--text3)">('+esc(e.to)+')</span>':'';
     const when=actDay(e.at)===today?agoTxt(e.at):agoTxt(e.at)+' · '+Number(actDay(e.at).slice(5,7))+'/'+Number(actDay(e.at).slice(8));
-    return '<div class="feed-item"><div class="feed-av" style="background:'+col+'22;color:'+col+'">'+esc((p||'?').slice(-1))+'</div><div class="feed-info"><div class="feed-nm">'+esc(p||'누군가')+proxy+(dept?' <span class="db db-'+dept+'" style="font-size:12px">'+dept+'</span>':'')+'</div><div class="feed-tk">'+ACT_TXT[e.type]+' · '+esc(e.title)+tail+'</div></div><div class="feed-tm">'+when+'</div></div>';
+    return '<div class="feed-item"><div class="feed-av" style="background:'+col+'22;color:'+col+'">'+esc((p||'?').slice(-1))+'</div><div class="feed-info"><div class="feed-nm">'+esc(p||'누군가')+proxy+(dept?' <span class="db db-'+dept+'" style="font-size:12px">'+dept+'</span>':'')+'</div><div class="feed-tk">'+ACT_TXT[e.type]+' · '+esc(e.title)+tail+'</div></div><div class="feed-tm">'+when+undoBtn(e)+'</div></div>';
   };
   const box=list=>'<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:4px 16px;margin-bottom:8px;box-shadow:var(--sh)">'+list.map(row).join('')+'</div>';
   const hd=(txt,col,mt)=>'<div style="font-size:12px;color:'+col+';font-weight:700;font-family:\'Noto Sans KR\',sans-serif;margin:'+mt+' 0 8px">'+txt+'</div>';
@@ -2273,6 +2291,8 @@ document.addEventListener('click',function(e){
   if(action==='edit'){openEdit(id);return;}
   if(action==='del'){openDel(id);return;}
   if(action==='chgSt'){chgSt(id,el.dataset.status);return;}
+  if(action==='undoDone'){tDone(id,el.dataset.name);return;}
+  if(action==='undoSt'){const t=tasks.find(x=>x.id===id);if(t&&confirm('"'+t.title+'" 완료를 되돌릴까요? ('+el.dataset.status+' 상태로 돌아가요)'))chgSt(id,el.dataset.status);return;}
   if(action==='togSub'){togSub(id,idx);return;}
   if(action==='editSD'){editSD(id,idx);return;}
   if(action==='addSub'){addSub(id);return;}
