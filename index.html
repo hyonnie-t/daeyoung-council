@@ -370,7 +370,11 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .sd-row:first-child{border-top:none}
 .sd-ti{font-size:14px;font-weight:600;line-height:1.4}
 .sd-sub{font-size:12px;color:var(--text2);margin-top:2px;line-height:1.5}
-.sd-head{margin-bottom:16px;padding-bottom:6px;border-bottom:2px dashed var(--border)}
+.sd-seg{max-width:none;overflow-x:auto}
+.sd-seg button{padding:9px 10px;flex:0 0 auto}
+.sd-ovs{display:grid;gap:8px}
+.sd-ov{display:block;width:100%;text-align:left;font-family:inherit;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;cursor:pointer}
+.sd-ov.on{border-color:var(--accent)}
 .sd-me{display:inline-block;font-size:11px;font-weight:700;color:#fff;background:var(--accent);padding:1px 7px;border-radius:10px;margin-right:6px;vertical-align:1px}
 .sched-fold>summary{font-size:14px;font-weight:700;color:var(--text2);padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);margin-bottom:12px}
 .sched-fold>summary small{font-weight:400;color:var(--text3);margin-left:6px;font-size:12px}
@@ -2273,6 +2277,7 @@ document.addEventListener('click',function(e){
   if(action==='bulkPick'){bulkPick(el.dataset.name);return;}
   if(action==='openStu'){openStu(el.dataset.name);return;}
   if(action==='copyNag'){copyNag(el.dataset.name);return;}
+  if(action==='sdDept'){sdSel=el.dataset.dept;renderSDept();return;}
   if(action==='actRange'){actRange=el.dataset.range;renderActivity();return;}
   if(action==='goOver'){
     const o=document.getElementById('myOverdue');if(!o)return;
@@ -2327,71 +2332,70 @@ document.addEventListener('change',function(e){
   }
 });
 
-// ── 학생 부서 현황 ──
-const sdOpen=new Set(),sdTouched={v:false};
-document.addEventListener('toggle',e=>{const d=e.target;if(d&&d.classList&&d.classList.contains('sd-dept')){sdTouched.v=true;d.open?sdOpen.add(d.dataset.dept):sdOpen.delete(d.dataset.dept);}},true);
+// ── 학생 부서 현황 (대시보드) ──
+// 선택한 부서의 숫자·먼저 챙길 업무·부원별 진행 상황을 한 화면에 보여준다. 누구나 모든 부서를 볼 수 있다.
+const sdOpen=new Set();
+let sdSel='';
+document.addEventListener('toggle',e=>{const d=e.target;if(d&&d.classList&&d.classList.contains('sd-dept')){d.open?sdOpen.add(d.dataset.dept):sdOpen.delete(d.dataset.dept);}},true);
+function deptTasks(dept){return tasks.filter(t=>t.dept===dept||assOf(t).some(n=>gd(n)===dept));}
 function renderSDept(){
   const area=document.getElementById('sDept');if(!area)return;
-  const myName=document.getElementById('s0Name')?.value||'';
-  const myDept=(MEMBERS.find(m=>m.name===myName))?.dept||'';
-  if(!sdTouched.v&&myDept)sdOpen.add(myDept); // 처음엔 내 부서만 펼침
+  const myN=myName(),myDept=gd(myN);
+  if(!sdSel||!DEPTS.includes(sdSel))sdSel=DEPTS.includes(myDept)?myDept:DEPTS[0];
+  const dept=sdSel,col=dc(dept);
   const key=t=>{const d=dU(effDeadline(t));return d===null?1e6:d>=0?d:1000+(-d);};
-  const row=t=>{
-    const ass=assOf(t),d=dU(effDeadline(t));
-    const mine=myName&&ass.includes(myName);
-    const dl=effDeadline(t)&&t.status!=='완료'?(d<0?'<span style="color:var(--danger);font-weight:700">⏰ '+fD(effDeadline(t))+' · '+(-d)+'일 지남</span>':'⏰ '+fD(effDeadline(t))+(d<=3?' · '+(d===0?'오늘':'D-'+d):'')):'';
-    const who=!ass.length?'담당자 없음':ass.length>3?esc(ass.slice(0,2).join(', '))+' 외 '+(ass.length-2)+'명':ass.map(esc).join(', ');
-    const prog=isPer(t)&&ass.length?ass.length+'명 중 '+doneNames(t).length+'명 완료':'';
-    return '<div class="sd-row"><div style="flex:1;min-width:0"><div class="sd-ti">'+(mine?'<span class="sd-me">내 업무</span>':'')+esc(t.title)+'</div><div class="sd-sub">'+[who,prog,dl].filter(Boolean).join(' · ')+'</div></div><span class="tag tag-'+t.status+'">'+t.status+'</span></div>';
+  const mdone=(t,n)=>isPer(t)?!!(t.doneBy&&t.doneBy[n]):t.status==='완료';
+  const dt=deptTasks(dept);
+  const done=dt.filter(t=>t.status==='완료').length;
+  const ing=dt.filter(t=>t.status==='진행중').length;
+  const urg=dt.filter(t=>{const d=dU(effDeadline(t));return d!==null&&d<=3&&t.status!=='완료';}).length;
+  const pct=dt.length?Math.round(done/dt.length*100):0;
+  const who=t=>{const a=assOf(t);return !a.length?'담당자 없음':a.length>3?esc(a.slice(0,2).join(', '))+' 외 '+(a.length-2)+'명':a.map(esc).join(', ');};
+  const dLabel=t=>{
+    const d=dU(effDeadline(t));
+    if(d===null)return ['미배정','gray'];
+    if(d<0)return [(-d)+'일 지남','red'];
+    if(d===0)return ['오늘','red'];
+    return ['D-'+d,'warn'];
   };
-  // 부장 전용: 우리 부서 부원별 진행 상황 (부원에게 배정된 업무 기준)
-  const headHtml=()=>{
-    const mdone=(t,n)=>isPer(t)?!!(t.doneBy&&t.doneBy[n]):t.status==='완료';
-    const late=t=>{const d=dU(effDeadline(t));return d!==null&&d<0;};
-    const members=MEMBERS.filter(m=>m.dept===myDept);
-    const roleOrd={'부장':0,'차장':1};
-    members.sort((a,b)=>(roleOrd[a.role]??2)-(roleOrd[b.role]??2));
-    const unassigned=tasks.filter(t=>t.dept===myDept&&!assOf(t).length&&t.status!=='완료');
-    const mrow=t=>{
-      const ass=assOf(t),dl=effDeadline(t),d=dU(dl);
-      const dlH=dl?(d<0?'<span style="color:var(--danger);font-weight:700">⏰ '+fD(dl)+' · '+(-d)+'일 지남</span>':'⏰ '+fD(dl)+(d<=3?' · '+(d===0?'오늘':'D-'+d):'')):'';
-      const prog=isPer(t)&&ass.length>1?ass.length+'명 중 '+doneNames(t).length+'명 완료':'';
-      return '<div class="sd-row"><div style="flex:1;min-width:0"><div class="sd-ti">'+esc(t.title)+'</div><div class="sd-sub">'+[prog,dlH].filter(Boolean).join(' · ')+'</div></div><span class="tag tag-'+t.status+'">'+t.status+'</span></div>';
-    };
-    let tot=0,totDone=0,totLate=0,body='';
-    members.forEach(m=>{
-      const mt=tasks.filter(t=>assOf(t).includes(m.name));
-      const dn=mt.filter(t=>mdone(t,m.name)).length;
-      const act=mt.filter(t=>!mdone(t,m.name)).sort((a,b)=>key(a)-key(b));
-      const lt=act.filter(late).length;
-      tot+=mt.length;totDone+=dn;totLate+=lt;
-      body+='<details class="sd-dept" data-dept="m:'+esc(m.name)+'"'+(sdOpen.has('m:'+m.name)?' open':'')+'><summary><span class="arr">▶</span><b>'+esc(m.name)+'</b><small style="color:var(--text3)">'+esc(m.role)+'</small>'+
-        (lt?'<span class="sd-mine" style="color:var(--danger);background:#fff0f0">기한 지남 '+lt+'</span>':'')+
-        '<span class="sd-cnt">'+(act.length?'남은 '+act.length+'건':(mt.length?'모두 완료':'업무 없음'))+' <small>'+dn+'/'+mt.length+'</small></span></summary><div class="sd-body">'+
-        (act.length?act.map(mrow).join(''):'<div class="ev-none">'+(mt.length?'남은 업무가 없어요':'배정된 업무가 없어요')+'</div>')+'</div></details>';
-    });
-    if(unassigned.length)body+='<details class="sd-dept" data-dept="m:__none"'+(sdOpen.has('m:__none')?' open':'')+'><summary><span class="arr">▶</span><b>담당자 없음</b><span class="sd-cnt">'+unassigned.length+'건</span></summary><div class="sd-body">'+unassigned.sort((a,b)=>key(a)-key(b)).map(mrow).join('')+'</div></details>';
-    return '<div class="sd-head"><div class="hint" style="margin:0 0 8px">👑 부장 전용 · <b>'+esc(myDept)+'</b> 부원별 진행 상황 <small style="color:var(--text3)">(부원에게 배정된 업무 기준, 완료 '+totDone+'/'+tot+(totLate?' · 기한 지남 '+totLate+'건':'')+')</small></div>'+body+'</div>';
+  // 먼저 챙길 것: 기한 지남·3일 이내·담당자 없음
+  const todo=dt.filter(t=>t.status!=='완료'&&t.status!=='보류'&&(!assOf(t).length||(()=>{const d=dU(effDeadline(t));return d!==null&&d<=3;})())).sort((a,b)=>key(a)-key(b));
+  const todoRow=t=>{
+    const [lb,cl]=dLabel(t),ass=assOf(t);
+    const prog=isPer(t)&&ass.length>1?' · '+ass.length+'명 중 '+doneNames(t).length+'명 완료':'';
+    return '<div class="todo-row"><span class="todo-d '+cl+'">'+lb+'</span><div class="todo-main"><div class="todo-ti">'+(myN&&ass.includes(myN)?'<span class="sd-me">내 업무</span>':'')+esc(t.title)+'</div><div class="todo-sub">'+who(t)+prog+'</div></div></div>';
   };
-  let html='<div class="sd-wrap">'+(gm(myName).role==='부장'&&myDept?headHtml():'')+'<div class="hint" style="margin:0 0 10px">부서 이름을 누르면 업무가 펼쳐져요.</div>';
-  DEPTS.forEach(dept=>{
-    const isMyDept=dept===myDept;
-    const dt=tasks.filter(t=>t.dept===dept);
-    const done=dt.filter(t=>t.status==='완료').length;
-    const left=dt.length-done;
-    const pct=dt.length>0?Math.round(done/dt.length*100):0;
-    const col=dc(dept);
-    const active=dt.filter(t=>t.status!=='완료').sort((a,b)=>key(a)-key(b));
-    const doneL=dt.filter(t=>t.status==='완료');
-    html+='<details class="sd-dept" data-dept="'+esc(dept)+'"'+(sdOpen.has(dept)?' open':'')+'><summary><span class="arr">▶</span><span class="db db-'+dept+'">'+dept+'</span>'+(isMyDept?'<span class="sd-mine">내 부서</span>':'')+
-      '<span class="sd-cnt">'+(left?'남은 '+left+'건':'모두 완료')+' <small>'+done+'/'+dt.length+'</small></span></summary>'+
-      '<div class="evd-bar"><div style="width:'+pct+'%;background:'+col+'"></div></div><div class="sd-body">'+
-      (active.length?active.map(row).join(''):'<div class="ev-none">진행 중인 업무가 없어요</div>')+
-      (doneL.length?'<details class="ev-donegrp"><summary>✓ 완료된 업무 '+doneL.length+'개 보기</summary>'+doneL.map(row).join('')+'</details>':'')+
-      '</div></details>';
-  });
-  html+='</div>';
-  area.innerHTML=html;
+  // 부원별 진행
+  const members=MEMBERS.filter(m=>m.dept===dept).sort((a,b)=>({'부장':0,'차장':1}[a.role]??2)-({'부장':0,'차장':1}[b.role]??2));
+  const mrow=t=>{
+    const [lb,cl]=dLabel(t),ass=assOf(t);
+    const prog=isPer(t)&&ass.length>1?ass.length+'명 중 '+doneNames(t).length+'명 완료':'';
+    return '<div class="sd-row"><div style="flex:1;min-width:0"><div class="sd-ti">'+esc(t.title)+'</div><div class="sd-sub">'+[prog,effDeadline(t)?'⏰ '+fD(effDeadline(t))+' · '+lb:''].filter(Boolean).join(' · ')+'</div></div><span class="tag tag-'+t.status+'">'+t.status+'</span></div>';
+  };
+  const mcard=m=>{
+    const mt=tasks.filter(t=>assOf(t).includes(m.name));
+    const dn=mt.filter(t=>mdone(t,m.name)).length;
+    const act=mt.filter(t=>!mdone(t,m.name)).sort((a,b)=>key(a)-key(b));
+    const lt=act.filter(t=>{const d=dU(effDeadline(t));return d!==null&&d<0;}).length;
+    const p=mt.length?Math.round(dn/mt.length*100):0;
+    return '<details class="sd-dept" data-dept="m:'+esc(m.name)+'"'+(sdOpen.has('m:'+m.name)?' open':'')+'><summary><span class="arr">▶</span><b>'+esc(m.name)+'</b><small style="color:var(--text3)">'+esc(m.role)+'</small>'+(m.name===myN?'<span class="sd-mine">나</span>':'')+
+      (lt?'<span class="sd-mine" style="color:var(--danger);background:#fff0f0">기한 지남 '+lt+'</span>':'')+
+      '<span class="sd-cnt">'+(act.length?'남은 '+act.length+'건':(mt.length?'모두 완료':'업무 없음'))+' <small>'+dn+'/'+mt.length+'</small></span></summary>'+
+      '<div class="evd-bar"><div style="width:'+p+'%;background:'+col+'"></div></div><div class="sd-body">'+
+      (act.length?act.map(mrow).join(''):'<div class="ev-none">'+(mt.length?'남은 업무가 없어요':'배정된 업무가 없어요')+'</div>')+'</div></details>';
+  };
+  // 전체 부서 비교
+  const overview=DEPTS.map(d=>{
+    const x=deptTasks(d),dn=x.filter(t=>t.status==='완료').length,p=x.length?Math.round(dn/x.length*100):0,c=dc(d);
+    return '<button type="button" class="sd-ov'+(d===dept?' on':'')+'" data-action="sdDept" data-dept="'+esc(d)+'"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span class="db db-'+d+'">'+d+'</span><span style="font-size:13px;color:'+c+';font-weight:600">'+dn+'/'+x.length+' '+p+'%</span></div><div class="dp"><div class="dpf" style="width:'+p+'%;background:'+c+'"></div></div></button>';
+  }).join('');
+  const chips='<div class="seg sd-seg">'+DEPTS.map(d=>'<button type="button"'+(d===dept?' class="on"':'')+' data-action="sdDept" data-dept="'+esc(d)+'">'+d+(d===myDept?' ·나':'')+'</button>').join('')+'</div>';
+  area.innerHTML='<div class="sd-wrap">'+chips+
+    '<div class="sg"><div class="sc2 c1"><div class="sn">'+dt.length+'</div><div class="sl2">전체 업무</div></div><div class="sc2 c2"><div class="sn">'+done+'</div><div class="sl2">완료 · '+pct+'%</div></div><div class="sc2 c3"><div class="sn">'+ing+'</div><div class="sl2">진행중</div></div><div class="sc2 c4"><div class="sn">'+urg+'</div><div class="sl2">마감 임박</div></div></div>'+
+    '<div class="stl">🎯 먼저 챙길 것 <span class="todo-n">'+(todo.length?todo.length+'건':'')+'</span></div>'+
+    (todo.length?'<div class="todo-list">'+todo.slice(0,8).map(todoRow).join('')+'</div>'+(todo.length>8?'<details class="tc-more" style="margin:0 0 8px"><summary>나머지 '+(todo.length-8)+'건 더 보기</summary><div class="todo-list" style="margin-top:10px">'+todo.slice(8).map(todoRow).join('')+'</div></details>':''):'<div style="font-size:14px;color:var(--text3);padding:8px 0">급하게 챙길 업무가 없어요 ✅</div>')+
+    '<div class="stl">👥 부원별 진행</div>'+members.map(mcard).join('')+
+    '<details class="fold"><summary class="stl">📊 전체 부서 비교</summary><div class="sd-ovs">'+overview+'</div></details></div>';
 }
 sFns[2]=renderSDept;
 
