@@ -516,9 +516,9 @@ details.un-notice[open]>summary{margin-bottom:8px}
   #tEvArea>.ev,#tEvArea>.tc{grid-column:auto;margin-bottom:0}
   #tDept{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;align-items:start}
   #tDept>.ds{margin-bottom:0}
-  #sDept>div{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;align-items:start}
-  #sDept>div>h3{grid-column:1/-1;margin-bottom:0!important}
-  #sDept .dept-card{margin-bottom:0!important}
+  /* 부서 현황: 대시보드는 한 줄기로 쌓되 PC에선 폭을 넓힌다 */
+  .sd-wrap{max-width:860px}
+  .sd-ovs{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
 }
 /* 터치 화면: 작은 버튼 누르기 편하게. 입력칸 16px 미만이면 iOS가 확대하므로 16px로 */
 @media(pointer:coarse){
@@ -907,6 +907,8 @@ function gm(name){return MEMBERS.find(m=>m.name===name)||{};}
 function gd(name){return gm(name).dept||'';}
 // 마감일 없으면 행사일로 폴백해서 D-day 계산
 function effDeadline(t){return t.deadline||t.date||'';}
+// 카드 안 업무 정렬: 마감일이 빠른 순(기한 지난 것이 맨 앞), 마감일 없는 건 맨 뒤
+function byDl(a,b){return (effDeadline(a)||'9').localeCompare(effDeadline(b)||'9');}
 function chip(ds,st,fallbackDate){
   const target=ds||(fallbackDate||'');
   if(!target||st==='완료')return '';
@@ -1461,7 +1463,7 @@ function renderMyTasks(){
     const d=dU(e.start);
     const dd=d>0?`<span class="chip chip-soon">D-${d}</span>`:(evEnd(e)>=td?'<span class="chip chip-today">진행 중</span>':'');
     const dn=et.filter(t=>t.status==='완료').length;
-    const act=mine.filter(t=>!myDone(t)&&!ovIds.has(t.id)),fin=mine.filter(myDone);
+    const act=mine.filter(t=>!myDone(t)&&!ovIds.has(t.id)).sort(byDl),fin=mine.filter(myDone).sort(byDl);
     const cnt=act.length?'남은 일 '+act.length:(mine.length?'✔ 완료':'내 일 없음');
     return `<details class="ev ev-fold" data-evid="${esc(e.id)}"${sEvOpen.get(e.id)?' open':''} style="border-left-color:${e.dept?dc(e.dept):'var(--accent)'}"><summary class="ev-sum"><span class="ev-nm">${esc(e.name)}</span><span class="ev-cnt${act.length?'':' ok'}">${cnt}</span></summary>
       <div class="ev-dt">📅 ${evRange(e)} ${dd}${deptBadges(e)}<span>· 전체 업무 ${dn}/${et.length} 완료</span>${canEv(name)?`<button type="button" class="eb" data-action="evEdit" data-id="${esc(e.id)}">✏️</button>`:''}</div>
@@ -1478,7 +1480,7 @@ function renderMyTasks(){
   if(evNone.length)h+='<details class="tc-more ev-nomine"><summary>🗂 내 일이 없는 행사 '+evNone.length+'개 <small>눌러서 보기</small></summary><div style="margin-top:10px">'+evNone.map(evCard).join('')+'</div></details>';
   // 1-2) 진행 중인 상시 프로젝트 — 내가 아직 안 끝낸 업무가 있는 것만
   const projH=evSorted().proj.map(e=>{
-    const act=tasks.filter(t=>inEv(t,e.id)&&assOf(t).includes(name)&&!myDone(t)&&!ovIds.has(t.id));
+    const act=tasks.filter(t=>inEv(t,e.id)&&assOf(t).includes(name)&&!myDone(t)&&!ovIds.has(t.id)).sort(byDl);
     if(!act.length)return '';
     act.forEach(t=>shown.add(t.id));
     return `<details class="ev ev-fold" data-evid="${esc(e.id)}"${sEvOpen.get(e.id)?' open':''} style="border-left-color:${e.dept?dc(e.dept):'var(--accent)'}"><summary class="ev-sum"><span class="ev-nm">📂 ${esc(e.name)}</span><span class="ev-cnt">남은 일 ${act.length}</span></summary>
@@ -2348,7 +2350,6 @@ function renderSDept(){
   const myN=myName(),myDept=gd(myN);
   if(!sdSel||!DEPTS.includes(sdSel))sdSel=DEPTS.includes(myDept)?myDept:DEPTS[0];
   const dept=sdSel,col=dc(dept);
-  const key=t=>{const d=dU(effDeadline(t));return d===null?1e6:d>=0?d:1000+(-d);};
   const mdone=(t,n)=>isPer(t)?!!(t.doneBy&&t.doneBy[n]):t.status==='완료';
   const dt=deptTasks(dept);
   const done=dt.filter(t=>t.status==='완료').length;
@@ -2364,7 +2365,7 @@ function renderSDept(){
     return ['D-'+d,'warn'];
   };
   // 먼저 챙길 것: 기한 지남·3일 이내·담당자 없음
-  const todo=dt.filter(t=>t.status!=='완료'&&t.status!=='보류'&&(!assOf(t).length||(()=>{const d=dU(effDeadline(t));return d!==null&&d<=3;})())).sort((a,b)=>key(a)-key(b));
+  const todo=dt.filter(t=>t.status!=='완료'&&t.status!=='보류'&&(!assOf(t).length||(()=>{const d=dU(effDeadline(t));return d!==null&&d<=3;})())).sort(byDl);
   const todoRow=t=>{
     const [lb,cl]=dLabel(t),ass=assOf(t);
     const prog=isPer(t)&&ass.length>1?' · '+ass.length+'명 중 '+doneNames(t).length+'명 완료':'';
@@ -2380,7 +2381,7 @@ function renderSDept(){
   const mcard=m=>{
     const mt=tasks.filter(t=>assOf(t).includes(m.name));
     const dn=mt.filter(t=>mdone(t,m.name)).length;
-    const act=mt.filter(t=>!mdone(t,m.name)).sort((a,b)=>key(a)-key(b));
+    const act=mt.filter(t=>!mdone(t,m.name)).sort(byDl);
     const lt=act.filter(t=>{const d=dU(effDeadline(t));return d!==null&&d<0;}).length;
     const p=mt.length?Math.round(dn/mt.length*100):0;
     return '<details class="sd-dept" data-dept="m:'+esc(m.name)+'"'+(sdOpen.has('m:'+m.name)?' open':'')+'><summary><span class="arr">▶</span><b>'+esc(m.name)+'</b><small style="color:var(--text3)">'+esc(m.role)+'</small>'+(m.name===myN?'<span class="sd-mine">나</span>':'')+
@@ -2560,7 +2561,7 @@ function renderTEvents(){
     const left=et.length-dn;
     const pct=et.length?Math.round(dn/et.length*100):0;
     const col=e.dept?dc(e.dept):'var(--accent)';
-    const todo=et.filter(t=>t.status!=='완료'),fin=et.filter(t=>t.status==='완료');
+    const todo=et.filter(t=>t.status!=='완료').sort(byDl),fin=et.filter(t=>t.status==='완료').sort(byDl);
     const rows=todo.map(rowHtml).join('')+(fin.length?'<details class="ev-donegrp"><summary>✓ 완료된 업무 '+fin.length+'개 보기</summary>'+fin.map(rowHtml).join('')+'</details>':'');
     const badge=!et.length?'<span class="evd-badge ok" style="background:var(--surface2);color:var(--text3)">업무 없음</span>':left?'<span class="evd-badge">남은 업무 '+left+'</span>':'<span class="evd-badge ok">모두 완료</span>';
     return '<details class="ev evd" data-evid="'+esc(e.id)+'" style="border-left-color:'+col+'"'+(evOpen.has(e.id)?' open':'')+'><summary><span class="arr">▶</span><div class="evd-main"><div class="evd-nm">'+esc(e.name)+'</div><div class="evd-sub">'+(isProj(e)?'📂 ':'📅 ')+evRange(e)+' · '+dn+'/'+et.length+' 완료</div></div>'+badge+'</summary>'+
