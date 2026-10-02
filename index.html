@@ -321,16 +321,18 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .ev-nm{font-size:16px;font-weight:700;line-height:1.4;flex:1}
 .ev-dt{font-size:13px;color:var(--text2);font-family:'Noto Sans KR',sans-serif;margin-bottom:6px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .ev-desc{font-size:13px;color:var(--text2);margin-bottom:8px;line-height:1.6}
-.ev-fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;margin-bottom:4px;-webkit-tap-highlight-color:transparent}
+.ev-fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;min-height:56px;margin:-4px -6px 0;padding:6px;border-radius:10px;-webkit-tap-highlight-color:transparent}
 .ev-fold>summary::-webkit-details-marker{display:none}
-.ev-fold>summary::before{content:'▸';color:var(--text3);font-size:13px}
-.ev-fold[open]>summary::before{content:'▾'}
-.ev-cnt{font-size:12px;font-weight:700;color:var(--warn);background:var(--surface2);border-radius:12px;padding:3px 9px;white-space:nowrap}
+.ev-fold>summary::before{content:'▸';flex-shrink:0;width:40px;height:40px;border-radius:50%;background:var(--surface2);color:var(--accent);font-size:24px;line-height:1;display:flex;align-items:center;justify-content:center;order:3;margin-left:auto}
+.ev-fold>summary .ev-nm{font-size:17px;flex:1;order:1}
+.ev-fold>summary .ev-cnt{order:2}
+.ev-fold[open]>summary::before{content:'▾';background:var(--accent);color:#fff}
+.ev-fold[open]>summary{margin-bottom:8px}
+.ev-cnt{font-size:13px;font-weight:700;color:var(--warn);background:var(--surface2);border-radius:12px;padding:3px 9px;white-space:nowrap}
 .ev-cnt.ok{color:var(--text3)}
-.add-fold{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);padding:12px 14px;margin-bottom:14px}
-.add-fold>summary{font-size:15px;font-weight:700;color:var(--accent)}
-.add-fold>summary small{font-weight:400;color:var(--text3);margin-left:4px}
-.add-body{margin-top:12px}
+.add-ev{font-size:13px;font-weight:700;color:var(--accent);background:var(--surface2);border-radius:8px;padding:9px 12px;margin-bottom:14px}
+.ev-add{display:block;width:100%;margin:10px 0 4px;padding:12px;border:1.5px dashed var(--accent);border-radius:10px;background:transparent;color:var(--accent);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.ev-add:hover{background:var(--surface2)}
 .ev-sub{font-size:12px;font-weight:700;color:var(--text2);margin:10px 0 6px}
 .ev-none{font-size:13px;color:var(--text3);padding:4px 0 6px}
 .ev-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border)}
@@ -607,27 +609,6 @@ details.un-notice[open]>summary{margin-bottom:8px}
    <div class="s0-main">
     <div id="unNotice"></div>
     <div class="nw" id="s0NameWrap"><label>내 이름 <span style="font-size:12px;color:var(--text3)">(한 번 고르면 이 폰에 기억돼요)</span></label><select id="s0Name"></select></div>
-    <!-- 업무 등록: 이름을 고르면 나타나는 접이식 폼. 이름 select(s1Name)는 s0Name과 값만 맞추는 숨김용 -->
-    <details class="fold add-fold" id="addFold" style="display:none">
-      <summary>✏️ 새 업무 등록 <small>눌러서 펼치기</small></summary>
-      <div class="add-body">
-        <select id="s1Name" style="display:none"></select>
-        <div class="fg"><label>업무명 <span class="req">*</span></label><input type="text" id="fTitle" placeholder="예: 디케 프로젝트 3차 회의"></div>
-        <div class="fg"><label>행사 <span style="font-size:12px;color:var(--text3)">(선택 · 여러 개 가능)</span></label><div class="evpick" id="fEv"></div><div class="hint">💡 행사가 없는 업무는 선택하지 않으면 '기타'로 들어가요. 두 행사에 같이 해당하면 둘 다 체크하세요</div></div>
-        <div class="fg">
-          <label>같이 할 사람 <span style="font-size:12px;color:var(--text3)">(선택)</span></label>
-          <div id="cwList" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px;max-height:200px;overflow-y:auto"></div>
-        </div>
-        <div class="fg"><label>마감일 <span style="font-size:12px;color:var(--text3)">(회의라면 회의 날짜)</span></label><input type="date" id="fDeadline"></div>
-        <div class="fg"><label>메모</label><textarea id="fMemo" rows="3" placeholder="참고사항"></textarea></div>
-        <details class="fg subfold" id="fSubFold">
-          <summary>+ 세부 할 일 (선택)</summary>
-          <div id="subList" style="margin-top:8px"><div class="sir"><input type="text" placeholder="예: 행사 장소 섭외" class="st"><input type="date" class="dm sd"><button type="button" class="sdel" data-action="rmSub">×</button></div></div>
-          <button type="button" class="asb" id="addSubBtn">+ 한 줄 더</button>
-        </details>
-        <button type="button" class="bp" id="submitBtn">업무 등록하기</button>
-      </div>
-    </details>
     <div id="myArea"><div class="empty" style="padding:20px 24px"><div class="ei">👆</div><p>이름을 선택하면<br>내 업무가 나타나요</p><img src="illust-student.png" alt="" style="width:100%;max-width:260px;margin-top:20px;border-radius:16px;opacity:0.9"></div></div>
    </div>
   </div>
@@ -814,6 +795,33 @@ details.un-notice[open]>summary{margin-bottom:8px}
     <div class="fg"><label>설명</label><textarea id="evDesc" rows="2" placeholder="예: 7, 8반쪽 현관 사용 가능"></textarea></div>
     <div class="ma"><button type="button" class="bc" id="evCancel">취소</button><button type="button" class="bs" id="evSave">저장</button></div>
     <button type="button" class="pw-back" id="evDelete" style="color:var(--danger);margin-top:14px;display:none">이 행사 삭제</button>
+  </div>
+</div>
+
+<!-- 업무 등록 모달: 행사 카드의 '+ 업무 추가'에서 열린다(행사는 미리 선택됨). 이름 select(s1Name)는 s0Name과 값만 맞추는 숨김용 -->
+<div class="mov" id="addMov">
+  <div class="ms">
+    <div class="mh"></div><div class="mt">✏️ 새 업무 등록</div>
+    <select id="s1Name" style="display:none"></select>
+    <div class="add-ev" id="addEvLbl"></div>
+    <div class="fg"><label>업무명 <span class="req">*</span></label><input type="text" id="fTitle" placeholder="예: 디케 프로젝트 3차 회의"></div>
+    <div class="fg"><label>마감일 <span style="font-size:12px;color:var(--text3)">(회의라면 회의 날짜)</span></label><input type="date" id="fDeadline"></div>
+    <details class="fg subfold">
+      <summary>🎪 행사 바꾸기 · 여러 행사에 연결</summary>
+      <div class="evpick" id="fEv" style="margin-top:8px"></div>
+      <div class="hint">행사를 하나도 고르지 않으면 '기타'로 들어가요</div>
+    </details>
+    <details class="fg subfold">
+      <summary>👥 같이 할 사람 (선택)</summary>
+      <div id="cwList" style="margin-top:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px;max-height:200px;overflow-y:auto"></div>
+    </details>
+    <div class="fg"><label>메모</label><textarea id="fMemo" rows="2" placeholder="참고사항"></textarea></div>
+    <details class="fg subfold" id="fSubFold">
+      <summary>+ 세부 할 일 (선택)</summary>
+      <div id="subList" style="margin-top:8px"><div class="sir"><input type="text" placeholder="예: 행사 장소 섭외" class="st"><input type="date" class="dm sd"><button type="button" class="sdel" data-action="rmSub">×</button></div></div>
+      <button type="button" class="asb" id="addSubBtn">+ 한 줄 더</button>
+    </details>
+    <div class="ma"><button type="button" class="bc" id="addCancel">취소</button><button type="button" class="bs" id="submitBtn">업무 등록하기</button></div>
   </div>
 </div>
 
@@ -1411,7 +1419,6 @@ document.addEventListener('toggle',e=>{const d=e.target;if(d&&d.classList&&d.cla
 function renderMyTasks(){
   renderUnNotice();
   const name=document.getElementById('s0Name').value;
-  document.getElementById('addFold').style.display=name?'':'none';
   const area=document.getElementById('myArea');
   document.getElementById('s0NameWrap').style.display=name?'none':'';
   document.getElementById('sChName').style.display=name?'':'none';
@@ -1440,41 +1447,39 @@ function renderMyTasks(){
   h+='<div class="sec-t"><span>🎪 다가오는 행사 (2주)</span></div>';
   if(canEv(name))h+='<button type="button" class="ev-new" data-action="evNew">+ 행사 등록</button>';
   if(!near.length)h+='<div class="ev-none" style="margin-bottom:16px">2주 안에 등록된 행사가 없어요</div>';
-  const others=[];
+  const addBtn=id=>`<button type="button" class="ev-add" data-action="addTask" data-id="${esc(id||'')}">＋ ${id?'이 행사에':'행사 없이'} 업무 추가</button>`;
+  // 행사 카드는 기본으로 접혀 있다. 직접 접고 편 상태는 sEvOpen에 기억
   near.forEach(e=>{
     const et=tasks.filter(t=>inEv(t,e.id));
     const mine=et.filter(t=>assOf(t).includes(name));
-    // 내가 맡은 일이 없는 행사는 아래에 한 줄씩만
-    if(!mine.length){others.push(e);return;}
     mine.forEach(t=>shown.add(t.id));
     const d=dU(e.start);
     const dd=d>0?`<span class="chip chip-soon">D-${d}</span>`:(evEnd(e)>=td?'<span class="chip chip-today">진행 중</span>':'');
     const dn=et.filter(t=>t.status==='완료').length;
     const act=mine.filter(t=>!myDone(t)&&!ovIds.has(t.id)),fin=mine.filter(myDone);
-    // 행사 카드는 접을 수 있다. 처음엔 내 남은 일이 있는 행사만 펼치고, 직접 접고 편 건 sEvOpen에 기억
-    const isOpen=sEvOpen.has(e.id)?sEvOpen.get(e.id):act.length>0;
-    h+=`<details class="ev ev-fold" data-evid="${esc(e.id)}"${isOpen?' open':''} style="border-left-color:${e.dept?dc(e.dept):'var(--accent)'}"><summary class="ev-sum"><span class="ev-nm">${esc(e.name)}</span><span class="ev-cnt${act.length?'':' ok'}">${act.length?'남은 일 '+act.length:'✔ 완료'}</span></summary>
+    const cnt=act.length?'남은 일 '+act.length:(mine.length?'✔ 완료':'내 일 없음');
+    h+=`<details class="ev ev-fold" data-evid="${esc(e.id)}"${sEvOpen.get(e.id)?' open':''} style="border-left-color:${e.dept?dc(e.dept):'var(--accent)'}"><summary class="ev-sum"><span class="ev-nm">${esc(e.name)}</span><span class="ev-cnt${act.length?'':' ok'}">${cnt}</span></summary>
       <div class="ev-dt">📅 ${evRange(e)} ${dd}${deptBadges(e)}<span>· 전체 업무 ${dn}/${et.length} 완료</span>${canEv(name)?`<button type="button" class="eb" data-action="evEdit" data-id="${esc(e.id)}">✏️</button>`:''}</div>
       ${e.desc?`<div class="ev-desc">${esc(e.desc)}</div>`:''}
       <div class="ev-sub">내가 맡은 일</div>
-      <div class="ev-tasks">${act.map(t=>card(t,evOpts)).join('')}</div>${act.length?'':mine.some(t=>ovIds.has(t.id))?'<div class="ev-none">남은 일은 위 \'기한 지난 업무\'에 있어요</div>':'<div class="ev-none">내 몫은 모두 끝냈어요 🎉</div>'}${fin.length?`<details class="tc-more"><summary>✅ 내가 끝낸 일 ${fin.length}개 <small>눌러서 보기</small></summary><div style="margin-top:8px">${fin.map(t=>card(t,evOpts)).join('')}</div></details>`:''}
+      <div class="ev-tasks">${act.map(t=>card(t,evOpts)).join('')}</div>${act.length?'':!mine.length?'<div class="ev-none">아직 내가 맡은 일이 없어요</div>':mine.some(t=>ovIds.has(t.id))?'<div class="ev-none">남은 일은 위 \'기한 지난 업무\'에 있어요</div>':'<div class="ev-none">내 몫은 모두 끝냈어요 🎉</div>'}${fin.length?`<details class="tc-more"><summary>✅ 내가 끝낸 일 ${fin.length}개 <small>눌러서 보기</small></summary><div style="margin-top:8px">${fin.map(t=>card(t,evOpts)).join('')}</div></details>`:''}
+      ${addBtn(e.id)}
     </details>`;
   });
-  if(others.length)h+='<div class="ev-front" style="max-width:none;margin-bottom:8px"><div class="ev-front-t" style="color:var(--text2)">내가 맡은 일이 없는 행사</div>'+others.map(e=>
-    '<div class="ev-front-r"><div class="ev-front-d">'+evRange(e).replace(' ~ ','~<br>')+'</div><div class="ev-front-n">'+esc(e.name)+'</div>'+(canEv(name)?'<button type="button" class="eb" data-action="evEdit" data-id="'+esc(e.id)+'">✏️</button>':'')+'</div>').join('')+'</div>';
   // 1-2) 진행 중인 상시 프로젝트 — 내가 아직 안 끝낸 업무가 있는 것만
   const projH=evSorted().proj.map(e=>{
     const act=tasks.filter(t=>inEv(t,e.id)&&assOf(t).includes(name)&&!myDone(t)&&!ovIds.has(t.id));
     if(!act.length)return '';
     act.forEach(t=>shown.add(t.id));
-    return `<div class="ev" style="border-left-color:${e.dept?dc(e.dept):'var(--accent)'}"><div class="ev-hd"><div class="ev-nm">📂 ${esc(e.name)}</div>${canEv(name)?`<button type="button" class="eb" data-action="evEdit" data-id="${esc(e.id)}">✏️</button>`:''}</div>
+    return `<details class="ev ev-fold" data-evid="${esc(e.id)}"${sEvOpen.get(e.id)?' open':''} style="border-left-color:${e.dept?dc(e.dept):'var(--accent)'}"><summary class="ev-sum"><span class="ev-nm">📂 ${esc(e.name)}</span><span class="ev-cnt">남은 일 ${act.length}</span></summary>
+      ${canEv(name)?`<div class="ev-dt"><button type="button" class="eb" data-action="evEdit" data-id="${esc(e.id)}">✏️</button></div>`:''}
       ${e.desc?`<div class="ev-desc">${esc(e.desc)}</div>`:''}
-      <div class="ev-sub">내가 맡은 일</div><div class="ev-tasks">${act.map(t=>card(t,evOpts)).join('')}</div></div>`;
+      <div class="ev-sub">내가 맡은 일</div><div class="ev-tasks">${act.map(t=>card(t,evOpts)).join('')}</div>${addBtn(e.id)}</details>`;
   }).join('');
   if(projH)h+='<div class="sec-t" style="margin-top:20px"><span>📂 진행 중인 상시 행사</span></div>'+projH;
   // 2) 그 밖의 내 업무
   const rest=all.filter(t=>!shown.has(t.id));
-  h+='<div class="sec-t" style="margin-top:20px"><span>📝 그 밖의 내 업무</span></div>';
+  h+='<div class="sec-t" style="margin-top:20px"><span>📝 그 밖의 내 업무</span></div>'+addBtn('');
   const ra=rest.filter(t=>!myDone(t));
   h+=ra.length?renderGrp(ra,opts):'<div class="ev-none">남은 업무가 없어요 🎉</div>';
   h+=doneSec(rest.filter(myDone),opts,'my');
@@ -1487,6 +1492,21 @@ function addSubRow(){
   const r=document.createElement('div');r.className='sir';
   r.innerHTML='<input type="text" placeholder="세부 할 일" class="st"><input type="date" class="dm sd"><button type="button" class="sdel" data-action="rmSub">×</button>';
   l.appendChild(r);
+}
+// 행사 카드(또는 '그 밖의 내 업무')의 '+ 업무 추가'로 열기. evId가 있으면 그 행사가 미리 선택됨
+function updAddEv(){
+  const ids=getEvPick('fEv');
+  document.getElementById('addEvLbl').textContent=ids.length?'🎪 '+evNames(ids):'📝 행사 없이 등록 (기타)';
+}
+function openAdd(evId){
+  const name=document.getElementById('s0Name').value;
+  if(!name){toast('이름을 먼저 선택해주세요');return;}
+  document.getElementById('s1Name').value=name;
+  buildCWList(name);
+  fillEvSel('fEv',evId?[evId]:[]);
+  updAddEv();
+  document.getElementById('addMov').classList.add('open');
+  setTimeout(()=>document.getElementById('fTitle').focus(),50);
 }
 function submitTask(){
   const name=document.getElementById('s1Name').value;
@@ -1509,7 +1529,7 @@ function submitTask(){
   document.getElementById('subList').innerHTML='<div class="sir"><input type="text" placeholder="예: 행사 장소 섭외" class="st"><input type="date" class="dm sd"><button type="button" class="sdel" data-action="rmSub">×</button></div>';
   document.querySelectorAll('.cw-cb').forEach(x=>x.checked=false);
   buildCWList(name);
-  document.getElementById('addFold').open=false;
+  closeMov('addMov');
   renderMyTasks();
 }
 
@@ -2048,6 +2068,7 @@ function bindStatic(){
   document.getElementById('lockBtn').addEventListener('click',()=>{setPwRemembered(false);goHome();});
   document.getElementById('submitBtn').addEventListener('click',submitTask);
   document.getElementById('addSubBtn').addEventListener('click',addSubRow);
+  document.getElementById('addCancel').addEventListener('click',()=>closeMov('addMov'));
 
   // 교사 업무 추가 모달
 
@@ -2276,6 +2297,7 @@ document.addEventListener('click',function(e){
     document.getElementById('acctMov').classList.add('open');
     return;
   }
+  if(action==='addTask'){openAdd(id);return;}
   if(action==='evNew'){openEv(null);return;}
   if(action==='evEdit'){openEv(id);return;}
   if(action==='evSeed'){seedOct();return;}
@@ -2293,6 +2315,7 @@ document.addEventListener('click',function(e){
 
 // 이름 change
 document.addEventListener('change',function(e){
+  if(e.target.closest&&e.target.closest('#fEv'))updAddEv();
   if(['s0Name','s1Name'].includes(e.target.id)){
     const name=e.target.value;
     ['s0Name','s1Name'].forEach(id=>{const el=document.getElementById(id);if(el&&el.value!==name)el.value=name;});
