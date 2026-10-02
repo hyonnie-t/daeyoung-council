@@ -463,8 +463,9 @@ details.un-notice[open]>summary{margin-bottom:8px}
 .pp-line{font-size:13px;color:var(--text2);margin-bottom:8px;line-height:1.6}
 .pp-line b{color:var(--accent3)}
 .pp-left{color:var(--danger);font-weight:600}
-.me-btn{width:100%;padding:10px;border-radius:9px;font-size:15px;font-weight:700;background:var(--accent3);color:#fff}
-.me-btn.undo{background:var(--surface2);color:var(--text2);border:1px solid var(--border);font-size:13px;font-weight:600;padding:7px}
+.me-btn{width:100%;padding:9px;border-radius:9px;font-size:14px;font-weight:600;background:var(--surface);color:var(--text2);border:1.5px dashed var(--border);font-family:inherit;cursor:pointer}
+.me-btn:hover{border-color:var(--accent);color:var(--accent)}
+.me-btn.undo{background:#f4fbf6;color:#2f9e44;border:1px solid #cdeed5;border-style:solid;font-size:13px;padding:7px}
 /* 이름 */
 .nm-btn{font-size:12px;color:var(--text2);background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 8px;white-space:nowrap;flex-shrink:0}
 /* 달력 행사 표시 */
@@ -716,7 +717,7 @@ details.un-notice[open]>summary{margin-bottom:8px}
         <button type="button" class="sb-btn" data-status="완료">완료</button>
         <button type="button" class="sb-btn" data-status="보류">보류</button>
       </div>
-      <div class="hint" id="mStHint" style="display:none">💡 완료는 담당자마다 '내 몫 완료'로 체크해요. 여기서는 '보류'만 걸거나 풀 수 있어요.</div>
+      <div class="hint" id="mStHint" style="display:none">💡 완료는 담당자마다 직접 '다 했으면 눌러서 체크'로 표시해요. 여기서는 '보류'만 걸거나 풀 수 있어요.</div>
     </div>
     <div class="fg">
       <label>담당자</label>
@@ -1305,7 +1306,7 @@ function card(t,opts){
     const leftTxt=left.length>3?left.slice(0,3).map(esc).join(', ')+' 외 '+(left.length-3)+'명':left.map(esc).join(', ');
     const solo=ass.length===1&&!opts.teacher;
     ppH=`<div class="pp">`+(solo?'':`<div class="pp-line"><b>${ass.length}명 중 ${dnc}명 완료</b>${left.length?` · 남은 사람: <span class="pp-left">${leftTxt}</span>`:' · 모두 끝났어요 🎉'}</div>`)+
-      (mine&&t.status!=='보류'?`<button type="button" class="me-btn${iDid?' undo':''}" data-action="meDone" data-id="${t.id}">${iDid?'↩ 내 완료 취소':'✅ 내 몫 완료'}</button>`:'')+
+      (mine&&t.status!=='보류'?`<button type="button" class="me-btn${iDid?' undo':''}" data-action="meDone" data-id="${t.id}">${iDid?'☑ 완료했어요 · 누르면 취소':'☐ 다 했으면 눌러서 체크'}</button>`:'')+
       (opts.teacher?doneChips(t):'')+`</div>`;
   }
   // 선생님 화면: 기존(행사 없는) 업무도 상태 버튼으로 바로 완료 처리
@@ -1654,7 +1655,7 @@ function openEdit(id){
   const tvE=document.getElementById('tView').style.display!=='none';
   const hint=document.getElementById('mStHint');
   hint.style.display=isPer(t)?'block':'none';
-  hint.textContent=tvE?"💡 '완료'는 담당자 전원 완료, '예정'은 전원 체크 취소예요. 한 명씩은 카드의 이름을 눌러요.":"💡 완료는 담당자마다 '내 몫 완료'로 체크해요. 여기서는 '보류'만 걸거나 풀 수 있어요.";
+  hint.textContent=tvE?"💡 '완료'는 담당자 전원 완료, '예정'은 전원 체크 취소예요. 한 명씩은 카드의 이름을 눌러요.":"💡 완료는 담당자마다 직접 '다 했으면 눌러서 체크'로 표시해요. 여기서는 '보류'만 걸거나 풀 수 있어요.";
   document.getElementById('mDate').value=t.date||'';
   document.getElementById('mDead').value=t.deadline||'';
   document.getElementById('mMemo').value=t.memo||'';
@@ -2454,7 +2455,7 @@ async function toggleDone(id,name,byTeacher){
   if(val)t.doneBy[name]=val;else delete t.doneBy[name];
   derive(t);saveLocal();refresh();
   logDoneWrites(t,[[name,val]],byTeacher?'선생님':name);
-  toast(byTeacher?(val?'✅ '+name+' 완료 처리':'↩ '+name+' 완료 취소'):(val?'✅ 내 몫 완료!':'↩ 완료 취소'));
+  toast(byTeacher?(val?'✅ '+name+' 완료 처리':'↩ '+name+' 완료 취소'):(val?'✅ 완료 체크했어요!':'↩ 체크를 취소했어요'));
   try{
     await fbSetDone(id,name,val);
     // 다른 사람이 방금 체크했을 수도 있으니 서버의 최신 체크 현황으로 다시 계산
