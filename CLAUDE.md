@@ -14,6 +14,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **로컬 확인**: 빌드 과정이 없으므로 해당 HTML 파일을 브라우저로 직접 열면 된다. 정적 서버(`python3 -m http.server`)로 띄워도 되지만 필수는 아니다. 테스트/린트 명령은 없다.
 
+**화면 확인(Playwright)**: 샌드박스에서 `file://`로 열면 Firebase 호출이 안 돼 빈 화면이 나오니, 데이터가 필요한 확인은 `events`·`tasks` 배열에 샘플을 밀어 넣고 `renderMyTasks()` 같은 렌더 함수를 직접 부르는 방식으로 한다. 세 폭(폰 390·태블릿 820·PC 1280)으로 찍는 `shot.js`는 `hyonnie-t/history26`의 `tests/webapp-testing/shot.js`에 있다(playwright 경로를 알아서 찾음). 샌드박스에서 `script.google.com`·`hyonnie-t.github.io`는 프록시가 막아서 배포된 사이트·`CHEER_URL` 응답을 `curl`로 확인할 수 없다 — 효니에게 열어 보고 결과를 붙여 달라고 요청할 것.
+
 ## 저장소 공개 여부 — 항상 전제할 것
 
 GitHub Pages 무료 요금제는 public 저장소에서만 동작한다. 즉 이 저장소는 public이라고 가정하고 작업해야 한다. **비밀번호·계정·API 키·개인정보를 어떤 HTML/JS 파일에도 하드코딩하지 말 것.** 과거 `index.html`에 학생회 공용 계정(캡컷/미리캔버스/구글) ID·PW가 평문으로 박혀 있던 사고가 있었고, 지금은 제거하고 외부 구글 시트 링크(`ACCOUNT_SHEET_URL`)로 대체했다. 앞으로도 같은 종류의 정보는 코드가 아니라 외부 문서 링크로 연결하는 패턴을 유지한다.
