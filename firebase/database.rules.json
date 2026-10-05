@@ -1,0 +1,51 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "tasks": {
+      ".read": "auth != null",
+      "$id": {
+        ".write": "auth != null",
+        ".validate": "newData.child('title').isString() && newData.child('title').val().length <= 300 && (!newData.child('memo').exists() || (newData.child('memo').isString() && newData.child('memo').val().length <= 2000))"
+      }
+    },
+
+    "events": {
+      ".read": "auth != null",
+      "$id": {
+        ".write": "auth != null",
+        ".validate": "newData.child('name').isString() && newData.child('name').val().length <= 200"
+      }
+    },
+
+    "activity": {
+      ".read": "auth != null",
+      "$key": {
+        ".write": "auth != null && !data.exists()",
+        ".validate": "newData.hasChildren(['at', 'type', 'tid']) && newData.child('at').isString() && newData.child('type').isString()"
+      }
+    },
+
+    "notice": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      ".validate": "newData.isString() && newData.val().length <= 1000"
+    },
+
+    "attList": {
+      ".read": "auth != null",
+      ".write": "auth != null && newData.exists()"
+    },
+
+    "attendance": {
+      ".read": "auth != null",
+      "$date": {
+        "$name": {
+          ".write": "auth != null",
+          ".validate": "newData.child('status').isString()"
+        }
+      }
+    }
+  }
+}
