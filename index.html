@@ -198,7 +198,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .ck-top b.t{font-size:15px}.ck-days{font-size:13px;color:var(--text3)}.ck-days b{font-size:20px;color:var(--accent3)}
 .ck-sub{font-size:13px;color:var(--text3);margin:4px 0 10px;line-height:1.5}
 .ck-title{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:#ebfbee;color:var(--accent3);font-size:12px;font-weight:700}
-.ck-moods{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:10px}
+.ck-moods{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:10px}
 .ck-mood{min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 2px;font-size:12px;color:var(--text);background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r);cursor:pointer;font-family:inherit}
 .ck-mood span:first-child{font-size:20px;line-height:1}
 .ck-mood.on{background:#ebfbee;border-color:var(--accent3)}
@@ -1129,15 +1129,25 @@ function evNames(ids){return ids.map(evById).filter(Boolean).map(e=>e.name).join
 // 날짜마다 키가 달라 두 사람이 동시에 눌러도 서로 안 덮어쓴다(배열 통째 PUT 금지 원칙). 같은 날 또 눌러도 키가 같아 일수는 안 오른다.
 // 기분(무드미터 4분면)은 선택이라 안 골라도 출석은 된다. 보상은 칭호뿐이고 상점은 선생님이 대시보드 목록을 보고 직접 준다.
 // 이름이 '출석 관리'(회의 출석, attendance 경로)와 겹쳐 id·함수·경로를 ck/checkin으로 따로 썼다.
+// 문턱은 2026-10-06부터 12-31까지 평일 61일(한글날 10/9·성탄절 12/25 제외)의 10/30/50/75/90%다(6·18·30·45·55일).
+// 처음 정한 80일은 평일을 하나도 안 빠져도 못 채우는 숫자라 고쳤다. 방학 시작일·시험·체험학습으로 실제 등교일이 더 적으면 여기만 낮추면 된다.
 const CK_TIERS=[ // 누적일수 문턱(낮은 순). 숫자·이름은 여기서만 고치면 된다
-  {min:5, lv:1,name:'첫 도장',emoji:'🔖'},
-  {min:15,lv:2,name:'꾸준한 붓',emoji:'🖋️'},
+  {min:6, lv:1,name:'첫 도장',emoji:'🔖'},
+  {min:18,lv:2,name:'꾸준한 붓',emoji:'🖋️'},
   {min:30,lv:3,name:'든든한 기둥',emoji:'🏛️'},
-  {min:50,lv:4,name:'학생회 지킴이',emoji:'🛡️'},
-  {min:80,lv:5,name:'불멸의 임원',emoji:'🏯'}
+  {min:45,lv:4,name:'학생회 지킴이',emoji:'🛡️'},
+  {min:55,lv:5,name:'불멸의 임원',emoji:'🏯'}
 ];
-const CK_MOODS=[{k:'red',e:'😣',t:'답답해요'},{k:'yellow',e:'😄',t:'신나요'},{k:'blue',e:'😔',t:'축 처져요'},{k:'green',e:'😌',t:'편안해요'}];
+// 무드미터 4분면(에너지 높음/낮음 × 기분 불쾌/유쾌)에 3개씩, 한 줄이 한 분면이다. k는 Firebase에 저장되는 값이라 바꾸면 옛 기록 라벨이 깨지고 규칙 정규식도 같이 고쳐야 한다.
+const CK_MOODS=[
+  {k:'annoyed',e:'😤',t:'짜증나요'},{k:'nervous',e:'😬',t:'긴장돼요'},{k:'stuffy',e:'😣',t:'답답해요'},   // 에너지↑ 불쾌
+  {k:'excited',e:'😄',t:'신나요'},{k:'thrilled',e:'🤩',t:'설레요'},{k:'proud',e:'😊',t:'뿌듯해요'},       // 에너지↑ 유쾌
+  {k:'tired',e:'😴',t:'피곤해요'},{k:'gloomy',e:'😔',t:'우울해요'},{k:'bored',e:'🥱',t:'지루해요'},      // 에너지↓ 불쾌
+  {k:'calm',e:'😌',t:'편안해요'},{k:'relaxed',e:'😎',t:'여유로워요'},{k:'content',e:'🙂',t:'만족스러워요'} // 에너지↓ 유쾌
+];
 const CK_MOOD_LABEL=Object.fromEntries(CK_MOODS.map(m=>[m.k,m.e+' '+m.t]));
+// 처음 만든 4값(기분을 4개로 쓰던 때). 이미 저장된 게 있으면 라벨만 보이게 남겨둔다.
+Object.assign(CK_MOOD_LABEL,{red:'😣 답답해요',yellow:'😄 신나요',blue:'😔 축 처져요',green:'😌 편안해요'});
 let CK={};          // 이름 → {dates:{날짜:{at,mood}}}  (로드 전엔 없음)
 let CK_PICK='',CK_BUSY=false;
 function ckTier(n){let t=null;CK_TIERS.forEach(x=>{if(n>=x.min)t=x;});return t;}

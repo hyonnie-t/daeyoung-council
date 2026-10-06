@@ -43,7 +43,7 @@
       "$name": {
         "$date": {
           ".write": "auth != null && newData.exists()",
-          ".validate": "newData.child('at').isString() && (!newData.child('mood').exists() || newData.child('mood').val().matches(/^(red|yellow|blue|green)$/))"
+          ".validate": "newData.child('at').isString() && (!newData.child('mood').exists() || newData.child('mood').val().matches(/^(annoyed|nervous|stuffy|excited|thrilled|proud|tired|gloomy|bored|calm|relaxed|content|red|yellow|blue|green)$/))"
         }
       }
     },
