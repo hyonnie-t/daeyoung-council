@@ -204,6 +204,8 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .ck-mood.on{background:#ebfbee;border-color:var(--accent3)}
 .ck-fortune{margin:0 0 10px;padding:10px 12px;border-radius:var(--r);background:#fff9db;border:1px dashed #f0c36d;font-size:14px;line-height:1.6;color:var(--text)}
 .ck-fortune-t{display:block;font-size:12px;font-weight:700;color:var(--warn);margin-bottom:2px}.ck-fortune-t small{font-weight:400;color:var(--text3);margin-left:4px}
+.ck-links{display:flex;gap:14px;justify-content:flex-end;margin-top:8px}
+.ck-links button{background:none;border:0;padding:4px 0;font-size:12px;color:var(--text3);text-decoration:underline;cursor:pointer;font-family:inherit}
 .ck-btn{width:100%;min-height:44px;border:0;border-radius:var(--r);background:var(--accent3);color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
 .ck-btn:disabled{opacity:.6}
 .ck-adm{margin-bottom:14px}.ck-adm-note{font-size:12px;color:var(--text3);margin:0 0 8px;line-height:1.5}
@@ -1192,7 +1194,7 @@ function ckFortune(name,date,mood){
   const arr=CK_FORTUNE[q];return arr[Math.floor(ckRng(name+'|'+date+'|'+mood)()*arr.length)];
 }
 let CK={};          // 이름 → {dates:{날짜:{at,mood}}}  (로드 전엔 없음)
-let CK_PICK='',CK_BUSY=false;
+let CK_PICK='',CK_BUSY=false,CK_CHANGE=false; // CK_CHANGE: 이미 남긴 기분을 다시 고르는 중
 function ckTier(n){let t=null;CK_TIERS.forEach(x=>{if(n>=x.min)t=x;});return t;}
 function ckNext(n){return CK_TIERS.find(x=>x.min>n)||null;}
 async function ckLoad(name){
@@ -1214,13 +1216,14 @@ function renderCk(){
   const td=todayStr(),n=Object.keys(st.dates).length,today=st.dates[td];
   const done=!!today,moodSaved=today&&today.mood?today.mood:'';
   const tier=ckTier(n),nx=ckNext(n),pick=CK_PICK||moodSaved;
-  const showMood=!done||!moodSaved;
-  const showBtn=!done||(!moodSaved&&CK_PICK);
+  const showMood=!done||!moodSaved||CK_CHANGE;
+  const showBtn=!done||!!CK_PICK;
   box.innerHTML='<div class="ck-top"><b class="t">📌 오늘의 출석'+(tier?'<span class="ck-title">'+tier.emoji+' Lv'+tier.lv+' '+esc(tier.name)+'</span>':'')+'</b><span class="ck-days">누적 <b>'+n+'</b>일</span></div>'
    +'<div class="ck-sub">'+(done?'✅ 오늘 출석했어요. ':'오늘 기분을 골라도 되고, 안 골라도 돼요. ')+(nx?'다음 칭호 '+nx.emoji+' '+esc(nx.name)+'까지 '+(nx.min-n)+'일':'가장 높은 출석 칭호예요!')+'</div>'
    +(showMood?'<div class="ck-moods" role="group" aria-label="오늘의 기분">'+ckTodayMoods(name,td).map(m=>'<button type="button" class="ck-mood'+(pick===m.k?' on':'')+'" data-action="ckMood" data-mood="'+m.k+'" aria-pressed="'+(pick===m.k)+'"><span>'+m.e+'</span><span>'+m.t+'</span></button>').join('')+'</div>':'')
    +(moodSaved&&CK_Q_OF[moodSaved]?'<div class="ck-fortune"><span class="ck-fortune-t">🥠 오늘의 한마디 <small>'+esc(CK_MOOD_LABEL[moodSaved]||'')+'</small></span>'+esc(ckFortune(name,td,moodSaved))+'</div>':(done?'<div class="ck-sub" style="margin:0">기분을 남기면 오늘의 한마디가 나와요.</div>':''))
-   +(showBtn?'<button type="button" class="ck-btn" data-action="ckSubmit"'+(CK_BUSY?' disabled':'')+'>'+(done?'기분 남기기':'출석 도장 찍기')+'</button>':'');
+   +(showBtn?'<button type="button" class="ck-btn" data-action="ckSubmit"'+(CK_BUSY?' disabled':'')+'>'+(done?'기분 남기기':'출석 도장 찍기')+'</button>':'')
+   +(done&&!CK_BUSY?'<div class="ck-links">'+(moodSaved&&!CK_CHANGE?'<button type="button" data-action="ckChange">기분 바꾸기</button>':'')+'<button type="button" data-action="ckUndo">↩ 오늘 출석 취소</button></div>':'');
 }
 async function ckSubmit(){
   const name=myName(),st=CK[name];
@@ -1235,11 +1238,27 @@ async function ckSubmit(){
     if(!r.ok)throw new Error(r.status);
     const before=ckTier(Object.keys(st.dates).length);
     st.dates[td]=Object.assign({},cur||{},body);
-    CK_PICK='';
+    CK_PICK='';CK_CHANGE=false;
     const n=Object.keys(st.dates).length,after=ckTier(n);
     toast(after&&(!before||after.lv>before.lv)?'🎉 '+after.emoji+' '+after.name+' 칭호 획득!':cur?'기분을 남겼어요.':'📌 출석 도장! 누적 '+n+'일');
   }catch(e){
     toast('⚠️ 출석 저장 실패'+((''+e.message).match(/40[13]/)?' — Firebase 규칙에 checkin 경로 허용이 필요해요':'. 잠시 뒤 다시 눌러 주세요.'));
+  }finally{CK_BUSY=false;renderCk();}
+}
+// 오늘 도장을 지운다(실수로 눌렀거나 기분을 다시 고르고 싶을 때). 오늘 키 하나만 지우니 누적일수가 1 줄고, 다시 찍을 수 있다.
+// 날짜 키 단위 삭제라 다른 사람·다른 날 기록은 안 건드린다. 규칙이 삭제를 막고 있으면 401/403 안내를 띄운다.
+async function ckUndo(){
+  const name=myName(),st=CK[name],td=todayStr();
+  if(!name||!st||!st.dates||!st.dates[td]||CK_BUSY)return;
+  if(!confirm('오늘 출석을 취소할까요?\n누적일수에서 1일 빠지고, 다시 눌러 찍을 수 있어요.'))return;
+  CK_BUSY=true;renderCk();
+  try{
+    const r=await fetch(FB+'/checkin/'+encodeURIComponent(name)+'/'+td+'.json',{method:'DELETE'});
+    if(!r.ok)throw new Error(r.status);
+    delete st.dates[td];CK_PICK='';CK_CHANGE=false;
+    toast('오늘 출석을 취소했어요.');
+  }catch(e){
+    toast('⚠️ 출석 취소 실패'+((''+e.message).match(/40[13]/)?' — Firebase 규칙에서 checkin 삭제 허용이 필요해요':'. 잠시 뒤 다시 눌러 주세요.'));
   }finally{CK_BUSY=false;renderCk();}
 }
 async function ckAdminLoad(){
@@ -2760,6 +2779,8 @@ document.addEventListener('click',function(e){
   const action=el.dataset.action,id=el.dataset.id,idx=el.dataset.idx!==undefined?parseInt(el.dataset.idx):undefined;
   if(action==='ckMood'){CK_PICK=CK_PICK===el.dataset.mood?'':el.dataset.mood;renderCk();return;}
   if(action==='ckSubmit'){ckSubmit();return;}
+  if(action==='ckChange'){CK_CHANGE=true;CK_PICK='';renderCk();return;}
+  if(action==='ckUndo'){ckUndo();return;}
   if(action==='ckRetry'){delete CK[myName()];renderCk();return;}
   if(action==='edit'){openEdit(id);return;}
   if(action==='del'){openDel(id);return;}

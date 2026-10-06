@@ -42,7 +42,7 @@
       ".read": "auth != null",
       "$name": {
         "$date": {
-          ".write": "auth != null && newData.exists()",
+          ".write": "auth != null",
           ".validate": "newData.child('at').isString() && (!newData.child('mood').exists() || newData.child('mood').val().matches(/^[a-z]{2,16}$/))"
         }
       }
