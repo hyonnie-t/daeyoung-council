@@ -38,6 +38,16 @@
       ".write": "auth != null && newData.exists()"
     },
 
+    "checkin": {
+      ".read": "auth != null",
+      "$name": {
+        "$date": {
+          ".write": "auth != null && newData.exists()",
+          ".validate": "newData.child('at').isString() && (!newData.child('mood').exists() || newData.child('mood').val().matches(/^(red|yellow|blue|green)$/))"
+        }
+      }
+    },
+
     "attendance": {
       ".read": "auth != null",
       "$date": {

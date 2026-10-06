@@ -193,6 +193,21 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .hm-alert{background:#fff5f5;border:1px solid #ffc9c9;border-radius:var(--r);padding:10px 14px;margin-bottom:8px;font-size:13px;font-family:'Noto Sans KR',sans-serif;color:#c92a2a;line-height:1.6}
 .hm-alert div{color:var(--text);font-weight:600}
 .hm-alert.ok{background:#f4fce3;border-color:#d8f5a2;color:#2b8a3e}
+.ck-card{margin:0 0 12px;padding:12px 14px;border-radius:var(--r);background:var(--surface);border:1px solid var(--border);border-left:5px solid var(--accent3);box-shadow:var(--sh)}
+.ck-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.ck-top b.t{font-size:15px}.ck-days{font-size:13px;color:var(--text3)}.ck-days b{font-size:20px;color:var(--accent3)}
+.ck-sub{font-size:13px;color:var(--text3);margin:4px 0 10px;line-height:1.5}
+.ck-title{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:#ebfbee;color:var(--accent3);font-size:12px;font-weight:700}
+.ck-moods{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:10px}
+.ck-mood{min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 2px;font-size:12px;color:var(--text);background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r);cursor:pointer;font-family:inherit}
+.ck-mood span:first-child{font-size:20px;line-height:1}
+.ck-mood.on{background:#ebfbee;border-color:var(--accent3)}
+.ck-btn{width:100%;min-height:44px;border:0;border-radius:var(--r);background:var(--accent3);color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+.ck-btn:disabled{opacity:.6}
+.ck-adm{margin-bottom:14px}.ck-adm-note{font-size:12px;color:var(--text3);margin:0 0 8px;line-height:1.5}
+.ck-tb{width:100%;border-collapse:collapse;font-size:13px;background:var(--surface);border-radius:var(--r);overflow:hidden}
+.ck-tb th,.ck-tb td{padding:7px 8px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
+.ck-tb th{background:var(--surface2);color:var(--text3);font-weight:600}
 .cheer{margin:0 0 12px;padding:12px 14px;border-radius:var(--r);background:var(--surface);border:1px solid var(--border);border-left:5px solid var(--accent);font-size:14px;line-height:1.55;box-shadow:var(--sh)}
 .cheer.over{border-left-color:#e03131;background:#fff5f5}
 .cheer.soon{border-left-color:#f08c00;background:#fff9db}
@@ -667,6 +682,7 @@ details.un-notice[open]>summary{margin-bottom:8px}
    <div class="s0-main">
     <div id="unNotice"></div>
     <div class="nw" id="s0NameWrap"><label>내 이름 <span style="font-size:12px;color:var(--text3)">(한 번 고르면 이 폰에 기억돼요)</span></label><select id="s0Name"></select></div>
+    <div id="ckCard" class="ck-card" style="display:none"></div>
     <div id="myArea"><div class="empty" style="padding:20px 24px"><div class="ei">👆</div><p>이름을 선택하면<br>내 업무가 나타나요</p><img src="illust-student.png" alt="" style="width:100%;max-width:260px;margin-top:20px;border-radius:16px;opacity:0.9"></div></div>
    </div>
   </div>
@@ -705,6 +721,11 @@ details.un-notice[open]>summary{margin-bottom:8px}
     </div>
     <div class="stl">🎯 오늘 처리할 것 <span id="todoN" class="todo-n"></span></div>
     <div id="todoArea"></div>
+    <details class="fold ck-adm" id="ckAdm">
+      <summary class="stl" style="display:inline-block;margin-bottom:8px">📌 접속 출석 현황 <small id="ckAdmSum" style="font-weight:400;color:var(--text3)"></small></summary>
+      <div class="ck-adm-note">학생이 이 앱에서 '출석 도장'을 누른 날수예요. 상점은 이 목록을 보고 직접 주세요. (아래 '출석 관리'는 회의 출석이라 별개예요)</div>
+      <div id="ckAdmBody"><div class="ev-none">펼치면 불러와요</div></div>
+    </details>
     <div class="stl">📢 공지사항 관리</div>
 <div id="noticeAdmin" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:8px;box-shadow:var(--sh)">
   <textarea id="noticeInput" rows="3" placeholder="공지 내용을 입력하세요. 비워두면 공지가 숨겨집니다." style="margin-bottom:8px"></textarea>
@@ -1103,6 +1124,86 @@ function fillEvSel(id,cur){
 }
 function getEvPick(id){return [...document.querySelectorAll('#'+id+' input:checked')].map(x=>x.value).filter(v=>evById(v));}
 function evNames(ids){return ids.map(evById).filter(Boolean).map(e=>e.name).join(' · ');}
+// ── 접속 출석 + 오늘의 기분 (2026-10-06 효니 요청) ──
+// 학생이 하루 한 번 '출석 도장'을 누르면 Firebase checkin/{이름}/{날짜}={at,mood?}가 한 키로 쌓이고, 누적일수에 따라 칭호가 붙는다.
+// 날짜마다 키가 달라 두 사람이 동시에 눌러도 서로 안 덮어쓴다(배열 통째 PUT 금지 원칙). 같은 날 또 눌러도 키가 같아 일수는 안 오른다.
+// 기분(무드미터 4분면)은 선택이라 안 골라도 출석은 된다. 보상은 칭호뿐이고 상점은 선생님이 대시보드 목록을 보고 직접 준다.
+// 이름이 '출석 관리'(회의 출석, attendance 경로)와 겹쳐 id·함수·경로를 ck/checkin으로 따로 썼다.
+const CK_TIERS=[ // 누적일수 문턱(낮은 순). 숫자·이름은 여기서만 고치면 된다
+  {min:5, lv:1,name:'첫 도장',emoji:'🔖'},
+  {min:15,lv:2,name:'꾸준한 붓',emoji:'🖋️'},
+  {min:30,lv:3,name:'든든한 기둥',emoji:'🏛️'},
+  {min:50,lv:4,name:'학생회 지킴이',emoji:'🛡️'},
+  {min:80,lv:5,name:'불멸의 임원',emoji:'🏯'}
+];
+const CK_MOODS=[{k:'red',e:'😣',t:'답답해요'},{k:'yellow',e:'😄',t:'신나요'},{k:'blue',e:'😔',t:'축 처져요'},{k:'green',e:'😌',t:'편안해요'}];
+const CK_MOOD_LABEL=Object.fromEntries(CK_MOODS.map(m=>[m.k,m.e+' '+m.t]));
+let CK={};          // 이름 → {dates:{날짜:{at,mood}}}  (로드 전엔 없음)
+let CK_PICK='',CK_BUSY=false;
+function ckTier(n){let t=null;CK_TIERS.forEach(x=>{if(n>=x.min)t=x;});return t;}
+function ckNext(n){return CK_TIERS.find(x=>x.min>n)||null;}
+async function ckLoad(name){
+  try{
+    const r=await fetch(FB+'/checkin/'+encodeURIComponent(name)+'.json');
+    if(!r.ok)throw new Error(r.status);
+    CK[name]={dates:(await r.json())||{}};
+    return true;
+  }catch(e){console.warn('출석 불러오기 실패:',e);if(!CK[name])CK[name]={dates:null};return false;}
+}
+function renderCk(){
+  const box=document.getElementById('ckCard');if(!box)return;
+  const name=myName();
+  if(!name){box.style.display='none';return;}
+  box.style.display='';
+  const st=CK[name];
+  if(!st){box.innerHTML='<div class="ck-sub" style="margin:0">출석 정보를 불러오는 중…</div>';ckLoad(name).then(renderCk);return;}
+  if(!st.dates){box.innerHTML='<div class="ck-sub" style="margin:0">출석 정보를 못 불러왔어요. <button type="button" class="ck-mood" style="display:inline-flex;min-height:32px;padding:2px 10px" data-action="ckRetry">다시 시도</button></div>';return;}
+  const td=todayStr(),n=Object.keys(st.dates).length,today=st.dates[td];
+  const done=!!today,moodSaved=today&&today.mood?today.mood:'';
+  const tier=ckTier(n),nx=ckNext(n),pick=CK_PICK||moodSaved;
+  const showMood=!done||!moodSaved;
+  const showBtn=!done||(!moodSaved&&CK_PICK);
+  box.innerHTML='<div class="ck-top"><b class="t">📌 오늘의 출석'+(tier?'<span class="ck-title">'+tier.emoji+' Lv'+tier.lv+' '+esc(tier.name)+'</span>':'')+'</b><span class="ck-days">누적 <b>'+n+'</b>일</span></div>'
+   +'<div class="ck-sub">'+(done?'✅ 오늘 출석했어요. ':'오늘 기분을 골라도 되고, 안 골라도 돼요. ')+(nx?'다음 칭호 '+nx.emoji+' '+esc(nx.name)+'까지 '+(nx.min-n)+'일':'가장 높은 출석 칭호예요!')+'</div>'
+   +(showMood?'<div class="ck-moods" role="group" aria-label="오늘의 기분">'+CK_MOODS.map(m=>'<button type="button" class="ck-mood'+(pick===m.k?' on':'')+'" data-action="ckMood" data-mood="'+m.k+'" aria-pressed="'+(pick===m.k)+'"><span>'+m.e+'</span><span>'+m.t+'</span></button>').join('')+'</div>':'')
+   +(showBtn?'<button type="button" class="ck-btn" data-action="ckSubmit"'+(CK_BUSY?' disabled':'')+'>'+(done?'기분 남기기':'출석 도장 찍기')+'</button>':'');
+}
+async function ckSubmit(){
+  const name=myName(),st=CK[name];
+  if(!name||!st||!st.dates||CK_BUSY)return;
+  const td=todayStr(),cur=st.dates[td],body={};
+  if(!cur)body.at=new Date().toISOString();
+  if(CK_PICK)body.mood=CK_PICK;
+  CK_BUSY=true;renderCk();
+  try{
+    // PATCH라 같은 날 기분만 고쳐 보내도 처음 찍은 시각(at)은 그대로 남는다
+    const r=await fetch(FB+'/checkin/'+encodeURIComponent(name)+'/'+td+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(!r.ok)throw new Error(r.status);
+    const before=ckTier(Object.keys(st.dates).length);
+    st.dates[td]=Object.assign({},cur||{},body);
+    CK_PICK='';
+    const n=Object.keys(st.dates).length,after=ckTier(n);
+    toast(after&&(!before||after.lv>before.lv)?'🎉 '+after.emoji+' '+after.name+' 칭호 획득!':cur?'기분을 남겼어요.':'📌 출석 도장! 누적 '+n+'일');
+  }catch(e){
+    toast('⚠️ 출석 저장 실패'+((''+e.message).match(/40[13]/)?' — Firebase 규칙에 checkin 경로 허용이 필요해요':'. 잠시 뒤 다시 눌러 주세요.'));
+  }finally{CK_BUSY=false;renderCk();}
+}
+async function ckAdminLoad(){
+  const box=document.getElementById('ckAdmBody');
+  box.innerHTML='<div class="ev-none">불러오는 중…</div>';
+  try{
+    const r=await fetch(FB+'/checkin.json');
+    if(!r.ok)throw new Error(r.status);
+    const all=(await r.json())||{},td=todayStr();
+    const rows=MEMBERS.map(m=>{const d=all[m.name]||{},n=Object.keys(d).length,tdv=d[td];return{m,n,tier:ckTier(n),done:!!tdv,mood:tdv&&tdv.mood||''};})
+      .sort((a,b)=>b.n-a.n||a.m.name.localeCompare(b.m.name));
+    document.getElementById('ckAdmSum').textContent='· 오늘 '+rows.filter(x=>x.done).length+'/'+rows.length+'명';
+    box.innerHTML='<div style="overflow-x:auto"><table class="ck-tb"><thead><tr><th>이름</th><th>부서</th><th>누적</th><th>칭호</th><th>오늘</th><th>기분</th></tr></thead><tbody>'
+      +rows.map(x=>'<tr><td>'+esc(x.m.name)+'</td><td>'+esc(x.m.dept)+'</td><td><b>'+x.n+'</b>일</td><td>'+(x.tier?x.tier.emoji+' Lv'+x.tier.lv+' '+esc(x.tier.name):'—')+'</td><td>'+(x.done?'✅':'')+'</td><td>'+esc(CK_MOOD_LABEL[x.mood]||'')+'</td></tr>').join('')+'</tbody></table></div>';
+  }catch(e){box.innerHTML='<div class="ev-none">불러오지 못했어요'+((''+e.message).match(/40[13]/)?' — Firebase 규칙에 checkin 읽기 허용이 필요해요':'')+'</div>';}
+}
+document.addEventListener('toggle',e=>{if(e.target&&e.target.id==='ckAdm'&&e.target.open)ckAdminLoad();},true);
+
 function loadMe(){try{const n=localStorage.getItem(ME_KEY);return n&&gm(n).name?n:'';}catch(e){return '';}}
 function saveMe(n){try{if(n)localStorage.setItem(ME_KEY,n);else localStorage.removeItem(ME_KEY);}catch(e){}}
 
@@ -1535,6 +1636,7 @@ const sEvOpen=new Map();
 document.addEventListener('toggle',e=>{const d=e.target;if(d&&d.classList&&d.classList.contains('ev-fold'))sEvOpen.set(d.dataset.evid,d.open);},true);
 function renderMyTasks(){
   renderUnNotice();
+  renderCk();
   const name=document.getElementById('s0Name').value;
   const area=document.getElementById('myArea');
   document.getElementById('s0NameWrap').style.display=name?'none':'';
@@ -2602,6 +2704,9 @@ document.addEventListener('click',function(e){
   // data-action
   const el=e.target.closest('[data-action]');if(!el)return;
   const action=el.dataset.action,id=el.dataset.id,idx=el.dataset.idx!==undefined?parseInt(el.dataset.idx):undefined;
+  if(action==='ckMood'){CK_PICK=CK_PICK===el.dataset.mood?'':el.dataset.mood;renderCk();return;}
+  if(action==='ckSubmit'){ckSubmit();return;}
+  if(action==='ckRetry'){delete CK[myName()];renderCk();return;}
   if(action==='edit'){openEdit(id);return;}
   if(action==='del'){openDel(id);return;}
   if(action==='chgSt'){chgSt(id,el.dataset.status);return;}

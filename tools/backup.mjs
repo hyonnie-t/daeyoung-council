@@ -9,7 +9,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 
 const DB_URL = process.env.DB_URL || 'https://daeyoung-council-default-rtdb.firebaseio.com';
 const KEY = process.env.FB_API_KEY;
-const PATHS = (process.env.PATHS || 'tasks,events,activity,notice,attList,attendance').split(',').map(s => s.trim()).filter(Boolean);
+const PATHS = (process.env.PATHS || 'tasks,events,activity,notice,attList,attendance,checkin').split(',').map(s => s.trim()).filter(Boolean);
 if (!KEY) { console.error('FB_API_KEY 환경변수가 필요해 (Firebase 콘솔 > 프로젝트 설정 > 웹 API 키)'); process.exit(1); }
 
 const su = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=' + KEY, {
