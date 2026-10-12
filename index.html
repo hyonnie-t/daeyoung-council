@@ -2442,9 +2442,55 @@ function renderActivity(){
   const alert=zero.length
     ?'<div class="hm-alert"><b>⚠️ 이 기간 활동 없음 ('+zero.length+'명)</b><div>'+zero.map(esc).join(' · ')+'</div></div>'
     :'<div class="hm-alert ok"><b>✅ 이 기간에 모두 활동했어요</b></div>';
-  heat.innerHTML=seg+alert+'<div class="hm-wrap"><table class="hm"><thead><tr><th></th>'+th+'<th>합계</th></tr></thead><tbody>'+body+'</tbody></table></div>'
+  ACT_X={evs,live,bks,lo,hi};
+  const csvBar='<div style="display:flex;gap:8px;margin:0 0 10px"><button type="button" class="bc" data-action="actCsv" data-kind="sum">📥 학생별 요약 CSV</button><button type="button" class="bc" data-action="actCsv" data-kind="log">📥 활동 내역 CSV</button></div>';
+  heat.innerHTML=seg+alert+csvBar+'<div class="hm-wrap"><table class="hm"><thead><tr><th></th>'+th+'<th>합계</th></tr></thead><tbody>'+body+'</tbody></table></div>'
     +'<div class="hm-note">칸의 숫자는 그 기간에 한 일(완료 체크·등록·수정 등)의 개수예요. 부서 안에서는 활동이 적은 학생이 위에 와요. 이름 아래 글씨는 마지막 활동이고, 3일이 넘으면 빨간색이에요. 기간은 아래 \'최근 활동\'에도 같이 적용돼요.</div>'
     +'<div class="hm-note">로그가 생기기 전 기록은 완료 체크·등록만 반영돼요. 3~9월 예전 업무는 담당자 전원이 완료 시점에 끝낸 것으로 계산한 추정치예요.</div>';
+}
+
+// ── 교사: 학생별 활동 CSV 내보내기 (자치 활동 기록용, 위 히트맵과 같은 기간·같은 집계 기준) ──
+let ACT_X=null;
+function csvCell(v){
+  let s=v==null?'':String(v);
+  if(/^[=+\-@\t\r]/.test(s))s="'"+s; // 엑셀 수식 실행 방지 (업무 제목은 학생 입력)
+  return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;
+}
+function csvDownload(name,rows){
+  const txt='﻿'+rows.map(r=>r.map(csvCell).join(',')).join('\r\n'); // BOM: 엑셀에서 한글 깨짐 방지
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([txt],{type:'text/csv;charset=utf-8'}));
+  a.download=name;
+  document.body.appendChild(a);a.click();setTimeout(()=>a.remove(),0);
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function exportActCsv(kind){
+  if(!ACT_X){toast('활동 데이터를 불러온 뒤에 눌러 주세요');return;}
+  const {evs,live,bks,lo,hi}=ACT_X;
+  const rng=ACT_RANGES.find(r=>r[0]===actRange)[1];
+  const inR=evs.filter(e=>{const p=actPerson(e),d=actDay(e.at);return p&&gm(p).name&&live(e)&&d>=lo&&d<=hi;});
+  const fname='학생회_학생별활동_'+(kind==='sum'?'요약':'내역')+'_'+rng+'_'+todayStr()+'.csv';
+  if(kind==='log'){
+    const rows=[['일시','이름','부서','직책','구분','업무','비고']];
+    inR.slice().sort((a,b)=>new Date(a.at)-new Date(b.at)).forEach(e=>{
+      const p=actPerson(e),d=new Date(e.at);
+      const note=[e.to||'',e.legacy?'추정(예전 업무 완료일)':'',(e.type==='done'&&e.who&&e.who!==e.name)?e.who+'이 처리':''].filter(Boolean).join(' / ');
+      rows.push([actDay(e.at)+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'),p,gd(p),gm(p).role||'',ACT_TXT[e.type].replace(/^\S+\s/,''),e.title||'',note]);
+    });
+    csvDownload(fname,rows);
+  }else{
+    const lab=bks.map(b=>b.label.replace('<br>',' '));
+    const rows=[['이름','부서','직책',...lab,'합계','완료 체크','업무 등록','마지막 활동']];
+    const last={};
+    evs.forEach(e=>{const p=actPerson(e);if(p&&gm(p).name&&live(e)&&!last[p])last[p]=e.at;});
+    MEMBERS.forEach(m=>{
+      const mine=inR.filter(e=>actPerson(e)===m.name);
+      const per=bks.map(b=>mine.filter(e=>{const d=actDay(e.at);return d>=b.from&&d<=b.to;}).length);
+      rows.push([m.name,m.dept,m.role,...per,mine.length,mine.filter(e=>e.type==='done').length,mine.filter(e=>e.type==='add').length,last[m.name]?actDay(last[m.name]):'']);
+    });
+    csvDownload(fname,rows);
+  }
+  toast('CSV를 내려받았어요 ('+rng+')');
 }
 
 // ── 교사: 학생별 ──
@@ -2801,6 +2847,7 @@ document.addEventListener('click',function(e){
   if(action==='copyNag'){copyNag(el.dataset.name);return;}
   if(action==='sdDept'){sdSel=el.dataset.dept;renderSDept();return;}
   if(action==='actRange'){actRange=el.dataset.range;renderActivity();return;}
+  if(action==='actCsv'){exportActCsv(el.dataset.kind);return;}
   if(action==='goTask'){
     const c=document.getElementById('c-'+el.dataset.id);if(!c)return;
     for(let p=c.parentElement;p;p=p.parentElement)if(p.tagName==='DETAILS')p.open=true;
