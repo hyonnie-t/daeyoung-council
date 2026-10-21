@@ -442,6 +442,13 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .sched-fold>summary::before{content:'▸ ';color:var(--text3)}
 .sched-fold[open]>summary::before{content:'▾ '}
 .sched-fold[open]>summary small{display:none}
+.report-card{display:flex;align-items:center;gap:12px;width:100%;text-align:left;font-family:inherit;cursor:pointer;background:#f3f0ff;border:1px solid var(--accent);border-radius:var(--r);box-shadow:var(--sh);padding:12px 14px;margin-bottom:12px;color:var(--text);transition:all .2s}
+.report-card:hover{background:#ebe5ff}
+.rc-ic{font-size:24px;line-height:1}
+.rc-tx{flex:1;display:flex;flex-direction:column;gap:2px}
+.rc-tx b{font-size:15px;color:var(--accent)}
+.rc-tx small{font-size:12px;color:var(--text3)}
+.rc-go{font-size:22px;color:var(--accent);font-weight:700}
 .my-strip{display:flex;gap:8px;margin-bottom:16px}
 .ms{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px 4px;text-align:center;box-shadow:var(--sh)}
 .ms b{display:block;font-size:22px;font-weight:900;line-height:1.15;font-family:'Noto Sans KR',sans-serif}
@@ -470,6 +477,7 @@ details.un-notice[open]>summary{margin-bottom:8px}
   #sP0.active{display:flex;flex-direction:column}
   .s0-side,.s0-main{display:contents}
   #noticeBox{order:0}#s0NameWrap{order:1}#myArea{order:2}#unNotice{order:3}#schedFold{order:4}
+  #reportCard{order:0} /* 결과보고서는 폰에서도 공지 바로 아래(위쪽)에 */
 }
 .seg{display:flex;gap:4px;background:var(--surface2);border-radius:12px;padding:4px;margin:0 auto 16px;max-width:560px}
 .seg button{flex:1;padding:9px 6px;border-radius:9px;border:none;background:transparent;color:var(--text2);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}
@@ -675,11 +683,13 @@ details.un-notice[open]>summary{margin-bottom:8px}
       <div style="font-size:12px;font-weight:700;color:var(--warn);margin-bottom:6px">📢 공지사항</div>
       <div id="noticeText" style="font-size:15px;color:var(--text);line-height:1.7;white-space:pre-wrap"></div>
     </div>
+    <!-- 결과보고서 팝업(SHEET_POPUPS.report). 일정표 바로 위 잘 보이는 자리 -->
+    <button type="button" class="report-card" id="reportCard" data-action="report"><span class="rc-ic">📊</span><span class="rc-tx"><b>10월 행사 결과보고서</b><small>참여율·만족도 결과 보기</small></span><span class="rc-go">›</span></button>
     <!-- 이번 달 일정표. 기존 배너 hero-banner.png는 보관 중(되돌릴 땐 src만 바꾸면 됨). 누르면 원본 크기로 열림 -->
     <details class="fold sched-fold" id="schedFold">
       <summary>📅 이번 달 일정표 <small>눌러서 펼치기</small></summary>
-      <a href="schedule-2026-10.webp" target="_blank" rel="noopener" style="display:block;margin:8px 0 16px">
-        <img src="schedule-2026-10.webp" alt="2026년 10월 학생회 일정" style="width:100%;border-radius:14px;display:block">
+      <a href="schedule-2026-11.webp" target="_blank" rel="noopener" style="display:block;margin:8px 0 16px">
+        <img src="schedule-2026-11.webp" alt="2026년 11월 학생회 일정" style="width:100%;border-radius:14px;display:block">
       </a>
     </details>
    </div>
@@ -698,7 +708,6 @@ details.un-notice[open]>summary{margin-bottom:8px}
   <div class="tp" id="sP4"><div id="sDept"></div></div>
   <div class="foot-links">
     <a class="mc-link" style="flex:1" href="https://docs.google.com/document/d/184Tscu9FSgxyeuxSgPnjnkRiOwjqS60pak2y8cuw9cQ/edit" target="_blank" rel="noopener">📝 회의록 <span class="mc-link-ext">↗</span></a>
-    <button type="button" class="mc-link" style="flex:1;background:none" data-action="report">📊 결과보고서</button>
     <button type="button" class="mc-link" style="flex:1;background:none" id="btnT">🔒 선생님 모드</button>
   </div>
 </div>
