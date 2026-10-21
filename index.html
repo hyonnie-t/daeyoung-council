@@ -698,6 +698,7 @@ details.un-notice[open]>summary{margin-bottom:8px}
   <div class="tp" id="sP4"><div id="sDept"></div></div>
   <div class="foot-links">
     <a class="mc-link" style="flex:1" href="https://docs.google.com/document/d/184Tscu9FSgxyeuxSgPnjnkRiOwjqS60pak2y8cuw9cQ/edit" target="_blank" rel="noopener">📝 회의록 <span class="mc-link-ext">↗</span></a>
+    <button type="button" class="mc-link" style="flex:1;background:none" data-action="report">📊 결과보고서</button>
     <button type="button" class="mc-link" style="flex:1;background:none" id="btnT">🔒 선생님 모드</button>
   </div>
 </div>
@@ -707,6 +708,7 @@ details.un-notice[open]>summary{margin-bottom:8px}
   <div class="ah">
     <button type="button" class="back-btn" id="tBack">←</button>
     <h2>전체 현황</h2>
+    <button type="button" class="acct-btn" data-action="report">📊 결과보고서</button>
     <button type="button" class="acct-btn" data-action="acct">🔑 계정</button>
     <button type="button" class="lock-btn" id="lockBtn">🔒 잠금</button>
   </div>
@@ -855,11 +857,11 @@ details.un-notice[open]>summary{margin-bottom:8px}
   </div>
 </div>
   
-<!-- 계정 팝업: 구글 시트를 앱 안에서 바로 보여준다(계정 정보는 코드에 넣지 말 것) -->
+<!-- 시트 팝업: 구글 시트를 앱 안에서 바로 보여준다(계정·결과보고서 공용, SHEET_POPUPS. 계정 정보는 코드에 넣지 말 것) -->
 <div class="mov" id="acctMov">
   <div class="ms" style="max-width:900px;display:flex;flex-direction:column;height:85vh">
     <div class="mh"></div>
-    <div class="mt" style="display:flex;justify-content:space-between;align-items:center;gap:8px">🔑 학생회 공용 계정
+    <div class="mt" style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span id="acctTitle">🔑 학생회 공용 계정</span>
       <a class="acct-btn" id="acctOpen" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div>
     <iframe id="acctFrame" title="학생회 공용 계정" style="flex:1;width:100%;border:1px solid var(--border);border-radius:10px;background:var(--surface2)"></iframe>
     <div class="hint">화면이 비어 있으면 구글 로그인이 필요한 경우예요. '새 창에서 열기'를 눌러주세요.</div>
@@ -1008,6 +1010,12 @@ const FB_API_KEY='AIzaSyCtDfzTbaa_Y-G4n-DuUgcSoNnyo6BcmQo';
 })();
 const GAS='https://script.google.com/macros/s/AKfycbzcmOgxrmciJN7Uw6Flq7U6KtlP8vtDiI5bexcDmEzYHw8_y129BAiPGZI_NenJfhcE/exec';
 const ACCOUNT_SHEET_URL='https://docs.google.com/spreadsheets/d/1kuBQRMXVZypsh2hL7Fjrtp39hZgQskD_J3oxDOzSmKc/edit#gid=1570826793';
+// 시트 팝업(#acctMov) 대상. report는 htmlview+single=true라 그 탭 하나만 읽기 전용으로 보이고 아래 탭 줄이 없다
+const REPORT_SHEET_URL='https://docs.google.com/spreadsheets/d/1kuBQRMXVZypsh2hL7Fjrtp39hZgQskD_J3oxDOzSmKc/htmlview?gid=286960274&single=true&headers=false&chrome=false';
+const SHEET_POPUPS={
+  acct:{title:'🔑 학생회 공용 계정',src:ACCOUNT_SHEET_URL.replace('/edit#','/edit?rm=minimal#'),open:ACCOUNT_SHEET_URL},
+  report:{title:'📊 10월 행사 결과보고서',src:REPORT_SHEET_URL,open:REPORT_SHEET_URL}
+};
 const EK='daeyoung_events_v1';   // 행사 로컬 캐시
 const ME_KEY='daeyoung_me';      // 이 폰에서 고른 학생 이름
 // 선생님 '행사' 탭의 "10월 일정 한 번에 등록" 버튼용. 행사가 하나도 없을 때만 쓰인다.
@@ -2871,11 +2879,12 @@ document.addEventListener('click',function(e){
   if(action==='meDone'){meDone(id);return;}
   if(action==='tDone'){tDone(id,el.dataset.name);return;}
   if(action==='tAll'){setAllDone(id,el.dataset.val==='1');return;}
-  if(action==='acct'){
-    const f=document.getElementById('acctFrame');
-    // 편집 도구 줄을 줄인 보기로 띄움. 처음 열 때만 로드
-    if(!f.src)f.src=ACCOUNT_SHEET_URL.replace('/edit#','/edit?rm=minimal#');
-    document.getElementById('acctOpen').href=ACCOUNT_SHEET_URL;
+  if(action==='acct'||action==='report'){
+    const p=SHEET_POPUPS[action],f=document.getElementById('acctFrame');
+    // 같은 시트를 다시 열 땐 다시 로드하지 않음
+    if(f.dataset.sheet!==action){f.src=p.src;f.dataset.sheet=action;f.title=p.title.slice(2).trim();}
+    document.getElementById('acctTitle').textContent=p.title;
+    document.getElementById('acctOpen').href=p.open;
     document.getElementById('acctMov').classList.add('open');
     return;
   }
