@@ -24,7 +24,7 @@ body{word-break:keep-all;overflow-wrap:break-word}
     font-family:Pretendard,-apple-system,BlinkMacSystemFont,'Malgun Gothic',sans-serif;
     background:var(--bg);color:var(--ink);
     font-size:16px;line-height:1.7;word-break:keep-all;
-    padding-bottom:80px;
+    padding-bottom:24px;
   }
   .wrap{max-width:760px;margin:0 auto;padding:0 14px}
 
@@ -72,7 +72,6 @@ body{word-break:keep-all;overflow-wrap:break-word}
     background:var(--card);border:1px solid var(--line);border-radius:10px;
     margin-bottom:9px;overflow:hidden;
   }
-  .art.read{border-color:#cfe0d3;background:#fcfefc}
   .art-head{
     display:flex;align-items:flex-start;gap:9px;width:100%;
     padding:14px 15px;background:none;border:0;font-family:inherit;
@@ -82,10 +81,8 @@ body{word-break:keep-all;overflow-wrap:break-word}
     flex:none;font-size:13px;font-weight:800;color:var(--blue);
     background:var(--blue-bg);padding:3px 8px;border-radius:5px;margin-top:1px;
   }
-  .art.read .art-no{background:#e3f0e5;color:#2e6b3a}
   .art-title{flex:1;font-size:16px;font-weight:700;line-height:1.5;letter-spacing:-.01em}
   .art-mark{flex:none;font-size:14px;color:var(--ink3);margin-top:2px}
-  .art.read .art-mark{color:#3d8a4d}
 
   .art-body{display:none;padding:0 15px 15px;border-top:1px solid var(--line2)}
   .art.open .art-body{display:block}
@@ -101,7 +98,6 @@ body{word-break:keep-all;overflow-wrap:break-word}
     border-radius:7px;border:1.5px solid var(--line);background:var(--card);
     color:var(--ink2);cursor:pointer;
   }
-  .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
   .btn:active{transform:scale(.98)}
 
   /* 안내 박스 */
@@ -115,20 +111,8 @@ body{word-break:keep-all;overflow-wrap:break-word}
 
   .empty{text-align:center;padding:48px 20px;color:var(--ink3);font-size:15px}
 
-  /* 하단 바 */
-  .bar{
-    position:fixed;left:0;right:0;bottom:0;z-index:30;
-    background:rgba(255,255,255,.96);backdrop-filter:blur(8px);
-    border-top:1px solid var(--line);
-    padding:10px 14px calc(10px + env(safe-area-inset-bottom));
-  }
-  .bar-in{max-width:760px;margin:0 auto;display:flex;gap:8px;align-items:center}
-  .bar-txt{flex:1;font-size:13px;color:var(--ink2);line-height:1.45}
-  .bar-txt b{color:var(--blue)}
-  .bar .btn{flex:none}
-
   .toast{
-    position:fixed;left:50%;bottom:88px;transform:translateX(-50%) translateY(12px);
+    position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(12px);
     background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;
     font-size:14px;opacity:0;pointer-events:none;transition:.22s;z-index:60;white-space:nowrap;
   }
@@ -158,8 +142,7 @@ body{word-break:keep-all;overflow-wrap:break-word}
     <b>이렇게 보면 됩니다</b>
     <ul>
       <li>위에서 자기 부서를 누르면 담당 조항만 나옵니다</li>
-      <li>읽은 조항은 <b>읽음</b>으로 표시해두면 어디까지 봤는지 남습니다</li>
-      <li>이야기해볼 만한 조항을 찾으면 <b>이 조항 제출</b>을 누르세요</li>
+      <li>조항을 누르면 내용이 펼쳐지고, <b>조항 복사</b>로 내용을 복사할 수 있습니다</li>
     </ul>
   </div>
 
@@ -177,14 +160,6 @@ body{word-break:keep-all;overflow-wrap:break-word}
   </footer>
 </div>
 
-<div class="bar">
-  <div class="bar-in">
-    <div class="bar-txt" id="prog">읽은 조항 <b>0</b> / 37</div>
-    <button type="button" class="btn" id="reset">읽음 초기화</button>
-    <button type="button" class="btn primary" id="goForm">제출하러 가기</button>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <script>
@@ -192,8 +167,6 @@ body{word-break:keep-all;overflow-wrap:break-word}
   'use strict';
 
   // ── 설정 ────────────────────────────────────────────
-  var FORM_URL = 'https://forms.gle/kWs2UiRXAAxM1uAP8';
-  var SKEY = 'dike_rules_read_v1';
 
   var DEPTS = [
     { id: 'all',  name: '전체',       from: 1,  to: 37 },
@@ -260,23 +233,12 @@ body{word-break:keep-all;overflow-wrap:break-word}
   ];
 
   // ── 상태 ────────────────────────────────────────────
-  var state = { dept: 'all', q: '', read: {} };
-
-  function loadRead() {
-    try {
-      var raw = window.localStorage.getItem(SKEY);
-      state.read = raw ? JSON.parse(raw) : {};
-    } catch (e) { state.read = {}; }
-  }
-  function saveRead() {
-    try { window.localStorage.setItem(SKEY, JSON.stringify(state.read)); } catch (e) {}
-  }
+  var state = { dept: 'all', q: '' };
 
   // ── 렌더 ────────────────────────────────────────────
   var elList = document.getElementById('list');
   var elChips = document.getElementById('chips');
   var elCount = document.getElementById('count');
-  var elProg = document.getElementById('prog');
   var elToast = document.getElementById('toast');
 
   function esc(s) {
@@ -321,21 +283,17 @@ body{word-break:keep-all;overflow-wrap:break-word}
         html += '<div class="chapter">' + esc(CHAPTERS[a.n]) + '</div>';
         lastCh = CHAPTERS[a.n];
       }
-      var isRead = !!state.read[a.n];
       html +=
-        '<article class="art' + (isRead ? ' read' : '') + '" data-n="' + a.n + '">' +
+        '<article class="art" data-n="' + a.n + '">' +
           '<button type="button" class="art-head" data-act="toggle">' +
             '<span class="art-no">제' + a.n + '조</span>' +
             '<span class="art-title">' + esc(a.t) + '</span>' +
-            '<span class="art-mark">' + (isRead ? '\u2713' : '\u203A') + '</span>' +
+            '<span class="art-mark">' + '\u203A' + '</span>' +
           '</button>' +
           '<div class="art-body">' +
             '<div class="art-text">' + esc(a.b) + '</div>' +
             '<div class="art-tools">' +
-              '<button type="button" class="btn" data-act="read">' +
-                (isRead ? '읽음 해제' : '읽음 표시') + '</button>' +
               '<button type="button" class="btn" data-act="copy">조항 복사</button>' +
-              '<button type="button" class="btn primary" data-act="submit">이 조항 제출</button>' +
             '</div>' +
           '</div>' +
         '</article>';
@@ -343,11 +301,6 @@ body{word-break:keep-all;overflow-wrap:break-word}
 
     elList.innerHTML = html;
     elCount.textContent = items.length + '개 조항';
-  }
-
-  function renderProg() {
-    var n = Object.keys(state.read).filter(function (k) { return state.read[k]; }).length;
-    elProg.innerHTML = '읽은 조항 <b>' + n + '</b> / ' + ARTICLES.length;
   }
 
   var toastTimer = null;
@@ -410,48 +363,15 @@ body{word-break:keep-all;overflow-wrap:break-word}
       art.classList.toggle('open');
       return;
     }
-    if (act === 'read') {
-      state.read[n] = !state.read[n];
-      saveRead();
-      renderProg();
-      var wasOpen = art.classList.contains('open');
-      renderList();
-      if (wasOpen) {
-        var again = elList.querySelector('.art[data-n="' + n + '"]');
-        if (again) again.classList.add('open');
-      }
-      return;
-    }
     if (act === 'copy') {
       copyText('제' + data.n + '조(' + data.t + ') ' + data.b);
       return;
     }
-    if (act === 'submit') {
-      copyText('제' + data.n + '조(' + data.t + ')');
-      setTimeout(function () { window.open(FORM_URL, '_blank', 'noopener'); }, 260);
-      toast('조항 번호를 복사했어요. 폼에 붙여넣으세요');
-      return;
-    }
-  });
-
-  document.getElementById('goForm').addEventListener('click', function () {
-    window.open(FORM_URL, '_blank', 'noopener');
-  });
-
-  document.getElementById('reset').addEventListener('click', function () {
-    if (!window.confirm('읽음 표시를 모두 지울까요?')) return;
-    state.read = {};
-    saveRead();
-    renderList();
-    renderProg();
-    toast('초기화했습니다');
   });
 
   // ── 시작 ────────────────────────────────────────────
-  loadRead();
   renderChips();
   renderList();
-  renderProg();
 })();
 </script>
 </body>
