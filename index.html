@@ -334,7 +334,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 .tc-more .add-si{margin-top:6px}
 .tc-act{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px dashed var(--border)}
 .tc-act button{flex:1;min-width:88px;padding:8px 6px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
-.tc-act button.danger,.ev-row-act button.danger{color:#d64545}
+.tc-act button.danger,.ev-row-act button.danger,.todo-act button.danger{color:#d64545}
 .bulk-open{width:100%;margin-bottom:12px;padding:11px;border-radius:9px;border:1px dashed var(--accent);background:var(--surface2);color:var(--accent);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
 .bk-row{display:flex;align-items:flex-start;gap:10px;padding:10px 4px;border-bottom:1px solid var(--border);cursor:pointer}
 .bk-row input{width:20px;height:20px;margin-top:2px;flex-shrink:0}
@@ -2318,7 +2318,7 @@ function renderDash(){
     const sub=[esc(t.category||'기타'),ua?'담당자 없음':ass.map(esc).join(', ')].join(' · ');
     const chips=!ua&&isPer(t)&&t.status!=='보류'?doneChips(t):(!ua?'<span class="tag tag-'+t.status+'" style="margin-top:6px;display:inline-block">'+t.status+'</span>':'');
     return '<div class="todo-row"><span class="todo-d '+cl+'">'+lb+'</span><div class="todo-main"><div class="todo-ti">'+esc(t.title)+'</div><div class="todo-sub">'+sub+'</div>'+chips+'</div><div class="todo-act">'+
-      '<button type="button"'+(ua?' class="pri"':'')+' data-action="assign" data-id="'+t.id+'">'+(ua?'배정':'👤')+'</button><button type="button" data-action="edit" data-id="'+t.id+'">✏️</button></div></div>';
+      '<button type="button"'+(ua?' class="pri"':'')+' data-action="assign" data-id="'+t.id+'">'+(ua?'배정':'👤')+'</button><button type="button" data-action="edit" data-id="'+t.id+'">✏️</button><button type="button" class="danger" data-action="del" data-id="'+t.id+'" aria-label="업무 삭제">🗑</button></div></div>';
   };
   document.getElementById('todoArea').innerHTML=todo.length?'<div class="todo-list">'+todo.slice(0,10).map(todoRow).join('')+'</div>'+(todo.length>10?'<details class="tc-more" style="margin:0 0 8px"><summary>나머지 '+(todo.length-10)+'건 더 보기</summary><div class="todo-list" style="margin-top:10px">'+todo.slice(10).map(todoRow).join('')+'</div></details>':''):'<div style="font-size:14px;color:var(--text3);padding:8px 0">지금 처리할 업무가 없어요 ✅</div>';
   renderActivity();
