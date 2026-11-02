@@ -11,6 +11,7 @@
 | `index.html` | 핵심 앱. CSS·JS 전부 인라인(약 3,500줄). 학생 화면(`#sView`, 이름 선택만) / 선생님 화면(`#tView`, SHA-256 비번은 "실수 방지" 수준). 구획 주석 `// ── 이름 ──`으로 찾는다 |
 | `rules.html` | 학생회 규정집. `ARTICLES` 배열 하드코딩, 네트워크 없음 |
 | `staff.html`, `task-review.html` | 행사 1회성 페이지(환경의 날 담당자 / 10월 업무 확인). `index.html`에서 링크하지 않는다 |
+| `election.html` | 2027 학생회장 선거 학생 공유용 안내(교사용 길잡이에서 교사 전용 내용을 지운 사본). 원본은 OneDrive `학생회/20 학생회장 선거/2027학생회장선거_업무정리.html`, 고치면 다시 만든다. `index.html`에서 링크하지 않는다 |
 | `firebase/` | `database.rules.json`(콘솔에 게시된 규칙 사본) + 적용 순서 README |
 | `tools/` | `backup.mjs`(DB JSON 백업, `backup/`은 gitignore), `backup-weekly.gs` |
 | `docs/features.md` | **기능 상세**(화면 구조·데이터 모델·저장/동기화·출석·기분 체크인·말로 쪼개기). 고칠 기능의 절만 `grep -n "^## \|^### "`로 찾아 읽는다 |
