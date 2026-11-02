@@ -65,7 +65,7 @@ h2 .em{font-size:1.1em}
 .filters button[aria-pressed="true"]{border-color:var(--pink-d);background:var(--pink);color:var(--pink-d)}
 .tl{list-style:none;margin:0;padding:0;position:relative}
 .tl:before{content:"";position:absolute;left:19px;top:6px;bottom:6px;width:4px;border-radius:4px;background:var(--line)}
-.tl li{position:relative;padding:0 0 14px 52px}
+.tl > li{position:relative;padding:0 0 14px 52px}
 .tl .dot{position:absolute;left:4px;top:2px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
   background:var(--card);border:3px solid var(--pink);font-size:16px}
 .tl li.big .dot{border-color:var(--pink-d);background:var(--pink)}
@@ -114,6 +114,44 @@ th{background:var(--lav);color:var(--lav-d);font-size:14px}
 .tools button{font:inherit;font-size:14px;font-weight:700;border:0;border-radius:999px;padding:7px 14px;cursor:pointer;background:var(--pink);color:var(--pink-d)}
 .only-teacher{outline:2px dashed var(--sky-d);outline-offset:3px;border-radius:14px}
 section.only-teacher,li.only-teacher{padding:12px 14px}
+/* 폰(학생 대부분): 머리글을 줄여 내용이 빨리 보이게, 탭은 한 줄에 다 들어가게, 표는 카드로 쌓기. 인쇄 중(.printing)에는 적용하지 않는다 */
+@media(max-width:600px){
+  body:not(.printing){font-size:16px;line-height:1.6}
+  body:not(.printing) .wrap{padding:0 14px 48px}
+  body:not(.printing) header.hero{padding:18px 0 8px}
+  body:not(.printing) .hero .stamp{font-size:34px;margin-bottom:2px}
+  body:not(.printing) .hero h1{font-size:22px;line-height:1.35;text-wrap:balance}
+  body:not(.printing) .hero p{font-size:14px;margin-top:4px}
+  body:not(.printing) .dday{gap:6px;margin-top:10px}
+  body:not(.printing) .pill{font-size:13px;padding:5px 11px}
+  body:not(.printing) #printBtn{display:none}
+  body:not(.printing) .tools{margin-top:8px}
+  body:not(.printing) nav.tabs{gap:6px;padding:8px 0}
+  body:not(.printing) nav.tabs a{flex:1 0 auto;text-align:center;padding:8px 10px;font-size:14px}
+  body:not(.printing) section{margin-top:22px;scroll-margin-top:56px}
+  body:not(.printing) h2{font-size:21px}
+  body:not(.printing) .card{padding:14px;border-radius:16px}
+  body:not(.printing) .filters{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  body:not(.printing) .filters::-webkit-scrollbar{display:none}
+  body:not(.printing) .filters button{flex:0 0 auto;padding:7px 14px}
+  body:not(.printing) .tl:before{left:14px}
+  body:not(.printing) .tl > li{padding:0 0 12px 40px}
+  body:not(.printing) .tl .dot{left:1px;width:30px;height:30px;font-size:14px}
+  body:not(.printing) .tl .what{font-size:16.5px}
+  body:not(.printing) .tl ul{padding-left:18px}
+  body:not(.printing) .month{margin-left:40px}
+  body:not(.printing) .check li{padding:9px 0}
+  body:not(.printing) .check input{width:22px;height:22px;margin-top:2px}
+  /* 3칸 표 → 줄마다 카드 한 장 */
+  body:not(.printing) #trouble table,body:not(.printing) #trouble tbody,body:not(.printing) #trouble tr,body:not(.printing) #trouble td{display:block;width:auto}
+  body:not(.printing) #trouble tr:first-child{display:none}
+  body:not(.printing) #trouble tr{padding:10px 0;border-bottom:1px solid var(--line)}
+  body:not(.printing) #trouble tr:last-child{border-bottom:0}
+  body:not(.printing) #trouble td{border:0;padding:2px 0}
+  body:not(.printing) #trouble td:first-child{font-weight:800}
+  body:not(.printing) #trouble td:nth-child(3){font-size:14px;color:var(--sub)}
+  body:not(.printing) #trouble td:nth-child(3):before{content:"누가: "}
+}
 body.student .only-teacher,body.student .staff{display:none}
 .edition{display:inline-block;margin-top:8px;padding:4px 14px;border-radius:999px;font-weight:800;font-size:15px;background:var(--sky);color:var(--sky-d)}
 body.student .edition{background:var(--mint);color:var(--mint-d)}
@@ -140,7 +178,7 @@ body.printing .grid2{grid-template-columns:1fr 1fr;gap:8px}
 body.printing ul{margin:2px 0;padding-left:18px}
 body.printing .tag{font-size:10.5px;padding:1px 7px}
 body.printing .tl:before{left:12px}
-body.printing .tl li{padding:0 0 6px 36px}
+body.printing .tl > li{padding:0 0 6px 36px}
 body.printing .tl .dot{width:26px;height:26px;font-size:12px;border-width:2px}
 body.printing .tl .when{font-size:12.5px}
 body.printing .tl .what{font-size:14px;margin:0 0 2px}
@@ -173,7 +211,7 @@ body.printing footer{margin-top:14px}
 
 <header class="hero">
   <div class="stamp">🗳️</div>
-  <h1>2027학년도 학생회장·부회장 선거 길잡이</h1>
+  <h1>2027학년도 <span style="white-space:nowrap">학생회장·부회장</span> 선거 길잡이</h1>
   <p>대영중학교 창의인성교육부 · 2026년 11월 2일 정리</p>
   <span class="edition"><span class="ed-t">🧑‍🏫 교사용</span><span class="ed-s">🙋 학생 공유용</span></span>
   <div class="dday">
