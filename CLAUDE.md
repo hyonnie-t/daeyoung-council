@@ -1,7 +1,7 @@
 # daeyoung-council — 대영중 학생회 업무 앱 (정적 페이지 + Firebase)
 
 학생회 임원이 행사별 업무를 나눠 맡고 완료를 체크하는 앱. 빌드·패키지·서버 코드 없음. GitHub Pages가 저장소 루트를 그대로 서빙하고
-`main`에 push하면 1~2분 안에 https://hyonnie-t.github.io/daeyoung-council/ 에 반영된다(= 바로 배포라는 뜻. 작업은 브랜치 → PR → 효니 병합).
+`main`에 push하면 1~2분 안에 https://hyonnie-t.github.io/daeyoung-council/ 에 반영된다(= 바로 배포라는 뜻. 작업은 브랜치 → PR → 클로드가 검증 뒤 병합·배포 확인).
 **이 저장소는 public이다.** 비밀번호·계정·개인정보를 HTML/JS에 적지 않는다(과거 공용 계정이 평문으로 들어간 사고 있음 → 지금은 구글 시트 링크 `ACCOUNT_SHEET_URL`).
 `FB_API_KEY`(Firebase 웹 API 키)만 예외로 공개돼도 되는 값이다(접근 제어는 DB 규칙).
 
