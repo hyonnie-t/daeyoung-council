@@ -12,7 +12,8 @@
 | `rules.html` | 학생회 규정집. `ARTICLES` 배열 하드코딩, 네트워크 없음 |
 | `staff.html`, `task-review.html` | 행사 1회성 페이지(환경의 날 담당자 / 10월 업무 확인). `index.html`에서 링크하지 않는다 |
 | `election.html` | 2027 학생회장 선거 학생 공유용 안내(교사용 길잡이에서 교사 전용 내용을 지운 사본). 원본은 OneDrive `학생회/20 학생회장 선거/2027학생회장선거_업무정리.html`, 고치면 다시 만든다(`클로드작업/도구/선거길잡이_학생용만들기.js`, 만든 뒤 빈 주석 줄 지우기). 학생 첫 화면 규정집 카드 위 «🗳️ 2027 학생회장 선거 안내» 카드에서 링크(선거 끝나면 카드 지우기) |
-| `sangjeom.html` | 행사 상점 기록. 담당 학생(비밀번호)은 학번·점수로 가능/부족 확인 후 기록, 선생님 화면(`?teacher=1`, 전용 관리 비밀번호)은 잠금·담당 비밀번호·남은 상점·기록. Firebase가 아니라 `history26_backend` `72_sangjeom.gs`를 쓴다(전교생 이름·점수를 로그인 없는 Firebase에 두지 않으려고). `API`는 `CHEER_URL`과 같은 값. 행사 전 점수 넣기·행사 뒤 e알리미 음수 등록은 `클로드작업\도구\ealimi\상점행사.ps1` |
+| `sangjeom.html` | 행사 상점 기록. 담당 학생(비밀번호)은 학번·점수로 가능/부족 확인 후 기록, 선생님 화면(`?teacher=1`, 관리 비밀번호)은 잠금·담당 비밀번호·남은 상점·기록. 전교생 이름·점수를 로그인 없는 Firebase에 두지 않으려고 학생회 전용 앱스크립트를 쓴다(역사 포털 백엔드에 넣지 않는다, 효니 결정). 행사 전 점수 넣기·행사 뒤 e알리미 음수 등록은 `클로드작업\도구\ealimi\상점행사.ps1` |
+| `apps-script/sangjeom/` | 위 페이지의 서버 소스 `Code.gs`(대영중_학생회_DB_2026 시트에 연결된 스크립트의 사본, 스크립트 ID 1MSKMlCsF6MV7bQEIBagFmmJrhLEs5uEJFFSIP-VXVdk1hJCgcwsDEaIW)와 `test.js`(`node apps-script/sangjeom/test.js`). 고치면 편집기에 올리고 «새 버전». 그 시트는 효니만 보게 둔다. `2026 대영중학교 학생회` 시트는 링크로 누구나 수정할 수 있어 점수를 두지 않는다 |
 | `firebase/` | `database.rules.json`(콘솔에 게시된 규칙 사본) + 적용 순서 README |
 | `tools/` | `backup.mjs`(DB JSON 백업, `backup/`은 gitignore), `backup-weekly.gs` |
 | `docs/features.md` | **기능 상세**(화면 구조·데이터 모델·저장/동기화·출석·기분 체크인·말로 쪼개기). 고칠 기능의 절만 `grep -n "^## \|^### "`로 찾아 읽는다 |
