@@ -583,8 +583,8 @@ details.un-notice[open]>summary{margin-bottom:8px}
   .cday{aspect-ratio:auto;min-height:64px}
   .dnum{font-size:14px}
   .ddot{width:6px;height:6px}
-  .s0-side a{max-width:560px;margin-left:auto;margin-right:auto}
-  #noticeBox{max-width:560px;margin-left:auto;margin-right:auto}
+  /* 일정표 그림만 줄인다. 공지·안내 카드는 이름 칸과 같은 폭으로 맞춘다 */
+  .sched-fold a{max-width:560px;margin-left:auto!important;margin-right:auto!important}
   /* 업무 카드·행사 카드 2열 */
   .tg{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;align-items:start}
   .tg>.tgl{grid-column:1/-1;margin-bottom:0}
@@ -639,7 +639,7 @@ details.un-notice[open]>summary{margin-bottom:8px}
   /* 해야할 일: 왼쪽 공지·일정표 고정, 오른쪽 내 업무 */
   #sP0.active{display:grid;grid-template-columns:360px 1fr;gap:28px;align-items:start}
   .s0-side{position:sticky;top:130px}
-  .s0-side a,#noticeBox{max-width:none}
+  .sched-fold a{max-width:none}
   #myArea .ev .tc{box-shadow:none}
   .sg{gap:16px}
 }
