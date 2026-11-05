@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>행사 상점 기록</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
+<style>
+/* 학생회 앱(index.html)과 같은 색. 행사장에서 폰 한 손으로 쓰는 화면이라 칸·버튼을 크게 둔다 */
+:root{
+  --bg:#f8f9fa;--surface:#fff;--surface2:#f1f3f5;--border:#dee2e6;
+  --accent:#5b52e8;--accent-soft:#eeedfd;--good:#1b7a36;--good-soft:#e6f6ea;--bad:#c02b2b;--bad-soft:#fdecec;
+  --text:#212529;--text2:#495057;--text3:#6c757d;--sh:0 2px 10px rgba(30,30,60,.07);
+}
+*{box-sizing:border-box;margin:0}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);font-size:16px;line-height:1.55;word-break:keep-all;min-height:100vh}
+.wrap{width:100%;max-width:28rem;margin:0 auto;padding:18px 16px 40px}
+@media (min-width:768px){.wrap{max-width:40rem;padding-top:28px}body{font-size:17px}}
+@media (min-width:1100px){.wrap.wide{max-width:64rem}.wide .cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}}
+h1{font-size:22px;font-weight:900}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.top a,.link{color:var(--text3);font-size:14px;background:none;border:0;cursor:pointer;font-family:inherit;text-decoration:underline;padding:6px 2px}
+.sub{color:var(--text2);font-size:14px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;box-shadow:var(--sh);margin-bottom:14px}
+.card h2{font-size:16px;font-weight:700;margin-bottom:10px}
+label{display:block;font-size:14px;font-weight:500;color:var(--text2);margin:12px 0 5px}
+label:first-child{margin-top:0}
+input[type=text],input[type=password],input[type=search]{width:100%;height:48px;font:inherit;font-size:17px;border:1px solid var(--border);border-radius:10px;padding:0 12px;background:#fff;color:var(--text)}
+input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,82,232,.15)}
+.btn{display:block;width:100%;min-height:50px;border:0;border-radius:11px;background:var(--accent);color:#fff;font:inherit;font-size:17px;font-weight:700;cursor:pointer;margin-top:14px;padding:8px 12px}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.line{background:#fff;color:var(--accent);border:1.5px solid var(--accent)}
+.btn.danger{background:var(--bad)}
+.row{display:flex;gap:8px}.row .btn{flex:1}
+.stepper{display:flex;align-items:center;gap:10px}
+.stepper button{width:52px;height:48px;border:1px solid var(--border);border-radius:10px;background:var(--surface2);font-size:24px;font-weight:700;cursor:pointer;color:var(--text)}
+.stepper output{min-width:64px;text-align:center;font-size:22px;font-weight:900}
+.msg{margin-top:10px;font-size:15px;color:var(--bad);min-height:0}
+.result{border-radius:12px;padding:14px;margin-top:14px;animation:rise .2s ease-out}
+.result.good{background:var(--good-soft);color:var(--good)}
+.result.bad{background:var(--bad-soft);color:var(--bad)}
+.result b{display:block;font-size:20px;font-weight:900;color:var(--text)}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.result,.toast{animation:none}}
+.list{list-style:none;padding:0}
+.list li{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;border-top:1px solid var(--surface2)}
+.list li:first-child{border-top:0}
+.list small{display:block;color:var(--text3);font-size:13px}
+.list .off{color:var(--text3);text-decoration:line-through}
+.list li>span.sub{white-space:nowrap;flex:none}
+.mini{min-height:40px;padding:6px 12px;border:1px solid var(--border);border-radius:9px;background:#fff;color:var(--text2);font:inherit;font-size:14px;cursor:pointer;flex:none}
+.pill{display:inline-block;padding:3px 10px;border-radius:99px;font-size:14px;font-weight:700}
+.pill.on{background:var(--good-soft);color:var(--good)}
+.pill.off{background:var(--surface2);color:var(--text2)}
+.num{font-size:20px;font-weight:900;color:var(--accent);white-space:nowrap}
+.check{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:14px;color:var(--text2)}
+.check input{width:20px;height:20px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#212529;color:#fff;padding:10px 18px;border-radius:99px;font-size:15px;animation:toastIn .2s ease-out;max-width:90vw;z-index:9;white-space:nowrap}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,6px)}to{opacity:1;transform:translateX(-50%)}}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main class="wrap" id="app"></main>
+<script>
+// 비밀번호·토큰은 코드에 넣지 않는다(공개 레포). 확인은 전부 서버(history26_backend 72_sangjeom.gs)가 한다.
+// 주소는 index.html의 CHEER_URL과 같은 값이어야 한다.
+const API='https://script.google.com/macros/s/AKfycbyXSjCfWY_HiZFqW_OBR-FQDoIfF1z_STqyKWUI31MacHeY3u7hbirFSFDvW-5yuUHaJQ/exec';
+const ERR={
+  locked:'지금은 잠겨 있어요. 행사 때 선생님이 열어 주세요.',
+  wrong_pw:'비밀번호가 맞지 않아요.',
+  busy:'너무 많이 눌렀어요. 잠시 뒤에 다시 해 주세요.',
+  no_data:'아직 상점 점수가 안 들어왔어요. 선생님께 말씀드려 주세요.',
+  not_found:'없는 학번이에요. 다시 확인해 주세요.',
+  short:'상점이 부족해요.',
+  bad_input:'입력한 내용을 다시 확인해 주세요.',
+  no_auth:'관리 비밀번호가 맞지 않아요.',
+  cancelled:'취소된 기록이에요. 다시 확인해 주세요.',
+  server:'서버가 바빠요. 아래 목록을 확인하고 다시 해 주세요.',
+  no_record:'그 기록을 찾지 못했어요.',
+  already:'이미 처리가 시작된 기록이라 선생님께 말씀드려 주세요.'
+};
+const NOT_READY='아직 준비 중이에요. 선생님께 말씀드려 주세요.';
+const NET='연결이 안 돼요. 인터넷을 확인하고 다시 해 주세요. 기록이 됐는지는 아래 목록에서 확인해 주세요.';
+const app=document.getElementById('app');
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtTime=t=>{if(!t)return '';const d=new Date(t);return (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
+const sidLabel=s=>{s=String(s);return s[0]+'-'+Number(s.slice(1,3))+' '+Number(s.slice(3))+'번'};
+const uid=()=>(window.crypto&&crypto.randomUUID)?crypto.randomUUID():Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,12);
+function toast(t){document.querySelectorAll('.toast').forEach(x=>x.remove());const d=document.createElement('div');d.className='toast';d.setAttribute('role','status');d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2500)}
+
+async function call(body,timeout=30000){
+  const ac=new AbortController();const tm=setTimeout(()=>ac.abort(),timeout);
+  try{
+    const r=await fetch(API,{method:'POST',body:JSON.stringify(body),signal:ac.signal});
+    const j=await r.json();
+    if(j&&typeof j.ok==='boolean')return j;
+    return {ok:false,error:'not_ready'};
+  }catch(e){return {ok:false,error:'net'}}
+  finally{clearTimeout(tm)}
+}
+const getAdmin=key=>call({action:'sjAdmin',key});
+const errText=e=>e==='net'?NET:e==='not_ready'?NOT_READY:(ERR[e]||'문제가 생겼어요. 다시 해 주세요.');
+
+/* ── 담당 학생 화면 ── */
+const S={pw:'',by:'',event:'',point:1,pending:null,busy:false,retry:null};
+const GATE=['locked','wrong_pw'];
+
+function viewLogin(msg){
+  app.className='wrap';
+  app.innerHTML=`<div class="top"><h1>🔒 행사 상점 기록</h1></div>
+  <form class="card" id="loginForm" autocomplete="off">
+    <p class="sub" style="margin-bottom:12px">선생님께 비밀번호를 받은 담당자만 쓸 수 있어요.</p>
+    <label for="by">내 이름</label><input type="text" id="by" maxlength="20" value="${esc(S.by)}">
+    <label for="pw">비밀번호</label><input type="password" id="pw" maxlength="40" autocomplete="off">
+    <button class="btn" type="submit" id="loginBtn">들어가기</button>
+    <p class="msg" id="loginMsg" role="alert">${esc(msg||'')}</p>
+  </form>
+  <button class="link" type="button" id="toTeacher">선생님 화면</button>`;
+  document.getElementById('loginForm').onsubmit=async e=>{
+    e.preventDefault();
+    const by=document.getElementById('by').value.trim(),pw=document.getElementById('pw').value.trim();
+    const m=document.getElementById('loginMsg'),b=document.getElementById('loginBtn');
+    if(!by){m.textContent='내 이름을 써 주세요.';return}
+    if(!pw){m.textContent='비밀번호를 써 주세요.';return}
+    b.disabled=true;b.textContent='확인하는 중…';
+    const r=await call({action:'sjAuth',pw});
+    b.disabled=false;b.textContent='들어가기';
+    if(!r.ok){m.textContent=errText(r.error);return}
+    S.pw=pw;S.by=by;S.event=r.event||'';viewMain();
+  };
+  document.getElementById('toTeacher').onclick=()=>viewTeacherLogin();
+}
+function backToLogin(error){S.pw='';S.pending=null;viewLogin(errText(error))}
+
+function viewMain(){
+  app.className='wrap';
+  app.innerHTML=`<div class="top"><div><h1>${esc(S.event)||'행사 상점 기록'}</h1><p class="sub">기록하는 사람: ${esc(S.by)}</p></div><button class="link" type="button" id="logout">나가기</button></div>
+  <section class="card">
+    <label for="sid">학번 5자리</label><input type="text" id="sid" inputmode="numeric" maxlength="5" autocomplete="off">
+    <label>쓰는 점수</label>
+    <div class="stepper"><button type="button" id="minus" aria-label="1점 줄이기">−</button><output id="pt" aria-live="polite">1점</output><button type="button" id="plus" aria-label="1점 늘리기">＋</button></div>
+    <button class="btn" type="button" id="checkBtn">확인하기</button>
+    <p class="msg" id="mainMsg" role="alert"></p>
+    <div id="resultBox"></div>
+  </section>
+  <section class="card"><div class="top" style="margin-bottom:4px"><h2 style="margin:0">이번 행사 기록</h2><button class="mini" type="button" id="reload">새로고침</button></div><ul class="list" id="recent"><li class="sub">불러오는 중…</li></ul></section>`;
+  const sid=document.getElementById('sid');
+  sid.oninput=()=>{sid.value=sid.value.replace(/\D/g,'');clearResult()};
+  document.getElementById('minus').onclick=()=>setPoint(S.point-1);
+  document.getElementById('plus').onclick=()=>setPoint(S.point+1);
+  document.getElementById('checkBtn').onclick=doCheck;
+  sid.onkeydown=e=>{if(e.key==='Enter')doCheck()};
+  document.getElementById('reload').onclick=loadRecent;
+  document.getElementById('logout').onclick=()=>{S.pw='';S.pending=null;viewLogin()};
+  document.getElementById('recent').onclick=onRecentClick;
+  setPoint(S.point);sid.focus();loadRecent();
+}
+function setPoint(n){S.point=Math.min(10,Math.max(1,n));document.getElementById('pt').textContent=S.point+'점';clearResult()}
+function clearResult(){S.pending=null;const b=document.getElementById('resultBox');if(b)b.innerHTML='';const m=document.getElementById('mainMsg');if(m)m.textContent=''}
+
+async function doCheck(){
+  if(S.busy)return;
+  const sid=document.getElementById('sid').value.trim(),m=document.getElementById('mainMsg');
+  clearResult();
+  if(!/^[1-3]\d{4}$/.test(sid)){m.textContent='학번 5자리를 써 주세요.';return}
+  const b=document.getElementById('checkBtn');S.busy=true;b.disabled=true;b.textContent='확인하는 중…';
+  const point=S.point;
+  const r=await call({action:'sjCheck',pw:S.pw,sid,point});
+  S.busy=false;b.disabled=false;b.textContent='확인하기';
+  if(!r.ok){if(GATE.includes(r.error))return backToLogin(r.error);m.textContent=errText(r.error);return}
+  if(document.getElementById('sid').value.trim()!==sid||S.point!==point)return;
+  const box=document.getElementById('resultBox');
+  if(!r.enough){box.innerHTML=`<div class="result bad"><b>${esc(r.name)}</b>상점이 부족해요. ${point}점을 쓸 수 없어요.</div>`;return}
+  const same=S.retry&&S.retry.sid===sid&&S.retry.point===point;
+  S.pending={sid,point,name:r.name,reqId:same?S.retry.reqId:uid()};
+  box.innerHTML=`<div class="result good"><b>${esc(r.name)}</b>${point}점을 쓸 수 있어요. 본인이 맞는지 확인해 주세요.</div><button class="btn" type="button" id="spendBtn">${point}점 쓴 걸로 기록하기</button>`;
+  document.getElementById('spendBtn').onclick=doSpend;
+}
+async function doSpend(){
+  if(S.busy||!S.pending)return;
+  const p=S.pending,b=document.getElementById('spendBtn'),m=document.getElementById('mainMsg');
+  S.busy=true;b.disabled=true;b.textContent='기록하는 중…';
+  const r=await call({action:'sjSpend',pw:S.pw,sid:p.sid,point:p.point,by:S.by,reqId:p.reqId});
+  S.busy=false;
+  if(!r.ok){
+    if(GATE.includes(r.error))return backToLogin(r.error);
+    S.retry={sid:p.sid,point:p.point,reqId:p.reqId}; // 응답만 못 받았을 수 있다. 같은 reqId라 다시 해도 두 번 기록되지 않는다
+    b.disabled=false;b.textContent=p.point+'점 쓴 걸로 기록하기';
+    if(r.error==='short'){clearResult();document.getElementById('resultBox').innerHTML=`<div class="result bad"><b>${esc(r.name||p.name)}</b>방금 다른 기록이 들어가서 상점이 부족해요.</div>`;loadRecent();return}
+    if(r.error==='cancelled'){S.retry=null;clearResult();m.textContent=errText(r.error);loadRecent();return}
+    m.textContent=errText(r.error);
+    const rows=await loadRecent();
+    if(rows&&rows.some(x=>x.id===p.reqId)){ // 서버에는 들어갔고 응답만 못 받은 경우
+      S.retry=null;
+      const sid=document.getElementById('sid');sid.value='';clearResult();sid.focus();toast(p.name+' '+p.point+'점 기록돼 있어요');
+    }
+    return;
+  }
+  S.retry=null;
+  if(r.repeated){const s=document.getElementById('sid');s.value='';clearResult();s.focus();toast('이미 기록돼 있어요. 또 쓰는 거면 다시 확인해 주세요');loadRecent();return}
+  toast(p.name+' '+p.point+'점 기록했어요');
+  const sid=document.getElementById('sid');sid.value='';clearResult();sid.focus();loadRecent();
+}
+async function loadRecent(){
+  const ul=document.getElementById('recent');if(!ul)return;
+  const r=await call({action:'sjRecent',pw:S.pw});
+  if(!document.getElementById('recent'))return;
+  if(!r.ok){if(GATE.includes(r.error))return backToLogin(r.error);ul.innerHTML=`<li class="sub">${esc(errText(r.error))}</li>`;return}
+  if(!r.rows.length){ul.innerHTML='<li class="sub">아직 기록이 없어요.</li>';return []}
+  ul.innerHTML=r.rows.map(x=>{
+    const off=x.status!=='정상';
+    return `<li><div><span class="${off?'off':''}">${esc(x.name)} <b>${x.point}점</b></span><small>${esc(sidLabel(x.sid))} · ${esc(fmtTime(x.at))} · ${esc(x.by)}${off?' · 취소함':''}</small></div>${off||x.locked?'':`<button class="mini" type="button" data-cancel="${esc(x.id)}" data-who="${esc(x.name)}">취소</button>`}</li>`;
+  }).join('');
+  return r.rows;
+}
+async function onRecentClick(e){
+  const b=e.target.closest('[data-cancel]');if(!b)return;
+  if(!confirm(b.dataset.who+' 기록을 취소할까요?'))return;
+  b.disabled=true;
+  const r=await call({action:'sjCancel',pw:S.pw,id:b.dataset.cancel,by:S.by});
+  if(!r.ok){if(GATE.includes(r.error))return backToLogin(r.error);b.disabled=false;toast(errText(r.error));return}
+  if(S.retry&&S.retry.reqId===b.dataset.cancel)S.retry=null;
+  toast('취소했어요');clearResult();loadRecent();
+}
+
+/* ── 선생님 화면 ── */
+// 관리 비밀번호는 저장하지 않는다(같은 github.io 주소의 다른 앱도 localStorage를 읽을 수 있고, 폰을 학생에게 건네면 바로 열린다).
+const T={key:'',data:null,q:'',shownPw:''};
+function randomPw(){
+  const c='abcdefghjkmnpqrstuvwxyz23456789',a=new Uint32Array(8);crypto.getRandomValues(a);
+  return Array.from(a,n=>c[n%c.length]).join('');
+}
+function viewTeacherLogin(msg){
+  app.className='wrap';
+  app.innerHTML=`<div class="top"><h1>행사 상점 · 선생님</h1><button class="link" type="button" id="toStudent">담당자 화면</button></div>
+  <form class="card" id="tForm" autocomplete="off">
+    <label for="tk">관리 비밀번호</label><input type="password" id="tk" autocomplete="current-password">
+    <button class="btn" type="submit" id="tBtn">들어가기</button>
+    <p class="msg" id="tMsg" role="alert">${esc(msg||'')}</p>
+  </form>
+  <button class="link" type="button" id="toInit">처음이에요: 관리 비밀번호 정하기</button>`;
+  document.getElementById('toStudent').onclick=()=>viewLogin();
+  document.getElementById('toInit').onclick=()=>viewTeacherInit();
+  document.getElementById('tForm').onsubmit=async e=>{
+    e.preventDefault();
+    const key=document.getElementById('tk').value.trim(),m=document.getElementById('tMsg'),b=document.getElementById('tBtn');
+    if(!key){m.textContent='관리 비밀번호를 써 주세요.';return}
+    b.disabled=true;b.textContent='확인하는 중…';
+    const r=await getAdmin(key);
+    b.disabled=false;b.textContent='들어가기';
+    if(r.error==='no_admin'){viewTeacherInit();return}
+    if(!r.ok){m.textContent=errText(r.error);return}
+    T.key=key;T.data=r;viewTeacher();
+  };
+}
+// 처음 한 번: 교사 토큰으로 이 기능 전용 관리 비밀번호를 정한다
+function viewTeacherInit(){
+  app.className='wrap';
+  app.innerHTML=`<div class="top"><h1>관리 비밀번호 정하기</h1></div>
+  <form class="card" id="iForm" autocomplete="off">
+    <p class="sub" style="margin-bottom:12px">처음 한 번만 정해요. 전교생 상점을 보는 비밀번호라 다른 곳에서 쓰지 않는 값으로 정해 주세요.</p>
+    <label for="iTk">교사 토큰</label><input type="password" id="iTk" autocomplete="off">
+    <label for="iKey">새 관리 비밀번호(10글자 이상)</label><input type="password" id="iKey" maxlength="40" autocomplete="new-password">
+    <button class="btn" type="submit" id="iBtn">정하기</button>
+    <p class="msg" id="iMsg" role="alert"></p>
+  </form>`;
+  document.getElementById('iForm').onsubmit=async e=>{
+    e.preventDefault();
+    const token=document.getElementById('iTk').value.trim(),key=document.getElementById('iKey').value.trim(),m=document.getElementById('iMsg');
+    if(!token){m.textContent='교사 토큰을 써 주세요.';return}
+    if(key.length<10){m.textContent='관리 비밀번호는 10글자 이상으로 해 주세요.';return}
+    const r=await call({action:'sjAdminInit',token,key});
+    if(!r.ok){m.textContent=r.error==='no_auth'?'교사 토큰이 맞지 않아요.':r.error==='already'?'이미 정해져 있어요.':errText(r.error);return}
+    toast('정했어요');
+    const a=await getAdmin(key);
+    if(!a.ok){viewTeacherLogin(errText(a.error));return}
+    T.key=key;T.data=a;viewTeacher();
+  };
+}
+function viewTeacher(){
+  const d=T.data;
+  const waiting=d.log.filter(x=>x.status==='정상'&&!x.done&&!x.claim);
+  const stuck=d.log.filter(x=>x.status==='정상'&&!x.done&&x.claim);
+  app.className='wrap wide';
+  app.innerHTML=`<div class="top"><h1>행사 상점 · 선생님</h1><div><button class="mini" type="button" id="tReload">새로고침</button> <button class="link" type="button" id="tOut">나가기</button></div></div>
+  <div class="cols"><div>
+  <section class="card">
+    <h2>담당자 기능 <span class="pill ${d.open?'on':'off'}">${d.open?'열림':'잠김'}</span></h2>
+    <label for="evName">행사 이름</label><input type="text" id="evName" maxlength="40" value="${esc(d.event)}">
+    <label for="newPw">${d.hasPw?'새 담당 비밀번호(바꿀 때만)':'담당 비밀번호(8글자 이상)'}</label>
+    <div class="row"><input type="text" id="newPw" maxlength="40" autocomplete="off" style="flex:1;min-width:0"><button class="mini" type="button" id="genPw">자동으로 만들기</button></div>
+    <div class="row"><button class="btn" type="button" id="openBtn">${d.open?'저장':'열기'}</button>${d.open?'<button class="btn danger" type="button" id="closeBtn">잠그기</button>':''}</div>
+    <p class="msg" id="setMsg" role="alert"></p>
+    ${T.shownPw?`<p class="result good" style="margin-top:10px">담당자에게 줄 비밀번호<b id="shownPw">${esc(T.shownPw)}</b></p><button class="mini" type="button" id="copyPw" style="margin-top:8px">비밀번호 복사</button>`:''}
+    <p class="sub" style="margin-top:10px">잠그면 담당 비밀번호도 지워져요. 다음 행사에는 새로 정해 주세요.</p>
+    <p class="sub">상점 점수: ${d.snapAt?esc(fmtTime(d.snapAt))+' 기준 '+d.rows.length+'명':'아직 안 넣음'}${d.wrongPw?` · 틀린 비밀번호 ${d.wrongPw}번`:''}</p>
+  </section>
+  <section class="card">
+    <h2>학생 찾기</h2>
+    <input type="search" id="q" placeholder="이름 또는 학번" value="${esc(T.q)}" aria-label="이름 또는 학번">
+    <ul class="list" id="found" style="margin-top:8px"></ul>
+  </section>
+  </div><div>
+  <section class="card">
+    <div class="top" style="margin-bottom:4px"><h2 style="margin:0">사용 기록 <small class="sub">반영 전 ${waiting.length}건${stuck.length?` · 확인 필요 ${stuck.length}건`:''}</small></h2><button class="mini" type="button" id="copyBtn">반영 전 복사</button></div>
+    <ul class="list" id="tLog"></ul>
+  </section>
+  </div></div>`;
+  document.getElementById('tReload').onclick=reloadTeacher;
+  document.getElementById('tOut').onclick=()=>{T.key='';T.data=null;T.shownPw='';viewTeacherLogin()};
+  document.getElementById('genPw').onclick=()=>{document.getElementById('newPw').value=randomPw()};
+  document.getElementById('openBtn').onclick=()=>saveSetup(true);
+  const cp=document.getElementById('copyPw');if(cp)cp.onclick=()=>navigator.clipboard.writeText(T.shownPw).then(()=>toast('복사했어요'),()=>toast('복사하지 못했어요'));
+  const cb=document.getElementById('closeBtn');if(cb)cb.onclick=()=>saveSetup(false);
+  const q=document.getElementById('q');q.oninput=()=>{T.q=q.value;renderFound()};
+  document.getElementById('copyBtn').onclick=()=>{
+    const text=waiting.map(x=>[x.sid,x.name,x.point,x.event].join('\t')).join('\n');
+    if(!text){toast('복사할 기록이 없어요');return}
+    navigator.clipboard.writeText(text).then(()=>toast(waiting.length+'건 복사했어요'),()=>toast('복사하지 못했어요'));
+  };
+  renderFound();
+  document.getElementById('tLog').onclick=onTeacherLogClick;
+  document.getElementById('tLog').innerHTML=d.log.length?d.log.slice(0,100).map(x=>{
+    const off=x.status!=='정상';
+    const st=off?'취소'+(x.cancelBy?'('+x.cancelBy+')':''):x.done?'반영함':x.claim?'확인 필요':'반영 전';
+    return `<li><div><span class="${off?'off':''}">${esc(x.name)} <b>${x.point}점</b></span><small>${esc(sidLabel(x.sid))} · ${esc(fmtTime(x.at))} · ${esc(x.by)} · ${esc(x.event)}</small></div><span class="sub">${esc(st)}${!off&&!x.done&&!x.claim?` <button class="mini" type="button" data-tcancel="${esc(x.id)}" data-who="${esc(x.name)}">취소</button>`:''}</span></li>`;
+  }).join(''):'<li class="sub">아직 기록이 없어요.</li>';
+}
+async function onTeacherLogClick(e){
+  const b=e.target.closest('[data-tcancel]');if(!b)return;
+  if(!confirm(b.dataset.who+' 기록을 취소할까요?'))return;
+  b.disabled=true;
+  const r=await call({action:'sjAdminCancel',key:T.key,id:b.dataset.tcancel});
+  if(!r.ok){b.disabled=false;toast(errText(r.error));return}
+  toast('취소했어요');reloadTeacher();
+}
+function renderFound(){
+  const ul=document.getElementById('found'),q=T.q.trim();
+  if(!q){ul.innerHTML='';return}
+  const hits=T.data.rows.filter(x=>x.sid.includes(q)||x.name.includes(q)).slice(0,20);
+  ul.innerHTML=hits.length?hits.map(x=>`<li><div>${esc(x.name)}<small>${esc(sidLabel(x.sid))} · 넣은 점수 ${x.point}</small></div><span class="num">${x.left}점</span></li>`).join(''):'<li class="sub">찾는 학생이 없어요.</li>';
+}
+async function reloadTeacher(){
+  const r=await getAdmin(T.key);
+  if(!r.ok){toast(errText(r.error));if(r.error==='no_auth'){T.key='';viewTeacherLogin(errText(r.error))}return}
+  T.data=r;viewTeacher();
+}
+async function saveSetup(open){
+  const m=document.getElementById('setMsg'),ev=document.getElementById('evName').value.trim(),pw=document.getElementById('newPw').value.trim();
+  if(open&&!ev){m.textContent='행사 이름을 써 주세요.';return}
+  if(open&&!T.data.hasPw&&!pw){m.textContent='담당 비밀번호를 정해 주세요.';return}
+  if(pw&&pw.length<8){m.textContent='담당 비밀번호는 8글자 이상으로 해 주세요.';return}
+  const body={action:'sjSetup',key:T.key,open};
+  if(ev)body.event=ev;
+  if(pw&&open)body.password=pw;
+  const r=await call(body);
+  if(!r.ok){m.textContent=errText(r.error);return}
+  if(!open)T.shownPw='';else if(pw)T.shownPw=pw;
+  toast(open?'저장했어요':'잠갔어요');reloadTeacher();
+}
+
+/* ── 시작 ── */
+if(new URLSearchParams(location.search).has('teacher'))viewTeacherLogin();else viewLogin();
+</script>
+</body>
+</html>
