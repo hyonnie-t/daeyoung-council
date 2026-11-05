@@ -54,7 +54,7 @@ ok('깨진 본문 거부', JSON.parse(ctx.doPost({ postData: { contents: '{' } }
   const wait = () => { const t = Date.now() + 3; while (Date.now() < t) {} };
   ok('sj 기본은 잠김', S({ action: 'sjAuth', pw: PW }).error === 'locked');
   ok('관리 비밀번호 전 no_admin', A({ action: 'sjAdmin' }).error === 'no_admin');
-  ok('짧은 관리 비밀번호 거부', ctx.sjSetAdminKey_('123456789') === false);
+  ok('짧은 관리 비밀번호 거부', ctx.sjSetAdminKey_('1234') === false);
   ok('관리 비밀번호 정하기', ctx.sjSetAdminKey_(KEY) === true);
   ok('틀린 관리 비밀번호 거부', POST({ action: 'sjAdmin', key: 'wrong-key-999' }).error === 'no_auth');
   ok('없는 action 거부', POST({ action: 'constructor' }).error === 'bad_input' && POST({ action: 'sjAdminInit', key: KEY }).error === 'bad_input');
