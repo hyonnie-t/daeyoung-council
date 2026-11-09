@@ -24,7 +24,7 @@
 2. **상태는 저장값을 믿지 않는다.** `derive()`가 `doneBy`로 매번 계산한다(보류만 수동). 1인별 완료는 `toggleDone()` 경유.
 3. 새 최상위 Firebase 경로를 쓰면 `firebase/database.rules.json`에 추가하고 콘솔 재게시가 필요하다고 효니에게 말한다(안 하면 401/403 → 토스트). 순서는 코드 배포 → 규칙 변경.
 4. 업무 객체는 `newTask(o)` 한 곳에서만 만든다(수동 등록·말로 쪼개기 공유). 쓰기 동작을 추가하면 `logAct()`도 같이 부른다. 실패는 `toast()`로 알린다(삼키지 않는다).
-5. 클릭은 `document` 위임 리스너의 `data-action` 분기로 추가한다. 예외는 파일 끝 출석 IIFE(인라인 onclick)뿐.
+5. 클릭은 `document` 위임 리스너의 `data-action` 분기로 추가한다. 예외는 파일 끝 출석 IIFE(인라인 onclick)와 «홈 화면에 추가» IIFE(`addEventListener`, Firebase 안 건드림)뿐.
 6. 학생 화면 문구는 다른 학생과 비교하지 않는다(응원 문구·기분 체크인 공통). AI 호출(`CHEER_URL`)에 이름·학번을 보내지 않는다.
 7. 탭을 추가하면 `sFns`/`tFns`·`S_PANELS`/`T_PANELS`·HTML `data-tab`을 함께 고치고, 출석 IIFE가 `tFns[6]`에 꽂히는 것도 확인한다.
 8. 업무 id는 `crypto.randomUUID()`. 날짜 비교 코드는 상시 행사(`isProj(e)`)를 먼저 걸러낸다.
