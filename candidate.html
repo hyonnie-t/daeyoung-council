@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2027 학생회장 선거 후보 안내</title>
+<meta property="og:type" content="website">
+<meta property="og:title" content="2027 학생회장 선거 후보 안내">
+<meta property="og:image" content="https://hyonnie-t.github.io/daeyoung-council/election-cover-og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="671">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+:root{
+  --bg:#fff9f4; --card:#ffffff; --ink:#3b3340; --sub:#6b6070; --line:#f0e4ea;
+  --pink:#ffd6e3; --pink-d:#a8285a; --mint:#d4f3e6; --mint-d:#146a45;
+  --sky:#dcecff; --sky-d:#1f5799; --lemon:#fff2c2; --lemon-d:#7a5600;
+  --lav:#ece3ff; --lav-d:#5634a8; --red:#ffe1e1; --red-d:#b02a1e;
+  --shadow:0 2px 0 #f2e3ea, 0 6px 18px rgba(120,80,110,.08);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1f1b23; --card:#2a2430; --ink:#f3ecf6; --sub:#b9aec2; --line:#3c3344;
+    --pink:#5a2c3e; --pink-d:#ff9fc0; --mint:#1f4a3a; --mint-d:#8fe3bd;
+    --sky:#22385a; --sky-d:#9cc7ff; --lemon:#4a3e17; --lemon-d:#ffd86b;
+    --lav:#382c58; --lav-d:#c8b4ff; --red:#4d2424; --red-d:#ff9b8f;
+    --shadow:0 2px 0 #15121a, 0 6px 18px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1f1b23; --card:#2a2430; --ink:#f3ecf6; --sub:#b9aec2; --line:#3c3344;
+  --pink:#5a2c3e; --pink-d:#ff9fc0; --mint:#1f4a3a; --mint-d:#8fe3bd;
+  --sky:#22385a; --sky-d:#9cc7ff; --lemon:#4a3e17; --lemon-d:#ffd86b;
+  --lav:#382c58; --lav-d:#c8b4ff; --red:#4d2424; --red-d:#ff9b8f;
+  --shadow:0 2px 0 #15121a, 0 6px 18px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  font-size:17px;line-height:1.65;word-break:keep-all}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px 64px}
+header.hero{padding:28px 0 14px;text-align:center}
+.hero .stamp{display:inline-block;font-size:44px;line-height:1;margin-bottom:6px}
+.hero h1{margin:0;font-size:clamp(24px,4.6vw,36px);letter-spacing:-.5px}
+.hero p{margin:6px 0 0;color:var(--sub)}
+.dday{display:inline-flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:14px}
+.pill{display:inline-block;padding:6px 14px;border-radius:999px;font-size:14px;font-weight:700;background:var(--card);box-shadow:var(--shadow)}
+nav.tabs{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs a{flex:0 0 auto;text-decoration:none;color:var(--ink);background:var(--card);border:2px solid var(--line);
+  padding:7px 14px;border-radius:999px;font-weight:700;font-size:15px}
+nav.tabs a:hover{border-color:var(--pink-d)}
+section{margin-top:28px;scroll-margin-top:64px}
+h2{font-size:clamp(20px,3.4vw,26px);margin:0 0 6px;display:flex;align-items:center;gap:8px}
+h2 .em{font-size:1.1em}
+.lead{color:var(--sub);margin:0 0 14px}
+.card{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:16px 18px;margin-bottom:14px;border:1px solid var(--line)}
+.grid2{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:768px){.grid2{grid-template-columns:1fr 1fr}}
+.tag{display:inline-block;font-size:12.5px;font-weight:800;padding:3px 10px;border-radius:999px;margin:0 3px 3px 0;vertical-align:1px}
+.t-teacher{background:var(--sky);color:var(--sky-d)}
+.t-sgw{background:var(--mint);color:var(--mint-d)}
+.t-cand{background:var(--pink);color:var(--pink-d)}
+.t-hr{background:var(--lemon);color:var(--lemon-d)}
+.t-all{background:var(--lav);color:var(--lav-d)}
+/* 타임라인 */
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.filters button{font:inherit;font-size:14px;font-weight:700;border:2px solid var(--line);background:var(--card);color:var(--ink);
+  border-radius:999px;padding:6px 14px;cursor:pointer}
+.filters button[aria-pressed="true"]{border-color:var(--pink-d);background:var(--pink);color:var(--pink-d)}
+.tl{list-style:none;margin:0;padding:0;position:relative}
+.tl:before{content:"";position:absolute;left:19px;top:6px;bottom:6px;width:4px;border-radius:4px;background:var(--line)}
+.tl > li{position:relative;padding:0 0 14px 52px}
+.tl .dot{position:absolute;left:4px;top:2px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  background:var(--card);border:3px solid var(--pink);font-size:16px}
+.tl li.big .dot{border-color:var(--pink-d);background:var(--pink)}
+.tl .when{font-weight:800;font-size:15px;color:var(--pink-d)}
+.tl .what{font-weight:800;font-size:17.5px;margin:1px 0 4px}
+.tl .card{margin:0}
+.tl ul{margin:4px 0 0;padding-left:20px}
+.tl li.hide{display:none}
+.month{margin:6px 0 10px 52px;font-weight:900;font-size:15px;color:var(--sub);letter-spacing:1px}
+/* 타임라인 카드: 보이는 순간 한 장씩 떠오름 */
+.tl li.rv{opacity:0;transform:translateY(10px);transition:opacity .3s ease,transform .3s ease}
+.tl li.rv.show{opacity:1;transform:none}
+@media (prefers-reduced-motion: reduce){.tl li.rv{opacity:1;transform:none;transition:none}}
+body.printing .tl li.rv{opacity:1;transform:none}
+.docs{margin:14px auto 0;max-width:560px;text-align:left}
+.docs ul{margin:4px 0 0;padding-left:20px}
+.docs a{color:var(--sky-d);font-weight:700}
+/* 체크리스트 */
+.check{list-style:none;margin:0;padding:0}
+.check li{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--line)}
+.check li:last-child{border-bottom:0}
+.check input{width:20px;height:20px;margin-top:4px;flex:0 0 auto;accent-color:var(--pink-d)}
+.check label{cursor:pointer}
+.check input:checked + label{color:var(--sub);text-decoration:line-through}
+.check small{display:block;color:var(--sub);text-decoration:none}
+.progress{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin:4px 0 10px}
+.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--pink-d),var(--lav-d));transition:width .3s}
+.ph{font-weight:900;margin:14px 0 4px;font-size:16px}
+/* 주의 */
+.warn{border:2px solid var(--red);border-top-width:8px}
+.warn h3,.note h3,.ok h3{margin:0 0 6px;font-size:18px}
+.note{border:2px solid var(--lemon);border-top-width:8px}
+.ok{border:2px solid var(--mint);border-top-width:8px}
+.no-list{margin:6px 0 0;padding-left:0;list-style:none}
+.no-list li{padding:3px 0 3px 30px;position:relative}
+.no-list li:before{content:"🚫";position:absolute;left:0}
+.yes-list li:before{content:"✅"}
+table{width:100%;border-collapse:collapse;font-size:15.5px}
+th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+th{background:var(--lav);color:var(--lav-d);font-size:14px}
+.tbl{overflow-x:auto}
+.src{font-size:13.5px;color:var(--sub)}
+.decide{background:var(--lemon);border-radius:14px;padding:10px 14px;margin-top:8px;font-size:15.5px}
+.decide b{color:var(--lemon-d)}
+.tools{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.tools button{font:inherit;font-size:14px;font-weight:700;border:0;border-radius:999px;padding:7px 14px;cursor:pointer;background:var(--pink);color:var(--pink-d)}
+.only-teacher{outline:2px dashed var(--sky-d);outline-offset:3px;border-radius:14px}
+section.only-teacher,li.only-teacher{padding:12px 14px}
+/* 폰(학생 대부분): 머리글을 줄여 내용이 빨리 보이게, 탭은 한 줄에 다 들어가게, 표는 카드로 쌓기. 인쇄 중(.printing)에는 적용하지 않는다 */
+@media(max-width:600px){
+  body:not(.printing){font-size:16px;line-height:1.6}
+  body:not(.printing) .wrap{padding:0 14px 48px}
+  body:not(.printing) header.hero{padding:18px 0 8px}
+  body:not(.printing) .hero .stamp{font-size:34px;margin-bottom:2px}
+  body:not(.printing) .hero h1{font-size:22px;line-height:1.35;text-wrap:balance}
+  body:not(.printing) .hero p{font-size:14px;margin-top:4px}
+  body:not(.printing) .dday{gap:6px;margin-top:10px}
+  body:not(.printing) .pill{font-size:13px;padding:5px 11px}
+  body:not(.printing) #printBtn{display:none}
+  body:not(.printing) .tools{margin-top:8px}
+  body:not(.printing) nav.tabs{gap:6px;padding:8px 0}
+  body:not(.printing) nav.tabs a{flex:1 0 auto;text-align:center;padding:8px 10px;font-size:14px}
+  body:not(.printing) section{margin-top:22px;scroll-margin-top:56px}
+  body:not(.printing) h2{font-size:21px}
+  body:not(.printing) .card{padding:14px;border-radius:16px}
+  body:not(.printing) .filters{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  body:not(.printing) .filters::-webkit-scrollbar{display:none}
+  body:not(.printing) .filters button{flex:0 0 auto;padding:7px 14px}
+  body:not(.printing) .tl:before{left:14px}
+  body:not(.printing) .tl > li{padding:0 0 12px 40px}
+  body:not(.printing) .tl .dot{left:1px;width:30px;height:30px;font-size:14px}
+  body:not(.printing) .tl .what{font-size:16.5px}
+  body:not(.printing) .tl ul{padding-left:18px}
+  body:not(.printing) .month{margin-left:40px}
+  body:not(.printing) .check li{padding:9px 0}
+  body:not(.printing) .check input{width:22px;height:22px;margin-top:2px}
+  /* 3칸 표 → 줄마다 카드 한 장 */
+  body:not(.printing) #trouble table,body:not(.printing) #trouble tbody,body:not(.printing) #trouble tr,body:not(.printing) #trouble td{display:block;width:auto}
+  body:not(.printing) #trouble tr:first-child{display:none}
+  body:not(.printing) #trouble tr{padding:10px 0;border-bottom:1px solid var(--line)}
+  body:not(.printing) #trouble tr:last-child{border-bottom:0}
+  body:not(.printing) #trouble td{border:0;padding:2px 0}
+  body:not(.printing) #trouble td:first-child{font-weight:800}
+  body:not(.printing) #trouble td:nth-child(3){font-size:14px;color:var(--sub)}
+  body:not(.printing) #trouble td:nth-child(3):before{content:"누가: "}
+}
+body.student .only-teacher,body.student .staff{display:none}
+.edition{display:inline-block;margin-top:8px;padding:4px 14px;border-radius:999px;font-weight:800;font-size:15px;background:var(--sky);color:var(--sky-d)}
+body.student .edition{background:var(--mint);color:var(--mint-d)}
+.ed-s{display:none}body.student .ed-s{display:inline}body.student .ed-t{display:none}
+body.printing .only-teacher{outline:none}
+footer{margin-top:40px;text-align:center;color:var(--sub);font-size:13.5px}
+body.printing nav.tabs,body.printing .tools,body.printing .filters,body.printing #printTip{display:none}
+body.printing .tl li.hide{display:block}
+body.printing .card{box-shadow:none}
+/* 인쇄용 촘촘한 배치: PDF 받기와 브라우저 인쇄 모두 body.printing으로 */
+body.printing{background:#fff;font-size:12.5px;line-height:1.45}
+body.printing .wrap{max-width:none;padding:0}
+body.printing header.hero{padding:0 0 4px}
+body.printing .hero .stamp,body.printing .progress{display:none}
+body.printing .hero h1{font-size:22px}
+body.printing .dday{margin-top:6px}
+body.printing .pill{padding:2px 10px;font-size:12px;box-shadow:none;border:1px solid var(--line)}
+body.printing .docs{margin-top:8px}
+body.printing section{margin-top:14px}
+body.printing h2{font-size:18px;margin-bottom:2px}
+body.printing .lead{margin-bottom:6px;font-size:12px}
+body.printing .card{padding:8px 12px;margin-bottom:8px;border-radius:10px}
+body.printing .grid2{grid-template-columns:1fr 1fr;gap:8px}
+body.printing ul{margin:2px 0;padding-left:18px}
+body.printing .tag{font-size:10.5px;padding:1px 7px}
+body.printing .tl:before{left:12px}
+body.printing .tl > li{padding:0 0 6px 36px}
+body.printing .tl .dot{width:26px;height:26px;font-size:12px;border-width:2px}
+body.printing .tl .when{font-size:12.5px}
+body.printing .tl .what{font-size:14px;margin:0 0 2px}
+body.printing .month{margin:4px 0 6px 36px;font-size:12.5px}
+body.printing .check{display:grid;grid-template-columns:1fr 1fr;column-gap:22px}
+body.printing .check li{padding:2px 0}
+/* 종이에서는 볼 일 없는 것(파일 링크·작년 자료·근거·개정 메모·화면 안내 문구) */
+body.printing .noprint,body.printing .src,body.printing footer{display:none}
+.pgap{grid-column:1/-1;list-style:none;border:0!important;padding:0!important;margin:0!important}
+body.printing .check input{width:14px;height:14px;margin-top:2px}
+body.printing .ph{margin:8px 0 2px;font-size:13px}
+body.printing .warn,body.printing .note,body.printing .ok{border-top-width:5px}
+body.printing .warn h3,body.printing .note h3,body.printing .ok h3{font-size:14.5px}
+body.printing table{font-size:12px}
+body.printing th,body.printing td{padding:4px 6px}
+body.printing .src{font-size:11px}
+body.printing footer{margin-top:14px}
+@media print{
+  @page{size:A4;margin:10mm 8mm}
+  nav.tabs,.tools,.filters{display:none}
+  .tl li,tr,.check li,h2,h3,.ph{break-inside:avoid}
+  h2,h3,.ph,.month{break-after:avoid}
+  .tl li.hide{display:block}
+  .tl li.rv{opacity:1;transform:none}
+}
+/* 표지 그림(2026-11-09): 노션 «만든 웹앱» 카드와 같은 그림을 첫 화면 위에 둔다. 글자 없는 장식 그림이라 alt="".
+ * 폰은 2:1, 768px 이상은 폭 720px 가운데에 12:5(낮은 가로 화면은 3:1)로 위아래를 조금 잘라 입력 칸이 첫 화면에 보이게 한다.
+ * 움직임: 처음 보일 때 한 번 살짝 떠오름(opacity·transform만). 움직임 줄이기 설정이면 끈다. */
+.cover-banner{margin:0 0 14px; border-radius:14px; overflow:hidden; aspect-ratio:2/1;
+  background:#efe4cf; border:1px solid rgba(80,60,30,.14); box-shadow:0 2px 10px rgba(60,40,20,.10);
+  animation:coverIn .5s ease-out both;}
+.cover-banner img{display:block; width:100%; height:100%; object-fit:cover;}
+@media (min-width:768px){ .cover-banner{aspect-ratio:12/5; max-width:720px; margin-inline:auto;} }
+@media (min-width:768px) and (max-height:860px){ .cover-banner{aspect-ratio:3/1;} }
+@keyframes coverIn{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;}}
+@media (prefers-reduced-motion: reduce){ .cover-banner{animation:none;} }
+.hero .cover-banner{max-width:720px; margin:0 auto 12px;}
+body.printing .cover-banner{display:none}
+@media print{ .cover-banner{display:none} }
+</style>
+</head>
+<body class="student">
+<div class="wrap">
+
+<header class="hero">
+  <figure class="cover-banner"><img src="election-cover.webp" width="1200" height="671" alt="" decoding="async"></figure>
+  <div class="stamp">🗳️</div>
+  <h1>2027학년도 <span style="white-space:nowrap">학생회장·부회장</span> 선거 후보 안내</h1>
+  <p>대영중학교 창의인성교육부 · 2026년 11월 13일 선거 공고 기준으로 정리</p>
+  <p>후보로 나오려는 학생이 볼 안내예요. 서류, 포스터·영상, 일정, 지킬 점을 모았어요. 궁금한 건 창의인성교육부나 선거관리위원에게 물어보세요.</p>
+  <span class="edition"><span class="ed-t">🧑‍🏫 교사용</span><span class="ed-s">🙋 후보용</span></span>
+  <div class="dday">
+    <span class="pill">💻 투표 12. 28.(월) 6교시 · 교실 PC 학급투표</span>
+    <span class="pill">📢 결과 공고 12. 29.(화)</span>
+    <span class="pill">🎖️ 당선증 1. 5.(화)</span>
+  </div>
+  <div class="tools">
+    <button type="button" id="printBtn">🖨️ 인쇄</button>
+  </div>
+  <p id="printTip" class="decide" hidden></p>
+</header>
+
+<nav class="tabs" aria-label="바로가기">
+  <a href="#summary">한눈에</a>
+  <a href="#timeline">타임라인</a>
+  <a href="#rules">꼭 지킬 점</a>
+</nav>
+
+<!-- 한눈에 -->
+<section id="summary">
+  <h2><span class="em">🌷</span>한눈에 보기</h2>
+  <p class="lead">누구를, 어떻게 뽑는지부터 정리했어요.</p>
+  <div class="grid2">
+    <div class="card">
+      <b>뽑는 사람</b>
+      <ul>
+        <li><b>학생회장 1명</b> — 내년 3학년(지금 2학년)</li>
+        <li><b>3학년 부회장 1명</b> — 내년 3학년(지금 2학년)</li>
+        <li><b>2학년 부회장 1명</b> — 내년 2학년(지금 1학년)</li>
+        <li>성적·벌점·징계 이력·성별 때문에 출마를 막지 않아요</li>
+        <li>당선된 뒤 교내봉사 이상의 징계를 받으면 선관위 심의를 거쳐 자격이 정지되거나 해임될 수 있어요</li>
+      </ul>
+      <p class="src">학생회 규정 제8조·제11조·제20조, 선거 계획 3·4항, 선거 공고 2·8항</p>
+    </div>
+    <div class="card">
+      <b>뽑는 방법</b>
+      <ul>
+        <li>모든 학생의 <b>직접·비밀 투표</b>(누구를 찍었는지 아무도 모르게)</li>
+        <li><b>교실 PC 학급투표:</b> 학급회장 선거 때 쓰는 교실 PC <b>학급투표프로그램</b>으로 반마다 투표해요. PC나 프로그램이 안 되면 <b>시청각실 예비 투표소</b>로 와서 투표</li>
+        <li>투표는 12. 28.(월) <b>6교시</b>, 학교 안에서만. 결석·조퇴 등으로 그 시간에 없으면 기권</li>
+        <li>반별 결과를 투표마다 <b>학급 개표 결과지</b>에 적어 봉인 → 선관위가 <b>지정 장소</b>에서 후보별 참관인과 함께 공개 집계</li>
+        <li><b>투표는 2개, 차례로:</b> «3학년 회장단»(1위 회장, 회장과 다른 성별 최다 득표자가 3학년 부회장)과 «2학년 부회장»</li>
+        <li>같은 표면 그 후보끼리 다시 투표 (일시는 선관위가 정함)</li>
+        <li>후보가 1명뿐이면 선관위가 «찬반 투표» 또는 «무투표 당선»을 정함</li>
+      </ul>
+      <p class="src">학생회 규정 제12조·제17조·제18조·제19조</p>
+    </div>
+  </div>
+  <div class="card">
+    <b>역할 표시</b><br>
+    <span class="tag t-sgw">선관위</span> 선거관리위원회 학생
+    <span class="tag t-cand">후보</span> 후보자·선거운동원
+    <span class="tag t-hr">담임</span> 담임 선생님 협조
+    <span class="tag t-all">전체</span> 모든 학생
+  </div>
+</section>
+
+<!-- 타임라인 -->
+<section id="timeline">
+  <h2><span class="em">🗓️</span>타임라인</h2>
+  <p class="lead">학사일정의 «학생회장선거 12. 28.(월) 5~6교시»를 기준으로 거꾸로 짰어요. 투표는 교실 PC 학급투표프로그램으로 해요. 투표일과 후보 등록 기간을 뺀 세부 일정은 선관위가 담당 선생님과 협의해 조정할 수 있어요.</p>
+
+  <ol class="tl" id="tl">
+    <div class="month">11월 초 · 준비</div>
+    <li data-r="sgw hr all" class="big">
+      <span class="dot">📢</span>
+      <div class="when">11. 13.(금) ~ 11. 20.(금)</div>
+      <div class="what">선거 공고</div>
+      <div class="card"><span class="tag t-sgw">선관위</span><span class="tag t-hr">담임</span>
+        <ul><li>11. 13.(금) 선관위원장 이름으로 공고 + 선관위원 명단 + 공명선거 협조문 (투표 방법: 교실 PC 학급투표, 결석·조퇴 등으로 그 시간에 없으면 기권)</li>
+        <li>게시판에 A1 포스터, 학생 단톡방에 카드뉴스 6장. 카드뉴스는 친구에게 전달해도 괜찮아요</li>
+        <li>아침 조회 시간을 써서 학급별 선거 안내·출마 안내</li>
+</ul></div>
+    </li>
+    <div class="month">11월 말 ~ 12월 초 · 후보 등록과 공약 점검</div>
+    <li data-r="cand teacher hr" class="big">
+      <span class="dot">🙋</span>
+      <div class="when">11. 23.(월) ~ 12. 4.(금) 16:30</div>
+      <div class="what">후보자 등록 (서류 한 번에)</div>
+      <div class="card"><span class="tag t-cand">후보</span><span class="tag t-teacher">교사</span><span class="tag t-hr">담임</span>
+        <ul><li>서류 9가지: 학부모 확인 입후보 신청서, 담임 추천서, 선거운동원 명단(도와줄 친구 4명 이내), 소견 발표문, 홍보 포스터(벽보), <b>홍보 영상</b>(1분 30초 이내, 꼭 필요하면 2분까지),후보 추천서(재학생 50명 이상 자필 서명, 중복 서명 가능), 자기소개서, 공약 및 이행 계획서</li>
+        <li><b>포스터·영상은 파일로 USB에 담아</b> 제출. 포스터는 A1로 인쇄하니 화질이 떨어지지 않는 원본 파일(PDF 또는 고해상도 그림)로</li>
+        <li>서류 양식은 창의인성교육부에서 받아요. 선관위원은 후보 추천서에 서명하지 않아요</li>
+        <li>후보 본인이 창의인성교육부에 직접 제출.</li></ul></div>
+    </li>
+    <li data-r="teacher sgw cand" class="big">
+      <span class="dot">🎲</span>
+      <div class="when">12. 8.(화) 방과후 · 12. 9.(수) 공고</div>
+      <div class="what">후보자·운동원 교육 · 기호 추첨 · 입후보 결과 공고</div>
+      <div class="card"><span class="tag t-teacher">교사</span><span class="tag t-sgw">선관위</span><span class="tag t-cand">후보</span>
+        <ul><li>규칙·금지 행동 안내, 공정선거 협약서 서명, 기호 추첨</li>
+        <li>12. 9. 후보 명단·기호·투표일 공고</li>
+        <li>추가 등록이 있으면 12. 16.(수) 방과후 추가 후보 교육·기호 추첨 → 최종 공고</li></ul></div>
+    </li>
+    <li data-r="sgw cand">
+      <span class="dot">🔁</span>
+      <div class="when">12. 9.(수) ~ 12. 11.(금) <small>필요할 때만</small></div>
+      <div class="what">추가 등록 (예비)</div>
+      <div class="card"><span class="tag t-sgw">선관위</span><span class="tag t-cand">후보</span>
+        후보가 없거나, 후보 자격을 잃어 빈자리가 생기거나, 3학년 회장단 후보가 모두 같은 성별일 때 한 번 더 받기. 그래도 없으면 처리 방법을 선관위가 정해 공고문에 밝혀요. 추가 등록도 12. 18.(규정 마감) 안에 끝나요.</div>
+    </li>
+    <li data-r="sgw cand">
+      <span class="dot">🔍</span>
+      <div class="when">12. 8.(화) ~ 12. 11.(금)</div>
+      <div class="what">공약 점검 (공약심의위원회)</div>
+      <div class="card"><span class="tag t-sgw">선관위</span><span class="tag t-cand">후보</span>
+        <ul><li>선관위가 실현 가능성을 살펴 의견 전달 (체육·예산·시설은 담당 선생님·행정실 자문)</li>
+        <li>고칠지는 <b>후보가 결정</b>. 12. 11.(금)까지 최종 공약·포스터 확정</li></ul></div>
+    </li>
+    <li data-r="all">
+      <span class="dot">✏️</span>
+      <div class="when">12. 14.(월) ~ 12. 16.(수)</div>
+      <div class="what">1·2학년 기말고사 — 선거운동 없음</div>
+      <div class="card"><span class="tag t-all">전체</span> 공약 점검을 시험 전에 끝내 두는 이유예요.</div>
+    </li>
+    <div class="month">12월 · 선거운동과 투표</div>
+    <li data-r="cand sgw hr all" class="big">
+      <span class="dot">📣</span>
+      <div class="when">12. 17.(목) 아침 ~ 12. 28.(월) 점심</div>
+      <div class="what">선거운동 기간</div>
+      <div class="card"><span class="tag t-cand">후보</span><span class="tag t-sgw">선관위</span><span class="tag t-hr">담임</span>
+        <ul><li>12. 17.(목) 벽보 게시 (선관위 공약 안내 + 후보 포스터, 각 층 게시판 옆 정한 곳만)</li>
+        <li>벽보는 A1 세로, 후보 1명당 2종까지(얼굴·홍보 문구 1종 + 공약 1종 권장). 게시 매수는 모든 후보 같게, 위치·매수는 후보자 교육 때 안내</li>
+        <li>게시된 벽보는 사진 찍지 않기(내 벽보도), 훼손하지 않기</li>
+        <li>12. 17.(목) 아침 조회: 회장단 후보 영상 / 12. 18.(금) 아침 조회: 2학년 부회장 후보 영상</li>
+        <li>12. 21.(월)·22.(화) 아침 조회: 학급 방문 유세 (담임 선생님께 미리 양해)</li>
+        <li>등교·점심시간 교내 유세, 등록된 운동원(4명 이내)만</li>
+        <li>영상·유세 날짜와 홍보물 세부 사항은 선관위가 정하면 바뀔 수 있어요. 후보 간 조건은 같게 해요</li>
+        <li><b>온라인 선거운동은 하지 않아요:</b> 개인 SNS 홍보, 단톡방 홍보, DM으로 지지 부탁, 다른 학생의 후보 포스터 공유. 선관위도 SNS에 후보 소개 게시물을 올리지 않아요</li></ul></div>
+    </li>
+    <li data-r="all hr">
+      <span class="dot">🧠</span>
+      <div class="when">12. 18.(금) 6교시 자치</div>
+      <div class="what">유권자 교육 · 공약 비교 · 질문 모으기</div>
+      <div class="card"><span class="tag t-all">전체</span><span class="tag t-hr">담임</span> 3학년도 투표하니 3학년 학급도 함께 해요. 모은 질문은 선관위가 질의응답 질문으로 정리.</div>
+    </li>
+    <li data-r="teacher sgw hr cand">
+      <span class="dot">🗂️</span>
+      <div class="when">12. 23.(수) ~ 12. 24.(목)</div>
+      <div class="what">투표 준비 끝내기</div>
+      <div class="card"><span class="tag t-teacher">교사</span><span class="tag t-sgw">선관위</span><span class="tag t-hr">담임</span><span class="tag t-cand">후보</span>
+        <ul>
+        <li>후보별 참관인 신고(12. 23.까지), 질의응답 질문 확정</li></ul></div>
+    </li>
+    <li data-r="all sgw hr teacher" class="big">
+      <span class="dot">🗳️</span>
+      <div class="when">12. 28.(월) 5~6교시</div>
+      <div class="what">선거 날 (교실 PC 학급투표)</div>
+      <div class="card"><span class="tag t-all">전체</span><span class="tag t-sgw">선관위</span><span class="tag t-hr">담임</span>
+        <ul><li>5교시: 소견 발표·질의응답 방송 (규정 제17조②-1)</li>
+        <li>6교시: 반마다 한 명씩 교실 PC 학급투표프로그램으로 투표. <b>3학년 회장단 → 2학년 부회장</b> 차례로 2번. 담임 선생님이 학급 명부로 참여 확인</li>
+        <li>PC·프로그램 문제 → <b>시청각실 예비 투표소</b>로 이동해 투표. 시간 안에 마치기 어려우면 선관위가 담당 선생님과 협의해 투표 시간을 늘릴 수 있어요</li>
+        <li>투표 끝 → <b>학급 개표</b>: 프로그램 결과를 투표별 학급 개표 결과지(선거인 수·투표자 수·후보별 득표수)에 적고, 담임 + 학급회장(후보면 다른 학생) 확인·서명 → 봉투에 봉인해 선관위에 제출</li>
+        <li>선관위가 위원과 후보별 참관인 입회 하에 <b>지정 장소</b>에서 봉투를 공개적으로 열어 집계</li></ul></div>
+    </li>
+    <li data-r="teacher sgw cand" class="big">
+      <span class="dot">📜</span>
+      <div class="when">12. 29.(화)</div>
+      <div class="what">결과 확정 · 당선 공고</div>
+      <div class="card"><span class="tag t-teacher">교사</span><span class="tag t-sgw">선관위</span><span class="tag t-cand">후보</span>
+        최종 집계표 → 지도교사 확인 → 교장 결재 → 공고(득표수 포함)·개별 통보.</div>
+    </li>
+    <li data-r="sgw cand">
+      <span class="dot">✋</span>
+      <div class="when">12. 29.(화) ~ 12. 31.(목) 16:30</div>
+      <div class="what">재검표 요청 기간 (발표 후 2일)</div>
+      <div class="card"><span class="tag t-sgw">선관위</span><span class="tag t-cand">후보</span>
+        후보가 선관위에 <b>서면</b>으로 요청 (제18조③).</div>
+    </li>
+    <div class="month">1월 · 마무리</div>
+    <li data-r="sgw teacher cand" class="big">
+      <span class="dot">🎖️</span>
+      <div class="when">1. 5.(화) 아침 조회</div>
+      <div class="what">당선증 수여 · 당선 소감</div>
+      <div class="card"><span class="tag t-sgw">선관위</span><span class="tag t-teacher">교사</span><span class="tag t-cand">후보</span>
+        선관위원장 이름의 당선증. 재검표 요청이 있으면 1. 4.(월)까지 처리한 뒤 수여.</div>
+    </li>
+  </ol>
+</section>
+
+
+<!-- 꼭 지킬 점 -->
+<section id="rules">
+  <h2><span class="em">⚠️</span>꼭 지킬 점</h2>
+  <p class="lead noprint">학교 규정과 서울시교육청 안내를 함께 정리했어요.</p>
+
+  <div class="card warn">
+    <h3>🚫 이렇게 하면 후보 자격을 잃을 수 있어요</h3>
+    <ul class="no-list">
+      <li>학교 밖에서 선거운동 (학교 앞 건널목·문구점 포함)</li>
+      <li>온라인 선거운동: 개인 SNS·단톡방 홍보, DM으로 지지 부탁, 다른 학생의 후보 포스터 공유 <span class="src">(«홍보 목적»이 있었는지를 가장 중요하게 봐요. 목적이 없으면 경고·재교육·삭제, 있으면 정도에 따라 등록 무효까지)</span></li>
+      <li>음식·선물·돈을 주거나 주겠다고 약속하기 (선거가 끝난 뒤에도 안 됨)</li>
+      <li>정해지지 않은 곳에 포스터 붙이기</li>
+      <li>다른 후보 흉보기, 거짓말 퍼뜨리기, 욕설, 협박</li>
+      <li>후보끼리 짜고 하기(담합), 표를 사고팔기, 개표 조작</li>
+      <li>등록하지 않은 친구가 유세에 끼기</li>
+    </ul>
+    <p class="src">학생회 규정 제16조·제19조④, 2027 선거 계획 10-다, 선거 공고 6항</p>
+  </div>
+
+  <div class="grid2">
+    <div class="card note">
+      <h3>🙋 유권자(모든 학생)가 지킬 점</h3>
+      <ul>
+        <li>친하다고, 잘생겼다고가 아니라 <b>공약</b>을 보고 뽑기</li>
+        <li>벽보 훼손하지 않기, 게시된 벽보 사진 찍지 않기</li>
+        <li>후보 포스터를 SNS·단톡방에 퍼뜨리지 않기 (선거 안내 카드뉴스는 전달해도 괜찮아요)</li>
+        <li>후보에게 음식·선물을 달라고 하지 않기 (요구한 학생도 징계 대상)</li>
+        <li><b>투표는 한 명씩, 나 혼자</b> — 다른 친구 화면을 보거나 대신 눌러 주면 안 돼요(대리투표 금지)</li>
+        <li>투표는 12. 28. 학교 안에서만. 결석·조퇴 등으로 그 시간에 없으면 기권이에요</li>
+        <li>누가 당선되든 학교 대표로 존중하고 협조하기</li>
+      </ul>
+    </div>
+    <div class="card ok">
+      <h3>✅ 공정하게 하려고 정해 둔 것</h3>
+      <ul>
+        <li>모든 후보의 포스터 크기(A1)·종류(2종까지)·게시 매수, 영상 길이(1분 30초 이내, 꼭 필요하면 2분까지)를 똑같이</li>
+        <li>포스터·영상은 후보가 <b>직접</b> 만들기 (업체 맡기기 금지 — 집안 형편이 선거에 영향 주지 않게). AI는 과도하지 않은 범위에서 도움받는 정도만</li>
+        <li>선관위원은 특정 후보를 돕거나 홍보하지 않기</li>
+        <li>반별 결과지는 담임 선생님과 학급회장이 확인·서명하고 봉인, 집계는 선관위 + 후보별 참관인이 지정 장소에서 공개로</li>
+        <li>개표 결과에 이의가 있으면 후보가 확정 발표 후 2일 안에 선관위에 서면으로 재검표를 요청할 수 있어요</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card" id="trouble">
+    <h3 style="margin:0 0 6px;font-size:18px">🛠️ 투표 날 문제가 생기면</h3>
+    <div class="tbl"><table>
+      <tr><th>상황</th><th>이렇게 해요</th><th>누가</th></tr>
+      <tr><td>교실 PC 고장, 프로그램이 안 열림·멈춤</td><td>그 반은 <b>시청각실 예비 투표소</b>로 이동해 투표, 결과를 같은 학급 개표 결과지에 적기</td><td>담임</td></tr>
+      <tr><td>결석·조퇴 등으로 투표 시간에 없는 학생</td><td>기권 처리(선거 계획에 정함, 선거 공고에 미리 안내)</td><td>담임</td></tr>
+      <tr><td>개표 결과에 이의</td><td>발표 후 2일 이내 서면 재검표 요청 → 선관위 회의로 처리, 보관한 학급 개표 결과지로 확인</td><td>선관위</td></tr>
+    </table></div>
+  </div>
+</section>
+
+<footer>🌱 학생이 주인인 선거, 공정하게! · 대영중 창의인성교육부</footer>
+</div>
+
+<script>
+(function(){
+  var KEY="sgw2027-checks";
+  var saved={};
+  try{saved=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(saved))}catch(e){}}
+  function bar(card){
+    var boxes=[].slice.call(card.querySelectorAll("input[type=checkbox]")).filter(function(b){return b.offsetParent!==null});
+    var done=boxes.filter(function(b){return b.checked}).length;
+    var i=card.querySelector(".progress i"); if(i) i.style.width=(boxes.length?done/boxes.length*100:0)+"%";
+  }
+  document.querySelectorAll("[data-list]").forEach(function(card){
+    card.querySelectorAll("input[type=checkbox]").forEach(function(b){
+      b.checked=!!saved[b.id];
+      b.addEventListener("change",function(){saved[b.id]=b.checked;save();bar(card)});
+    });
+    bar(card);
+  });
+  // 역할 거르기
+  var btns=document.querySelectorAll(".filters button");
+  btns.forEach(function(btn){
+    btn.addEventListener("click",function(){
+      var f=btn.dataset.f;
+      btns.forEach(function(x){x.setAttribute("aria-pressed",x===btn?"true":"false")});
+      document.querySelectorAll("#tl > li").forEach(function(li){
+        var r=li.dataset.r.split(" ");
+        li.classList.toggle("hide", f!=="all" && r.indexOf(f)<0 && r.indexOf("all")<0);
+      });
+    });
+  });
+  // 인쇄: 다른 페이지 안에 끼워진 경우(인쇄 창이 막힘) 안내를 보여 준다
+  var inFrame=false;try{inFrame=window.self!==window.top}catch(e){inFrame=true}
+  // Claude 페이지 안에서는 인쇄 창이 막혀 있어 PDF를 만들어 저장·공유 창으로 넘긴다
+  var pBtn=document.getElementById("printBtn"), tip=document.getElementById("printTip");
+  if(inFrame) pBtn.textContent="🖨️ 인쇄 (PDF로 받기)";
+  function say(msg){tip.textContent=msg;tip.hidden=!msg}
+  function loadLib(){
+    return new Promise(function(ok,no){
+      if(window.html2pdf) return ok();
+      var s=document.createElement("script");
+      s.src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
+      s.onload=ok; s.onerror=no; document.head.appendChild(s);
+    });
+  }
+  // html2pdf의 avoid는 쪽 높이 계산이 조금씩 어긋나 경계에 걸친 줄이 잘려 보인다.
+  // 그래서 A4 본문 폭으로 배치한 뒤, 쪽 경계에 걸리는 덩어리 앞에 빈칸을 직접 넣어 다음 쪽으로 민다.
+  var BLOCKS=".dday,.docs,.grid2,h2,h3,.lead,.ph,.month,.tl > li,.card,li,tr,p";
+  function paginate(wrap){
+    var mm=document.createElement("div"); mm.style.width="194mm"; document.body.appendChild(mm);
+    var W=mm.getBoundingClientRect().width; mm.remove();
+    wrap.style.width=W+"px";
+    var pageH=W*277/194, guard=12;
+    [].slice.call(wrap.querySelectorAll(BLOCKS)).forEach(function(el){
+      if(el.offsetParent===null) return;
+      var base=wrap.getBoundingClientRect().top, r=el.getBoundingClientRect();
+      var top=r.top-base, bottom=r.bottom-base;
+      if(r.height>pageH*0.35 && !/^(LI|TR|P)$/.test(el.tagName)) return; // 큰 카드는 안쪽 줄 단위로 나눈다
+      if(r.height>pageH-2*guard) return;
+      var edge=(Math.floor(top/pageH)+1)*pageH;
+      // 제목은 아래에 내용이 들어갈 자리가 없으면 다음 쪽으로 같이 넘긴다
+      var keep=el.tagName==="H2"?150:/^H3$/.test(el.tagName)||el.classList.contains("ph")||el.classList.contains("month")?70:0;
+      if(bottom<=edge-guard-keep) return;
+      var target=el;
+      // 2칸 체크리스트에서 오른쪽 칸이면 같은 줄의 왼쪽 칸부터 민다
+      if(el.parentNode.classList.contains("check") && el.previousElementSibling && el.getBoundingClientRect().left-el.previousElementSibling.getBoundingClientRect().left>10) target=el.previousElementSibling;
+      var h=edge-(target.getBoundingClientRect().top-base)+guard, gap;
+      if(target.tagName==="TR"){gap=document.createElement("tr");gap.innerHTML='<td colspan="9" style="padding:0;border:0;height:'+h+'px"></td>'}
+      else{gap=document.createElement(target.tagName==="LI"?"li":"div");gap.style.height=h+"px"}
+      gap.className="pgap"; target.parentNode.insertBefore(gap,target);
+    });
+  }
+  function unpaginate(wrap){
+    wrap.querySelectorAll(".pgap").forEach(function(g){g.remove()});
+    wrap.style.width="";
+  }
+  pBtn.addEventListener("click",async function(){
+    if(!inFrame){window.print();return}
+    var dl=window.claude&&window.claude.use?await window.claude.use("downloads"):null;
+    if(!dl){say("이 화면에서는 파일 저장이 안 돼요. 브라우저 메뉴의 인쇄를 써 주세요.");return}
+    pBtn.disabled=true; say("PDF 만드는 중… (10초쯤 걸려요)");
+    var root=document.documentElement, prevTheme=root.getAttribute("data-theme");
+    var student=document.body.classList.contains("student"), wrap=document.querySelector(".wrap");
+    try{
+      await loadLib();
+      window.scrollTo(0,0); root.setAttribute("data-theme","light"); document.body.classList.add("printing");
+      paginate(wrap);
+      var blob=await html2pdf().set({
+        margin:[10,8,10,8], image:{type:"jpeg",quality:0.95},
+        // 스크롤바 폭을 뺀 실제 폭을 줘야 내용이 스크롤바 절반만큼 오른쪽으로 밀려 잘리지 않는다
+        html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0,windowWidth:root.clientWidth},
+        jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},
+        pagebreak:{mode:["legacy"]} // 쪽 나누기는 paginate()가 미리 해 둔다
+      }).from(wrap).outputPdf("blob");
+      unpaginate(wrap); document.body.classList.remove("printing");
+      if(prevTheme===null) root.removeAttribute("data-theme"); else root.setAttribute("data-theme",prevTheme);
+      say("");
+      await dl.save({filename:"2027학생회장선거_후보용.pdf",data:blob});
+      say("저장(또는 공유) 창으로 넘겼어요. PDF를 열어 인쇄하면 돼요.");
+    }catch(e){
+      unpaginate(wrap); document.body.classList.remove("printing");
+      if(prevTheme===null) root.removeAttribute("data-theme"); else root.setAttribute("data-theme",prevTheme);
+      say(e&&e.code==="declined"?"저장을 취소했어요.":"PDF를 만들지 못했어요. 잠시 뒤 다시 눌러 주세요.");
+    }finally{pBtn.disabled=false}
+  });
+  // 타임라인 카드가 화면에 들어올 때 한 번만 떠오르게
+  if("IntersectionObserver" in window && !matchMedia("(prefers-reduced-motion: reduce)").matches){
+    var items=[].slice.call(document.querySelectorAll("#tl > li"));
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(e.isIntersecting){
+          var d=Math.min(items.indexOf(e.target)%6,5)*50;
+          setTimeout(function(){e.target.classList.add("show")},d);
+          io.unobserve(e.target);
+        }
+      });
+    },{threshold:0.1});
+    items.forEach(function(li){li.classList.add("rv");io.observe(li)});
+    window.addEventListener("beforeprint",function(){items.forEach(function(li){li.classList.add("show")})});
+  }
+  // 브라우저 인쇄(Ctrl+P)에도 같은 인쇄용 배치를 쓴다
+  window.addEventListener("beforeprint",function(){document.body.classList.add("printing")});
+  window.addEventListener("afterprint",function(){document.body.classList.remove("printing")});
+  if(location.hash==="#student")document.body.classList.add("student");
+})();
+</script>
+</body>
+</html>
