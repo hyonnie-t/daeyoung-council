@@ -1050,6 +1050,8 @@ const SHEET_POPUPS={
 const EK='daeyoung_events_v1';   // 행사 로컬 캐시
 const ME_KEY='daeyoung_me';      // 이 폰에서 고른 학생 이름
 // 선생님 '행사' 탭의 "10월 일정 한 번에 등록" 버튼용. 행사가 하나도 없을 때만 쓰인다.
+// 10월이 지나 버튼은 숨김(2026-11-12). 코드는 기록으로 둔다 — 다시 보이려면 SHOW_EV_SEED를 true로.
+const SHOW_EV_SEED=false;
 const EV_OCT=[
   {name:'등교길 아침먹기 캠페인',start:'2026-10-06',end:'2026-10-07',desc:''},
   {name:'학생회 인스타그램 팔로우 이벤트',start:'2026-10-07',end:'2026-10-07',desc:''},
@@ -3167,7 +3169,7 @@ function renderTEvents(){
     });
   }
   let h='<button type="button" class="ev-new" data-action="evNew">+ 행사 등록</button>';
-  if(!events.length)h+='<button type="button" class="ev-add" data-action="evSeed" style="margin:0 0 16px;padding:12px;font-weight:700">📥 10월 일정 '+EV_OCT.length+'개 한 번에 등록</button>';
+  if(SHOW_EV_SEED&&!events.length)h+='<button type="button" class="ev-add" data-action="evSeed" style="margin:0 0 16px;padding:12px;font-weight:700">📥 10월 일정 '+EV_OCT.length+'개 한 번에 등록</button>';
   const {up,proj,past}=evSorted();
   const evLeft=e=>{const et=tasks.filter(t=>inEv(t,e.id));return et.length&&et.every(t=>t.status==='완료')?1:0;};
   up.sort((a,b)=>evLeft(a)-evLeft(b)||a.start.localeCompare(b.start));
