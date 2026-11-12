@@ -506,7 +506,7 @@ h2{font-size:18px;margin:0 0 var(--space-2)}
     DEPTS.forEach(function (d) {
       h += '<button class="dept-btn" style="border-left-color:' + d.c + '" data-act="pick" data-dept="' + d.k + '">' + esc(d.n) + '</button>';
     });
-    h += '<div style="margin-top:16px;font-weight:700">이름 (선택)</div>';
+    h += '<div style="margin-top:var(--space-3);font-weight:700">이름 (선택)</div>';
     h += '<input class="name-in" id="nameIn" type="text" maxlength="12" placeholder="적으면 누가 의견을 냈는지 알 수 있어요" value="' + esc(me.name) + '">';
     h += '</div>';
     return h;
@@ -525,7 +525,7 @@ h2{font-size:18px;margin:0 0 var(--space-2)}
     h += '<div class="card">';
     h += '<div><span class="dept-tag" style="background:' + d.c + '">' + esc(d.n) + '</span>';
     h += ' <button class="link" data-act="change">부서 바꾸기</button></div>';
-    h += '<div class="muted" style="margin-top:6px">업무마다 하나씩 눌러 주세요. 정답은 없어요. 한 번 더 누르면 취소돼요.</div>';
+    h += '<div class="muted" style="margin-top:var(--space-2)">업무마다 하나씩 눌러 주세요. 정답은 없어요. 한 번 더 누르면 취소돼요.</div>';
     h += '<div class="legend">';
     h += '<div class="lg"><span class="chip ok">좋아요</span><span>이 업무 그대로 해도 돼요</span></div>';
     h += '<div class="lg"><span class="chip edit">고쳐요</span><span>내용·순서·표현을 바꿔야 해요 (어떻게 바꿀지 적기)</span></div>';
