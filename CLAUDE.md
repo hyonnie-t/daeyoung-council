@@ -27,7 +27,7 @@
 4. 업무 객체는 `newTask(o)` 한 곳에서만 만든다(수동 등록·말로 쪼개기 공유). 쓰기 동작을 추가하면 `logAct()`도 같이 부른다. 실패는 `toast()`로 알린다(삼키지 않는다).
 5. 클릭은 `document` 위임 리스너의 `data-action` 분기로 추가한다. 예외는 파일 끝 출석 IIFE(인라인 onclick)와 «홈 화면에 추가» IIFE(`addEventListener`, Firebase 안 건드림)뿐.
 6. 학생 화면 문구는 다른 학생과 비교하지 않는다(응원 문구·기분 체크인 공통). AI 호출(`CHEER_URL`)에 이름·학번을 보내지 않는다.
-7. 탭을 추가하면 `sFns`/`tFns`·`S_PANELS`/`T_PANELS`·HTML `data-tab`을 함께 고치고, 출석 IIFE가 `tFns[6]`에 꽂히는 것도 확인한다.
+7. 탭을 추가하면 `sFns`/`tFns`·`S_PANELS`/`T_PANELS`·HTML `data-tab`을 함께 고치고, 출석 IIFE(`_initAttTabSystem`)가 `tFns`의 마지막 칸(지금 `tFns[3]`, 패널 `tP5`)에 꽂히는 것도 확인한다. 탭을 끼워 넣어 칸 번호가 밀리면 그 줄도 같이 고친다.
 8. 업무 id는 `crypto.randomUUID()`. 날짜 비교 코드는 상시 행사(`isProj(e)`)를 먼저 걸러낸다.
 
 ## 작업 습관
