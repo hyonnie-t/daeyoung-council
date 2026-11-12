@@ -224,6 +224,29 @@ body.printing footer{margin-top:14px}
 .hero .cover-banner{max-width:720px; margin:0 auto 12px;}
 body.printing .cover-banner{display:none}
 @media print{ .cover-banner{display:none} }
+
+/* 서류 받기·내기 (후보용, 선거길잡이_후보용만들기.js가 넣음) */
+nav.tabs a.go-forms{background:var(--lemon);border-color:var(--lemon-d);color:var(--lemon-d);font-weight:800}
+#forms{background:var(--lemon);border:3px solid var(--lemon-d);border-radius:22px;padding:18px 18px 16px;margin:6px 0 22px;box-shadow:var(--shadow)}
+#forms h2{margin:0 0 4px;color:var(--lemon-d)}
+#forms .lead{margin:0 0 12px;color:var(--ink)}
+#forms ol.steps{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+#forms ol.steps>li{background:var(--card);border-radius:16px;padding:12px 14px}
+#forms .no{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--lemon-d);color:var(--card);font-weight:800;margin-right:6px}
+#forms .big{display:flex;align-items:center;justify-content:center;gap:8px;margin:10px 0 4px;padding:14px 16px;border-radius:14px;font-size:1.08em;font-weight:800;text-decoration:none;color:#fff;background:var(--sky-d);transition:transform .15s ease,box-shadow .15s ease}
+#forms .big.up{background:var(--mint-d)}
+#forms .big:hover{transform:translateY(-2px);box-shadow:0 6px 14px rgba(0,0,0,.15)}
+#forms .big:active{transform:translateY(0) scale(.98)}
+#forms details{margin-top:8px}
+#forms summary{cursor:pointer;color:var(--sub);font-size:.95em}
+#forms .hwp{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+#forms .hwp a{padding:6px 10px;border:1.5px solid var(--line);border-radius:10px;text-decoration:none;color:var(--ink);font-size:.92em}
+#forms .small{color:var(--sub);font-size:.92em;margin:4px 0 0}
+#forms .ask{margin:12px 0 0;font-weight:700}
+@media (prefers-color-scheme:dark){#forms .big{color:#1f1b23}}
+:root[data-theme="dark"] #forms .big{color:#1f1b23}
+@media (prefers-reduced-motion:reduce){#forms .big{transition:none}#forms .big:hover{transform:none}}
+@media print{#forms .big{color:#000;background:none;border:2px solid #000}}
 </style>
 </head>
 <body class="student">
@@ -248,10 +271,31 @@ body.printing .cover-banner{display:none}
 </header>
 
 <nav class="tabs" aria-label="바로가기">
+  <a href="#forms" class="go-forms">📥 서류 받기·내기</a>
   <a href="#summary">한눈에</a>
   <a href="#timeline">타임라인</a>
   <a href="#rules">꼭 지킬 점</a>
 </nav>
+
+<!-- 서류 받기·내기 -->
+<section id="forms">
+  <h2><span class="em">📥</span>서류 받기·내기</h2>
+  <p class="lead">후보 등록은 <b>11. 23.(월) ~ 12. 4.(금) 16:30</b>, 서류를 한 번에 내요.</p>
+  <ol class="steps">
+    <li><span class="no">1</span><b>양식 내려받기</b>
+      <a class="big" href="forms/candidate-forms.pdf" download="2027 학생회장 선거 후보 등록 서류 묶음.pdf">📄 서류 묶음 PDF 받기 (인쇄용 8쪽)</a>
+      <p class="small">종이 양식은 창의인성교육부에서도 받을 수 있어요.</p>
+      <details><summary>한글(hwp) 파일로 따로 받기</summary>
+        <div class="hwp"><a href="forms/form0.hwp" download="00 제출서류 체크리스트.hwp">00 제출서류 체크리스트</a><a href="forms/form1.hwp" download="서식1 입후보 신청서(학부모 확인).hwp">서식1 입후보 신청서(학부모 확인)</a><a href="forms/form2.hwp" download="서식2 담임 추천서.hwp">서식2 담임 추천서</a><a href="forms/form3.hwp" download="서식3 후보 추천서.hwp">서식3 후보 추천서</a><a href="forms/form4.hwp" download="서식4 선거운동원 명단.hwp">서식4 선거운동원 명단</a><a href="forms/form5.hwp" download="서식5 자기소개서.hwp">서식5 자기소개서</a><a href="forms/form6.hwp" download="서식6 공약 및 이행 계획서.hwp">서식6 공약 및 이행 계획서</a><a href="forms/form7.hwp" download="서식7 소견 발표문.hwp">서식7 소견 발표문</a></div>
+      </details></li>
+    <li><span class="no">2</span><b>서류는 종이로 직접 내기</b>
+      <p class="small">서식 1~7을 써서(입후보 신청서·담임 추천서·후보 추천서는 서명을 받아서) <b>후보 본인이 창의인성교육부에</b> 내요. 선관위원은 후보 추천서에 서명하지 않아요.</p></li>
+    <li><span class="no">3</span><b>포스터·영상은 파일로 내기</b>
+      <a class="big up" href="https://padlet.com/dy_sch03/submission-request/7kQ0bNN9oMGWbNVy" target="_blank" rel="noopener">📤 포스터·영상 파일 제출하기</a>
+      <p class="small">올린 파일은 <b>담당 선생님만</b> 봐요. 제목에 «학년-반-번호 이름 / 출마 직책»을 써요. USB로 내도 돼요. 포스터는 A1로 인쇄하니 원본 파일(PDF 또는 고해상도 그림)로.</p></li>
+  </ol>
+  <p class="ask">❓ 궁금한 건 창의인성교육부 담당 선생님께 물어보세요. (선거관리위원·학생회는 답해 줄 수 없어요)</p>
+</section>
 
 <!-- 한눈에 -->
 <section id="summary">
@@ -277,7 +321,7 @@ body.printing .cover-banner{display:none}
         <li>투표는 12. 28.(월) <b>6교시</b>, 학교 안에서만. 결석·조퇴 등으로 그 시간에 없으면 기권</li>
         <li>반별 결과를 투표마다 <b>학급 개표 결과지</b>에 적어 봉인 → 선관위가 <b>지정 장소</b>에서 후보별 참관인과 함께 공개 집계</li>
         <li><b>투표는 2개, 차례로:</b> «3학년 회장단»(1위 회장, 회장과 다른 성별 최다 득표자가 3학년 부회장)과 «2학년 부회장»</li>
-        <li>같은 표면 그 후보끼리 다시 투표 (일시는 선관위가 정함)</li>
+        <li>표가 같으면 그 후보끼리 다시 투표 (일시는 선관위가 정함)</li>
         <li>후보가 1명뿐이면 선관위가 «찬반 투표» 또는 «무투표 당선»을 정함</li>
       </ul>
       <p class="src">학생회 규정 제12조·제17조·제18조·제19조</p>
@@ -315,10 +359,10 @@ body.printing .cover-banner{display:none}
       <div class="when">11. 23.(월) ~ 12. 4.(금) 16:30</div>
       <div class="what">후보자 등록 (서류 한 번에)</div>
       <div class="card"><span class="tag t-cand">후보</span><span class="tag t-teacher">교사</span><span class="tag t-hr">담임</span>
-        <ul><li>서류 9가지: 학부모 확인 입후보 신청서, 담임 추천서, 선거운동원 명단(도와줄 친구 4명 이내), 소견 발표문, 홍보 포스터(벽보), <b>홍보 영상</b>(1분 30초 이내, 꼭 필요하면 2분까지),후보 추천서(재학생 50명 이상 자필 서명, 중복 서명 가능), 자기소개서, 공약 및 이행 계획서</li>
-        <li><b>포스터·영상 파일은 <a href="https://padlet.com/dy_sch03/submission-request/7kQ0bNN9oMGWbNVy" target="_blank" rel="noopener">패들렛 제출 링크</a> 또는 USB로</b> 제출. 패들렛에 올린 파일은 담당 선생님만 봐요. 포스터는 A1로 인쇄하니 화질이 떨어지지 않는 원본 파일(PDF 또는 고해상도 그림)로</li>
-        <li><b>서류 양식 내려받기:</b> <a href="forms/candidate-forms.pdf" download="2027 학생회장 선거 후보 등록 서류 묶음.pdf">📄 인쇄용 묶음 PDF(8쪽)</a> · 한글 파일: <a href="forms/form0.hwp" download="00_제출서류_체크리스트.hwp">00_제출서류_체크리스트</a> · <a href="forms/form1.hwp" download="서식1_입후보 신청서(학부모 확인).hwp">서식1_입후보 신청서(학부모 확인)</a> · <a href="forms/form2.hwp" download="서식2_담임 추천서.hwp">서식2_담임 추천서</a> · <a href="forms/form3.hwp" download="서식3_후보 추천서.hwp">서식3_후보 추천서</a> · <a href="forms/form4.hwp" download="서식4_선거운동원 명단.hwp">서식4_선거운동원 명단</a> · <a href="forms/form5.hwp" download="서식5_자기소개서.hwp">서식5_자기소개서</a> · <a href="forms/form6.hwp" download="서식6_공약 및 이행 계획서.hwp">서식6_공약 및 이행 계획서</a> · <a href="forms/form7.hwp" download="서식7_소견 발표문.hwp">서식7_소견 발표문</a>. 종이 양식은 창의인성교육부에서도 받을 수 있어요. 선관위원은 후보 추천서에 서명하지 않아요</li>
-        <li><b>서명이 들어가는 서류(입후보 신청서·담임 추천서·후보 추천서)는 종이 원본</b>으로, 후보 본인이 창의인성교육부에 직접 제출.</li></ul></div>
+        <ul><li>서류 9가지<ul><li>입후보 신청서(학부모 확인)</li><li>담임 추천서</li><li>후보 추천서(재학생 50명 이상 자필 서명, 다른 후보와 중복 서명 가능)</li><li>선거운동원 명단(도와줄 친구 4명 이내)</li><li>자기소개서</li><li>공약 및 이행 계획서</li><li>소견 발표문</li><li>홍보 포스터(벽보)</li><li><b>홍보 영상</b>(1분 30초 이내, 꼭 필요하면 2분까지)</li></ul></li>
+        <li><b>포스터·영상은 파일로</b> 제출(<a href="https://padlet.com/dy_sch03/submission-request/7kQ0bNN9oMGWbNVy" target="_blank" rel="noopener">패들렛 제출 링크</a> 또는 USB). 포스터는 A1로 인쇄하니 원본 파일(PDF 또는 고해상도 그림)로</li>
+        <li>서류 양식은 맨 위 <a href="#forms"><b>📥 서류 받기·내기</b></a>에서 받아요. 선관위원은 후보 추천서에 서명하지 않아요</li>
+        <li>서류는 종이로, 후보 본인이 창의인성교육부에 직접 제출.</li></ul></div>
     </li>
     <li data-r="teacher sgw cand" class="big">
       <span class="dot">🎲</span>
