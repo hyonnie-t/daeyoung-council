@@ -295,7 +295,7 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
 /* .ms는 요약 카드용 text-align:center 규칙과 이름이 겹쳐서 모달 안 글자가 가운데로 모인다 — 이 모달은 본문만 왼쪽 정렬 */
 #brkBody{text-align:left}
 #brkBody .add-ev{text-align:center}
-.brk-card{border:1px solid var(--border);border-radius:var(--r);padding:var(--space-2);margin-bottom:var(--space-3);background:var(--surface)}
+.brk-card{border:1px solid var(--border);border-radius:var(--r);padding:var(--space-3);margin-bottom:var(--space-3);background:var(--surface)}
 .brk-ah{font-size:14px;font-weight:700;margin-bottom:2px}
 .brk-q0{font-size:12px;color:var(--text3);margin-bottom:var(--space-2);line-height:1.5;word-break:keep-all}
 .brk-row{padding:var(--space-2) 0;border-top:1px solid var(--border)}
@@ -678,8 +678,8 @@ details.un-notice[open]>summary{margin-bottom:var(--space-2)}
     <div class="pw-sub">비밀번호를 입력하세요</div>
     <input type="password" id="pwInput" maxlength="6" placeholder="••••">
     <div class="pw-err" id="pwErr"></div>
-    <label style="display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;color:#666;margin:2px 0 8px"><input type="checkbox" id="pwRemember"> 이 기기에서 기억하기</label>
-    <button type="button" class="bp" id="pwOK" style="margin-top:4px">확인</button>
+    <label style="display:flex;align-items:center;justify-content:center;gap:var(--space-2);font-size:13px;color:#666;margin:2px 0 var(--space-2)"><input type="checkbox" id="pwRemember"> 이 기기에서 기억하기</label>
+    <button type="button" class="bp" id="pwOK" style="margin-top:var(--space-1)">확인</button>
     <button type="button" class="pw-back" id="pwBack">← 돌아가기</button>
   </div>
 </div>
@@ -699,8 +699,8 @@ details.un-notice[open]>summary{margin-bottom:var(--space-2)}
   </div>
   <div class="tp active" id="sP0">
    <div class="s0-side">
-    <div id="noticeBox" style="display:none;background:#fff9db;border:1px solid #ffd43b;border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh);margin-bottom:14px">
-      <div style="font-size:12px;font-weight:700;color:var(--warn);margin-bottom:6px">📢 공지사항</div>
+    <div id="noticeBox" style="display:none;background:#fff9db;border:1px solid #ffd43b;border-radius:var(--r);padding:var(--space-3) var(--space-3);box-shadow:var(--sh);margin-bottom:var(--space-3)">
+      <div style="font-size:12px;font-weight:700;color:var(--warn);margin-bottom:var(--space-2)">📢 공지사항</div>
       <div id="noticeText" style="font-size:15px;color:var(--text);line-height:1.7;white-space:pre-wrap"></div>
     </div>
     <!-- 2027 학생회장 선거 안내(election.html, 교사용 길잡이에서 만든 학생 공유본). 선거 끝나면(2027. 1.) 지우기 -->
@@ -716,7 +716,7 @@ details.un-notice[open]>summary{margin-bottom:var(--space-2)}
     <!-- 이번 달 일정표. 기존 배너 hero-banner.png는 보관 중(되돌릴 땐 src만 바꾸면 됨). 누르면 원본 크기로 열림 -->
     <details class="fold sched-fold" id="schedFold">
       <summary>📅 이번 달 일정표 <small>눌러서 펼치기</small></summary>
-      <a href="schedule-2026-11.webp" target="_blank" rel="noopener" style="display:block;margin:8px 0 16px">
+      <a href="schedule-2026-11.webp" target="_blank" rel="noopener" style="display:block;margin:var(--space-2) 0 var(--space-3)">
         <img src="schedule-2026-11.webp" alt="2026년 11월 학생회 일정" style="width:100%;border-radius:14px;display:block">
       </a>
     </details>
@@ -725,11 +725,11 @@ details.un-notice[open]>summary{margin-bottom:var(--space-2)}
     <div id="unNotice"></div>
     <div class="nw" id="s0NameWrap"><label>내 이름 <span style="font-size:12px;color:var(--text3)">(한 번 고르면 이 폰에 기억돼요)</span></label><select id="s0Name"></select></div>
     <div id="ckCard" class="ck-card" style="display:none"></div>
-    <div id="myArea"><div class="empty" style="padding:20px 24px"><div class="ei">👆</div><p>이름을 선택하면<br>내 업무가 나타나요</p><img src="illust-student.webp" alt="" style="width:100%;max-width:260px;margin-top:20px;border-radius:16px;opacity:0.9"></div></div>
+    <div id="myArea"><div class="empty" style="padding:var(--space-3) var(--space-4)"><div class="ei">👆</div><p>이름을 선택하면<br>내 업무가 나타나요</p><img src="illust-student.webp" alt="" style="width:100%;max-width:260px;margin-top:var(--space-4);border-radius:16px;opacity:0.9"></div></div>
    </div>
   </div>
   <div class="tp" id="sP3">
-    <div id="evFront" class="ev-front" style="display:none;max-width:none;margin-bottom:16px"></div>
+    <div id="evFront" class="ev-front" style="display:none;max-width:none;margin-bottom:var(--space-3)"></div>
     <div class="ch"><button type="button" class="cn" id="sCP">‹</button><div class="ct" id="sCT"></div><button type="button" class="cn" id="sCN">›</button></div>
     <div class="cg" id="sCG"></div><div id="sCD"></div>
   </div>
@@ -769,14 +769,14 @@ details.un-notice[open]>summary{margin-bottom:var(--space-2)}
     <div class="stl">🎯 오늘 처리할 것 <span id="todoN" class="todo-n"></span></div>
     <div id="todoArea"></div>
     <details class="fold ck-adm" id="ckAdm">
-      <summary class="stl" style="display:inline-block;margin-bottom:8px">📌 접속 출석 현황 <small id="ckAdmSum" style="font-weight:400;color:var(--text3)"></small></summary>
+      <summary class="stl" style="display:inline-block;margin-bottom:var(--space-2)">📌 접속 출석 현황 <small id="ckAdmSum" style="font-weight:400;color:var(--text3)"></small></summary>
       <div class="ck-adm-note">학생이 이 앱에서 '출석 도장'을 누른 날수예요. 상점은 이 목록을 보고 직접 주세요. (아래 '출석 관리'는 회의 출석이라 별개예요)</div>
       <div id="ckAdmBody"><div class="ev-none">펼치면 불러와요</div></div>
     </details>
     <div class="stl">📢 공지사항 관리</div>
-<div id="noticeAdmin" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:8px;box-shadow:var(--sh)">
-  <textarea id="noticeInput" rows="3" placeholder="공지 내용을 입력하세요. 비워두면 공지가 숨겨집니다." style="margin-bottom:8px"></textarea>
-  <div style="display:flex;gap:8px">
+<div id="noticeAdmin" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:var(--space-3);margin-bottom:var(--space-2);box-shadow:var(--sh)">
+  <textarea id="noticeInput" rows="3" placeholder="공지 내용을 입력하세요. 비워두면 공지가 숨겨집니다." style="margin-bottom:var(--space-2)"></textarea>
+  <div style="display:flex;gap:var(--space-2)">
     <button type="button" class="bs" id="noticeSave" style="flex:1">저장</button>
     <button type="button" class="bc" id="noticeClear">공지 삭제</button>
   </div>
@@ -796,7 +796,7 @@ details.un-notice[open]>summary{margin-bottom:var(--space-2)}
   <div class="wv" id="tP2"><div id="tDept"></div></div>
   <div class="wv" id="tP3"><div id="tStu"></div></div>
   <div class="wv" id="tP4">
-<button type="button" id="tAddTaskBtn" class="fc active" style="width:100%;margin-bottom:10px;padding:10px;border-radius:10px;font-size:15px;font-weight:700;">➕ 업무 추가</button>
+<button type="button" id="tAddTaskBtn" class="fc active" style="width:100%;min-height:40px;margin-bottom:var(--space-2);padding:var(--space-2);border-radius:10px;font-size:15px;font-weight:700;">➕ 업무 추가</button>
     <div class="sw"><span class="si2">🔍</span><input type="text" id="searchInput" placeholder="업무명, 담당자, 카테고리 검색..."><button type="button" class="sc3" id="searchClear">×</button></div>
     <div class="fb" id="filterBar">
       <button type="button" class="fc active" data-filter="전체">전체</button>
@@ -815,8 +815,8 @@ details.un-notice[open]>summary{margin-bottom:var(--space-2)}
   </div>
 
   <div class="tp" id="tP5">
-  <div class="stl" style="margin-top:4px; color:var(--accent); font-size:16px; font-weight:700;">📊 학생회 출석 관리 대시보드</div>
-  <div id="_attPanelView" style="margin-top:12px;"></div>
+  <div class="stl" style="margin-top:var(--space-1); color:var(--accent); font-size:16px; font-weight:700;">📊 학생회 출석 관리 대시보드</div>
+  <div id="_attPanelView" style="margin-top:var(--space-3);"></div>
 </div>
 </div>
 
@@ -842,11 +842,11 @@ details.un-notice[open]>summary{margin-bottom:var(--space-2)}
     <div class="fg">
       <label>담당자</label>
       <div id="mAssigneeWrap" style="border:1px solid var(--border);border-radius:8px;overflow:hidden">
-        <div id="mAssigneeToggle" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;background:var(--surface2)">
+        <div id="mAssigneeToggle" style="display:flex;align-items:center;justify-content:space-between;padding:var(--space-2) var(--space-3);cursor:pointer;background:var(--surface2)">
           <span style="font-size:14px" id="mAssigneeCur">-</span>
           <span style="font-size:12px;color:var(--accent);font-weight:700" id="mAssigneeArrow">변경하기 ▼</span>
         </div>
-        <div id="mAssigneePanel" style="display:none;padding:8px;max-height:200px;overflow-y:auto;background:var(--surface2)">
+        <div id="mAssigneePanel" style="display:none;padding:var(--space-2);max-height:200px;overflow-y:auto;background:var(--surface2)">
           <div class="cb-group" id="mAssigneeCBs"></div>
         </div>
       </div>
@@ -873,7 +873,7 @@ details.un-notice[open]>summary{margin-bottom:var(--space-2)}
   <div class="ms">
     <div class="mh"></div><div class="mt" id="stuTitle"></div>
     <div id="stuBody"></div>
-    <div style="margin-top:20px"><button type="button" class="bc" style="width:100%" id="stuClose">닫기</button></div>
+    <div style="margin-top:var(--space-4)"><button type="button" class="bc" style="width:100%" id="stuClose">닫기</button></div>
   </div>
 </div>
 
@@ -883,7 +883,7 @@ details.un-notice[open]>summary{margin-bottom:var(--space-2)}
     <div class="mh"></div><div class="mt">업무 추가</div>
     <div class="fg">
       <label>담당자 <span class="req">*</span></label>
-      <div id="tAddAssigneeWrap" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px;max-height:200px;overflow-y:auto"></div>
+      <div id="tAddAssigneeWrap" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:var(--space-2);max-height:200px;overflow-y:auto"></div>
     </div>
     <div class="fg"><label>업무명 <span class="req">*</span></label><input type="text" id="tAddTitle" placeholder="업무명 입력"></div>
     <div class="fg"><label>행사 <span style="font-size:12px;color:var(--text3)">(선택 · 여러 개 가능)</span></label><div class="evpick" id="tAddEv"></div></div>
@@ -891,7 +891,7 @@ details.un-notice[open]>summary{margin-bottom:var(--space-2)}
     <div class="fg"><label>메모</label><textarea id="tAddMemo" rows="2"></textarea></div>
     <details class="fg subfold" id="tAddSubFold">
       <summary>+ 세부 할 일 (선택)</summary>
-      <div id="tAddSubList" style="margin-top:8px"><div class="sir"><input type="text" placeholder="예: 행사 장소 섭외" class="st"><input type="date" class="dm sd"><button type="button" class="sdel" data-action="tAddRmSub">×</button></div></div>
+      <div id="tAddSubList" style="margin-top:var(--space-2)"><div class="sir"><input type="text" placeholder="예: 행사 장소 섭외" class="st"><input type="date" class="dm sd"><button type="button" class="sdel" data-action="tAddRmSub">×</button></div></div>
       <button type="button" class="asb" id="tAddSubBtn">+ 한 줄 더</button>
     </details>
     <div class="ma"><button type="button" class="bc" id="tAddCancel">취소</button><button type="button" class="bs" id="tAddSave">추가</button></div>
@@ -902,11 +902,11 @@ details.un-notice[open]>summary{margin-bottom:var(--space-2)}
 <div class="mov" id="acctMov">
   <div class="ms" style="max-width:900px;display:flex;flex-direction:column;height:85vh">
     <div class="mh"></div>
-    <div class="mt" style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span id="acctTitle">🔑 학생회 공용 계정</span>
+    <div class="mt" style="display:flex;justify-content:space-between;align-items:center;gap:var(--space-2)"><span id="acctTitle">🔑 학생회 공용 계정</span>
       <a class="acct-btn" id="acctOpen" target="_blank" rel="noopener">새 창에서 열기 ↗</a></div>
     <iframe id="acctFrame" title="학생회 공용 계정" style="flex:1;width:100%;border:1px solid var(--border);border-radius:10px;background:var(--surface2)"></iframe>
     <div class="hint">화면이 비어 있으면 구글 로그인이 필요한 경우예요. '새 창에서 열기'를 눌러주세요.</div>
-    <div class="ma" style="margin-top:12px"><button type="button" class="bc" id="acctClose">닫기</button></div>
+    <div class="ma" style="margin-top:var(--space-3)"><button type="button" class="bc" id="acctClose">닫기</button></div>
   </div>
 </div>
 
@@ -920,7 +920,7 @@ details.un-notice[open]>summary{margin-bottom:var(--space-2)}
     <div class="fg"><label>주관 부서 <span style="font-size:12px;color:var(--text3)">(여러 개 선택 가능)</span></label><div class="evpick" id="evDepts" style="max-height:none"></div></div>
     <div class="fg"><label>설명</label><textarea id="evDesc" rows="2" placeholder="예: 7, 8반쪽 현관 사용 가능"></textarea></div>
     <div class="ma"><button type="button" class="bc" id="evCancel">취소</button><button type="button" class="bs" id="evSave">저장</button></div>
-    <button type="button" class="pw-back" id="evDelete" style="color:var(--danger);margin-top:14px;display:none">이 행사 삭제</button>
+    <button type="button" class="pw-back" id="evDelete" style="color:var(--danger);margin-top:var(--space-3);display:none">이 행사 삭제</button>
   </div>
 </div>
 
@@ -934,17 +934,17 @@ details.un-notice[open]>summary{margin-bottom:var(--space-2)}
     <div class="fg"><label>마감일 <span style="font-size:12px;color:var(--text3)">(회의라면 회의 날짜)</span></label><input type="date" id="fDeadline"></div>
     <details class="fg subfold">
       <summary>🎪 행사 바꾸기 · 여러 행사에 연결</summary>
-      <div class="evpick" id="fEv" style="margin-top:8px"></div>
+      <div class="evpick" id="fEv" style="margin-top:var(--space-2)"></div>
       <div class="hint">행사를 하나도 고르지 않으면 '기타'로 들어가요</div>
     </details>
     <details class="fg subfold">
       <summary>👥 같이 할 사람 (선택)</summary>
-      <div id="cwList" style="margin-top:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px;max-height:200px;overflow-y:auto"></div>
+      <div id="cwList" style="margin-top:var(--space-2);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:var(--space-2);max-height:200px;overflow-y:auto"></div>
     </details>
     <div class="fg"><label>메모</label><textarea id="fMemo" rows="2" placeholder="참고사항"></textarea></div>
     <details class="fg subfold" id="fSubFold">
       <summary>+ 세부 할 일 (선택)</summary>
-      <div id="subList" style="margin-top:8px"><div class="sir"><input type="text" placeholder="예: 행사 장소 섭외" class="st"><input type="date" class="dm sd"><button type="button" class="sdel" data-action="rmSub">×</button></div></div>
+      <div id="subList" style="margin-top:var(--space-2)"><div class="sir"><input type="text" placeholder="예: 행사 장소 섭외" class="st"><input type="date" class="dm sd"><button type="button" class="sdel" data-action="rmSub">×</button></div></div>
       <button type="button" class="asb" id="addSubBtn">+ 한 줄 더</button>
     </details>
     <div class="ma"><button type="button" class="bc" id="addCancel">취소</button><button type="button" class="bs" id="submitBtn">업무 등록하기</button></div>
@@ -963,8 +963,8 @@ details.un-notice[open]>summary{margin-bottom:var(--space-2)}
 <div class="mov" id="delMov">
   <div class="ms">
     <div class="mh"></div><div class="mt">업무 삭제</div>
-    <p style="font-size:15px;color:var(--text2);margin-bottom:8px">정말 삭제할까요?</p>
-    <p id="delTitle" style="font-size:16px;font-weight:700;margin-bottom:4px"></p>
+    <p style="font-size:15px;color:var(--text2);margin-bottom:var(--space-2)">정말 삭제할까요?</p>
+    <p id="delTitle" style="font-size:16px;font-weight:700;margin-bottom:var(--space-1)"></p>
     <p style="font-size:13px;color:var(--danger)">삭제된 업무는 복구되지 않아요</p>
     <div class="ma"><button type="button" class="bc" id="delCancel">취소</button><button type="button" class="bs" style="background:var(--danger)" id="delOK">삭제</button></div>
   </div>
@@ -1263,7 +1263,7 @@ function renderCk(){
   box.style.display='';
   const st=CK[name];
   if(!st){box.innerHTML='<div class="ck-sub" style="margin:0">출석 정보를 불러오는 중…</div>';ckLoad(name).then(renderCk);return;}
-  if(!st.dates){box.innerHTML='<div class="ck-sub" style="margin:0">출석 정보를 못 불러왔어요. <button type="button" class="ck-mood" style="display:inline-flex;min-height:32px;padding:2px 10px" data-action="ckRetry">다시 시도</button></div>';return;}
+  if(!st.dates){box.innerHTML='<div class="ck-sub" style="margin:0">출석 정보를 못 불러왔어요. <button type="button" class="ck-mood" style="display:inline-flex;min-height:32px;padding:2px var(--space-2)" data-action="ckRetry">다시 시도</button></div>';return;}
   const td=todayStr(),n=Object.keys(st.dates).length,today=st.dates[td];
   const done=!!today,moodSaved=today&&today.mood?today.mood:'';
   const tier=ckTier(n),nx=ckNext(n),pick=CK_PICK||moodSaved;
@@ -1662,7 +1662,7 @@ function card(t,opts){
     ${metaH}
     ${dateL?`<div class="tc-meta" style="margin-top:2px">${dateL}</div>`:''}
     ${subH}
-    ${t.memo?`<div style="margin-top:8px;font-size:13px;color:var(--text2);line-height:1.6">${t.memo}</div>`:''}
+    ${t.memo?`<div style="margin-top:var(--space-2);font-size:13px;color:var(--text2);line-height:1.6">${t.memo}</div>`:''}
     ${ppH}${sbH}
     ${addH||actH?`<details class="tc-more"><summary>+ 더보기 <small>${opts.me?'수정 · 담당자 · 삭제':(compact?'상태 · ':'')+'세부 할 일 · 담당자 · 삭제'}</small></summary>${sbIn}${addH}${actH}</details>`:''}
   </div>`;
@@ -1766,7 +1766,7 @@ function renderMyTasks(){
   document.getElementById('s0NameWrap').style.display=name?'none':'';
   document.getElementById('sChName').style.display=name?'':'none';
   if(!name){document.getElementById('sHdr').textContent='학생 모드';document.getElementById('sBadge').textContent='';}
-  if(!name){area.innerHTML='<div class="empty" style="padding:20px 24px"><div class="ei">👆</div><p>이름을 선택하면<br>내 업무가 나타나요</p><img src="illust-student.webp" alt="" style="width:100%;max-width:260px;margin-top:20px;border-radius:16px;opacity:0.9"></div>';return;}
+  if(!name){area.innerHTML='<div class="empty" style="padding:var(--space-3) var(--space-4)"><div class="ei">👆</div><p>이름을 선택하면<br>내 업무가 나타나요</p><img src="illust-student.webp" alt="" style="width:100%;max-width:260px;margin-top:var(--space-4);border-radius:16px;opacity:0.9"></div>';return;}
   document.getElementById('sHdr').textContent=name+'의 업무';
   document.getElementById('sBadge').textContent=gd(name);
   const all=tasks.filter(t=>(t.assignees||[t.assignee]).includes(name));
@@ -1791,7 +1791,7 @@ function renderMyTasks(){
   h+=all.some(t=>t.status!=='완료')?'<button type="button" class="bulk-open" data-action="bulkSelf">☑ 내 업무 여러 개 한 번에 넘기기</button>':'';
   h+='<div class="sec-t"><span>🎪 다가오는 행사 (2주)</span></div>';
   if(canEv(name))h+='<button type="button" class="ev-new" data-action="evNew">+ 행사 등록</button>';
-  if(!near.length)h+='<div class="ev-none" style="margin-bottom:16px">2주 안에 등록된 행사가 없어요</div>';
+  if(!near.length)h+='<div class="ev-none" style="margin-bottom:var(--space-3)">2주 안에 등록된 행사가 없어요</div>';
   const addBtn=id=>`<button type="button" class="ev-add" data-action="addTask" data-id="${esc(id||'')}">＋ ${id?'이 행사에':'행사 없이'} 업무 추가</button>`+(id&&CHEER_URL?`<button type="button" class="ev-add ev-brk" data-action="brkOpen" data-id="${esc(id)}">🗣 말로 쪼개기<small>계획을 말하듯 쓰면 업무 체크리스트로 정리해줘요</small></button>`:'');
   // 내 남은 일이 있는 행사 카드는 기본으로 펼쳐지고, 없으면 접힌다. 직접 접고 편 상태는 sEvOpen에 기억
   const evCard=e=>{
@@ -1805,7 +1805,7 @@ function renderMyTasks(){
     return `<details class="ev ev-fold ev-s" data-evid="${esc(e.id)}"${(sEvOpen.has(e.id)?sEvOpen.get(e.id):act.length>0)?' open':''} style="--dc:${e.dept?dc(e.dept):'var(--accent)'}"><summary class="ev-sum"><span class="ev-nm">${esc(e.name)}</span><span class="ev-cnt${act.length?'':' ok'}">${cnt}</span></summary>
       <div class="ev-dt">📅 ${evRange(e)} ${dd}${deptBadges(e)}${canEv(name)?`<button type="button" class="eb" data-action="evEdit" data-id="${esc(e.id)}">✏️</button>`:''}</div>
       ${e.desc?`<div class="ev-desc">${esc(e.desc)}</div>`:''}
-      <div class="ev-tasks">${act.map(t=>card(t,evOpts)).join('')}</div>${act.length?'':!mine.length?'<div class="ev-none">아직 내가 맡은 일이 없어요</div>':mine.some(t=>ovIds.has(t.id))?'<div class="ev-none">남은 일은 위 \'기한 지난 업무\'에 있어요</div>':'<div class="ev-none">내 몫은 모두 끝냈어요 🎉</div>'}${fin.length?`<details class="tc-more"><summary>✅ 내가 끝낸 일 ${fin.length}개 <small>눌러서 보기</small></summary><div style="margin-top:8px">${fin.map(t=>card(t,evOpts)).join('')}</div></details>`:''}
+      <div class="ev-tasks">${act.map(t=>card(t,evOpts)).join('')}</div>${act.length?'':!mine.length?'<div class="ev-none">아직 내가 맡은 일이 없어요</div>':mine.some(t=>ovIds.has(t.id))?'<div class="ev-none">남은 일은 위 \'기한 지난 업무\'에 있어요</div>':'<div class="ev-none">내 몫은 모두 끝냈어요 🎉</div>'}${fin.length?`<details class="tc-more"><summary>✅ 내가 끝낸 일 ${fin.length}개 <small>눌러서 보기</small></summary><div style="margin-top:var(--space-2)">${fin.map(t=>card(t,evOpts)).join('')}</div></details>`:''}
       ${addBtn(e.id)}
     </details>`;
   };
@@ -1813,7 +1813,7 @@ function renderMyTasks(){
   const hasMine=e=>tasks.some(t=>inEv(t,e.id)&&assOf(t).includes(name));
   const evMine=near.filter(hasMine),evNone=near.filter(e=>!hasMine(e));
   h+=evMine.map(evCard).join('');
-  if(evNone.length)h+='<details class="tc-more ev-nomine"><summary>🗂 내 일이 없는 행사 '+evNone.length+'개 <small>눌러서 보기</small></summary><div style="margin-top:10px">'+evNone.map(evCard).join('')+'</div></details>';
+  if(evNone.length)h+='<details class="tc-more ev-nomine"><summary>🗂 내 일이 없는 행사 '+evNone.length+'개 <small>눌러서 보기</small></summary><div style="margin-top:var(--space-2)">'+evNone.map(evCard).join('')+'</div></details>';
   // 1-2) 진행 중인 상시 프로젝트 — 내가 아직 안 끝낸 업무가 있는 것만
   const projH=evSorted().proj.map(e=>{
     const act=tasks.filter(t=>inEv(t,e.id)&&assOf(t).includes(name)&&!myDone(t)&&!ovIds.has(t.id)).sort(byDl);
@@ -1824,10 +1824,10 @@ function renderMyTasks(){
       ${e.desc?`<div class="ev-desc">${esc(e.desc)}</div>`:''}
       <div class="ev-tasks">${act.map(t=>card(t,evOpts)).join('')}</div>${addBtn(e.id)}</details>`;
   }).join('');
-  if(projH)h+='<div class="sec-t" style="margin-top:20px"><span>📂 진행 중인 상시 행사</span></div>'+projH;
+  if(projH)h+='<div class="sec-t" style="margin-top:var(--space-4)"><span>📂 진행 중인 상시 행사</span></div>'+projH;
   // 2) 그 밖의 내 업무
   const rest=all.filter(t=>!shown.has(t.id));
-  h+='<div class="sec-t" style="margin-top:20px"><span>📝 그 밖의 내 업무</span></div>'+addBtn('');
+  h+='<div class="sec-t" style="margin-top:var(--space-4)"><span>📝 그 밖의 내 업무</span></div>'+addBtn('');
   const ra=rest.filter(t=>!myDone(t));
   h+=ra.length?renderGrp(ra,opts):'<div class="ev-none">남은 업무가 없어요 🎉</div>';
   h+=doneSec(rest.filter(myDone),opts,'my');
@@ -1966,14 +1966,14 @@ function brkRenderResult(){
   let h=brkEvHead(e);
   if(tight)h+='<div class="brk-warn">⏰ 행사까지 '+brkDaysLeft(base,today)+'일 남았어요. 일부 업무는 AI가 권한 준비 기간보다 짧아서 마감이 오늘로 잡혔어요. 마감을 꼭 확인해 주세요.</div>';
   if(rows.length){
-    h+='<div class="hint" style="margin:-4px 0 12px">내가 쓴 내용을 AI가 정리한 초안이에요. 필요한 것만 체크하고, 제목·마감·담당자를 고쳐서 등록해요.'+(BRK.nExisting?' 이 행사에 이미 등록된 업무 '+BRK.nExisting+'개와 겹치는 건 빼고 보여줘요.':'')+'</div>';
+    h+='<div class="hint" style="margin:-4px 0 var(--space-3)">내가 쓴 내용을 AI가 정리한 초안이에요. 필요한 것만 체크하고, 제목·마감·담당자를 고쳐서 등록해요.'+(BRK.nExisting?' 이 행사에 이미 등록된 업무 '+BRK.nExisting+'개와 겹치는 건 빼고 보여줘요.':'')+'</div>';
     let i=0;
     res.activities.forEach(a=>{
       h+='<div class="brk-card"><div class="brk-ah">'+esc(a.name)+'</div><div class="brk-q0">“'+esc(a.quote)+'”</div><div class="brk-rows">';
       a.tasks.forEach(()=>{h+=brkRowHtml(rows[i++],who);});
       h+='</div></div>';
     });
-    h+='<button type="button" class="asb" data-action="brkAll" style="margin:0 0 12px">전체 선택 / 해제</button>';
+    h+='<button type="button" class="asb" data-action="brkAll" style="margin:0 0 var(--space-3)">전체 선택 / 해제</button>';
   } else h+='<div class="brk-warn">'+brkNoRowsMsg()+(qs.length?' 아래 질문에 답하거나 ‘다시 쓰기’로 내용을 더 적어봐요.':' ‘다시 쓰기’로 내용을 더 적어봐요.')+'</div>';
   if(qs.length){
     h+='<div class="brk-q"><div class="brk-qt">💬 이것도 정해두면 좋아요</div>'+
@@ -2303,7 +2303,7 @@ function renderCalDet(mode){
   const evs=events.filter(e=>!isProj(e)&&e.start<=sel&&sel<=evEnd(e));
   const evH=evs.map(e=>'<div class="cev">🎪 '+esc(e.name)+'</div>').join('');
   if(!dt.length){det.innerHTML='<div class="cdet"><div class="cdet-d">'+fD(sel)+'</div>'+evH+'<div style="font-size:14px;color:var(--text3)">업무 없음</div></div>';return;}
-  det.innerHTML='<div class="cdet"><div class="cdet-d">'+fD(sel)+' — '+dt.length+'개</div>'+evH+dt.map(t=>'<div class="ctr"><div class="cbar" style="background:'+dc(t.dept)+'"></div><div style="flex:1"><div style="font-size:14px;font-weight:600;margin-bottom:3px">'+t.title+'</div><div style="font-size:12px;color:var(--text2)">'+(t.assignees||[t.assignee]).join(', ')+' · '+t.dept+'</div></div><span class="tag tag-'+t.status+'">'+t.status+'</span></div>').join('')+'</div>';
+  det.innerHTML='<div class="cdet"><div class="cdet-d">'+fD(sel)+' — '+dt.length+'개</div>'+evH+dt.map(t=>'<div class="ctr"><div class="cbar" style="background:'+dc(t.dept)+'"></div><div style="flex:1"><div style="font-size:14px;font-weight:600;margin-bottom:var(--space-1)">'+t.title+'</div><div style="font-size:12px;color:var(--text2)">'+(t.assignees||[t.assignee]).join(', ')+' · '+t.dept+'</div></div><span class="tag tag-'+t.status+'">'+t.status+'</span></div>').join('')+'</div>';
 }
 
 // ── 부서 현황 ──
@@ -2316,7 +2316,7 @@ function deptHtml(teacher){
     const active=dt.filter(t=>t.status!=='완료');
     const doneL=dt.filter(t=>t.status==='완료');
     const opts=teacher?{showEB:true,showDel:true,teacher:true}:{};
-    return '<div class="ds"><div class="dh"><span class="db db-'+dept+'">'+dept+'</span><span style="font-size:13px;color:'+col+';font-family:\'Noto Sans KR\',sans-serif;font-weight:700">'+done+'/'+dt.length+' ('+pct+'%)</span></div><div class="dp"><div class="dpf" style="width:'+pct+'%;background:'+col+'"></div></div>'+(active.length?active.map(t=>card(t,opts)).join(''):'<div style="font-size:14px;color:var(--text3);padding:4px 0">진행 중 없음</div>')+doneSec(doneL,opts,dept+(teacher?'_t':'_s'))+'</div>';
+    return '<div class="ds"><div class="dh"><span class="db db-'+dept+'">'+dept+'</span><span style="font-size:13px;color:'+col+';font-family:\'Noto Sans KR\',sans-serif;font-weight:700">'+done+'/'+dt.length+' ('+pct+'%)</span></div><div class="dp"><div class="dpf" style="width:'+pct+'%;background:'+col+'"></div></div>'+(active.length?active.map(t=>card(t,opts)).join(''):'<div style="font-size:14px;color:var(--text3);padding:var(--space-1) 0">진행 중 없음</div>')+doneSec(doneL,opts,dept+(teacher?'_t':'_s'))+'</div>';
   }).join('');
 }
 function renderTDept(){document.getElementById('tDept').innerHTML=deptHtml(true);}
@@ -2348,17 +2348,17 @@ function renderDash(){
     else{lb='D-'+d;cl='warn';}
     const ass=assOf(t);
     const sub=[esc(t.category||'기타'),ua?'담당자 없음':ass.map(esc).join(', ')].join(' · ');
-    const chips=!ua&&isPer(t)&&t.status!=='보류'?doneChips(t):(!ua?'<span class="tag tag-'+t.status+'" style="margin-top:6px;display:inline-block">'+t.status+'</span>':'');
+    const chips=!ua&&isPer(t)&&t.status!=='보류'?doneChips(t):(!ua?'<span class="tag tag-'+t.status+'" style="margin-top:var(--space-2);display:inline-block">'+t.status+'</span>':'');
     return '<div class="todo-row"><span class="todo-d '+cl+'">'+lb+'</span><div class="todo-main"><div class="todo-ti">'+esc(t.title)+'</div><div class="todo-sub">'+sub+'</div>'+chips+'</div><div class="todo-act">'+
       '<button type="button"'+(ua?' class="pri"':'')+' data-action="assign" data-id="'+t.id+'">'+(ua?'배정':'👤')+'</button><button type="button" data-action="edit" data-id="'+t.id+'">✏️</button><button type="button" class="danger" data-action="del" data-id="'+t.id+'" aria-label="업무 삭제">🗑</button></div></div>';
   };
-  document.getElementById('todoArea').innerHTML=todo.length?'<div class="todo-list">'+todo.slice(0,10).map(todoRow).join('')+'</div>'+(todo.length>10?'<details class="tc-more" style="margin:0 0 8px"><summary>나머지 '+(todo.length-10)+'건 더 보기</summary><div class="todo-list" style="margin-top:10px">'+todo.slice(10).map(todoRow).join('')+'</div></details>':''):'<div style="font-size:14px;color:var(--text3);padding:8px 0">지금 처리할 업무가 없어요 ✅</div>';
+  document.getElementById('todoArea').innerHTML=todo.length?'<div class="todo-list">'+todo.slice(0,10).map(todoRow).join('')+'</div>'+(todo.length>10?'<details class="tc-more" style="margin:0 0 var(--space-2)"><summary>나머지 '+(todo.length-10)+'건 더 보기</summary><div class="todo-list" style="margin-top:var(--space-2)">'+todo.slice(10).map(todoRow).join('')+'</div></details>':''):'<div style="font-size:14px;color:var(--text3);padding:var(--space-2) 0">지금 처리할 업무가 없어요 ✅</div>';
   renderActivity();
   if(Date.now()-_actLoadedAt>60000)loadActivity();
   document.getElementById('dSum').innerHTML=DEPTS.map(dept=>{
     const dt=tasks.filter(t=>t.dept===dept);const d=dt.filter(t=>t.status==='완료').length;
     const pct=dt.length>0?Math.round(d/dt.length*100):0;const col=dc(dept);
-    return '<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span class="db db-'+dept+'">'+dept+'</span><span style="font-size:13px;color:'+col+';font-family:\'Noto Sans KR\',sans-serif;font-weight:600">'+d+'/'+dt.length+' '+pct+'%</span></div><div class="dp"><div class="dpf" style="width:'+pct+'%;background:'+col+'"></div></div></div>';
+    return '<div style="margin-bottom:var(--space-3)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-2)"><span class="db db-'+dept+'">'+dept+'</span><span style="font-size:13px;color:'+col+';font-family:\'Noto Sans KR\',sans-serif;font-weight:600">'+d+'/'+dt.length+' '+pct+'%</span></div><div class="dp"><div class="dpf" style="width:'+pct+'%;background:'+col+'"></div></div></div>';
   }).join('');
 }
 
@@ -2411,7 +2411,7 @@ function renderActivity(){
     if(!t)return false;
     return e.legacy?(t.status==='완료'&&t.completedAt===e.at):(t.doneBy||{})[e.name]===e.at;
   };
-  const seg='<div class="seg" style="margin-bottom:10px">'+ACT_RANGES.map(r=>'<button type="button"'+(actRange===r[0]?' class="on"':'')+' data-action="actRange" data-range="'+r[0]+'">'+r[1]+'</button>').join('')+'</div>';
+  const seg='<div class="seg" style="margin-bottom:var(--space-2)">'+ACT_RANGES.map(r=>'<button type="button"'+(actRange===r[0]?' class="on"':'')+' data-action="actRange" data-range="'+r[0]+'">'+r[1]+'</button>').join('')+'</div>';
 
   // 피드
   const today=todayStr();
@@ -2445,13 +2445,13 @@ function renderActivity(){
     const when=actDay(e.at)===today?agoTxt(e.at):agoTxt(e.at)+' · '+Number(actDay(e.at).slice(5,7))+'/'+Number(actDay(e.at).slice(8));
     return '<div class="feed-item"><div class="feed-av" style="background:'+col+'22;color:'+col+'">'+esc((p||'?').slice(-1))+'</div><div class="feed-info"><div class="feed-nm">'+esc(p||'누군가')+proxy+(dept?' <span class="db db-'+dept+'" style="font-size:12px">'+dept+'</span>':'')+'</div><div class="feed-tk">'+ACT_TXT[e.type]+' · '+esc(e.title)+tail+'</div></div><div class="feed-tm">'+when+undoBtn(e)+'</div></div>';
   };
-  const box=list=>'<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:4px 16px;margin-bottom:8px;box-shadow:var(--sh)">'+list.map(row).join('')+'</div>';
+  const box=list=>'<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:var(--space-1) var(--space-3);margin-bottom:var(--space-2);box-shadow:var(--sh)">'+list.map(row).join('')+'</div>';
   const hd=(txt,col,mt)=>'<div style="font-size:12px;color:'+col+';font-weight:700;font-family:\'Noto Sans KR\',sans-serif;margin:'+mt+' 0 8px">'+txt+'</div>';
   const todayL=recent.filter(e=>actDay(e.at)===today),wkL=recent.filter(e=>actDay(e.at)<today);
   let fh=seg;
   if(todayL.length)fh+=hd('TODAY ('+todayL.length+')','var(--accent3)','0')+box(todayL);
   if(wkL.length)fh+=hd((actRange==='7'?'이번 주':'이전')+' ('+wkL.length+')','var(--text2)','12px')+box(wkL);
-  if(!recent.length)fh+='<div style="font-size:14px;color:var(--text3);padding:8px 0">이 기간의 활동 없음</div>';
+  if(!recent.length)fh+='<div style="font-size:14px;color:var(--text3);padding:var(--space-2) 0">이 기간의 활동 없음</div>';
   if(inRange.length>CAP)fh+='<div class="hm-note">최근 '+CAP+'건만 보여줘요. 기간을 줄이면 더 자세히 볼 수 있어요.</div>';
   feed.innerHTML=fh;
 
@@ -2494,7 +2494,7 @@ function renderActivity(){
     ?'<div class="hm-alert"><b>⚠️ 이 기간 활동 없음 ('+zero.length+'명)</b><div>'+zero.map(esc).join(' · ')+'</div></div>'
     :'<div class="hm-alert ok"><b>✅ 이 기간에 모두 활동했어요</b></div>';
   ACT_X={evs,live,bks,lo,hi};
-  const csvBar='<div style="display:flex;gap:8px;margin:0 0 10px"><button type="button" class="bc" data-action="actCsv" data-kind="sum">📥 학생별 요약 CSV</button><button type="button" class="bc" data-action="actCsv" data-kind="log">📥 활동 내역 CSV</button></div>';
+  const csvBar='<div style="display:flex;gap:var(--space-2);margin:0 0 var(--space-2)"><button type="button" class="bc" data-action="actCsv" data-kind="sum">📥 학생별 요약 CSV</button><button type="button" class="bc" data-action="actCsv" data-kind="log">📥 활동 내역 CSV</button></div>';
   heat.innerHTML=seg+alert+csvBar+'<div class="hm-wrap"><table class="hm"><thead><tr><th></th>'+th+'<th>합계</th></tr></thead><tbody>'+body+'</tbody></table></div>'
     +'<div class="hm-note">칸의 숫자는 그 기간에 한 일(완료 체크·등록·수정 등)의 개수예요. 부서 안에서는 활동이 적은 학생이 위에 와요. 이름 아래 글씨는 마지막 활동이고, 3일이 넘으면 빨간색이에요. 기간은 아래 \'최근 활동\'에도 같이 적용돼요.</div>'
     +'<div class="hm-note">로그가 생기기 전 기록은 완료 체크·등록만 반영돼요. 3~9월 예전 업무는 담당자 전원이 완료 시점에 끝낸 것으로 계산한 추정치예요.</div>';
@@ -2557,11 +2557,11 @@ function renderTStu(){
     const od=dls.filter(d=>d<0).length;
     return {m,mt,left,od,min:dls.length?Math.min(...dls):null};
   }).sort((a,b)=>(b.od-a.od)||(b.left.length-a.left.length)||((a.min===null?999:a.min)-(b.min===null?999:b.min)));
-  document.getElementById('tStu').innerHTML='<div class="hint" style="margin:0 0 8px">밀린 업무가 많은 사람부터 보여요. 이름을 누르면 상세, 📋 버튼은 카톡용 안내 문구를 복사해요.</div><div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:4px 16px;box-shadow:var(--sh)">'+rows.map(({m,mt,left,od,min})=>{
+  document.getElementById('tStu').innerHTML='<div class="hint" style="margin:0 0 var(--space-2)">밀린 업무가 많은 사람부터 보여요. 이름을 누르면 상세, 📋 버튼은 카톡용 안내 문구를 복사해요.</div><div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:var(--space-1) var(--space-3);box-shadow:var(--sh)">'+rows.map(({m,mt,left,od,min})=>{
     const col=dc(m.dept);
     const n=left.length;
     const near=min===null?'':min<0?'<span style="color:#d64545;font-weight:700"> · ⏰ '+(-min)+'일 지남</span>':' · ⏰ '+(min===0?'오늘':'D-'+min);
-    return '<div class="sr'+(n?'':' dim')+'" data-action="openStu" data-name="'+esc(m.name)+'"><div class="sav" style="background:'+col+'22;color:'+col+'">'+esc(m.name.slice(-1))+'</div><div style="flex:1"><div style="font-size:14px;font-weight:600">'+esc(m.name)+' <span class="db db-'+m.dept+'" style="margin-left:4px">'+m.dept+'</span></div><div class="sr-sub">'+(n?'<b class="sr-left'+(od?' hot':'')+'">남은 '+n+'건</b>'+near:'<span class="sr-left zero">남은 업무 없음</span>')+' · 전체 '+mt.length+'건</div></div>'+
+    return '<div class="sr'+(n?'':' dim')+'" data-action="openStu" data-name="'+esc(m.name)+'"><div class="sav" style="background:'+col+'22;color:'+col+'">'+esc(m.name.slice(-1))+'</div><div style="flex:1"><div style="font-size:14px;font-weight:600">'+esc(m.name)+' <span class="db db-'+m.dept+'" style="margin-left:var(--space-1)">'+m.dept+'</span></div><div class="sr-sub">'+(n?'<b class="sr-left'+(od?' hot':'')+'">남은 '+n+'건</b>'+near:'<span class="sr-left zero">남은 업무 없음</span>')+' · 전체 '+mt.length+'건</div></div>'+
       (n?'<button type="button" class="sr-copy" data-action="copyNag" data-name="'+esc(m.name)+'">📋 안내 복사</button>':'')+'</div>';
   }).join('')+'</div>';
 }
@@ -2612,7 +2612,7 @@ function openBulk(name,self){
     return `<label class="bk-row"><input type="checkbox" class="bk-cb" value="${t.id}"><span class="bk-main"><b>${esc(t.title)}</b><small>${esc(evs)}${effDeadline(t)?' · ⏰ '+fD(effDeadline(t)):''}${co.length?' · 같이: '+esc(co.join(', ')):''}</small></span></label>`;
   };
   document.getElementById('stuBody').innerHTML=
-    `<div class="hint" style="margin-bottom:10px">넘길 업무를 체크하고 '담당자 지정'을 누르세요. ${esc(name)} 님만 빠지고, 같이 맡은 다른 사람은 그대로 남아요.</div>`+
+    `<div class="hint" style="margin-bottom:var(--space-2)">넘길 업무를 체크하고 '담당자 지정'을 누르세요. ${esc(name)} 님만 빠지고, 같이 맡은 다른 사람은 그대로 남아요.</div>`+
     `<label class="bk-row bk-all"><input type="checkbox" id="bkAll"><span class="bk-main"><b>전체 선택 (${list.length}개)</b></span></label>`+
     (list.length?list.map(row).join(''):'<div class="ev-none">남은 업무가 없어요</div>')+
     `<div class="bk-bar"><button type="button" class="bc" data-action="bulkCancel" data-name="${esc(name)}">취소</button><button type="button" class="bs" data-action="bulkPick" data-name="${esc(name)}">담당자 지정</button></div>`;
@@ -3021,13 +3021,13 @@ function renderSDept(){
   // 전체 부서 비교
   const overview=DEPTS.map(d=>{
     const x=deptTasks(d),dn=x.filter(t=>t.status==='완료').length,p=x.length?Math.round(dn/x.length*100):0,c=dc(d);
-    return '<button type="button" class="sd-ov'+(d===dept?' on':'')+'" data-action="sdDept" data-dept="'+esc(d)+'"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span class="db db-'+d+'">'+d+'</span><span style="font-size:13px;color:'+c+';font-weight:600">'+dn+'/'+x.length+' '+p+'%</span></div><div class="dp"><div class="dpf" style="width:'+p+'%;background:'+c+'"></div></div></button>';
+    return '<button type="button" class="sd-ov'+(d===dept?' on':'')+'" data-action="sdDept" data-dept="'+esc(d)+'"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-2)"><span class="db db-'+d+'">'+d+'</span><span style="font-size:13px;color:'+c+';font-weight:600">'+dn+'/'+x.length+' '+p+'%</span></div><div class="dp"><div class="dpf" style="width:'+p+'%;background:'+c+'"></div></div></button>';
   }).join('');
   const chips='<div class="seg sd-seg">'+DEPTS.map(d=>'<button type="button"'+(d===dept?' class="on"':'')+' data-action="sdDept" data-dept="'+esc(d)+'">'+d+(d===myDept?' ·나':'')+'</button>').join('')+'</div>';
   area.innerHTML='<div class="sd-wrap">'+chips+
     '<div class="sg"><div class="sc2 c1"><div class="sn">'+dt.length+'</div><div class="sl2">전체 업무</div></div><div class="sc2 c2"><div class="sn">'+done+'</div><div class="sl2">완료 · '+pct+'%</div></div><div class="sc2 c3"><div class="sn">'+ing+'</div><div class="sl2">진행중</div></div><div class="sc2 c4"><div class="sn">'+urg+'</div><div class="sl2">마감 임박</div></div></div>'+
     '<div class="stl">🎯 먼저 챙길 것 <span class="todo-n">'+(todo.length?todo.length+'건':'')+'</span></div>'+
-    (todo.length?'<div class="todo-list">'+todo.slice(0,8).map(todoRow).join('')+'</div>'+(todo.length>8?'<details class="tc-more" style="margin:0 0 8px"><summary>나머지 '+(todo.length-8)+'건 더 보기</summary><div class="todo-list" style="margin-top:10px">'+todo.slice(8).map(todoRow).join('')+'</div></details>':''):'<div style="font-size:14px;color:var(--text3);padding:8px 0">급하게 챙길 업무가 없어요 ✅</div>')+
+    (todo.length?'<div class="todo-list">'+todo.slice(0,8).map(todoRow).join('')+'</div>'+(todo.length>8?'<details class="tc-more" style="margin:0 0 var(--space-2)"><summary>나머지 '+(todo.length-8)+'건 더 보기</summary><div class="todo-list" style="margin-top:var(--space-2)">'+todo.slice(8).map(todoRow).join('')+'</div></details>':''):'<div style="font-size:14px;color:var(--text3);padding:var(--space-2) 0">급하게 챙길 업무가 없어요 ✅</div>')+
     '<div class="stl">👥 부원별 진행</div>'+members.map(mcard).join('')+
     '<details class="fold"><summary class="stl">📊 전체 부서 비교</summary><div class="sd-ovs">'+overview+'</div></details></div>';
 }
@@ -3179,7 +3179,7 @@ function renderTEvents(){
     });
   }
   let h='<button type="button" class="ev-new" data-action="evNew">+ 행사 등록</button>';
-  if(SHOW_EV_SEED&&!events.length)h+='<button type="button" class="ev-add" data-action="evSeed" style="margin:0 0 16px;padding:12px;font-weight:700">📥 10월 일정 '+EV_OCT.length+'개 한 번에 등록</button>';
+  if(SHOW_EV_SEED&&!events.length)h+='<button type="button" class="ev-add" data-action="evSeed" style="margin:0 0 var(--space-3);min-height:40px;padding:var(--space-2);font-weight:700">📥 10월 일정 '+EV_OCT.length+'개 한 번에 등록</button>';
   const {up,proj,past}=evSorted();
   const evLeft=e=>{const et=tasks.filter(t=>inEv(t,e.id));return et.length&&et.every(t=>t.status==='완료')?1:0;};
   up.sort((a,b)=>evLeft(a)-evLeft(b)||a.start.localeCompare(b.start));
@@ -3199,7 +3199,7 @@ function renderTEvents(){
     const badge=!et.length?'<span class="evd-badge ok" style="background:var(--surface2);color:var(--text3)">업무 없음</span>':left?'<span class="evd-badge">남은 업무 '+left+'</span>':'<span class="evd-badge ok">모두 완료</span>';
     return '<details class="ev evd" data-evid="'+esc(e.id)+'" style="border-left-color:'+col+'"'+(evOpen.has(e.id)?' open':'')+'><summary><span class="arr">▶</span><div class="evd-main"><div class="evd-nm">'+esc(e.name)+'</div><div class="evd-sub">'+(isProj(e)?'📂 ':'📅 ')+evRange(e)+' · '+dn+'/'+et.length+' 완료</div></div>'+badge+'</summary>'+
       '<div class="evd-bar"><div style="width:'+pct+'%;background:'+col+'"></div></div><div class="evd-bd">'+
-      '<div class="ev-dt" style="margin-top:8px">'+(evDeptsOf(e).length?deptBadges(e):'')+'<button type="button" class="eb" style="margin-left:auto" data-action="evEdit" data-id="'+esc(e.id)+'">✏️ 행사 수정</button></div>'+
+      '<div class="ev-dt" style="margin-top:var(--space-2)">'+(evDeptsOf(e).length?deptBadges(e):'')+'<button type="button" class="eb" style="margin-left:auto" data-action="evEdit" data-id="'+esc(e.id)+'">✏️ 행사 수정</button></div>'+
       (e.desc?'<div class="ev-desc">'+esc(e.desc)+'</div>':'')+
       (rows||'<div class="ev-none">연결된 업무가 없어요</div>')+
       (isProj(e)&&e.closed?'':'<button type="button" class="ev-add" data-action="evAddTask" data-id="'+esc(e.id)+'">+ 이 행사에 업무 추가</button>')+
@@ -3212,7 +3212,7 @@ function renderTEvents(){
   const un=tasks.filter(t=>!t.eventId&&!t.per&&t.status!=='완료'&&(effDeadline(t)>='2026-10-01'||(!effDeadline(t)&&(t.createdAt||'')>='2026-09-01')))
     .sort((a,b)=>(effDeadline(a)||'9').localeCompare(effDeadline(b)||'9'));
   h+='<div class="stl">🔗 행사 미연결 업무 (10월 이후 · '+un.length+'개)</div>'+
-    '<div class="hint" style="margin:-4px 0 10px">✏️를 눌러 행사를 고르면 연결돼요. 연결하면 담당자별 완료 체크로 바뀌어요.</div>'+
+    '<div class="hint" style="margin:-4px 0 var(--space-2)">✏️를 눌러 행사를 고르면 연결돼요. 연결하면 담당자별 완료 체크로 바뀌어요.</div>'+
     (un.length?un.map(t=>card(t,{showEB:true,showDel:true,teacher:true})).join(''):'<div class="ev-none">없음 ✅</div>');
   if(past.length)h+='<div class="dt" data-done="evpast"><span class="arr">▶</span><span>지난 행사 '+past.length+'개</span></div><div class="dl" id="dl-evpast">'+past.map(evCard).join('')+'</div>';
   area.innerHTML=h;
@@ -3381,18 +3381,18 @@ enterStudent();
     const curColor=ATT_TYPE_COLORS[cur.type]||'#868e96';
     const currentMap=fullMap[cur.date]||{};
 
-    let statsHtml=`<div class="ds" style="margin-bottom:12px;padding:12px;background:var(--surface);">
+    let statsHtml=`<div class="ds" style="margin-bottom:var(--space-3);padding:var(--space-3);background:var(--surface);">
       <div onclick="const s=this.nextElementSibling;s.style.display=s.style.display==='none'?'block':'none';" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
         <strong style="font-size:14px;color:var(--accent);">📊 임원별 누적 참여 통계 (클릭하여 열기) ▼</strong>
       </div>
-      <div style="display:none;margin-top:10px;max-height:160px;overflow-y:auto;border-top:1px solid var(--border);padding-top:8px;font-size:12px;line-height:1.6;">`;
+      <div style="display:none;margin-top:var(--space-2);max-height:160px;overflow-y:auto;border-top:1px solid var(--border);padding-top:var(--space-2);font-size:12px;line-height:1.6;">`;
     MEMBERS.forEach(m=>{
       let p=0,l=0,a=0;
       _attList.forEach(dItem=>{
         const st=fullMap[dItem.date]?.[m.name]?.status;
         if(st==='출석')p++;if(st==='지각')l++;if(st==='결석')a++;
       });
-      statsHtml+=`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--surface2);">
+      statsHtml+=`<div style="display:flex;justify-content:space-between;padding:var(--space-1) 0;border-bottom:1px solid var(--surface2);">
         <span><strong>${m.name}</strong> (${m.dept})</span>
         <span style="font-family:monospace;font-weight:700;">
           <span style="color:var(--accent3)">출석 ${p}회</span> | 
@@ -3430,51 +3430,51 @@ enterStudent();
       return `<option value="${idx}" ${idx===_attCurIdx?'selected':''}>${icon} [${d.type}] ${d.date}${d.name?' · '+d.name:''}</option>`;
     }).join('');
 
-    let html=`<div style="display:flex;flex-direction:column;gap:12px;">
-      <div class="ds" style="padding:12px;margin-bottom:0;">
-        <label style="font-size:13px;font-weight:700;display:block;margin-bottom:6px;color:var(--text2);">📅 출석 관리 대상 활동 선택</label>
-        <select onchange="window._attChangeIdx(this.value);" style="font-weight:700;margin-bottom:8px;border-left:5px solid ${curColor};">
+    let html=`<div style="display:flex;flex-direction:column;gap:var(--space-3);">
+      <div class="ds" style="padding:var(--space-3);margin-bottom:0;">
+        <label style="font-size:13px;font-weight:700;display:block;margin-bottom:var(--space-2);color:var(--text2);">📅 출석 관리 대상 활동 선택</label>
+        <select onchange="window._attChangeIdx(this.value);" style="font-weight:700;margin-bottom:var(--space-2);border-left:5px solid ${curColor};">
           ${selectOptionsHtml}
         </select>
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;padding:8px;background:var(--surface2);border-radius:8px;">
+        <div style="display:flex;align-items:center;gap:var(--space-2);flex-wrap:wrap;margin-bottom:var(--space-3);padding:var(--space-2);background:var(--surface2);border-radius:8px;">
           <span style="font-size:12px;color:var(--text3);font-weight:700;">✏️ 현재 활동 구분 수정:</span>
           ${editTypeToggleHtml}
           ${legacyNote}
         </div>
-        <label style="font-size:12px;font-weight:700;display:block;margin-bottom:6px;color:var(--text3);">➕ 새 활동 추가</label>
-        <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;">${typeToggleHtml}</div>
-        <div style="display:flex;gap:4px;">
-          <input type="text" id="_attNewNameIpt" placeholder="활동명 (선택, 예: 여름 정기모임)" style="flex:1;font-size:13px;padding:6px;height:34px;border:1px solid var(--border);border-radius:8px;">
-          <input type="date" id="_attNewDateIpt" style="padding:6px 10px;font-size:13px;width:140px;height:34px;border:1px solid var(--border);border-radius:8px;">
-          <button type="button" onclick="window._attAddNewDate()" class="fc active" style="border-radius:8px;font-size:12px;padding:0 8px;height:34px;white-space:nowrap;">➕ 추가</button>
+        <label style="font-size:12px;font-weight:700;display:block;margin-bottom:var(--space-2);color:var(--text3);">➕ 새 활동 추가</label>
+        <div style="display:flex;gap:var(--space-2);margin-bottom:var(--space-2);flex-wrap:wrap;">${typeToggleHtml}</div>
+        <div style="display:flex;gap:var(--space-1);">
+          <input type="text" id="_attNewNameIpt" placeholder="활동명 (선택, 예: 여름 정기모임)" style="flex:1;font-size:13px;padding:var(--space-1);height:34px;border:1px solid var(--border);border-radius:8px;">
+          <input type="date" id="_attNewDateIpt" style="padding:var(--space-1) var(--space-2);font-size:13px;width:140px;height:34px;border:1px solid var(--border);border-radius:8px;">
+          <button type="button" onclick="window._attAddNewDate()" class="fc active" style="border-radius:8px;font-size:12px;padding:0 var(--space-2);height:34px;white-space:nowrap;">➕ 추가</button>
         </div>
       </div>
       ${statsHtml}
       <div class="ds" style="padding:0;overflow:hidden;margin-bottom:0;">
-        <div style="padding:12px 14px;background:var(--surface2);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);">
+        <div style="padding:var(--space-2) var(--space-3);background:var(--surface2);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);">
           <div>
-            <span style="background:${curColor};color:#fff;font-size:12px;padding:2px 6px;border-radius:4px;margin-right:6px;font-weight:bold;">${ATT_TYPE_ICON[cur.type]||''} ${cur.type}</span>
+            <span style="background:${curColor};color:#fff;font-size:12px;padding:2px var(--space-1);border-radius:4px;margin-right:var(--space-2);font-weight:bold;">${ATT_TYPE_ICON[cur.type]||''} ${cur.type}</span>
             <strong style="font-size:14px;color:var(--text2);">${cur.date}${cur.name?' · '+cur.name:''} 명부 체크</strong>
           </div>
-          <button type="button" onclick="window._attSaveAllPresent()" class="fc active" style="background:var(--accent3);border-radius:6px;font-size:12px;padding:4px 10px;">⚡ 전원 출석 처리</button>
+          <button type="button" onclick="window._attSaveAllPresent()" class="fc active" style="background:var(--accent3);border-radius:6px;font-size:12px;padding:var(--space-1) var(--space-2);">⚡ 전원 출석 처리</button>
         </div>
         <div style="max-height:450px;overflow-y:auto;">`;
 
     MEMBERS.forEach(m=>{
       const currentStatus=currentMap[m.name]?.status||'미체크';
-      html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:11px 14px;border-bottom:1px solid var(--surface2);">
+      html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:var(--space-2) var(--space-3);border-bottom:1px solid var(--surface2);">
         <div>
           <strong style="font-size:15px;color:var(--text);">${m.name}</strong>
-          <span style="font-size:12px;color:var(--text3);margin-left:4px;">${m.dept}</span>
+          <span style="font-size:12px;color:var(--text3);margin-left:var(--space-1);">${m.dept}</span>
         </div>
-        <div style="display:flex;gap:4px;">
+        <div style="display:flex;gap:var(--space-1);">
           ${['출석','지각','결석'].map(st=>{
             const isChecked=currentStatus===st;
             let bg='var(--surface2)',co='var(--text2)';
             if(isChecked){if(st==='출석'){bg='var(--accent3)';co='#fff';}if(st==='지각'){bg='var(--warn)';co='#fff';}if(st==='결석'){bg='var(--danger)';co='#fff';}}
             return `<button type="button"
               onclick="window._attSaveSingle('${m.name}','${st}');this.parentElement.querySelectorAll('button').forEach(b=>{b.style.background='var(--surface2)';b.style.color='var(--text2)'});this.style.background='${st==='출석'?'var(--accent3)':st==='지각'?'var(--warn)':'var(--danger)'}';this.style.color='#fff';"
-              style="padding:5px 9px;font-size:12px;border:none;border-radius:4px;background:${bg};color:${co};font-weight:700;cursor:pointer;transition:all 0.1s;">
+              style="padding:var(--space-1) var(--space-2);font-size:12px;border:none;border-radius:4px;background:${bg};color:${co};font-weight:700;cursor:pointer;transition:all 0.1s;">
               ${st}
             </button>`;
           }).join('')}

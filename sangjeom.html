@@ -121,7 +121,7 @@ function viewLogin(msg){
   app.className='wrap';
   app.innerHTML=`<div class="top"><h1>🔒 행사 상점 기록</h1></div>
   <form class="card" id="loginForm" autocomplete="off">
-    <p class="sub" style="margin-bottom:12px">선생님께 비밀번호를 받은 담당자만 쓸 수 있어요.</p>
+    <p class="sub" style="margin-bottom:var(--space-3)">선생님께 비밀번호를 받은 담당자만 쓸 수 있어요.</p>
     <label for="by">내 이름</label><input type="text" id="by" maxlength="20" value="${esc(S.by)}">
     <label for="pw">비밀번호</label><input type="password" id="pw" maxlength="40" autocomplete="off">
     <button class="btn" type="submit" id="loginBtn">들어가기</button>
@@ -155,7 +155,7 @@ function viewMain(){
     <p class="msg" id="mainMsg" role="alert"></p>
     <div id="resultBox"></div>
   </section>
-  <section class="card"><div class="top" style="margin-bottom:4px"><h2 style="margin:0">이번 행사 기록</h2><button class="mini" type="button" id="reload">새로고침</button></div><ul class="list" id="recent"><li class="sub">불러오는 중…</li></ul></section>`;
+  <section class="card"><div class="top" style="margin-bottom:var(--space-1)"><h2 style="margin:0">이번 행사 기록</h2><button class="mini" type="button" id="reload">새로고침</button></div><ul class="list" id="recent"><li class="sub">불러오는 중…</li></ul></section>`;
   const sid=document.getElementById('sid');
   sid.oninput=()=>{sid.value=sid.value.replace(/\D/g,'');clearResult()};
   document.getElementById('minus').onclick=()=>setPoint(S.point-1);
@@ -276,18 +276,18 @@ function viewTeacher(){
     <div class="row"><input type="text" id="newPw" maxlength="40" autocomplete="off" style="flex:1;min-width:0"><button class="mini" type="button" id="genPw">자동으로 만들기</button></div>
     <div class="row"><button class="btn" type="button" id="openBtn">${d.open?'저장':'열기'}</button>${d.open?'<button class="btn danger" type="button" id="closeBtn">잠그기</button>':''}</div>
     <p class="msg" id="setMsg" role="alert"></p>
-    ${T.shownPw?`<p class="result good" style="margin-top:10px">담당자에게 줄 비밀번호<b id="shownPw">${esc(T.shownPw)}</b></p><button class="mini" type="button" id="copyPw" style="margin-top:8px">비밀번호 복사</button>`:''}
-    <p class="sub" style="margin-top:10px">잠그면 담당 비밀번호도 지워져요. 다음 행사에는 새로 정해 주세요.</p>
+    ${T.shownPw?`<p class="result good" style="margin-top:var(--space-2)">담당자에게 줄 비밀번호<b id="shownPw">${esc(T.shownPw)}</b></p><button class="mini" type="button" id="copyPw" style="margin-top:var(--space-2)">비밀번호 복사</button>`:''}
+    <p class="sub" style="margin-top:var(--space-2)">잠그면 담당 비밀번호도 지워져요. 다음 행사에는 새로 정해 주세요.</p>
     <p class="sub">상점 점수: ${d.snapAt?esc(fmtTime(d.snapAt))+' 기준 '+d.rows.length+'명':'아직 안 넣음'}${d.wrongPw?` · 틀린 비밀번호 ${d.wrongPw}번`:''}</p>
   </section>
   <section class="card">
     <h2>학생 찾기</h2>
     <input type="search" id="q" placeholder="이름 또는 학번" value="${esc(T.q)}" aria-label="이름 또는 학번">
-    <ul class="list" id="found" style="margin-top:8px"></ul>
+    <ul class="list" id="found" style="margin-top:var(--space-2)"></ul>
   </section>
   </div><div>
   <section class="card">
-    <div class="top" style="margin-bottom:4px"><h2 style="margin:0">사용 기록 <small class="sub">반영 전 ${waiting.length}건${stuck.length?` · 확인 필요 ${stuck.length}건`:''}</small></h2><button class="mini" type="button" id="copyBtn">반영 전 복사</button></div>
+    <div class="top" style="margin-bottom:var(--space-1)"><h2 style="margin:0">사용 기록 <small class="sub">반영 전 ${waiting.length}건${stuck.length?` · 확인 필요 ${stuck.length}건`:''}</small></h2><button class="mini" type="button" id="copyBtn">반영 전 복사</button></div>
     <ul class="list" id="tLog"></ul>
   </section>
   </div></div>`;
