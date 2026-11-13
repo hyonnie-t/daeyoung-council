@@ -496,6 +496,14 @@ details.un-notice[open]>summary{margin-bottom:var(--space-2)}
 .fold>summary{list-style:none;cursor:pointer}
 .fold>summary::-webkit-details-marker{display:none}
 .fold>summary::before{content:'▸ ';color:var(--text3)}
+/* 주소 모음(선생님 대시보드) */
+.lk-g{font-size:13px;color:var(--text3);margin:var(--space-2) 0 var(--space-1)}
+.lk-row{display:flex;align-items:center;gap:var(--space-2);background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:var(--space-2) var(--space-3);margin-bottom:var(--space-2)}
+.lk-ic{flex:none;font-size:20px}
+.lk-tx{flex:1;min-width:0;text-decoration:none;color:var(--text)}
+.lk-tx b{display:block;font-size:15px}
+.lk-tx small{display:block;font-size:12px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lk-copy{flex:none;min-height:40px;padding:0 var(--space-3);border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text2);font:inherit;font-size:14px;cursor:pointer}
 .fold[open]>summary::before{content:'▾ '}
 .qdone{padding:2px var(--space-2);border-radius:20px;border:1px solid #8ce99a;background:#fff;color:#2f9e44;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
 .qdone:hover{background:#ebfbee}
@@ -766,6 +774,22 @@ details.un-notice[open]>summary{margin-bottom:var(--space-2)}
       <div class="sc2 c3 clk" data-action="goFilter" data-filter="진행중"><div class="sn" id="stI">0</div><div class="sl2">진행중</div></div>
       <div class="sc2 c4 clk" data-action="goFilter" data-filter="임박"><div class="sn" id="stU">0</div><div class="sl2">마감 임박</div></div>
     </div>
+    <!-- 학생회 페이지 주소 모음(2026-11-14 효니: 서브 주소가 많아 찾기 힘듦). 새 페이지를 만들면 여기에 한 줄 더한다. 비밀번호는 적지 않는다(공개 레포) -->
+    <details class="fold" id="linkHub">
+      <summary class="stl" style="display:inline-block;margin-bottom:var(--space-2)">🔗 학생회 페이지 주소 모음</summary>
+      <div class="lk-g">학생에게 주는 주소</div>
+      <div class="lk-row"><span class="lk-ic" aria-hidden="true">📱</span><a class="lk-tx" href="./" target="_blank" rel="noopener"><b>학생회 앱</b><small>임원 모두 · index.html</small></a><button type="button" class="lk-copy" data-action="copyLink" data-url="https://hyonnie-t.github.io/daeyoung-council/" aria-label="학생회 앱 주소 복사">복사</button></div>
+      <div class="lk-row"><span class="lk-ic" aria-hidden="true">📜</span><a class="lk-tx" href="rules.html" target="_blank" rel="noopener"><b>학생회 규정집</b><small>임원 모두 · rules.html</small></a><button type="button" class="lk-copy" data-action="copyLink" data-url="https://hyonnie-t.github.io/daeyoung-council/rules.html" aria-label="학생회 규정집 주소 복사">복사</button></div>
+      <div class="lk-row"><span class="lk-ic" aria-hidden="true">🍬</span><a class="lk-tx" href="sangjeom.html" target="_blank" rel="noopener"><b>상점 교환소</b><small>담당 학생(비밀번호) · sangjeom.html</small></a><button type="button" class="lk-copy" data-action="copyLink" data-url="https://hyonnie-t.github.io/daeyoung-council/sangjeom.html" aria-label="상점 교환소 주소 복사">복사</button></div>
+      <div class="lk-row"><span class="lk-ic" aria-hidden="true">📝</span><a class="lk-tx" href="apply.html" target="_blank" rel="noopener"><b>2027 임원 신청서</b><small>지원 학생 · 공고 때 «신청 열기» · apply.html</small></a><button type="button" class="lk-copy" data-action="copyLink" data-url="https://hyonnie-t.github.io/daeyoung-council/apply.html" aria-label="2027 임원 신청서 주소 복사">복사</button></div>
+      <div class="lk-row"><span class="lk-ic" aria-hidden="true">🗳️</span><a class="lk-tx" href="election.html" target="_blank" rel="noopener"><b>학생회장 선거 안내(선관위)</b><small>선관위원 · election.html</small></a><button type="button" class="lk-copy" data-action="copyLink" data-url="https://hyonnie-t.github.io/daeyoung-council/election.html" aria-label="학생회장 선거 안내(선관위) 주소 복사">복사</button></div>
+      <div class="lk-row"><span class="lk-ic" aria-hidden="true">🙋</span><a class="lk-tx" href="candidate.html" target="_blank" rel="noopener"><b>학생회장 후보 안내</b><small>후보(주소·QR로) · candidate.html</small></a><button type="button" class="lk-copy" data-action="copyLink" data-url="https://hyonnie-t.github.io/daeyoung-council/candidate.html" aria-label="학생회장 후보 안내 주소 복사">복사</button></div>
+      <div class="lk-row"><span class="lk-ic" aria-hidden="true">🎉</span><a class="lk-tx" href="survey-studentday.html" target="_blank" rel="noopener"><b>학생의 날 설문 결과</b><small>전교생 · survey-studentday.html</small></a><button type="button" class="lk-copy" data-action="copyLink" data-url="https://hyonnie-t.github.io/daeyoung-council/survey-studentday.html" aria-label="학생의 날 설문 결과 주소 복사">복사</button></div>
+      <div class="lk-g">선생님 전용 주소</div>
+      <div class="lk-row"><span class="lk-ic" aria-hidden="true">🧾</span><a class="lk-tx" href="sangjeom.html?pos" target="_blank" rel="noopener"><b>상점 선생님 계산대</b><small>관리 비밀번호 · sangjeom.html?pos</small></a><button type="button" class="lk-copy" data-action="copyLink" data-url="https://hyonnie-t.github.io/daeyoung-council/sangjeom.html?pos" aria-label="상점 선생님 계산대 주소 복사">복사</button></div>
+      <div class="lk-row"><span class="lk-ic" aria-hidden="true">⚙️</span><a class="lk-tx" href="sangjeom.html?teacher=1" target="_blank" rel="noopener"><b>상점 관리(열기·잠금·기록)</b><small>관리 비밀번호 · sangjeom.html?teacher=1</small></a><button type="button" class="lk-copy" data-action="copyLink" data-url="https://hyonnie-t.github.io/daeyoung-council/sangjeom.html?teacher=1" aria-label="상점 관리(열기·잠금·기록) 주소 복사">복사</button></div>
+      <div class="lk-row"><span class="lk-ic" aria-hidden="true">📋</span><a class="lk-tx" href="apply.html?teacher=1" target="_blank" rel="noopener"><b>임원 신청 심사판</b><small>관리 비밀번호 · apply.html?teacher=1</small></a><button type="button" class="lk-copy" data-action="copyLink" data-url="https://hyonnie-t.github.io/daeyoung-council/apply.html?teacher=1" aria-label="임원 신청 심사판 주소 복사">복사</button></div>
+    </details>
     <div class="stl">🎯 오늘 처리할 것 <span id="todoN" class="todo-n"></span></div>
     <div id="todoArea"></div>
     <details class="fold ck-adm" id="ckAdm">
@@ -2572,6 +2596,11 @@ function copyNag(name){
   const fb=()=>{const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok();}catch(e){toast('복사에 실패했어요');}ta.remove();};
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(ok,fb);else fb();
 }
+function copyLink(url){
+  const ok=()=>toast('🔗 주소를 복사했어요');
+  const fb=()=>{const ta=document.createElement('textarea');ta.value=url;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok();}catch(e){toast('복사에 실패했어요');}ta.remove();};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(url).then(ok,fb);else fb();
+}
 let _stuName='';
 function openStu(name){
   _stuName=name;
@@ -2912,6 +2941,7 @@ document.addEventListener('click',function(e){
     const b=o.nextElementSibling;if(b){b.classList.remove('flash');void b.offsetWidth;b.classList.add('flash');}
     return;
   }
+  if(action==='copyLink'){copyLink(el.dataset.url);return;}
   if(action==='goFilter'){
     allFilt=el.dataset.filter;sq='';
     const si=document.getElementById('searchInput');if(si)si.value='';
