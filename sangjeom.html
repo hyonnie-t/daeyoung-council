@@ -111,6 +111,14 @@ input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(91
 .chip.on{background:var(--bad-soft);border-color:var(--bad);color:var(--bad);font-weight:700}
 .mini.warn{border-color:var(--bad);color:var(--bad);font-weight:700}
 .mini.go{border-color:var(--accent);color:var(--accent);font-weight:700}
+.mrow{display:grid;grid-template-columns:48px 1fr 48px auto;gap:var(--space-2);align-items:center;padding:var(--space-2) 0;border-top:1px solid var(--surface2)}
+.mrow input[type=text]{height:40px;font-size:16px;padding:0 var(--space-2)}
+.mrow [data-f=ic],.mrow [data-f=p]{text-align:center;padding:0}
+.mrow .check{grid-column:1/3;margin:0}
+.mrow .mini{grid-column:3/5;justify-self:end}
+#menuEd .row{margin-top:var(--space-2)}
+.mrow>.sub{line-height:40px}
+@media (min-width:600px){.mrow{grid-template-columns:48px 1fr 48px auto auto auto}.mrow .check,.mrow .mini{grid-column:auto}}
 </style>
 </head>
 <body>
@@ -159,8 +167,9 @@ async function call(body,timeout=30000){
 const getAdmin=key=>call({action:'sjAdmin',key});
 const errText=e=>e==='net'?NET:e==='not_ready'?NOT_READY:(ERR[e]||'문제가 생겼어요. 다시 해 주세요.');
 
-/* ── 교환소 메뉴 ── 키·점수는 서버 Code.gs SJ_MENU와 같게, 이름은 메뉴판 그림과 같게 고친다 */
-const MENU=[
+/* ── 교환소 메뉴 ── 서버가 준 메뉴(sjAuth·sjAdmin의 menu)를 쓴다. 아래는 서버 응답 전 기본값(서버 SJ_MENU와 같게) */
+const DEF_IC={jelly:'🍬',jjb:'🍡',sr:'🍦',d6:'🧸',d8:'🧸',d10:'🧸'};
+let MENU=[
   {k:'jelly',name:'마이쮸·젤리스트로우',p:1,ic:'🍬'},
   {k:'jjb',name:'쭈쭈바',p:3,ic:'🍡',ice:true},
   {k:'sr',name:'설레임',p:4,ic:'🍦',ice:true},
@@ -168,15 +177,22 @@ const MENU=[
   {k:'d8',name:'인형 중',p:8,ic:'🧸'},
   {k:'d10',name:'인형 대',p:10,ic:'🧸'}
 ];
-const MK=Object.fromEntries(MENU.map(m=>[m.k,m]));
-const MAX_ONE=10; // e알리미 차감 항목이 한 번에 -10점까지라 한 기록도 10점까지
+let MK=Object.fromEntries(MENU.map(m=>[m.k,m]));
+function setMenu(list){
+  if(!Array.isArray(list)||!list.length)return;
+  MENU=list.map(x=>({k:x.k,name:x.name,p:x.point,ice:!!x.ice,ic:x.ic||DEF_IC[x.k]||(x.ice?'🍦':'🎁')}));
+  MK=Object.fromEntries(MENU.map(m=>[m.k,m]));
+  Object.keys(P.cart).forEach(k=>{if(!MK[k])delete P.cart[k]}); // 지운 메뉴는 장바구니에서도 뺀다
+}
+const MAX_ONE=10;
+const MENU_CHANGED='메뉴가 바뀌었어요. 합계를 확인하고 다시 눌러 주세요.'; // e알리미 차감 항목이 한 번에 -10점까지라 한 기록도 10점까지
 
 /* ── 계산대(담당 학생·선생님 공통) ──
    담당(helper): 학번+물품 → 확인하기(가능/부족만, 점수는 안 보임) → 교환 기록하기
    선생님(teacher): 학번 5자리를 다 치면 이름·남은 상점이 바로 보이고 → 계산하기 */
 const S={pw:'',by:'',event:''};
 const GATE=['locked','wrong_pw'];
-const P={mode:'',sid:'',cart:{},sold:[],stu:null,looking:false,busy:false,retry:null,seq:0};
+const P={mode:'',sid:'',cart:{},sold:[],stu:null,looking:false,busy:false,retry:null,seq:0,draft:[]};
 const isT=()=>P.mode==='teacher';
 const total=()=>Object.keys(P.cart).reduce((a,k)=>a+MK[k].p*P.cart[k],0);
 const iceIn=()=>Object.keys(P.cart).reduce((a,k)=>a+(MK[k].ice?P.cart[k]:0),0);
@@ -206,12 +222,12 @@ function viewLogin(msg){
     const r=await call({action:'sjAuth',pw});
     b.disabled=false;b.textContent='들어가기';
     if(!r.ok){m.textContent=errText(r.error);return}
-    S.pw=pw;S.by=by;S.event=r.event||'';P.sold=r.soldOut||[];viewPos('helper');
+    S.pw=pw;S.by=by;S.event=r.event||'';P.sold=r.soldOut||[];setMenu(r.menu);viewPos('helper');
   };
   document.getElementById('toTeacher').onclick=()=>viewTeacherLogin();
 }
 function backToLogin(error){S.pw='';viewLogin(errText(error))}
-function backToTeacherLogin(error){T.key='';T.data=null;viewTeacherLogin(errText(error))}
+function backToTeacherLogin(error){T.key='';T.data=null;keySet('');viewTeacherLogin(errText(error))}
 
 function viewPos(mode){
   Object.assign(P,{mode,sid:'',cart:{},stu:null,looking:false,busy:false,retry:null});
@@ -231,7 +247,7 @@ function viewPos(mode){
       <h2>메뉴 <small class="sub">눌러서 담기 · 한 번에 ${MAX_ONE}점까지</small></h2>
       <div class="menu" id="menu"></div>
       <p class="hint" id="hint" role="status"></p>
-      ${t?'<details class="sold"><summary>품절 표시하기</summary><p class="sub">누르면 품절 ↔ 판매 중이 바뀌어요. 담당 학생 화면에는 다음 새로고침 때 보여요.</p><div class="soldlist" id="soldList"></div></details>':''}
+      ${t?'<details class="sold"><summary>품절 표시하기</summary><p class="sub">누르면 품절 ↔ 판매 중이 바뀌어요. 담당 학생 화면에는 다음 새로고침 때 보여요.</p><div class="soldlist" id="soldList"></div></details><details class="sold" id="menuEd"><summary>메뉴 고치기·추가</summary><p class="sub">이름·점수(1~10)를 고치고 «저장»을 눌러요. 담당 학생 화면에는 다음 새로고침 때 보여요.</p><div id="menuRows"></div><div class="row"><button class="mini" type="button" id="menuAdd">＋ 메뉴 추가</button><button class="mini go" type="button" id="menuSave">저장</button></div><p class="msg" id="menuMsg" role="alert"></p></details>':''}
     </section>
     <section class="card">
       <ul class="cart" id="cart"></ul>
@@ -257,10 +273,14 @@ function viewPos(mode){
   document.getElementById('payBtn').onclick=onPay;
   document.getElementById('reload').onclick=()=>loadPosRecent(true);
   document.getElementById('recent').onclick=onPosRecentClick;
-  document.getElementById('logout').onclick=()=>{if(t){T.key='';T.data=null;viewTeacherLogin()}else{S.pw='';viewLogin()}};
+  document.getElementById('logout').onclick=()=>{if(t)teacherOut();else{S.pw='';viewLogin()}};
   if(t){
     document.getElementById('toAdmin').onclick=()=>reloadTeacher();
     document.getElementById('soldList').onclick=onSoldClick;
+    document.getElementById('menuEd').ontoggle=e=>{if(e.target.open){P.draft=MENU.map(m=>({k:m.k,name:m.name,p:m.p,ice:m.ice,ic:m.ic}));renderMenuEd()}};
+    document.getElementById('menuAdd').onclick=()=>{syncDraft();P.draft.push({k:newKey(),name:'',p:1,ice:false,ic:''});renderMenuEd();const ins=document.querySelectorAll('#menuRows [data-f=name]');ins[ins.length-1].focus()};
+    document.getElementById('menuRows').onclick=e=>{const b=e.target.closest('[data-del]');if(!b)return;syncDraft();P.draft.splice(+b.dataset.del,1);renderMenuEd()};
+    document.getElementById('menuSave').onclick=saveMenu;
   }
   renderAll();loadPosRecent();
 }
@@ -348,6 +368,35 @@ function renderCart(){
     b.disabled=!(okSid&&tot);
   }
 }
+// 메뉴 고치기: 초안(P.draft)을 칸에서 읽고 쓴다. 키는 새 메뉴만 만들고 기존 메뉴는 그대로 둔다(지난 기록·품절이 키로 이어져서).
+const newKey=()=>{const c='abcdefghjkmnpqrstuvwxyz23456789',a=new Uint32Array(6);crypto.getRandomValues(a);return 'm'+Array.from(a,n=>c[n%c.length]).join('')};
+function renderMenuEd(){
+  const el=document.getElementById('menuRows');if(!el)return;
+  el.innerHTML=P.draft.map((m,i)=>`<div class="mrow" data-i="${i}"><input type="text" data-f="ic" maxlength="8" value="${esc(m.ic)}" aria-label="그림 글자" placeholder="🎁"><input type="text" data-f="name" maxlength="20" value="${esc(m.name)}" aria-label="메뉴 이름" placeholder="이름"><input type="text" data-f="p" inputmode="numeric" maxlength="2" value="${m.p}" aria-label="점수"><span class="sub">점</span><label class="check"><input type="checkbox" data-f="ice"${m.ice?' checked':''}>아이스크림</label><button class="mini" type="button" data-del="${i}" aria-label="${esc(m.name||'새 메뉴')} 지우기">지우기</button></div>`).join('');
+  document.getElementById('menuMsg').textContent='';
+}
+function syncDraft(){
+  document.querySelectorAll('#menuRows .mrow').forEach(r=>{const m=P.draft[+r.dataset.i];if(!m)return;
+    m.ic=r.querySelector('[data-f=ic]').value.trim();m.name=r.querySelector('[data-f=name]').value.trim();
+    m.p=Number(r.querySelector('[data-f=p]').value.trim());m.ice=r.querySelector('[data-f=ice]').checked});
+}
+async function saveMenu(){
+  syncDraft();
+  const msg=document.getElementById('menuMsg'),b=document.getElementById('menuSave');
+  if(!P.draft.length){msg.textContent='메뉴가 하나는 있어야 해요.';return}
+  if(P.draft.length>24){msg.textContent='메뉴는 24개까지예요.';return}
+  const odd=P.draft.find(m=>/[×,\[\]]/.test(m.name));if(odd){msg.textContent=odd.name+': 이름에 × 쉼표 [ ] 는 못 써요.';return}
+  const bad=P.draft.find(m=>!m.name||!Number.isInteger(m.p)||m.p<1||m.p>MAX_ONE);
+  if(bad){msg.textContent=(bad.name||'이름 없는 메뉴')+': 이름을 쓰고 점수는 1~'+MAX_ONE+'로 해 주세요.';return}
+  const names=P.draft.map(m=>m.name);if(new Set(names).size!==names.length){msg.textContent='이름이 같은 메뉴가 있어요.';return}
+  b.disabled=true;b.textContent='저장하는 중…';
+  const r=await call({action:'sjMenu',key:T.key,menu:P.draft.map(m=>({k:m.k,name:m.name,point:m.p,ice:m.ice,ic:m.ic}))});
+  b.disabled=false;b.textContent='저장';
+  if(!r.ok){if(r.error==='no_auth')return backToTeacherLogin(r.error);msg.textContent=r.error==='bad_input'?'이름·점수를 다시 확인해 주세요.':errText(r.error);return}
+  setMenu(r.menu);P.sold=r.soldOut||[];
+  document.getElementById('menuEd').open=false;
+  toast('메뉴를 저장했어요');setHint('');renderAll();
+}
 function renderSold(){
   const el=document.getElementById('soldList');if(!el)return;
   el.innerHTML=MENU.map(m=>{const s=P.sold.includes(m.k);return `<button type="button" class="chip${s?' on':''}" data-sold="${m.k}" aria-pressed="${s}">${m.ic} ${esc(m.name)} · ${s?'품절':'판매 중'}</button>`}).join('');
@@ -370,7 +419,7 @@ async function onPay(){
   const items=Object.assign({},P.cart),sid=P.sid,point=total(),key=sig();
   const reqId=P.retry&&P.retry.sig===key?P.retry.reqId:uid();
   P.busy=true;b.disabled=true;b.textContent='기록하는 중…';setMsg('');
-  const r=await call(t?{action:'sjAdminSpend',key:T.key,sid,items,reqId}:{action:'sjSpend',pw:S.pw,sid,items,by:S.by,reqId});
+  const r=await call(t?{action:'sjAdminSpend',key:T.key,sid,items,point,reqId}:{action:'sjSpend',pw:S.pw,sid,items,point,by:S.by,reqId});
   P.busy=false;
   if(r.ok){
     P.retry=null;
@@ -387,31 +436,31 @@ async function onPay(){
     if(rows&&rows.some(x=>x.id===reqId)){P.retry=null;toast(name0(s)+' '+point+'점 기록돼 있어요');resetSale()}
     return;
   }
-  if(r.error==='sold_out')await refreshSold();
+  if(r.error==='sold_out'||r.error==='bad_input')await refreshSold();
   if(t&&(r.error==='short'||r.error==='ice_today'))lookup();
   else if(!t)P.stu=null;
-  setMsg(r.error==='sold_out'&&r.item?r.item+'은(는) 방금 품절됐어요. 빼고 다시 해 주세요.':errText(r.error));
+  setMsg(r.error==='sold_out'&&r.item?r.item+'은(는) 방금 품절됐어요. 빼고 다시 해 주세요.':r.error==='bad_input'?MENU_CHANGED:errText(r.error));
   renderAll();
 }
 const name0=s=>(s&&s.name)||'';
 async function helperCheck(){
   const b=document.getElementById('payBtn'),seq=P.seq,key=sig();
   P.busy=true;b.disabled=true;b.textContent='확인하는 중…';setMsg('');
-  const r=await call({action:'sjCheck',pw:S.pw,sid:P.sid,items:P.cart});
+  const r=await call({action:'sjCheck',pw:S.pw,sid:P.sid,items:P.cart,point:total()});
   P.busy=false;
   if(seq!==P.seq||key!==sig()){renderAll();return}
   if(!r.ok){
     if(GATE.includes(r.error))return backToLogin(r.error);
-    if(r.error==='sold_out')await refreshSold();
-    P.stu=r.error==='ice_today'?null:{err:errText(r.error)};
-    setMsg(r.error==='ice_today'?errText(r.error):'');renderAll();return;
+    if(r.error==='sold_out'||r.error==='bad_input')await refreshSold();
+    P.stu=r.error==='ice_today'||r.error==='bad_input'?null:{err:errText(r.error)};
+    setMsg(r.error==='ice_today'?errText(r.error):r.error==='bad_input'?MENU_CHANGED:'');renderAll();return;
   }
   P.stu={sid:P.sid,name:r.name,enough:r.enough,ice:r.ice,point:total()};renderAll();
 }
 function resetSale(){P.sid='';P.cart={};P.stu=null;P.seq++;const el=document.getElementById('sid');if(el){el.value='';el.focus()}setHint('');setMsg('');renderAll()}
 async function refreshSold(){
-  if(isT()){const r=await getAdmin(T.key);if(r.ok){T.data=r;P.sold=r.soldOut||[]}}
-  else{const r=await call({action:'sjAuth',pw:S.pw});if(r.ok)P.sold=r.soldOut||[]}
+  if(isT()){const r=await getAdmin(T.key);if(r.ok){T.data=r;P.sold=r.soldOut||[];setMenu(r.menu)}}
+  else{const r=await call({action:'sjAuth',pw:S.pw});if(r.ok){P.sold=r.soldOut||[];setMenu(r.menu)}}
   Object.keys(P.cart).forEach(x=>{if(P.sold.includes(x))delete P.cart[x]});
 }
 
@@ -424,7 +473,7 @@ async function loadPosRecent(withSold){
     if(!document.getElementById('recent'))return;
     if(!r.ok){if(r.error==='no_auth')return backToTeacherLogin(r.error);ul.innerHTML=`<li class="sub">${esc(errText(r.error))}</li>`;return}
     T.data=r;
-    if(withSold){P.sold=r.soldOut||[];renderAll()}
+    if(withSold){P.sold=r.soldOut||[];setMenu(r.menu);renderAll()}
     const today=todayKey(Date.now());
     rows=r.log.filter(x=>x.at&&todayKey(x.at)===today).slice(0,40).map(x=>Object.assign({},x,{locked:!!(x.done||x.claim)}));
   }else{
@@ -458,7 +507,21 @@ async function onPosRecentClick(e){
 }
 
 /* ── 선생님 화면 ── */
-// 관리 비밀번호는 저장하지 않는다(같은 github.io 주소의 다른 앱도 localStorage를 읽을 수 있고, 폰을 학생에게 건네면 바로 열린다).
+// 관리 비밀번호는 «이 기기에서 자동 로그인»을 고른 기기에만 저장한다(2026-11-13 효니 요청, 디벗 계산대용).
+// 같은 hyonnie-t.github.io의 다른 앱도 이 저장소를 읽을 수 있고, 기기를 학생에게 건네면 바로 열린다. «나가기»를 누르면 지운다.
+const KEY_STORE='sj_admin_key';
+const keyGet=()=>{try{return localStorage.getItem(KEY_STORE)||''}catch(e){return ''}};
+const keySet=k=>{try{k?localStorage.setItem(KEY_STORE,k):localStorage.removeItem(KEY_STORE)}catch(e){}};
+function teacherOut(){T.key='';T.data=null;T.shownPw='';keySet('');viewTeacherLogin('나갔어요. 자동 로그인도 꺼졌어요.')}
+async function autoLogin(){
+  const k=keyGet();
+  if(!k)return viewTeacherLogin();
+  app.className='wrap';app.innerHTML='<p class="sub stuwait">자동으로 들어가는 중…</p>';
+  const r=await getAdmin(k);
+  if(!r.ok){if(r.error==='no_auth'||r.error==='no_admin')keySet('');return viewTeacherLogin(r.error==='no_auth'?'관리 비밀번호가 바뀌었어요. 다시 써 주세요.':errText(r.error))}
+  T.key=k;T.data=r;
+  if(T.goPos){T.goPos=false;P.sold=r.soldOut||[];setMenu(r.menu);viewPos('teacher')}else viewTeacher();
+}
 const T={key:'',data:null,q:'',shownPw:'',goPos:false};
 function randomPw(){
   const c='abcdefghjkmnpqrstuvwxyz23456789',a=new Uint32Array(8);crypto.getRandomValues(a);
@@ -469,6 +532,7 @@ function viewTeacherLogin(msg){
   app.innerHTML=`<div class="top"><h1>${T.goPos?'🧾 상점 계산대':'행사 상점 · 선생님'}</h1><button class="link" type="button" id="toStudent">담당자 화면</button></div>
   <form class="card" id="tForm" autocomplete="off">
     <label for="tk">관리 비밀번호</label><input type="password" id="tk" autocomplete="current-password">
+    <label class="check"><input type="checkbox" id="remember"${T.goPos?' checked':''}>이 기기에서 자동 로그인(선생님 기기만)</label>
     <button class="btn" type="submit" id="tBtn">들어가기</button>
     <p class="msg" id="tMsg" role="alert">${esc(msg||'')}</p>
   </form>`;
@@ -481,8 +545,8 @@ function viewTeacherLogin(msg){
     const r=await getAdmin(key);
     b.disabled=false;b.textContent='들어가기';
     if(!r.ok){m.textContent=errText(r.error);return}
-    T.key=key;T.data=r;
-    if(T.goPos){T.goPos=false;P.sold=r.soldOut||[];viewPos('teacher')}else viewTeacher();
+    T.key=key;T.data=r;keySet(document.getElementById('remember').checked?key:'');
+    if(T.goPos){T.goPos=false;P.sold=r.soldOut||[];setMenu(r.menu);viewPos('teacher')}else viewTeacher();
   };
 }
 function viewTeacher(){
@@ -515,8 +579,8 @@ function viewTeacher(){
   </section>
   </div></div>`;
   document.getElementById('tReload').onclick=reloadTeacher;
-  document.getElementById('toPos').onclick=()=>{P.sold=d.soldOut||[];viewPos('teacher')};
-  document.getElementById('tOut').onclick=()=>{T.key='';T.data=null;T.shownPw='';viewTeacherLogin()};
+  document.getElementById('toPos').onclick=()=>{P.sold=d.soldOut||[];setMenu(d.menu);viewPos('teacher')};
+  document.getElementById('tOut').onclick=teacherOut;
   document.getElementById('genPw').onclick=()=>{document.getElementById('newPw').value=randomPw()};
   document.getElementById('openBtn').onclick=()=>saveSetup(true);
   const cp=document.getElementById('copyPw');if(cp)cp.onclick=()=>navigator.clipboard.writeText(T.shownPw).then(()=>toast('복사했어요'),()=>toast('복사하지 못했어요'));
@@ -551,7 +615,7 @@ function renderFound(){
 }
 async function reloadTeacher(){
   const r=await getAdmin(T.key);
-  if(!r.ok){toast(errText(r.error));if(r.error==='no_auth'){T.key='';viewTeacherLogin(errText(r.error))}return}
+  if(!r.ok){toast(errText(r.error));if(r.error==='no_auth')backToTeacherLogin(r.error);return}
   T.data=r;viewTeacher();
 }
 async function saveSetup(open){
@@ -570,7 +634,7 @@ async function saveSetup(open){
 
 /* ── 시작 ── */
 const QS=new URLSearchParams(location.search);
-if(QS.has('pos')){T.goPos=true;viewTeacherLogin()}else if(QS.has('teacher'))viewTeacherLogin();else viewLogin();
+if(QS.has('pos')){T.goPos=true;autoLogin()}else if(QS.has('teacher'))autoLogin();else viewLogin();
 </script>
 </body>
 </html>

@@ -23,6 +23,8 @@
  *           sold_out(품절 물품) / ice_today(아이스크림은 하루 1인 1개)
  *  - 교환소 메뉴(2026-11-13): items {키: 개수}를 보내면 점수는 서버가 SJ_MENU로 계산하고 «물품» 칸에 남긴다. 한 기록은 10점까지(e알리미 차감 항목이 -10~-1).
  *    아이스크림(ice)은 한 기록에 1개, 같은 학생은 서울 날짜로 하루 1개. 품절은 효니가 sjSoldOut으로 정하고 담당 화면에 회색으로 보인다.
+ *  - 메뉴 고치기(2026-11-13): 선생님이 sjMenu로 메뉴를 더하고 고친다. 설정 cfg.menu에 저장하고, 없으면 SJ_MENU가 기본이다.
+ *    지운 메뉴의 지난 기록은 물품 칸 글자로 남는다. 아이스크림 하루 1개는 지금 메뉴와 기본 메뉴의 아이스크림 이름으로 센다.
  *  - 선생님 계산대(sjAdminCheck·sjAdminSpend): 관리 비밀번호로 남은 상점을 보고 바로 기록한다(효니 디벗 태블릿). 기록자는 «선생님». 잠겨 있어도 쓸 수 있다.
  * ════════════════════════════════════════════════════════ */
 const SJ_BALANCE_SHEET = '상점_잔액';
@@ -32,7 +34,7 @@ const SJ_LOG_HEADERS = ['기록ID', '시각', '행사', '학번', '이름', '점
 const SJC_ID = 0, SJC_AT = 1, SJC_EVENT = 2, SJC_SID = 3, SJC_NAME = 4, SJC_POINT = 5, SJC_BY = 6, SJC_STATUS = 7, SJC_DONE = 8, SJC_CLAIM = 9, SJC_EVENT_ID = 10, SJC_CANCEL_BY = 11, SJC_ITEMS = 12;
 const SJ_STATUS_OK = '정상';
 const SJ_STATUS_CANCEL = '취소';
-// 메뉴판(산출물\학생회\미스테리상점교환소_메뉴판_인쇄용.png)과 같게. 화면 sangjeom.html의 MENU도 같이 고친다.
+// 기본 메뉴(메뉴판 그림과 같음). 선생님이 화면에서 메뉴를 고치면 설정 cfg.menu가 대신한다.
 const SJ_MENU = {
   jelly: { name: '마이쮸·젤리스트로우', point: 1 },
   jjb: { name: '쭈쭈바', point: 3, ice: true },
@@ -41,7 +43,9 @@ const SJ_MENU = {
   d8: { name: '인형 중', point: 8 },
   d10: { name: '인형 대', point: 10 }
 };
-const SJ_PROP = 'SANGJEOM_EVENT_JSON';       // {open, hash, event, eventId, snapAt, adminHash, soldOut:[메뉴 키]}
+const SJ_MENU_MAX = 24;
+const SJ_ICE_MARK = ' [아이스크림]'; // 아이스크림이 든 기록의 물품 칸 끝 표시. 하루 1개는 이것으로 센다
+const SJ_PROP = 'SANGJEOM_EVENT_JSON';       // {open, hash, event, eventId, snapAt, adminHash, soldOut:[메뉴 키], menu:[{k,name,point,ice,ic}]}
 const SJ_ADMIN_NAME = '선생님';
 const SJ_SECRET_PROP = 'SANGJEOM_SECRET';
 const SJ_MAX_POINT = 10;
@@ -115,38 +119,47 @@ function sjLogRows_() {
   const last = sh.getLastRow();
   return last < 2 ? [] : sh.getRange(2, 1, last - 1, SJ_LOG_HEADERS.length).getValues();
 }
+// 지금 메뉴 목록 [{k,name,point,ice,ic}]. 설정에 없으면 기본 메뉴.
+function sjMenuList_(cfg) {
+  if (Array.isArray(cfg.menu) && cfg.menu.length) return cfg.menu;
+  return Object.keys(SJ_MENU).map(function (k) { return { k: k, name: SJ_MENU[k].name, point: SJ_MENU[k].point, ice: !!SJ_MENU[k].ice, ic: '' }; });
+}
+function sjMenuMap_(cfg) { const m = Object.create(null); sjMenuList_(cfg).forEach(function (x) { m[x.k] = x; }); return m; }
 // 물품 {키: 개수} → {point, text, ice} 또는 오류 코드. 모르는 키·0개·소수는 bad_input.
 function sjItems_(raw, cfg) {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return { error: 'bad_input' };
-  const sold = sjSoldSet_(cfg);
+  const sold = sjSoldSet_(cfg), menu = sjMenuMap_(cfg);
   let point = 0, ice = 0;
   const parts = [];
   const keys = Object.keys(raw);
   for (let i = 0; i < keys.length; i++) {
     const k = keys[i], n = Number(raw[k]);
-    if (!Object.prototype.hasOwnProperty.call(SJ_MENU, k) || !Number.isInteger(n) || n < 1 || n > SJ_MAX_POINT) return { error: 'bad_input' };
-    if (sold[k]) return { error: 'sold_out', item: SJ_MENU[k].name };
-    point += SJ_MENU[k].point * n;
-    if (SJ_MENU[k].ice) ice += n;
-    parts.push(SJ_MENU[k].name + '×' + n);
+    const m = menu[k];
+    if (!m || !Number.isInteger(n) || n < 1 || n > SJ_MAX_POINT) return { error: 'bad_input' };
+    if (sold[k]) return { error: 'sold_out', item: m.name };
+    point += m.point * n;
+    if (m.ice) ice += n;
+    parts.push(m.name + '×' + n);
   }
   if (!parts.length || point > SJ_MAX_POINT) return { error: 'bad_input' };
   if (ice > 1) return { error: 'ice_today' };
-  return { point: point, text: parts.join(', '), ice: ice > 0 };
+  return { point: point, text: parts.join(', ') + (ice > 0 ? SJ_ICE_MARK : ''), ice: ice > 0 };
 }
 function sjSoldSet_(cfg) { const s = Object.create(null); (Array.isArray(cfg.soldOut) ? cfg.soldOut : []).forEach(function (k) { s[String(k)] = true; }); return s; }
-function sjSoldList_(cfg) { return Object.keys(sjSoldSet_(cfg)).filter(function (k) { return Object.prototype.hasOwnProperty.call(SJ_MENU, k); }); }
+function sjSoldList_(cfg) { const menu = sjMenuMap_(cfg); return Object.keys(sjSoldSet_(cfg)).filter(function (k) { return !!menu[k]; }); }
 function sjDay_(t) { return Utilities.formatDate(new Date(t), 'Asia/Seoul', 'yyyyMMdd'); }
 // 오늘(서울) 이 학생이 아이스크림을 이미 바꿨나. 취소한 기록은 빼고, 물품 칸 글자로 본다.
-function sjIceToday_(rows, sid) {
+function sjIceToday_(rows, sid, cfg) {
   const today = sjDay_(Date.now());
-  const iceNames = Object.keys(SJ_MENU).filter(function (k) { return SJ_MENU[k].ice; }).map(function (k) { return SJ_MENU[k].name + '×'; });
+  // 표시가 없는 기록(이 기능 전 기록)은 기본 아이스크림 이름이 물품 하나와 똑같을 때만 센다
+  const iceNames = Object.keys(SJ_MENU).filter(function (k) { return SJ_MENU[k].ice; }).map(function (k) { return SJ_MENU[k].name; });
   return rows.some(function (r) {
     if (String(r[SJC_STATUS]) !== SJ_STATUS_OK || String(r[SJC_SID]).trim() !== sid) return false;
     const at = sjTime_(r[SJC_AT]);
     if (!at || sjDay_(at) !== today) return false;
     const text = String(r[SJC_ITEMS] || '');
-    return iceNames.some(function (n) { return text.indexOf(n) >= 0; });
+    if (text.indexOf(SJ_ICE_MARK.trim()) >= 0) return true;
+    return text.split(', ').some(function (p) { return iceNames.indexOf(p.replace(/×[0-9]+$/, '')) >= 0; });
   });
 }
 // 점수만 보내면 예전처럼, 물품을 보내면 물품으로 점수를 계산한다(둘 다 보내면 같아야 한다).
@@ -190,7 +203,7 @@ function sjGate_(data, cfg) {
 /* action=sjAuth {pw} → {ok, event} */
 function sjAuthPost_(data) {
   const cfg = sjConfig_();
-  return sjGate_(data, cfg) || sjOut_({ ok: true, event: cfg.event || '', soldOut: sjSoldList_(cfg) });
+  return sjGate_(data, cfg) || sjOut_({ ok: true, event: cfg.event || '', soldOut: sjSoldList_(cfg), menu: sjMenuList_(cfg) });
 }
 
 /* action=sjCheck {pw, sid, point 또는 items} → {ok, name, enough, ice}. 점수는 주지 않는다. ice: 오늘 이미 아이스크림을 바꿨는지. */
@@ -203,7 +216,7 @@ function sjCheckPost_(data) {
   if (amt.error) return sjErr_(amt.error, amt.item ? { item: amt.item } : null);
   if (sjCount_('sj_chk_all', SJ_CHECK_SEC) > SJ_CHECK_ALL_MAX || sjCount_('sj_chk_' + sid, SJ_CHECK_SEC) > SJ_CHECK_ONE_MAX) return sjErr_('busy');
   return sjLookup_(sid, cfg, function (st, left, rows) {
-    return sjOut_({ ok: true, sid: sid, name: st.name, enough: left >= amt.point, ice: amt.ice && sjIceToday_(rows, sid) });
+    return sjOut_({ ok: true, sid: sid, name: st.name, enough: left >= amt.point, ice: amt.ice && sjIceToday_(rows, sid, cfg) });
   });
 }
 // 학번으로 잔액을 찾아 next(학생, 남은 점수, 기록)를 부른다.
@@ -250,10 +263,10 @@ function sjSpendCore_(data, gate, by, isAdmin) {
     if (!st) return sjErr_('not_found');
     const left = st.point - (sjSpentMap_(rows, cfg.snapAt || 0)[sid] || 0);
     if (left < amt.point) return sjErr_('short', { name: st.name });
-    if (amt.ice && sjIceToday_(rows, sid)) return sjErr_('ice_today', { name: st.name });
+    if (amt.ice && sjIceToday_(rows, sid, cfg)) return sjErr_('ice_today', { name: st.name });
     const sh = sjSheet_(SJ_LOG_SHEET, SJ_LOG_HEADERS);
     if (!sh.getRange(1, SJC_ITEMS + 1).getValue()) sh.getRange(1, SJC_ITEMS + 1).setValue(SJ_LOG_HEADERS[SJC_ITEMS]); // 예전 시트에 «물품» 머리글 붙이기
-    sh.appendRow(['', new Date(), '', sid, sjText_(st.name, 20), amt.point, '', SJ_STATUS_OK, '', '', cfg.eventId || '', '', amt.text]);
+    sh.appendRow(['', new Date(), '', sid, sjText_(st.name, 20), amt.point, '', SJ_STATUS_OK, '', '', cfg.eventId || '', '', sjText_(amt.text, 300)]);
     const row = sh.getLastRow();
     // «12/20» 행사 이름, «3-1» 기록자, 숫자 모양 기록ID가 시트에서 바뀌지 않게 텍스트 칸으로 쓴다
     sh.getRange(row, SJC_ID + 1).setNumberFormat('@').setValue(reqId);
@@ -497,7 +510,7 @@ function sjAdminPost_(data) {
     return { sid: sid, name: bal[sid].name, point: bal[sid].point, left: bal[sid].point - (spent[sid] || 0) };
   });
   return sjOut_({
-    ok: true, now: Date.now(), open: !!cfg.open, event: cfg.event || '', hasPw: !!cfg.hash, snapAt: cfg.snapAt || 0, soldOut: sjSoldList_(cfg), // now: PC 시계가 틀려도 읽기 시작 시각이 어긋나지 않게
+    ok: true, now: Date.now(), open: !!cfg.open, event: cfg.event || '', hasPw: !!cfg.hash, snapAt: cfg.snapAt || 0, soldOut: sjSoldList_(cfg), menu: sjMenuList_(cfg), // now: PC 시계가 틀려도 읽기 시작 시각이 어긋나지 않게
     wrongPw: Number(CacheService.getScriptCache().get(SJ_WRONG_KEY)) || 0, rows: rows, log: log.map(sjLogView_).reverse()
   });
 }
@@ -510,7 +523,7 @@ function sjAdminCheckPost_(data) {
   const sid = sjSid_(data.sid);
   if (!sid) return sjErr_('bad_input');
   return sjLookup_(sid, cfg, function (st, left, rows) {
-    return sjOut_({ ok: true, sid: sid, name: st.name, left: left, ice: sjIceToday_(rows, sid) });
+    return sjOut_({ ok: true, sid: sid, name: st.name, left: left, ice: sjIceToday_(rows, sid, cfg) });
   });
 }
 
@@ -521,16 +534,44 @@ function sjAdminSpendPost_(data) {
 
 /* action=sjSoldOut {key, soldOut:[메뉴 키]} → 품절 목록을 통째로 바꾼다. */
 function sjSoldOutPost_(data) {
-  if (!Array.isArray(data.soldOut) || data.soldOut.some(function (k) { return !Object.prototype.hasOwnProperty.call(SJ_MENU, String(k)); })) return sjErr_('bad_input');
+  if (!Array.isArray(data.soldOut)) return sjErr_('bad_input');
   const lock = LockService.getScriptLock();
   lock.waitLock(15000);
   try {
     const cfg = sjConfig_();
     const blocked = sjAdminGate_(data, cfg);
     if (blocked) return blocked;
+    const menu = sjMenuMap_(cfg);
+    if (data.soldOut.some(function (k) { return !menu[String(k)]; })) return sjErr_('bad_input');
     cfg.soldOut = data.soldOut.map(String);
     sjSaveConfig_(cfg);
     return sjOut_({ ok: true, soldOut: sjSoldList_(cfg) });
+  } finally { lock.releaseLock(); }
+}
+
+/* action=sjMenu {key, menu:[{k,name,point,ice,ic}]} → 메뉴를 통째로 바꾼다. 키는 영문 소문자·숫자, 이름은 겹치지 않게, 점수 1~10. */
+function sjMenuPost_(data) {
+  const raw = data.menu;
+  if (!Array.isArray(raw) || !raw.length || raw.length > SJ_MENU_MAX) return sjErr_('bad_input');
+  const keys = Object.create(null), names = Object.create(null), menu = [];
+  for (let i = 0; i < raw.length; i++) {
+    const x = raw[i] || {};
+    const k = String(x.k == null ? '' : x.k), name = sjPlain_(x.name, 20), point = Number(x.point);
+    const ic = Array.from(String(x.ic == null ? '' : x.ic).trim()).slice(0, 8).join('');
+    if (!/^[a-z0-9]{1,12}$/.test(k) || keys[k] || !name || /[×,\[\]]/.test(name) || names[name] || !Number.isInteger(point) || point < 1 || point > SJ_MAX_POINT) return sjErr_('bad_input', { at: i });
+    keys[k] = true; names[name] = true;
+    menu.push({ k: k, name: name, point: point, ice: x.ice === true, ic: ic });
+  }
+  const lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    const cfg = sjConfig_();
+    const blocked = sjAdminGate_(data, cfg);
+    if (blocked) return blocked;
+    cfg.menu = menu;
+    cfg.soldOut = (Array.isArray(cfg.soldOut) ? cfg.soldOut : []).filter(function (k) { return keys[k]; }); // 지운 메뉴의 품절 표시는 버린다
+    sjSaveConfig_(cfg);
+    return sjOut_({ ok: true, menu: sjMenuList_(cfg), soldOut: sjSoldList_(cfg) });
   } finally { lock.releaseLock(); }
 }
 
@@ -544,7 +585,7 @@ function saHmac_(text) {
 }
 const SJ_ROUTES = {
   sjAuth: sjAuthPost_, sjCheck: sjCheckPost_, sjSpend: sjSpendPost_, sjRecent: sjRecentPost_, sjCancel: sjCancelPost_,
-  sjAdmin: sjAdminPost_, sjAdminCancel: sjAdminCancelPost_, sjAdminCheck: sjAdminCheckPost_, sjAdminSpend: sjAdminSpendPost_, sjSoldOut: sjSoldOutPost_, sjSetup: sjSetupPost_, sjLoad: sjLoadPost_, sjClaim: sjClaimPost_, sjMark: sjMarkPost_, sjRelease: sjReleasePost_
+  sjAdmin: sjAdminPost_, sjAdminCancel: sjAdminCancelPost_, sjAdminCheck: sjAdminCheckPost_, sjAdminSpend: sjAdminSpendPost_, sjSoldOut: sjSoldOutPost_, sjMenu: sjMenuPost_, sjSetup: sjSetupPost_, sjLoad: sjLoadPost_, sjClaim: sjClaimPost_, sjMark: sjMarkPost_, sjRelease: sjReleasePost_
 };
 function doPost(e) {
   let data = null;
