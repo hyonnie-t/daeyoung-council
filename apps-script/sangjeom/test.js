@@ -174,7 +174,7 @@ ok('깨진 본문 거부', JSON.parse(ctx.doPost({ postData: { contents: '{' } }
   ok('점수와 물품이 다르면 거부', S({ action: 'sjSpend', pw: PW, sid: '30901', items: { jelly: 1 }, point: 3, by: '임원', reqId: 'm0' }).error === 'bad_input');
   r = S({ action: 'sjSpend', pw: PW, sid: '30901', items: { jelly: 2, jjb: 1 }, by: '임원', reqId: 'm1' });
   ok('물품 기록, 점수는 서버 계산', r.ok && r.point === 5 && r.left === undefined && Rows().find(x => x[0] === 'm1')[5] === 5);
-  ok('물품 칸에 이름', Rows().find(x => x[0] === 'm1')[12] === '마이쮸·젤리스트로우×2, 쭈쭈바×1' && sheets['상점_사용기록'].rows[0][12] === '물품');
+  ok('물품 칸에 이름', Rows().find(x => x[0] === 'm1')[12] === '마이쮸·젤리스트로우×2, 쭈쭈바×1 [아이스크림]' && sheets['상점_사용기록'].rows[0][12] === '물품');
   ok('최근 기록에 물품', S({ action: 'sjRecent', pw: PW }).rows.find(x => x.id === 'm1').items.includes('쭈쭈바'));
   ok('오늘 아이스크림 바꾼 학생 조회 표시', S({ action: 'sjCheck', pw: PW, sid: '30901', items: { sr: 1 } }).ice === true);
   ok('같은 날 아이스크림 두 번째 거부', S({ action: 'sjSpend', pw: PW, sid: '30901', items: { sr: 1 }, by: '임원', reqId: 'm2' }).error === 'ice_today');
@@ -204,6 +204,39 @@ ok('깨진 본문 거부', JSON.parse(ctx.doPost({ postData: { contents: '{' } }
   ok('예전 점수 방식도 그대로', A({ action: 'sjSetup', open: true, password: PW }).ok && S({ action: 'sjSpend', pw: PW, sid: '30901', point: 2, by: '임원', reqId: 't6' }).ok === true && Rows().find(x => x[0] === 't6')[12] === '');
   ok('담당이 선생님 이름으로 기록 못 함', S({ action: 'sjSpend', pw: PW, sid: '30901', items: { jelly: 1 }, by: '선생님', reqId: 'x1' }).error === 'bad_input');
   ok('담당 기록 응답에 남은 점수 없음', S({ action: 'sjSpend', pw: PW, sid: '30901', items: { jelly: 1 }, by: '임원', reqId: 'x2' }).left === undefined);
+  // 메뉴 고치기(2026-11-13)
+  ok('기본 메뉴가 응답에', S({ action: 'sjAuth', pw: PW }).menu.length === 6 && A({ action: 'sjAdmin' }).menu.find(x => x.k === 'sr').ice === true);
+  ok('메뉴 키 없으면 거부', S({ action: 'sjMenu', menu: [{ k: 'a', name: 'a', point: 1 }] }).error === 'no_auth');
+  ok('잘못된 메뉴 거부', [[], [{ k: 'A!', name: '가', point: 1 }], [{ k: 'a', name: '', point: 1 }], [{ k: 'a', name: '가', point: 11 }], [{ k: 'a', name: '가', point: 1 }, { k: 'a', name: '나', point: 1 }], [{ k: 'a', name: '가', point: 1 }, { k: 'b', name: '가', point: 2 }]].every(m => A({ action: 'sjMenu', menu: m }).error === 'bad_input'));
+  A({ action: 'sjSoldOut', soldOut: ['d10', 'jelly'] });
+  const base = A({ action: 'sjAdmin' }).menu.filter(x => x.k !== 'd10');
+  r = A({ action: 'sjMenu', menu: base.concat([{ k: 'pen', name: '볼펜', point: 2, ic: '🖊️' }, { k: 'pop', name: '메로나', point: 3, ice: true }]) });
+  ok('메뉴 추가·삭제', r.ok && r.menu.length === 7 && r.menu.find(x => x.k === 'pen').point === 2 && !r.menu.find(x => x.k === 'd10'));
+  ok('지운 메뉴의 품절 표시는 버림', r.soldOut.join() === 'jelly');
+  A({ action: 'sjSoldOut', soldOut: [] });
+  ok('지운 메뉴로 기록 거부', A({ action: 'sjAdminSpend', sid: '30901', items: { d10: 1 }, reqId: 'n1' }).error === 'bad_input');
+  r = A({ action: 'sjAdminSpend', sid: '30901', items: { pen: 2 }, reqId: 'n2' });
+  ok('새 메뉴로 기록', r.ok && r.point === 4 && Rows().find(x => x[0] === 'n2')[12] === '볼펜×2');
+  load([{ sid: '10101', name: '라마', point: 20 }]); wait();
+  A({ action: 'sjAdminSpend', sid: '10101', items: { pop: 1 }, reqId: 'n3' });
+  ok('새 아이스크림도 하루 1개', A({ action: 'sjAdminSpend', sid: '10101', items: { jjb: 1 }, reqId: 'n4' }).error === 'ice_today');
+  ok('없는 메뉴 품절 거부', A({ action: 'sjSoldOut', soldOut: ['d10'] }).error === 'bad_input');
+  // 검토 지적(2026-11-13)
+  let menuNow = A({ action: 'sjAdmin' }).menu;
+  A({ action: 'sjMenu', menu: menuNow.map(x => x.k === 'pop' ? Object.assign({}, x, { name: '메로나2' }) : x) });
+  ok('아이스크림 이름을 바꿔도 하루 1개', A({ action: 'sjAdminCheck', sid: '10101' }).ice === true);
+  menuNow = A({ action: 'sjAdmin' }).menu;
+  A({ action: 'sjMenu', menu: menuNow.concat([{ k: 'cone', name: '콘', point: 1, ice: true }, { k: 'jc', name: '젤리콘', point: 1 }]) });
+  load([{ sid: '20202', name: '마바', point: 20 }]); wait();
+  A({ action: 'sjAdminSpend', sid: '20202', items: { jc: 1 }, reqId: 'n5' });
+  ok('이름 일부가 같아도 아이스크림으로 안 셈', A({ action: 'sjAdminCheck', sid: '20202' }).ice === false);
+  menuNow = A({ action: 'sjAdmin' }).menu;
+  A({ action: 'sjMenu', menu: menuNow.map(x => x.k === 'pen' ? Object.assign({}, x, { point: 5 }) : x) });
+  ok('화면 점수와 서버 메뉴 점수가 다르면 거부', A({ action: 'sjAdminSpend', sid: '20202', items: { pen: 1 }, point: 2, reqId: 'n6' }).error === 'bad_input');
+  ok('이름에 ×·쉼표·[ ] 거부', ['볼×펜', '볼,펜', '[펜]'].every(n => A({ action: 'sjMenu', menu: [{ k: 'a', name: n, point: 1 }] }).error === 'bad_input'));
+  A({ action: 'sjMenu', menu: [{ k: 'eq', name: '=1+1', point: 1 }] });
+  A({ action: 'sjAdminSpend', sid: '20202', items: { eq: 1 }, reqId: 'n7' });
+  ok('물품 칸 수식 막음', String(Rows().find(x => x[0] === 'n7')[12]).startsWith("'"));
   // 잠금 초과는 서버 오류로
   const oldLock = ctx.LockService;
   ctx.LockService = { getScriptLock: () => ({ waitLock() { throw new Error('timeout'); }, releaseLock() {} }) };
