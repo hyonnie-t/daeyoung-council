@@ -12,6 +12,7 @@ class Sheet {
     return {
       getValues() { const o = []; for (let i = 0; i < nr; i++) { const row = []; for (let j = 0; j < nc; j++) { const v = sh.rows[r - 1 + i]; row.push(v && v[c - 1 + j] !== undefined ? v[c - 1 + j] : ''); } o.push(row); } return o; },
       setValues(v) { v.forEach((row, i) => row.forEach((x, j) => { ensure(r + i, c + j)[c - 1 + j] = x; })); return this; },
+      getValue() { const v = sh.rows[r - 1]; return v && v[c - 1] !== undefined ? v[c - 1] : ''; },
       setValue(x) { ensure(r, c)[c - 1] = x; return this; },
       setNumberFormat() { return this; },
       clearContent() { for (let i = 0; i < nr; i++) for (let j = 0; j < nc; j++) ensure(r + i, c + j)[c - 1 + j] = ''; return this; }
@@ -32,7 +33,8 @@ const ctx = {
   Utilities: {
     getUuid: () => crypto.randomUUID(),
     computeHmacSha256Signature: (t, k) => [...crypto.createHmac('sha256', k).update(t).digest()],
-    base64Encode: b => Buffer.from(b).toString('base64')
+    base64Encode: b => Buffer.from(b).toString('base64'),
+    formatDate: (d, tz) => new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(d).split('-').join('')
   }
 };
 vm.createContext(ctx);
@@ -162,6 +164,46 @@ ok('깨진 본문 거부', JSON.parse(ctx.doPost({ postData: { contents: '{' } }
   ok('효니 취소', A({ action: 'sjAdminCancel', id: 'r7' }).ok === true && Rows().find(x => x[0] === 'r7')[11] === '선생님');
   ok('두 번 취소 안 됨', A({ action: 'sjAdminCancel', id: 'r7' }).error === 'cancelled');
   ok('반영된 기록은 취소 안 됨', A({ action: 'sjAdminCancel', id: 'r3' }).error === 'already');
+  // 교환소 메뉴(2026-11-13)
+  load([{ sid: '30901', name: '가나', point: 20 }, { sid: '20202', name: '다라', point: 2 }]); wait();
+  r = S({ action: 'sjCheck', pw: PW, sid: '30901', items: { jelly: 2, jjb: 1 } });
+  ok('물품으로 조회', r.ok && r.enough === true && r.ice === false && r.left === undefined);
+  ok('모르는 물품·0개·소수 거부', [{ x: 1 }, { jelly: 0 }, { jelly: 1.5 }, [], {}].every(it => S({ action: 'sjCheck', pw: PW, sid: '30901', items: it }).error === 'bad_input'));
+  ok('10점 넘는 한 번 계산 거부', S({ action: 'sjCheck', pw: PW, sid: '30901', items: { d10: 1, jelly: 1 } }).error === 'bad_input');
+  ok('아이스크림 한 번에 2개 거부', S({ action: 'sjCheck', pw: PW, sid: '30901', items: { jjb: 1, sr: 1 } }).error === 'ice_today');
+  ok('점수와 물품이 다르면 거부', S({ action: 'sjSpend', pw: PW, sid: '30901', items: { jelly: 1 }, point: 3, by: '임원', reqId: 'm0' }).error === 'bad_input');
+  r = S({ action: 'sjSpend', pw: PW, sid: '30901', items: { jelly: 2, jjb: 1 }, by: '임원', reqId: 'm1' });
+  ok('물품 기록, 점수는 서버 계산', r.ok && r.point === 5 && r.left === undefined && Rows().find(x => x[0] === 'm1')[5] === 5);
+  ok('물품 칸에 이름', Rows().find(x => x[0] === 'm1')[12] === '마이쮸·젤리스트로우×2, 쭈쭈바×1' && sheets['상점_사용기록'].rows[0][12] === '물품');
+  ok('최근 기록에 물품', S({ action: 'sjRecent', pw: PW }).rows.find(x => x.id === 'm1').items.includes('쭈쭈바'));
+  ok('오늘 아이스크림 바꾼 학생 조회 표시', S({ action: 'sjCheck', pw: PW, sid: '30901', items: { sr: 1 } }).ice === true);
+  ok('같은 날 아이스크림 두 번째 거부', S({ action: 'sjSpend', pw: PW, sid: '30901', items: { sr: 1 }, by: '임원', reqId: 'm2' }).error === 'ice_today');
+  ok('같은 요청 재전송은 하루 1개에 안 걸림', S({ action: 'sjSpend', pw: PW, sid: '30901', items: { jelly: 2, jjb: 1 }, by: '임원', reqId: 'm1' }).repeated === true);
+  ok('간식은 계속 됨', S({ action: 'sjSpend', pw: PW, sid: '30901', items: { jelly: 1 }, by: '임원', reqId: 'm3' }).ok === true);
+  S({ action: 'sjCancel', pw: PW, id: 'm1', by: '임원' });
+  ok('취소하면 아이스크림 다시 가능', S({ action: 'sjCheck', pw: PW, sid: '30901', items: { sr: 1 } }).ice === false);
+  ok('품절 키 없으면 거부', S({ action: 'sjSoldOut', soldOut: ['d10'] }).error === 'no_auth');
+  ok('모르는 품절 키 거부', A({ action: 'sjSoldOut', soldOut: ['nope'] }).error === 'bad_input');
+  ok('품절 정하기', A({ action: 'sjSoldOut', soldOut: ['d10', 'sr'] }).soldOut.join() === 'd10,sr' && S({ action: 'sjAuth', pw: PW }).soldOut.length === 2);
+  r = S({ action: 'sjSpend', pw: PW, sid: '30901', items: { sr: 1 }, by: '임원', reqId: 'm4' });
+  ok('품절 물품 거부', r.error === 'sold_out' && r.item === '설레임');
+  ok('관리 화면에 품절', A({ action: 'sjAdmin' }).soldOut.length === 2);
+  A({ action: 'sjSoldOut', soldOut: [] });
+  // 선생님 계산대
+  ok('계산대 조회 키 없으면 거부', S({ action: 'sjAdminCheck', sid: '30901' }).error === 'no_auth');
+  r = A({ action: 'sjAdminCheck', sid: '30901' });
+  ok('계산대 조회는 남은 점수', r.ok && r.name === '가나' && r.left === 19 && r.ice === false);
+  ok('계산대 없는 학번', A({ action: 'sjAdminCheck', sid: '39998' }).error === 'not_found');
+  r = A({ action: 'sjAdminSpend', sid: '30901', items: { d8: 1 }, reqId: 't1' });
+  ok('계산대 기록', r.ok && r.point === 8 && r.left === 11 && Rows().find(x => x[0] === 't1')[6] === '선생님');
+  ok('계산대 키 없으면 기록 안 됨', S({ action: 'sjAdminSpend', sid: '30901', items: { jelly: 1 }, reqId: 't2', by: '선생님' }).error === 'no_auth');
+  ok('계산대 잔액 부족', A({ action: 'sjAdminSpend', sid: '20202', items: { jjb: 1 }, reqId: 't3' }).error === 'short');
+  A({ action: 'sjSetup', open: false });
+  ok('잠겨 있어도 계산대는 됨', A({ action: 'sjAdminSpend', sid: '30901', items: { jelly: 1 }, reqId: 't4' }).ok === true);
+  ok('잠겨 있으면 담당은 안 됨', S({ action: 'sjSpend', pw: PW, sid: '30901', items: { jelly: 1 }, by: '임원', reqId: 't5' }).error === 'locked');
+  ok('예전 점수 방식도 그대로', A({ action: 'sjSetup', open: true, password: PW }).ok && S({ action: 'sjSpend', pw: PW, sid: '30901', point: 2, by: '임원', reqId: 't6' }).ok === true && Rows().find(x => x[0] === 't6')[12] === '');
+  ok('담당이 선생님 이름으로 기록 못 함', S({ action: 'sjSpend', pw: PW, sid: '30901', items: { jelly: 1 }, by: '선생님', reqId: 'x1' }).error === 'bad_input');
+  ok('담당 기록 응답에 남은 점수 없음', S({ action: 'sjSpend', pw: PW, sid: '30901', items: { jelly: 1 }, by: '임원', reqId: 'x2' }).left === undefined);
   // 잠금 초과는 서버 오류로
   const oldLock = ctx.LockService;
   ctx.LockService = { getScriptLock: () => ({ waitLock() { throw new Error('timeout'); }, releaseLock() {} }) };
