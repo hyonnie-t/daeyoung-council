@@ -33,6 +33,7 @@
 8. 업무 id는 `crypto.randomUUID()`. 날짜 비교 코드는 상시 행사(`isProj(e)`)를 먼저 걸러낸다.
 
 ## 작업 습관
+- 새 페이지(서브 주소)를 만들거나 지우면 `index.html` 선생님 대시보드의 «🔗 학생회 페이지 주소 모음»(`#linkHub`)에도 한 줄 더하거나 지운다. 효니가 주소를 거기서 찾는다(2026-11-14). 비밀번호는 적지 않는다.
 - 고치기 전에 `git fetch` 후 `origin/main`에서 임시 worktree(`git worktree add <임시폴더> -b <브랜치> origin/main`)를 만들어 작업한다. 여러 세션이 이 폴더를 같이 쓰므로 공용 폴더는 `main`으로 둔다(2026-11-08).
 - `index.html`은 통째로 Read하지 않는다. `grep -n "^// ── \|^function 이름" index.html`로 위치를 찾고 범위만 읽는다. 문서에 줄번호를 적지 않는다.
 - 로컬 확인: 교사업무 루트 `.claude/launch.json`의 `daeyoung-council`(포트 8771)로 띄우고 내장 브라우저에서 폰 390·태블릿 820·PC 1280 세 폭을 직접 본다(`file://`는 Firebase 호출이 안 된다).
