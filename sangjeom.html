@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>행사 상점 기록</title>
+<title>상점 교환소</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
 <style>
 /* 학생회 앱(index.html)과 같은 색. 행사장에서 폰 한 손으로 쓰는 화면이라 칸·버튼을 크게 둔다 */
@@ -67,6 +67,50 @@ input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(91
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#212529;color:#fff;padding:var(--space-2) var(--space-3);border-radius:99px;font-size:15px;animation:toastIn .2s ease-out;max-width:90vw;z-index:9;white-space:nowrap}
 @keyframes toastIn{from{opacity:0;transform:translate(-50%,6px)}to{opacity:1;transform:translateX(-50%)}}
 [hidden]{display:none!important}
+/* ── 계산대(2026-11-13) 폰은 한 줄, 태블릿 가로·PC는 왼쪽 학번 / 오른쪽 메뉴 ── */
+.wrap.pos{max-width:28rem}
+@media (min-width:760px){.wrap.pos{max-width:72rem}.posgrid{display:grid;grid-template-columns:minmax(16rem,2fr) 3fr;gap:var(--space-3);align-items:start}}
+.sidin{font-size:26px!important;font-weight:900;letter-spacing:.2em;text-align:center;height:56px!important}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-2);margin-top:var(--space-2)}
+.keypad button{height:48px;border:1px solid var(--border);border-radius:10px;background:var(--surface2);font:inherit;font-size:22px;font-weight:700;color:var(--text);cursor:pointer;touch-action:manipulation}
+.keypad button:active{background:var(--accent-soft)}
+.keypad [data-key=clear],.keypad [data-key=back]{font-size:16px;color:var(--text2)}
+@media (min-width:1000px){.keypad button{height:56px}}
+.stuwait{margin-top:var(--space-3);text-align:center}
+.sidl{display:block;font-size:14px;color:var(--text2)}
+.bal{display:flex;justify-content:space-between;align-items:baseline;margin-top:var(--space-2);color:var(--text)}
+.bal strong{font-size:26px;font-weight:900}
+.result.bad .bal strong{color:var(--bad)}
+.note{margin-top:var(--space-2);font-size:15px;font-weight:700;color:var(--text)}
+.card h2 small{font-weight:400;margin-left:var(--space-1)}
+.menu{display:grid;grid-template-columns:repeat(auto-fill,minmax(7.5rem,1fr));gap:var(--space-2)}
+.item{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-1);min-height:96px;padding:var(--space-2);border:1.5px solid var(--border);border-radius:12px;background:#fff;font:inherit;color:var(--text);cursor:pointer;text-align:center;touch-action:manipulation}
+.item:active{border-color:var(--accent);background:var(--accent-soft)}
+.item .ic{font-size:26px;line-height:1}
+.item .nm{font-size:14px;font-weight:700;line-height:1.3}
+.item .pt{font-size:15px;font-weight:900;color:var(--accent)}
+.item .cnt{position:absolute;top:var(--space-1);right:var(--space-1);min-width:24px;height:24px;border-radius:99px;background:var(--accent);color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 var(--space-1)}
+.item.off{opacity:.4}
+.item.off.has{opacity:1;border-color:var(--accent)} /* 담긴 물품은 더 못 담아도 흐리게 하지 않는다 */
+.item.has{border-color:var(--accent)}
+.item.soldout .pt{color:var(--bad)}
+.hint{min-height:0;margin-top:var(--space-2);font-size:14px;color:var(--bad)}
+.hint:empty{margin:0}
+.cart{list-style:none;padding:0}
+.cart li{display:flex;align-items:center;justify-content:space-between;gap:var(--space-2);padding:var(--space-1) 0;border-top:1px solid var(--surface2)}
+.cart li:first-child{border-top:0}
+.cart small{color:var(--text2)}
+.mini.q{width:40px;padding:0;font-size:20px;font-weight:700}
+.sum{display:flex;justify-content:space-between;align-items:baseline;margin-top:var(--space-2);padding-top:var(--space-2);border-top:2px solid var(--border);font-weight:700}
+.sum output{font-size:28px;font-weight:900;color:var(--accent)}
+.sold{margin-top:var(--space-3)}
+.sold summary{cursor:pointer;font-size:14px;color:var(--text2);min-height:32px;display:flex;align-items:center}
+.sold .sub{margin:var(--space-1) 0 var(--space-2)}
+.soldlist{display:flex;flex-wrap:wrap;gap:var(--space-2)}
+.chip{min-height:40px;padding:0 var(--space-3);border:1px solid var(--border);border-radius:99px;background:#fff;font:inherit;font-size:14px;color:var(--text2);cursor:pointer}
+.chip.on{background:var(--bad-soft);border-color:var(--bad);color:var(--bad);font-weight:700}
+.mini.warn{border-color:var(--bad);color:var(--bad);font-weight:700}
+.mini.go{border-color:var(--accent);color:var(--accent);font-weight:700}
 </style>
 </head>
 <body>
@@ -88,7 +132,9 @@ const ERR={
   cancelled:'취소된 기록이에요. 다시 확인해 주세요.',
   server:'서버가 바빠요. 아래 목록을 확인하고 다시 해 주세요.',
   no_record:'그 기록을 찾지 못했어요.',
-  already:'이미 처리가 시작된 기록이라 선생님께 말씀드려 주세요.'
+  already:'이미 처리가 시작된 기록이라 선생님께 말씀드려 주세요.',
+  sold_out:'품절된 물품이 있어요. 빼고 다시 해 주세요.',
+  ice_today:'아이스크림은 하루에 1인 1개예요. 오늘 이미 바꿨어요.'
 };
 const NOT_READY='아직 준비 중이에요. 선생님께 말씀드려 주세요.';
 const NET='연결이 안 돼요. 인터넷을 확인하고 다시 해 주세요. 기록이 됐는지는 아래 목록에서 확인해 주세요.';
@@ -113,13 +159,34 @@ async function call(body,timeout=30000){
 const getAdmin=key=>call({action:'sjAdmin',key});
 const errText=e=>e==='net'?NET:e==='not_ready'?NOT_READY:(ERR[e]||'문제가 생겼어요. 다시 해 주세요.');
 
-/* ── 담당 학생 화면 ── */
-const S={pw:'',by:'',event:'',point:1,pending:null,busy:false,retry:null};
+/* ── 교환소 메뉴 ── 키·점수는 서버 Code.gs SJ_MENU와 같게, 이름은 메뉴판 그림과 같게 고친다 */
+const MENU=[
+  {k:'jelly',name:'마이쮸·젤리스트로우',p:1,ic:'🍬'},
+  {k:'jjb',name:'쭈쭈바',p:3,ic:'🍡',ice:true},
+  {k:'sr',name:'설레임',p:4,ic:'🍦',ice:true},
+  {k:'d6',name:'인형 소',p:6,ic:'🧸'},
+  {k:'d8',name:'인형 중',p:8,ic:'🧸'},
+  {k:'d10',name:'인형 대',p:10,ic:'🧸'}
+];
+const MK=Object.fromEntries(MENU.map(m=>[m.k,m]));
+const MAX_ONE=10; // e알리미 차감 항목이 한 번에 -10점까지라 한 기록도 10점까지
+
+/* ── 계산대(담당 학생·선생님 공통) ──
+   담당(helper): 학번+물품 → 확인하기(가능/부족만, 점수는 안 보임) → 교환 기록하기
+   선생님(teacher): 학번 5자리를 다 치면 이름·남은 상점이 바로 보이고 → 계산하기 */
+const S={pw:'',by:'',event:''};
 const GATE=['locked','wrong_pw'];
+const P={mode:'',sid:'',cart:{},sold:[],stu:null,looking:false,busy:false,retry:null,seq:0};
+const isT=()=>P.mode==='teacher';
+const total=()=>Object.keys(P.cart).reduce((a,k)=>a+MK[k].p*P.cart[k],0);
+const iceIn=()=>Object.keys(P.cart).reduce((a,k)=>a+(MK[k].ice?P.cart[k]:0),0);
+const sig=()=>P.sid+'|'+Object.keys(P.cart).sort().map(k=>k+P.cart[k]).join(',');
+const itemText=c=>Object.keys(c).map(k=>MK[k].name+'×'+c[k]).join(', ');
+const todayKey=t=>{const d=new Date(t);return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
 
 function viewLogin(msg){
   app.className='wrap';
-  app.innerHTML=`<div class="top"><h1>🔒 행사 상점 기록</h1></div>
+  app.innerHTML=`<div class="top"><h1>🔒 상점 교환소</h1></div>
   <form class="card" id="loginForm" autocomplete="off">
     <p class="sub" style="margin-bottom:var(--space-3)">선생님께 비밀번호를 받은 담당자만 쓸 수 있어요.</p>
     <label for="by">내 이름</label><input type="text" id="by" maxlength="20" value="${esc(S.by)}">
@@ -133,118 +200,273 @@ function viewLogin(msg){
     const by=document.getElementById('by').value.trim(),pw=document.getElementById('pw').value.trim();
     const m=document.getElementById('loginMsg'),b=document.getElementById('loginBtn');
     if(!by){m.textContent='내 이름을 써 주세요.';return}
+    if(by==='선생님'){m.textContent='내 이름을 써 주세요. «선생님»은 선생님 계산대 기록에만 써요.';return}
     if(!pw){m.textContent='비밀번호를 써 주세요.';return}
     b.disabled=true;b.textContent='확인하는 중…';
     const r=await call({action:'sjAuth',pw});
     b.disabled=false;b.textContent='들어가기';
     if(!r.ok){m.textContent=errText(r.error);return}
-    S.pw=pw;S.by=by;S.event=r.event||'';viewMain();
+    S.pw=pw;S.by=by;S.event=r.event||'';P.sold=r.soldOut||[];viewPos('helper');
   };
   document.getElementById('toTeacher').onclick=()=>viewTeacherLogin();
 }
-function backToLogin(error){S.pw='';S.pending=null;viewLogin(errText(error))}
+function backToLogin(error){S.pw='';viewLogin(errText(error))}
+function backToTeacherLogin(error){T.key='';T.data=null;viewTeacherLogin(errText(error))}
 
-function viewMain(){
-  app.className='wrap';
-  app.innerHTML=`<div class="top"><div><h1>${esc(S.event)||'행사 상점 기록'}</h1><p class="sub">기록하는 사람: ${esc(S.by)}</p></div><button class="link" type="button" id="logout">나가기</button></div>
-  <section class="card">
-    <label for="sid">학번 5자리</label><input type="text" id="sid" inputmode="numeric" maxlength="5" autocomplete="off">
-    <label>쓰는 점수</label>
-    <div class="stepper"><button type="button" id="minus" aria-label="1점 줄이기">−</button><output id="pt" aria-live="polite">1점</output><button type="button" id="plus" aria-label="1점 늘리기">＋</button></div>
-    <button class="btn" type="button" id="checkBtn">확인하기</button>
-    <p class="msg" id="mainMsg" role="alert"></p>
-    <div id="resultBox"></div>
-  </section>
-  <section class="card"><div class="top" style="margin-bottom:var(--space-1)"><h2 style="margin:0">이번 행사 기록</h2><button class="mini" type="button" id="reload">새로고침</button></div><ul class="list" id="recent"><li class="sub">불러오는 중…</li></ul></section>`;
+function viewPos(mode){
+  Object.assign(P,{mode,sid:'',cart:{},stu:null,looking:false,busy:false,retry:null});
+  const t=isT();
+  app.className='wrap pos';
+  app.innerHTML=`<div class="top"><div><h1>${t?'🧾 상점 계산대':(esc(S.event)||'상점 교환소')}</h1><p class="sub">${t?'선생님 · 남은 상점이 바로 보여요':'기록하는 사람: '+esc(S.by)}</p></div>
+    <div class="row" style="align-items:center">${t?'<button class="mini" type="button" id="toAdmin">관리 화면</button>':''}<button class="link" type="button" id="logout">나가기</button></div></div>
+  <div class="posgrid"><div>
+    <section class="card">
+      <label for="sid">학번 5자리</label>
+      <input type="text" id="sid" class="sidin" inputmode="none" maxlength="5" autocomplete="off" aria-describedby="stuBox">
+      <div class="keypad" id="keypad">${[1,2,3,4,5,6,7,8,9].map(n=>`<button type="button" data-key="${n}">${n}</button>`).join('')}<button type="button" data-key="clear">지움</button><button type="button" data-key="0">0</button><button type="button" data-key="back" aria-label="한 글자 지우기">⌫</button></div>
+      <div id="stuBox" aria-live="polite"></div>
+    </section>
+  </div><div>
+    <section class="card">
+      <h2>메뉴 <small class="sub">눌러서 담기 · 한 번에 ${MAX_ONE}점까지</small></h2>
+      <div class="menu" id="menu"></div>
+      <p class="hint" id="hint" role="status"></p>
+      ${t?'<details class="sold"><summary>품절 표시하기</summary><p class="sub">누르면 품절 ↔ 판매 중이 바뀌어요. 담당 학생 화면에는 다음 새로고침 때 보여요.</p><div class="soldlist" id="soldList"></div></details>':''}
+    </section>
+    <section class="card">
+      <ul class="cart" id="cart"></ul>
+      <div class="sum"><span>합계</span><output id="total">0점</output></div>
+      <p class="msg" id="mainMsg" role="alert"></p>
+      <button class="btn" type="button" id="payBtn" disabled></button>
+    </section>
+  </div></div>
+  <section class="card"><div class="top" style="margin-bottom:var(--space-1)"><h2 style="margin:0">${t?'오늘 기록':'이번 행사 기록'}</h2><button class="mini" type="button" id="reload">새로고침</button></div><ul class="list" id="recent"><li class="sub">불러오는 중…</li></ul></section>`;
   const sid=document.getElementById('sid');
-  sid.oninput=()=>{sid.value=sid.value.replace(/\D/g,'');clearResult()};
-  document.getElementById('minus').onclick=()=>setPoint(S.point-1);
-  document.getElementById('plus').onclick=()=>setPoint(S.point+1);
-  document.getElementById('checkBtn').onclick=doCheck;
-  sid.onkeydown=e=>{if(e.key==='Enter')doCheck()};
-  document.getElementById('reload').onclick=loadRecent;
-  document.getElementById('logout').onclick=()=>{S.pw='';S.pending=null;viewLogin()};
-  document.getElementById('recent').onclick=onRecentClick;
-  setPoint(S.point);sid.focus();loadRecent();
+  sid.oninput=()=>setSid(sid.value.replace(/\D/g,'').slice(0,5));
+  sid.onkeydown=e=>{if(e.key==='Enter')onPay()};
+  document.getElementById('keypad').onclick=e=>{
+    const b=e.target.closest('[data-key]');if(!b)return;
+    const k=b.dataset.key;
+    setSid(k==='clear'?'':k==='back'?P.sid.slice(0,-1):(P.sid+k).slice(0,5));
+  };
+  document.getElementById('menu').onclick=e=>{const b=e.target.closest('[data-add]');if(b)addItem(b.dataset.add)};
+  document.getElementById('cart').onclick=e=>{
+    const b=e.target.closest('[data-dec],[data-inc]');if(!b)return;
+    if(b.dataset.inc)addItem(b.dataset.inc);else{const k=b.dataset.dec;P.cart[k]--;if(P.cart[k]<=0)delete P.cart[k];cartChanged()}
+  };
+  document.getElementById('payBtn').onclick=onPay;
+  document.getElementById('reload').onclick=()=>loadPosRecent(true);
+  document.getElementById('recent').onclick=onPosRecentClick;
+  document.getElementById('logout').onclick=()=>{if(t){T.key='';T.data=null;viewTeacherLogin()}else{S.pw='';viewLogin()}};
+  if(t){
+    document.getElementById('toAdmin').onclick=()=>reloadTeacher();
+    document.getElementById('soldList').onclick=onSoldClick;
+  }
+  renderAll();loadPosRecent();
 }
-function setPoint(n){S.point=Math.min(10,Math.max(1,n));document.getElementById('pt').textContent=S.point+'점';clearResult()}
-function clearResult(){S.pending=null;const b=document.getElementById('resultBox');if(b)b.innerHTML='';const m=document.getElementById('mainMsg');if(m)m.textContent=''}
+function renderAll(){renderStu();renderMenu();renderCart();renderSold()}
+function setSid(v){
+  if(v===P.sid)return;
+  P.sid=v;P.stu=null;P.retry=null;P.seq++;
+  const el=document.getElementById('sid');if(el.value!==v)el.value=v;
+  setMsg('');
+  if(isT()&&/^[1-3]\d{4}$/.test(v))lookup();
+  renderAll();
+}
+function setMsg(t){const m=document.getElementById('mainMsg');if(m)m.textContent=t}
+function setHint(t){const h=document.getElementById('hint');if(h)h.textContent=t||''}
 
-async function doCheck(){
-  if(S.busy)return;
-  const sid=document.getElementById('sid').value.trim(),m=document.getElementById('mainMsg');
-  clearResult();
-  if(!/^[1-3]\d{4}$/.test(sid)){m.textContent='학번 5자리를 써 주세요.';return}
-  const b=document.getElementById('checkBtn');S.busy=true;b.disabled=true;b.textContent='확인하는 중…';
-  const point=S.point;
-  const r=await call({action:'sjCheck',pw:S.pw,sid,point});
-  S.busy=false;b.disabled=false;b.textContent='확인하기';
-  if(!r.ok){if(GATE.includes(r.error))return backToLogin(r.error);m.textContent=errText(r.error);return}
-  if(document.getElementById('sid').value.trim()!==sid||S.point!==point)return;
-  const box=document.getElementById('resultBox');
-  if(!r.enough){box.innerHTML=`<div class="result bad"><b>${esc(r.name)}</b>상점이 부족해요. ${point}점을 쓸 수 없어요.</div>`;return}
-  const same=S.retry&&S.retry.sid===sid&&S.retry.point===point;
-  S.pending={sid,point,name:r.name,reqId:same?S.retry.reqId:uid()};
-  box.innerHTML=`<div class="result good"><b>${esc(r.name)}</b>${point}점을 쓸 수 있어요. 본인이 맞는지 확인해 주세요.</div><button class="btn" type="button" id="spendBtn">${point}점 쓴 걸로 기록하기</button>`;
-  document.getElementById('spendBtn').onclick=doSpend;
+// 선생님: 학번을 다 치면 바로 남은 상점을 읽는다. 그사이 학번이 바뀌면 늦게 온 답은 버린다.
+async function lookup(){
+  const seq=P.seq,sid=P.sid;P.looking=true;renderStu();
+  const r=await call({action:'sjAdminCheck',key:T.key,sid});
+  if(seq!==P.seq)return;
+  P.looking=false;
+  if(!r.ok){if(r.error==='no_auth')return backToTeacherLogin(r.error);P.stu={err:errText(r.error)}}
+  else P.stu={sid,name:r.name,left:r.left,ice:r.ice};
+  renderAll();
 }
-async function doSpend(){
-  if(S.busy||!S.pending)return;
-  const p=S.pending,b=document.getElementById('spendBtn'),m=document.getElementById('mainMsg');
-  S.busy=true;b.disabled=true;b.textContent='기록하는 중…';
-  const r=await call({action:'sjSpend',pw:S.pw,sid:p.sid,point:p.point,by:S.by,reqId:p.reqId});
-  S.busy=false;
-  if(!r.ok){
-    if(GATE.includes(r.error))return backToLogin(r.error);
-    S.retry={sid:p.sid,point:p.point,reqId:p.reqId}; // 응답만 못 받았을 수 있다. 같은 reqId라 다시 해도 두 번 기록되지 않는다
-    b.disabled=false;b.textContent=p.point+'점 쓴 걸로 기록하기';
-    if(r.error==='short'){clearResult();document.getElementById('resultBox').innerHTML=`<div class="result bad"><b>${esc(r.name||p.name)}</b>방금 다른 기록이 들어가서 상점이 부족해요.</div>`;loadRecent();return}
-    if(r.error==='cancelled'){S.retry=null;clearResult();m.textContent=errText(r.error);loadRecent();return}
-    m.textContent=errText(r.error);
-    const rows=await loadRecent();
-    if(rows&&rows.some(x=>x.id===p.reqId)){ // 서버에는 들어갔고 응답만 못 받은 경우
-      S.retry=null;
-      const sid=document.getElementById('sid');sid.value='';clearResult();sid.focus();toast(p.name+' '+p.point+'점 기록돼 있어요');
-    }
+function addItem(k){
+  const m=MK[k];if(!m)return;
+  if(P.sold.includes(k)){setHint(m.name+'은(는) 품절이에요.');return}
+  if(total()+m.p>MAX_ONE){setHint('한 번에 '+MAX_ONE+'점까지예요. 나머지는 계산한 뒤 한 번 더 해요.');return}
+  if(m.ice&&iceIn()>=1){setHint('아이스크림은 하루에 1인 1개예요.');return}
+  if(m.ice&&P.stu&&P.stu.ice){setHint('이 학생은 오늘 아이스크림을 이미 바꿨어요.');return}
+  P.cart[k]=(P.cart[k]||0)+1;cartChanged();
+}
+function cartChanged(){
+  setHint('');setMsg('');
+  if(!isT()&&P.stu&&!P.stu.err)P.stu=null; // 담당: 물품이 바뀌면 다시 확인
+  renderAll();
+}
+function renderStu(){
+  const box=document.getElementById('stuBox');if(!box)return;
+  const s=P.stu,t=isT();
+  if(P.looking){box.innerHTML='<p class="sub stuwait">찾는 중…</p>';return}
+  if(!s){
+    box.innerHTML=P.sid.length===5||!P.sid?'':`<p class="sub stuwait">${5-P.sid.length}자리 더 눌러 주세요</p>`;
+    if(!t&&/^[1-3]\d{4}$/.test(P.sid))box.innerHTML='<p class="sub stuwait">메뉴를 담고 «확인하기»를 눌러 주세요</p>';
     return;
   }
-  S.retry=null;
-  if(r.repeated){const s=document.getElementById('sid');s.value='';clearResult();s.focus();toast('이미 기록돼 있어요. 또 쓰는 거면 다시 확인해 주세요');loadRecent();return}
-  toast(p.name+' '+p.point+'점 기록했어요');
-  const sid=document.getElementById('sid');sid.value='';clearResult();sid.focus();loadRecent();
+  if(s.err){box.innerHTML=`<div class="result bad">${esc(s.err)}</div>`;return}
+  if(t){
+    const after=s.left-total();
+    box.innerHTML=`<div class="result ${after<0?'bad':'good'}"><b>${esc(s.name)}</b><span class="sidl">${esc(sidLabel(s.sid))}</span>
+      <div class="bal"><span>남은 상점</span><strong>${s.left}점</strong></div>
+      ${total()?`<div class="bal"><span>계산 뒤</span><strong>${after<0?'부족해요':after+'점'}</strong></div>`:''}
+      ${s.ice?'<p class="note">🍦 오늘 아이스크림을 이미 바꿨어요</p>':''}</div>`;
+    return;
+  }
+  if(s.ice){box.innerHTML=`<div class="result bad"><b>${esc(s.name)}</b>오늘 아이스크림을 이미 바꿨어요. 아이스크림을 빼 주세요.</div>`;return}
+  box.innerHTML=s.enough?`<div class="result good"><b>${esc(s.name)}</b>${s.point}점을 쓸 수 있어요. 본인이 맞는지 확인해 주세요.</div>`
+    :`<div class="result bad"><b>${esc(s.name)}</b>상점이 부족해요. ${s.point}점을 쓸 수 없어요.</div>`;
 }
-async function loadRecent(){
-  const ul=document.getElementById('recent');if(!ul)return;
-  const r=await call({action:'sjRecent',pw:S.pw});
-  if(!document.getElementById('recent'))return;
-  if(!r.ok){if(GATE.includes(r.error))return backToLogin(r.error);ul.innerHTML=`<li class="sub">${esc(errText(r.error))}</li>`;return}
-  if(!r.rows.length){ul.innerHTML='<li class="sub">아직 기록이 없어요.</li>';return []}
-  ul.innerHTML=r.rows.map(x=>{
-    const off=x.status!=='정상';
-    return `<li><div><span class="${off?'off':''}">${esc(x.name)} <b>${x.point}점</b></span><small>${esc(sidLabel(x.sid))} · ${esc(fmtTime(x.at))} · ${esc(x.by)}${off?' · 취소함':''}</small></div>${off||x.locked?'':`<button class="mini" type="button" data-cancel="${esc(x.id)}" data-who="${esc(x.name)}">취소</button>`}</li>`;
+function renderMenu(){
+  const el=document.getElementById('menu');if(!el)return;
+  const tot=total(),ice=iceIn(),stuIce=P.stu&&P.stu.ice;
+  el.innerHTML=MENU.map(m=>{
+    const sold=P.sold.includes(m.k),n=P.cart[m.k]||0;
+    const off=sold||tot+m.p>MAX_ONE||(m.ice&&(ice>=1||stuIce));
+    return `<button type="button" class="item${off?' off':''}${n?' has':''}${sold?' soldout':''}" data-add="${m.k}" aria-disabled="${off}" aria-label="${esc(m.name)} ${m.p}점${sold?' 품절':''}${n?' 담음 '+n+'개':''}">
+      <span class="ic" aria-hidden="true">${m.ic}</span><span class="nm">${esc(m.name)}</span><span class="pt">${sold?'품절':m.p+'점'}</span>${n?`<span class="cnt" aria-hidden="true">${n}</span>`:''}</button>`;
   }).join('');
-  return r.rows;
 }
-async function onRecentClick(e){
-  const b=e.target.closest('[data-cancel]');if(!b)return;
-  if(!confirm(b.dataset.who+' 기록을 취소할까요?'))return;
+function renderCart(){
+  const ul=document.getElementById('cart');if(!ul)return;
+  const ks=Object.keys(P.cart),tot=total();
+  ul.innerHTML=ks.length?ks.map(k=>`<li><span>${MK[k].ic} ${esc(MK[k].name)} <small>×${P.cart[k]}</small></span><span class="row" style="align-items:center"><b>${MK[k].p*P.cart[k]}점</b><button class="mini q" type="button" data-dec="${k}" aria-label="${esc(MK[k].name)} 하나 빼기">−</button><button class="mini q" type="button" data-inc="${k}" aria-label="${esc(MK[k].name)} 하나 더">＋</button></span></li>`).join('')
+    :'<li class="sub">메뉴를 눌러 담아 주세요.</li>';
+  document.getElementById('total').textContent=tot+'점';
+  const b=document.getElementById('payBtn'),t=isT(),s=P.stu,okSid=/^[1-3]\d{4}$/.test(P.sid);
+  if(P.busy)return;
+  if(t){
+    b.textContent=tot?tot+'점 계산하기':'계산하기';
+    b.disabled=!(okSid&&tot&&s&&!s.err&&s.left>=tot&&!(s.ice&&iceIn()));
+  }else{
+    const ready=s&&!s.err&&s.enough&&!s.ice;
+    b.textContent=ready?tot+'점 교환 기록하기':'확인하기';
+    b.disabled=!(okSid&&tot);
+  }
+}
+function renderSold(){
+  const el=document.getElementById('soldList');if(!el)return;
+  el.innerHTML=MENU.map(m=>{const s=P.sold.includes(m.k);return `<button type="button" class="chip${s?' on':''}" data-sold="${m.k}" aria-pressed="${s}">${m.ic} ${esc(m.name)} · ${s?'품절':'판매 중'}</button>`}).join('');
+}
+async function onSoldClick(e){
+  const b=e.target.closest('[data-sold]');if(!b||P.busy)return;
+  const k=b.dataset.sold,next=P.sold.includes(k)?P.sold.filter(x=>x!==k):P.sold.concat(k);
   b.disabled=true;
-  const r=await call({action:'sjCancel',pw:S.pw,id:b.dataset.cancel,by:S.by});
-  if(!r.ok){if(GATE.includes(r.error))return backToLogin(r.error);b.disabled=false;toast(errText(r.error));return}
-  if(S.retry&&S.retry.reqId===b.dataset.cancel)S.retry=null;
-  toast('취소했어요');clearResult();loadRecent();
+  const r=await call({action:'sjSoldOut',key:T.key,soldOut:next});
+  if(!r.ok){if(r.error==='no_auth')return backToTeacherLogin(r.error);b.disabled=false;toast(errText(r.error));return}
+  P.sold=r.soldOut;Object.keys(P.cart).forEach(x=>{if(P.sold.includes(x))delete P.cart[x]});
+  toast(MK[k].name+(P.sold.includes(k)?' 품절로 표시했어요':' 다시 판매해요'));renderAll();
+}
+
+async function onPay(){
+  if(P.busy)return;
+  const b=document.getElementById('payBtn');if(b.disabled)return;
+  const t=isT(),s=P.stu;
+  if(!t&&!(s&&!s.err&&s.enough&&!s.ice))return helperCheck();
+  const items=Object.assign({},P.cart),sid=P.sid,point=total(),key=sig();
+  const reqId=P.retry&&P.retry.sig===key?P.retry.reqId:uid();
+  P.busy=true;b.disabled=true;b.textContent='기록하는 중…';setMsg('');
+  const r=await call(t?{action:'sjAdminSpend',key:T.key,sid,items,reqId}:{action:'sjSpend',pw:S.pw,sid,items,by:S.by,reqId});
+  P.busy=false;
+  if(r.ok){
+    P.retry=null;
+    const name=r.name||(s&&s.name)||'';
+    toast(r.repeated?'이미 기록돼 있어요':name+' '+point+'점 기록했어요'+(t&&r.left!=null?' · 남은 '+r.left+'점':''));
+    resetSale();loadPosRecent();return;
+  }
+  if(t&&r.error==='no_auth')return backToTeacherLogin(r.error);
+  if(!t&&GATE.includes(r.error))return backToLogin(r.error);
+  if(r.error==='net'||r.error==='server'||r.error==='not_ready'){
+    P.retry={sig:key,reqId}; // 응답만 못 받았을 수 있다. 같은 reqId라 다시 눌러도 두 번 기록되지 않는다
+    setMsg(errText(r.error));renderCart();
+    const rows=await loadPosRecent();
+    if(rows&&rows.some(x=>x.id===reqId)){P.retry=null;toast(name0(s)+' '+point+'점 기록돼 있어요');resetSale()}
+    return;
+  }
+  if(r.error==='sold_out')await refreshSold();
+  if(t&&(r.error==='short'||r.error==='ice_today'))lookup();
+  else if(!t)P.stu=null;
+  setMsg(r.error==='sold_out'&&r.item?r.item+'은(는) 방금 품절됐어요. 빼고 다시 해 주세요.':errText(r.error));
+  renderAll();
+}
+const name0=s=>(s&&s.name)||'';
+async function helperCheck(){
+  const b=document.getElementById('payBtn'),seq=P.seq,key=sig();
+  P.busy=true;b.disabled=true;b.textContent='확인하는 중…';setMsg('');
+  const r=await call({action:'sjCheck',pw:S.pw,sid:P.sid,items:P.cart});
+  P.busy=false;
+  if(seq!==P.seq||key!==sig()){renderAll();return}
+  if(!r.ok){
+    if(GATE.includes(r.error))return backToLogin(r.error);
+    if(r.error==='sold_out')await refreshSold();
+    P.stu=r.error==='ice_today'?null:{err:errText(r.error)};
+    setMsg(r.error==='ice_today'?errText(r.error):'');renderAll();return;
+  }
+  P.stu={sid:P.sid,name:r.name,enough:r.enough,ice:r.ice,point:total()};renderAll();
+}
+function resetSale(){P.sid='';P.cart={};P.stu=null;P.seq++;const el=document.getElementById('sid');if(el){el.value='';el.focus()}setHint('');setMsg('');renderAll()}
+async function refreshSold(){
+  if(isT()){const r=await getAdmin(T.key);if(r.ok){T.data=r;P.sold=r.soldOut||[]}}
+  else{const r=await call({action:'sjAuth',pw:S.pw});if(r.ok)P.sold=r.soldOut||[]}
+  Object.keys(P.cart).forEach(x=>{if(P.sold.includes(x))delete P.cart[x]});
+}
+
+// 기록 목록. 선생님은 오늘 기록 전체(모든 기록자), 담당은 이번 행사 기록. 취소는 두 번 눌러야 된다(확인 창 대신).
+async function loadPosRecent(withSold){
+  const ul=document.getElementById('recent');if(!ul)return;
+  let rows;
+  if(isT()){
+    const r=await getAdmin(T.key);
+    if(!document.getElementById('recent'))return;
+    if(!r.ok){if(r.error==='no_auth')return backToTeacherLogin(r.error);ul.innerHTML=`<li class="sub">${esc(errText(r.error))}</li>`;return}
+    T.data=r;
+    if(withSold){P.sold=r.soldOut||[];renderAll()}
+    const today=todayKey(Date.now());
+    rows=r.log.filter(x=>x.at&&todayKey(x.at)===today).slice(0,40).map(x=>Object.assign({},x,{locked:!!(x.done||x.claim)}));
+  }else{
+    const r=await call({action:'sjRecent',pw:S.pw});
+    if(!document.getElementById('recent'))return;
+    if(!r.ok){if(GATE.includes(r.error))return backToLogin(r.error);ul.innerHTML=`<li class="sub">${esc(errText(r.error))}</li>`;return}
+    rows=r.rows;
+    if(withSold){await refreshSold();renderAll()}
+  }
+  ul.innerHTML=rows.length?rows.map(x=>{
+    const off=x.status!=='정상';
+    return `<li><div><span class="${off?'off':''}">${esc(x.name)} <b>${x.point}점</b></span><small>${x.items?esc(x.items)+' · ':''}${esc(sidLabel(x.sid))} · ${esc(fmtTime(x.at))} · ${esc(x.by)}${off?' · 취소함':''}</small></div>${off||x.locked?'':`<button class="mini" type="button" data-cancel="${esc(x.id)}">취소</button>`}</li>`;
+  }).join(''):'<li class="sub">아직 기록이 없어요.</li>';
+  return rows;
+}
+async function onPosRecentClick(e){
+  const b=e.target.closest('[data-cancel]');if(!b)return;
+  if(b.dataset.armed!=='1'){ // 첫 번째 누름: 한 번 더 누르라고 바꾼다. 3초 지나면 되돌린다
+    b.dataset.armed='1';b.textContent='한 번 더 누르면 취소';b.classList.add('warn');
+    setTimeout(()=>{if(b.isConnected&&b.dataset.armed==='1'){b.dataset.armed='';b.textContent='취소';b.classList.remove('warn')}},3000);
+    return;
+  }
+  b.disabled=true;b.textContent='취소하는 중…';
+  const t=isT();
+  const r=await call(t?{action:'sjAdminCancel',key:T.key,id:b.dataset.cancel}:{action:'sjCancel',pw:S.pw,id:b.dataset.cancel,by:S.by});
+  if(!r.ok){if(t&&r.error==='no_auth')return backToTeacherLogin(r.error);if(!t&&GATE.includes(r.error))return backToLogin(r.error);b.disabled=false;b.dataset.armed='';b.textContent='취소';b.classList.remove('warn');toast(errText(r.error));return}
+  if(P.retry&&P.retry.reqId===b.dataset.cancel)P.retry=null;
+  toast('취소했어요');
+  if(t&&P.stu&&!P.stu.err)lookup();
+  loadPosRecent();
 }
 
 /* ── 선생님 화면 ── */
 // 관리 비밀번호는 저장하지 않는다(같은 github.io 주소의 다른 앱도 localStorage를 읽을 수 있고, 폰을 학생에게 건네면 바로 열린다).
-const T={key:'',data:null,q:'',shownPw:''};
+const T={key:'',data:null,q:'',shownPw:'',goPos:false};
 function randomPw(){
   const c='abcdefghjkmnpqrstuvwxyz23456789',a=new Uint32Array(8);crypto.getRandomValues(a);
   return Array.from(a,n=>c[n%c.length]).join('');
 }
 function viewTeacherLogin(msg){
   app.className='wrap';
-  app.innerHTML=`<div class="top"><h1>행사 상점 · 선생님</h1><button class="link" type="button" id="toStudent">담당자 화면</button></div>
+  app.innerHTML=`<div class="top"><h1>${T.goPos?'🧾 상점 계산대':'행사 상점 · 선생님'}</h1><button class="link" type="button" id="toStudent">담당자 화면</button></div>
   <form class="card" id="tForm" autocomplete="off">
     <label for="tk">관리 비밀번호</label><input type="password" id="tk" autocomplete="current-password">
     <button class="btn" type="submit" id="tBtn">들어가기</button>
@@ -259,7 +481,8 @@ function viewTeacherLogin(msg){
     const r=await getAdmin(key);
     b.disabled=false;b.textContent='들어가기';
     if(!r.ok){m.textContent=errText(r.error);return}
-    T.key=key;T.data=r;viewTeacher();
+    T.key=key;T.data=r;
+    if(T.goPos){T.goPos=false;P.sold=r.soldOut||[];viewPos('teacher')}else viewTeacher();
   };
 }
 function viewTeacher(){
@@ -267,7 +490,7 @@ function viewTeacher(){
   const waiting=d.log.filter(x=>x.status==='정상'&&!x.done&&!x.claim);
   const stuck=d.log.filter(x=>x.status==='정상'&&!x.done&&x.claim);
   app.className='wrap wide';
-  app.innerHTML=`<div class="top"><h1>행사 상점 · 선생님</h1><div><button class="mini" type="button" id="tReload">새로고침</button> <button class="link" type="button" id="tOut">나가기</button></div></div>
+  app.innerHTML=`<div class="top"><h1>행사 상점 · 선생님</h1><div><button class="mini go" type="button" id="toPos">🧾 계산대 열기</button> <button class="mini" type="button" id="tReload">새로고침</button> <button class="link" type="button" id="tOut">나가기</button></div></div>
   <div class="cols"><div>
   <section class="card">
     <h2>담당자 기능 <span class="pill ${d.open?'on':'off'}">${d.open?'열림':'잠김'}</span></h2>
@@ -292,6 +515,7 @@ function viewTeacher(){
   </section>
   </div></div>`;
   document.getElementById('tReload').onclick=reloadTeacher;
+  document.getElementById('toPos').onclick=()=>{P.sold=d.soldOut||[];viewPos('teacher')};
   document.getElementById('tOut').onclick=()=>{T.key='';T.data=null;T.shownPw='';viewTeacherLogin()};
   document.getElementById('genPw').onclick=()=>{document.getElementById('newPw').value=randomPw()};
   document.getElementById('openBtn').onclick=()=>saveSetup(true);
@@ -308,12 +532,12 @@ function viewTeacher(){
   document.getElementById('tLog').innerHTML=d.log.length?d.log.slice(0,100).map(x=>{
     const off=x.status!=='정상';
     const st=off?'취소'+(x.cancelBy?'('+x.cancelBy+')':''):x.done?'반영함':x.claim?'확인 필요':'반영 전';
-    return `<li><div><span class="${off?'off':''}">${esc(x.name)} <b>${x.point}점</b></span><small>${esc(sidLabel(x.sid))} · ${esc(fmtTime(x.at))} · ${esc(x.by)} · ${esc(x.event)}</small></div><span class="sub">${esc(st)}${!off&&!x.done&&!x.claim?` <button class="mini" type="button" data-tcancel="${esc(x.id)}" data-who="${esc(x.name)}">취소</button>`:''}</span></li>`;
+    return `<li><div><span class="${off?'off':''}">${esc(x.name)} <b>${x.point}점</b></span><small>${x.items?esc(x.items)+' · ':''}${esc(sidLabel(x.sid))} · ${esc(fmtTime(x.at))} · ${esc(x.by)} · ${esc(x.event)}</small></div><span class="sub">${esc(st)}${!off&&!x.done&&!x.claim?` <button class="mini" type="button" data-tcancel="${esc(x.id)}" data-who="${esc(x.name)}">취소</button>`:''}</span></li>`;
   }).join(''):'<li class="sub">아직 기록이 없어요.</li>';
 }
 async function onTeacherLogClick(e){
   const b=e.target.closest('[data-tcancel]');if(!b)return;
-  if(!confirm(b.dataset.who+' 기록을 취소할까요?'))return;
+  if(b.dataset.armed!=='1'){b.dataset.armed='1';b.textContent='한 번 더 누르면 취소';b.classList.add('warn');setTimeout(()=>{if(b.isConnected&&b.dataset.armed==='1'){b.dataset.armed='';b.textContent='취소';b.classList.remove('warn')}},3000);return}
   b.disabled=true;
   const r=await call({action:'sjAdminCancel',key:T.key,id:b.dataset.tcancel});
   if(!r.ok){b.disabled=false;toast(errText(r.error));return}
@@ -345,7 +569,8 @@ async function saveSetup(open){
 }
 
 /* ── 시작 ── */
-if(new URLSearchParams(location.search).has('teacher'))viewTeacherLogin();else viewLogin();
+const QS=new URLSearchParams(location.search);
+if(QS.has('pos')){T.goPos=true;viewTeacherLogin()}else if(QS.has('teacher'))viewTeacherLogin();else viewLogin();
 </script>
 </body>
 </html>
