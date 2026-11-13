@@ -590,7 +590,10 @@ const SJ_ROUTES = {
 function doPost(e) {
   let data = null;
   try { data = JSON.parse(e.postData.contents); } catch (err) { return sjErr_('bad_input'); }
-  const fn = data && Object.prototype.hasOwnProperty.call(SJ_ROUTES, data.action) ? SJ_ROUTES[data.action] : null;
+  const has = function (o) { return !!o && !!data && Object.prototype.hasOwnProperty.call(o, data.action); };
+  // 임원 신청(Apply.gs, 2026-11-14)도 같은 주소로 받는다. Apply 파일이 없으면 AP_ROUTES가 없다
+  const ap = typeof AP_ROUTES === 'undefined' ? null : AP_ROUTES;
+  const fn = has(SJ_ROUTES) ? SJ_ROUTES[data.action] : has(ap) ? ap[data.action] : null;
   return fn ? sjTry_(fn, data) : sjErr_('bad_input');
 }
 function doGet() { return json_({ ok: true, service: 'sangjeom' }); }
