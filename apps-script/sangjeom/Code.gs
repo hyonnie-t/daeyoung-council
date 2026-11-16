@@ -22,7 +22,7 @@
  *           no_record / already(처리 시작·반영된 기록) / cancelled / claimed(처리 중 기록 있음) / must_lock(먼저 잠그기) / server /
  *           sold_out(품절 물품) / ice_today(아이스크림은 하루 1인 1개)
  *  - 교환소 메뉴(2026-11-13): items {키: 개수}를 보내면 점수는 서버가 SJ_MENU로 계산하고 «물품» 칸에 남긴다. 한 기록은 10점까지(e알리미 차감 항목이 -10~-1).
- *    아이스크림(ice)은 한 기록에 1개, 같은 학생은 서울 날짜로 하루 1개. 품절은 효니가 sjSoldOut으로 정하고 담당 화면에 회색으로 보인다.
+ *    하루 1개 물건(메뉴 ice 칸, 아이스크림·핫팩·전자제품 등)은 물건마다 따로 한 기록에 1개, 같은 학생은 서울 날짜로 하루 1개(2026-11-16 효니 «따로»). 품절은 효니가 sjSoldOut으로 정하고 담당 화면에 회색으로 보인다.
  *  - 메뉴 고치기(2026-11-13): 선생님이 sjMenu로 메뉴를 더하고 고친다. 설정 cfg.menu에 저장하고, 없으면 SJ_MENU가 기본이다.
  *    지운 메뉴의 지난 기록은 물품 칸 글자로 남는다. 아이스크림 하루 1개는 지금 메뉴와 기본 메뉴의 아이스크림 이름으로 센다.
  *  - 선생님 계산대(sjAdminCheck·sjAdminSpend): 관리 비밀번호로 남은 상점을 보고 바로 기록한다(효니 디벗 태블릿). 기록자는 «선생님». 잠겨 있어도 쓸 수 있다.
@@ -48,7 +48,8 @@ const SJ_MENU_MAX = 24;
 // 기타(2026-11-16 효니): 메뉴에 없는 물건은 계산대에서 이름(선택)과 점수를 직접 쓴다. items.etc = 점수, data.etcName = 물건 이름.
 // 메뉴 키로는 못 쓰고 품절 표시도 없다. 물품 칸에는 «기타(이름) N점»으로 남는다.
 const SJ_ETC = 'etc';
-const SJ_ICE_MARK = ' [아이스크림]'; // 아이스크림이 든 기록의 물품 칸 끝 표시. 하루 1개는 이것으로 센다
+const SJ_ICE_MARK = ' [아이스크림]'; // 2026-11-16 전 기록의 물품 칸 끝 표시(하루 1개 물건을 묶어 셀 때). 지금은 읽기만 한다
+const SJ_DAY_MARK = ' [하루1개:';  // 새 기록: « [하루1개:키,키]». 메뉴의 ice 칸 = «하루 1개» 물건(물건마다 따로 하루 1개)
 const SJ_PROP = 'SANGJEOM_EVENT_JSON';       // {open, hash, event, eventId, snapAt, adminHash, soldOut:[메뉴 키], menu:[{k,name,point,ice,ic}]}
 const SJ_ADMIN_NAME = '선생님';
 const SJ_SECRET_PROP = 'SANGJEOM_SECRET';
@@ -133,8 +134,8 @@ function sjMenuMap_(cfg) { const m = Object.create(null); sjMenuList_(cfg).forEa
 function sjItems_(raw, cfg, etcName) {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return { error: 'bad_input' };
   const sold = sjSoldSet_(cfg), menu = sjMenuMap_(cfg);
-  let point = 0, ice = 0;
-  const parts = [];
+  let point = 0;
+  const parts = [], day = [];
   const keys = Object.keys(raw);
   for (let i = 0; i < keys.length; i++) {
     const k = keys[i], n = Number(raw[k]);
@@ -149,33 +150,47 @@ function sjItems_(raw, cfg, etcName) {
     if (!m || !Number.isInteger(n) || n < 1 || n > SJ_MAX_POINT) return { error: 'bad_input' };
     if (sold[k]) return { error: 'sold_out', item: m.name };
     point += m.point * n;
-    if (m.ice) ice += n;
+    if (m.ice) { // 하루 1개 물건(2026-11-16 효니: 물건마다 따로). 한 기록에도 1개만
+      if (n > 1) return { error: 'ice_today', item: m.name };
+      day.push(k);
+    }
     parts.push(m.name + '×' + n);
   }
   if (!parts.length || point > SJ_MAX_POINT) return { error: 'bad_input' };
-  if (ice > 1) return { error: 'ice_today' };
-  return { point: point, text: parts.join(', ') + (ice > 0 ? SJ_ICE_MARK : ''), ice: ice > 0 };
+  return { point: point, text: parts.join(', ') + (day.length ? SJ_DAY_MARK + day.join(',') + ']' : ''), day: day };
 }
 function sjSoldSet_(cfg) { const s = Object.create(null); (Array.isArray(cfg.soldOut) ? cfg.soldOut : []).forEach(function (k) { s[String(k)] = true; }); return s; }
 function sjSoldList_(cfg) { const menu = sjMenuMap_(cfg); return Object.keys(sjSoldSet_(cfg)).filter(function (k) { return !!menu[k]; }); }
 function sjDay_(t) { return Utilities.formatDate(new Date(t), 'Asia/Seoul', 'yyyyMMdd'); }
-// 오늘(서울) 이 학생이 아이스크림을 이미 바꿨나. 취소한 기록은 빼고, 물품 칸 글자로 본다.
-function sjIceToday_(rows, sid, cfg) {
+// 오늘(서울) 이 학생이 이미 바꾼 하루 1개 물건의 키 {키: true}. 취소한 기록은 빼고, 물품 칸 글자로 본다.
+// 새 기록은 끝 표시 « [하루1개:키,키]»의 키로 센다(이름을 바꿔도 이어진다).
+// 그 전 기록(« [아이스크림]» 표시나 표시 없음)은 물품 이름을 지금 메뉴·기본 메뉴의 하루 1개 물건 이름과 맞춰 센다.
+function sjDayDone_(rows, sid, cfg) {
   const today = sjDay_(Date.now());
-  // 표시가 없는 기록(이 기능 전 기록)은 기본 아이스크림 이름이 물품 하나와 똑같을 때만 센다
-  const iceNames = Object.keys(SJ_MENU).filter(function (k) { return SJ_MENU[k].ice; }).map(function (k) { return SJ_MENU[k].name; });
-  return rows.some(function (r) {
-    if (String(r[SJC_STATUS]) !== SJ_STATUS_OK || String(r[SJC_SID]).trim() !== sid) return false;
+  const byName = Object.create(null);
+  sjMenuList_(cfg).forEach(function (m) { if (m.ice) byName[m.name] = m.k; });
+  Object.keys(SJ_MENU).forEach(function (k) { if (SJ_MENU[k].ice && !byName[SJ_MENU[k].name]) byName[SJ_MENU[k].name] = k; });
+  const done = Object.create(null);
+  rows.forEach(function (r) {
+    if (String(r[SJC_STATUS]) !== SJ_STATUS_OK || String(r[SJC_SID]).trim() !== sid) return;
     const at = sjTime_(r[SJC_AT]);
-    if (!at || sjDay_(at) !== today) return false;
+    if (!at || sjDay_(at) !== today) return;
     const text = String(r[SJC_ITEMS] || '');
-    if (text.indexOf(SJ_ICE_MARK.trim()) >= 0) return true;
-    return text.split(', ').some(function (p) { return iceNames.indexOf(p.replace(/×[0-9]+$/, '')) >= 0; });
+    const mark = text.match(/ \[하루1개:([a-z0-9,]+)\]$/);
+    if (mark) { mark[1].split(',').forEach(function (k) { done[k] = true; }); return; }
+    text.replace(SJ_ICE_MARK, '').split(', ').forEach(function (p) { const k = byName[p.replace(/×[0-9]+$/, '')]; if (k) done[k] = true; });
   });
+  return done;
+}
+// 물품 키 중 오늘 이미 바꾼 첫 하루 1개 물건의 이름(없으면 '')
+function sjDayHit_(day, done, cfg) {
+  const menu = sjMenuMap_(cfg);
+  for (let i = 0; i < day.length; i++) if (done[day[i]]) return menu[day[i]] ? menu[day[i]].name : day[i];
+  return '';
 }
 // 점수만 보내면 예전처럼, 물품을 보내면 물품으로 점수를 계산한다(둘 다 보내면 같아야 한다).
 function sjAmount_(data, cfg) {
-  if (data.items == null) { const p = sjPoint_(data.point); return p ? { point: p, text: '', ice: false } : { error: 'bad_input' }; }
+  if (data.items == null) { const p = sjPoint_(data.point); return p ? { point: p, text: '', day: [] } : { error: 'bad_input' }; }
   const it = sjItems_(data.items, cfg, data.etcName);
   if (it.error) return it;
   if (data.point != null && Number(data.point) !== it.point) return { error: 'bad_input' };
@@ -217,7 +232,7 @@ function sjAuthPost_(data) {
   return sjGate_(data, cfg) || sjOut_({ ok: true, event: cfg.event || '', soldOut: sjSoldList_(cfg), menu: sjMenuList_(cfg) });
 }
 
-/* action=sjCheck {pw, sid, point 또는 items} → {ok, name, enough, ice}. 점수는 주지 않는다. ice: 오늘 이미 아이스크림을 바꿨는지. */
+/* action=sjCheck {pw, sid, point 또는 items} → {ok, name, enough, ice, item}. 점수는 주지 않는다. ice: 담은 하루 1개 물건을 오늘 이미 바꿨는지, item: 그 물건 이름. */
 function sjCheckPost_(data) {
   const cfg = sjConfig_();
   const blocked = sjGate_(data, cfg);
@@ -227,7 +242,8 @@ function sjCheckPost_(data) {
   if (amt.error) return sjErr_(amt.error, amt.item ? { item: amt.item } : null);
   if (sjCount_('sj_chk_all', SJ_CHECK_SEC) > SJ_CHECK_ALL_MAX || sjCount_('sj_chk_' + sid, SJ_CHECK_SEC) > SJ_CHECK_ONE_MAX) return sjErr_('busy');
   return sjLookup_(sid, cfg, function (st, left, rows) {
-    return sjOut_({ ok: true, sid: sid, name: st.name, enough: left >= amt.point, ice: amt.ice && sjIceToday_(rows, sid, cfg) });
+    const hit = sjDayHit_(amt.day, sjDayDone_(rows, sid, cfg), cfg); // 담은 하루 1개 물건 중 오늘 이미 바꾼 것
+    return sjOut_({ ok: true, sid: sid, name: st.name, enough: left >= amt.point, ice: !!hit, item: hit || undefined });
   });
 }
 // 학번으로 잔액을 찾아 next(학생, 남은 점수, 기록)를 부른다.
@@ -274,7 +290,8 @@ function sjSpendCore_(data, gate, by, isAdmin) {
     if (!st) return sjErr_('not_found');
     const left = st.point - (sjSpentMap_(rows, cfg.snapAt || 0)[sid] || 0);
     if (left < amt.point) return sjErr_('short', { name: st.name });
-    if (amt.ice && sjIceToday_(rows, sid, cfg)) return sjErr_('ice_today', { name: st.name });
+    const hit = sjDayHit_(amt.day, sjDayDone_(rows, sid, cfg), cfg);
+    if (hit) return sjErr_('ice_today', { name: st.name, item: hit });
     const sh = sjSheet_(SJ_LOG_SHEET, SJ_LOG_HEADERS);
     if (!sh.getRange(1, SJC_ITEMS + 1).getValue()) sh.getRange(1, SJC_ITEMS + 1).setValue(SJ_LOG_HEADERS[SJC_ITEMS]); // 예전 시트에 «물품» 머리글 붙이기
     sh.appendRow(['', new Date(), '', sid, sjText_(st.name, 20), amt.point, '', SJ_STATUS_OK, '', '', cfg.eventId || '', '', sjText_(amt.text, 300)]);
@@ -526,7 +543,7 @@ function sjAdminPost_(data) {
   });
 }
 
-/* action=sjAdminCheck {key, sid} → {ok, sid, name, left, ice}. 선생님 계산대: 남은 상점과 오늘 아이스크림을 바꿨는지. */
+/* action=sjAdminCheck {key, sid} → {ok, sid, name, left, ice, done}. 선생님 계산대: 남은 상점과 오늘 이미 바꾼 하루 1개 물건. */
 function sjAdminCheckPost_(data) {
   const cfg = sjConfig_();
   const blocked = sjAdminGate_(data, cfg);
@@ -534,7 +551,8 @@ function sjAdminCheckPost_(data) {
   const sid = sjSid_(data.sid);
   if (!sid) return sjErr_('bad_input');
   return sjLookup_(sid, cfg, function (st, left, rows) {
-    return sjOut_({ ok: true, sid: sid, name: st.name, left: left, ice: sjIceToday_(rows, sid, cfg) });
+    const done = Object.keys(sjDayDone_(rows, sid, cfg));
+    return sjOut_({ ok: true, sid: sid, name: st.name, left: left, ice: done.length > 0, done: done }); // done: 오늘 이미 바꾼 하루 1개 물건 키
   });
 }
 
