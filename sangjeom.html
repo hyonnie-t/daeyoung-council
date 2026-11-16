@@ -148,7 +148,7 @@ const ERR={
   no_record:'그 기록을 찾지 못했어요.',
   already:'이미 처리가 시작된 기록이라 선생님께 말씀드려 주세요.',
   sold_out:'품절된 물품이 있어요. 빼고 다시 해 주세요.',
-  ice_today:'아이스크림은 하루에 1인 1개예요. 오늘 이미 바꿨어요.'
+  ice_today:'하루 1개 물건이에요. 이 학생은 오늘 이미 바꿨어요.'
 };
 const NOT_READY='아직 준비 중이에요. 선생님께 말씀드려 주세요.';
 const NET='연결이 안 돼요. 인터넷을 확인하고 다시 해 주세요. 기록이 됐는지는 아래 목록에서 확인해 주세요.';
@@ -203,7 +203,11 @@ const GATE=['locked','wrong_pw'];
 const P={mode:'',sid:'',cart:{},etc:null,etcOpen:false,sold:[],stu:null,looking:false,busy:false,retry:null,seq:0,draft:[]};
 const isT=()=>P.mode==='teacher';
 const total=()=>Object.keys(P.cart).reduce((a,k)=>a+MK[k].p*P.cart[k],0)+(P.etc?P.etc.p:0);
-const iceIn=()=>Object.keys(P.cart).reduce((a,k)=>a+(MK[k].ice?P.cart[k]:0),0);
+// 하루 1개 물건(메뉴 ice 칸): 물건마다 따로 하루 1개(2026-11-16 효니 «따로»). 선생님 계산대는 조회 때 받은 done 키로 미리 막는다
+const doneToday=k=>!!(P.stu&&Array.isArray(P.stu.done)&&P.stu.done.includes(k));
+const doneNames=()=>(P.stu&&Array.isArray(P.stu.done)?P.stu.done:[]).map(k=>MK[k]?MK[k].name:'').filter(Boolean);
+const dayMsg=r=>r&&r.item?r.item+'은(는) 한 사람이 하루 1개예요. 오늘 이미 바꿨거나 2개를 담았어요.':errText('ice_today');
+const showItems=s=>String(s||'').replace(/ \[하루1개:[a-z0-9,]+\]$/,' · 하루1개'); // 물품 칸 끝의 키 표시는 화면에서 줄인다
 const sig=()=>P.sid+'|'+Object.keys(P.cart).sort().map(k=>k+P.cart[k]).join(',')+(P.etc?'|etc'+P.etc.p+':'+P.etc.name:'');
 const sendItems=()=>Object.assign({},P.cart,P.etc?{etc:P.etc.p}:{});
 const etcName=()=>P.etc?P.etc.name:'';
@@ -315,15 +319,15 @@ async function lookup(){
   if(seq!==P.seq)return;
   P.looking=false;
   if(!r.ok){if(r.error==='no_auth')return backToTeacherLogin(r.error);P.stu={err:errText(r.error)}}
-  else P.stu={sid,name:r.name,left:r.left,ice:r.ice};
+  else P.stu={sid,name:r.name,left:r.left,done:Array.isArray(r.done)?r.done:[]}; // done: 오늘 이미 바꾼 하루 1개 물건 키(v 2026-11-16 물건마다 따로)
   renderAll();
 }
 function addItem(k){
   const m=MK[k];if(!m)return;
   if(P.sold.includes(k)){setHint(m.name+'은(는) 품절이에요.');return}
   if(total()+m.p>MAX_ONE){setHint('한 번에 '+MAX_ONE+'점까지예요. 나머지는 계산한 뒤 한 번 더 해요.');return}
-  if(m.ice&&iceIn()>=1){setHint('아이스크림은 하루에 1인 1개예요.');return}
-  if(m.ice&&P.stu&&P.stu.ice){setHint('이 학생은 오늘 아이스크림을 이미 바꿨어요.');return}
+  if(m.ice&&P.cart[k]>=1){setHint(m.name+'은(는) 한 사람이 하루 1개예요.');return}
+  if(m.ice&&doneToday(k)){setHint('이 학생은 오늘 '+m.name+'을(를) 이미 바꿨어요.');return}
   P.cart[k]=(P.cart[k]||0)+1;cartChanged();
 }
 // 기타: 칸을 열고 닫는다. 이미 담겨 있으면 그 값을 채워 고칠 수 있게 한다(한 번에 하나).
@@ -360,19 +364,19 @@ function renderStu(){
     box.innerHTML=`<div class="result ${after<0?'bad':'good'}"><b>${esc(s.name)}</b><span class="sidl">${esc(sidLabel(s.sid))}</span>
       <div class="bal"><span>남은 상점</span><strong>${s.left}점</strong></div>
       ${total()?`<div class="bal"><span>계산 뒤</span><strong>${after<0?'부족해요':after+'점'}</strong></div>`:''}
-      ${s.ice?'<p class="note">🍦 오늘 아이스크림을 이미 바꿨어요</p>':''}</div>`;
+      ${doneNames().length?`<p class="note">오늘 이미 바꾼 하루 1개 물건: ${esc(doneNames().join(', '))}</p>`:''}</div>`;
     return;
   }
-  if(s.ice){box.innerHTML=`<div class="result bad"><b>${esc(s.name)}</b>오늘 아이스크림을 이미 바꿨어요. 아이스크림을 빼 주세요.</div>`;return}
+  if(s.ice){box.innerHTML=`<div class="result bad"><b>${esc(s.name)}</b>오늘 ${esc(s.item||'하루 1개 물건')}을(를) 이미 바꿨어요. 빼 주세요.</div>`;return}
   box.innerHTML=s.enough?`<div class="result good"><b>${esc(s.name)}</b>${s.point}점을 쓸 수 있어요. 본인이 맞는지 확인해 주세요.</div>`
     :`<div class="result bad"><b>${esc(s.name)}</b>상점이 부족해요. ${s.point}점을 쓸 수 없어요.</div>`;
 }
 function renderMenu(){
   const el=document.getElementById('menu');if(!el)return;
-  const tot=total(),ice=iceIn(),stuIce=P.stu&&P.stu.ice;
+  const tot=total();
   el.innerHTML=MENU.map(m=>{
     const sold=P.sold.includes(m.k),n=P.cart[m.k]||0;
-    const off=sold||tot+m.p>MAX_ONE||(m.ice&&(ice>=1||stuIce));
+    const off=sold||tot+m.p>MAX_ONE||(m.ice&&(n>=1||doneToday(m.k)));
     return `<button type="button" class="item${off?' off':''}${n?' has':''}${sold?' soldout':''}" data-add="${m.k}" aria-disabled="${off}" aria-label="${esc(m.name)} ${m.p}점${sold?' 품절':''}${n?' 담음 '+n+'개':''}">
       <span class="ic" aria-hidden="true">${m.ic}</span><span class="nm">${esc(m.name)}</span><span class="pt">${sold?'품절':m.p+'점'}</span>${n?`<span class="cnt" aria-hidden="true">${n}</span>`:''}</button>`;
   }).join('')+`<button type="button" class="item etc${P.etc?' has':''}" data-etc="1" aria-expanded="${P.etcOpen}" aria-controls="etcBox" aria-label="기타 물건 점수 직접 쓰기${P.etc?' 담음 '+P.etc.p+'점':''}">
@@ -389,7 +393,7 @@ function renderCart(){
   if(P.busy)return;
   if(t){
     b.textContent=tot?tot+'점 계산하기':'계산하기';
-    b.disabled=!(okSid&&tot&&s&&!s.err&&s.left>=tot&&!(s.ice&&iceIn()));
+    b.disabled=!(okSid&&tot&&s&&!s.err&&s.left>=tot&&!Object.keys(P.cart).some(k=>MK[k].ice&&doneToday(k)));
   }else{
     const ready=s&&!s.err&&s.enough&&!s.ice;
     b.textContent=ready?tot+'점 교환 기록하기':'확인하기';
@@ -400,7 +404,7 @@ function renderCart(){
 const newKey=()=>{const c='abcdefghjkmnpqrstuvwxyz23456789',a=new Uint32Array(6);crypto.getRandomValues(a);return 'm'+Array.from(a,n=>c[n%c.length]).join('')};
 function renderMenuEd(){
   const el=document.getElementById('menuRows');if(!el)return;
-  el.innerHTML=P.draft.map((m,i)=>`<div class="mrow" data-i="${i}"><input type="text" data-f="ic" maxlength="8" value="${esc(m.ic)}" aria-label="그림 글자" placeholder="🎁"><input type="text" data-f="name" maxlength="20" value="${esc(m.name)}" aria-label="메뉴 이름" placeholder="이름"><input type="text" data-f="p" inputmode="numeric" maxlength="2" value="${m.p}" aria-label="점수"><span class="sub">점</span><label class="check"><input type="checkbox" data-f="ice"${m.ice?' checked':''}>아이스크림</label><button class="mini" type="button" data-del="${i}" aria-label="${esc(m.name||'새 메뉴')} 지우기">지우기</button></div>`).join('');
+  el.innerHTML=P.draft.map((m,i)=>`<div class="mrow" data-i="${i}"><input type="text" data-f="ic" maxlength="8" value="${esc(m.ic)}" aria-label="그림 글자" placeholder="🎁"><input type="text" data-f="name" maxlength="20" value="${esc(m.name)}" aria-label="메뉴 이름" placeholder="이름"><input type="text" data-f="p" inputmode="numeric" maxlength="2" value="${m.p}" aria-label="점수"><span class="sub">점</span><label class="check"><input type="checkbox" data-f="ice"${m.ice?' checked':''}>하루 1개</label><button class="mini" type="button" data-del="${i}" aria-label="${esc(m.name||'새 메뉴')} 지우기">지우기</button></div>`).join('');
   document.getElementById('menuMsg').textContent='';
 }
 function syncDraft(){
@@ -467,7 +471,7 @@ async function onPay(){
   if(r.error==='sold_out'||r.error==='bad_input')await refreshSold();
   if(t&&(r.error==='short'||r.error==='ice_today'))lookup();
   else if(!t)P.stu=null;
-  setMsg(r.error==='sold_out'&&r.item?r.item+'은(는) 방금 품절됐어요. 빼고 다시 해 주세요.':r.error==='bad_input'?MENU_CHANGED:errText(r.error));
+  setMsg(r.error==='sold_out'&&r.item?r.item+'은(는) 방금 품절됐어요. 빼고 다시 해 주세요.':r.error==='bad_input'?MENU_CHANGED:r.error==='ice_today'?dayMsg(r):errText(r.error));
   renderAll();
 }
 const name0=s=>(s&&s.name)||'';
@@ -481,9 +485,9 @@ async function helperCheck(){
     if(GATE.includes(r.error))return backToLogin(r.error);
     if(r.error==='sold_out'||r.error==='bad_input')await refreshSold();
     P.stu=r.error==='ice_today'||r.error==='bad_input'?null:{err:errText(r.error)};
-    setMsg(r.error==='ice_today'?errText(r.error):r.error==='bad_input'?MENU_CHANGED:'');renderAll();return;
+    setMsg(r.error==='ice_today'?dayMsg(r):r.error==='bad_input'?MENU_CHANGED:'');renderAll();return;
   }
-  P.stu={sid:P.sid,name:r.name,enough:r.enough,ice:r.ice,point:total()};renderAll();
+  P.stu={sid:P.sid,name:r.name,enough:r.enough,ice:r.ice,item:r.item,point:total()};renderAll();
 }
 function resetSale(){P.sid='';P.cart={};P.etc=null;P.etcOpen=false;const eb=document.getElementById('etcBox');if(eb)eb.hidden=true;P.stu=null;P.seq++;const el=document.getElementById('sid');if(el){el.value='';el.focus()}setHint('');setMsg('');renderAll()}
 async function refreshSold(){
@@ -513,7 +517,7 @@ async function loadPosRecent(withSold){
   }
   ul.innerHTML=rows.length?rows.map(x=>{
     const off=x.status!=='정상';
-    return `<li><div><span class="${off?'off':''}">${esc(x.name)} <b>${x.point}점</b></span><small>${x.items?esc(x.items)+' · ':''}${esc(sidLabel(x.sid))} · ${esc(fmtTime(x.at))} · ${esc(x.by)}${off?' · 취소함':''}</small></div>${off||x.locked?'':`<button class="mini" type="button" data-cancel="${esc(x.id)}">취소</button>`}</li>`;
+    return `<li><div><span class="${off?'off':''}">${esc(x.name)} <b>${x.point}점</b></span><small>${x.items?esc(showItems(x.items))+' · ':''}${esc(sidLabel(x.sid))} · ${esc(fmtTime(x.at))} · ${esc(x.by)}${off?' · 취소함':''}</small></div>${off||x.locked?'':`<button class="mini" type="button" data-cancel="${esc(x.id)}">취소</button>`}</li>`;
   }).join(''):'<li class="sub">아직 기록이 없어요.</li>';
   return rows;
 }
@@ -624,7 +628,7 @@ function viewTeacher(){
   document.getElementById('tLog').innerHTML=d.log.length?d.log.slice(0,100).map(x=>{
     const off=x.status!=='정상';
     const st=off?'취소'+(x.cancelBy?'('+x.cancelBy+')':''):x.done?'반영함':x.claim?'확인 필요':'반영 전';
-    return `<li><div><span class="${off?'off':''}">${esc(x.name)} <b>${x.point}점</b></span><small>${x.items?esc(x.items)+' · ':''}${esc(sidLabel(x.sid))} · ${esc(fmtTime(x.at))} · ${esc(x.by)} · ${esc(x.event)}</small></div><span class="sub">${esc(st)}${!off&&!x.done&&!x.claim?` <button class="mini" type="button" data-tcancel="${esc(x.id)}" data-who="${esc(x.name)}">취소</button>`:''}</span></li>`;
+    return `<li><div><span class="${off?'off':''}">${esc(x.name)} <b>${x.point}점</b></span><small>${x.items?esc(showItems(x.items))+' · ':''}${esc(sidLabel(x.sid))} · ${esc(fmtTime(x.at))} · ${esc(x.by)} · ${esc(x.event)}</small></div><span class="sub">${esc(st)}${!off&&!x.done&&!x.claim?` <button class="mini" type="button" data-tcancel="${esc(x.id)}" data-who="${esc(x.name)}">취소</button>`:''}</span></li>`;
   }).join(''):'<li class="sub">아직 기록이 없어요.</li>';
 }
 async function onTeacherLogClick(e){

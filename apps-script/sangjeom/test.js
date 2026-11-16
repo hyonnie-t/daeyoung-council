@@ -170,18 +170,23 @@ ok('깨진 본문 거부', JSON.parse(ctx.doPost({ postData: { contents: '{' } }
   ok('물품으로 조회', r.ok && r.enough === true && r.ice === false && r.left === undefined);
   ok('모르는 물품·0개·소수 거부', [{ x: 1 }, { jelly: 0 }, { jelly: 1.5 }, [], {}].every(it => S({ action: 'sjCheck', pw: PW, sid: '30901', items: it }).error === 'bad_input'));
   ok('10점 넘는 한 번 계산 거부', S({ action: 'sjCheck', pw: PW, sid: '30901', items: { d10: 1, jelly: 1 } }).error === 'bad_input');
-  ok('아이스크림 한 번에 2개 거부', S({ action: 'sjCheck', pw: PW, sid: '30901', items: { jjb: 1, sr: 1 } }).error === 'ice_today');
+  r = S({ action: 'sjCheck', pw: PW, sid: '30901', items: { jjb: 2 } });
+  ok('하루 1개 물건 한 번에 2개 거부', r.error === 'ice_today' && r.item === '쭈쭈바');
+  ok('하루 1개 물건이 서로 다르면 같이 됨(따로)', S({ action: 'sjCheck', pw: PW, sid: '30901', items: { jjb: 1, sr: 1 } }).ice === false);
   ok('점수와 물품이 다르면 거부', S({ action: 'sjSpend', pw: PW, sid: '30901', items: { jelly: 1 }, point: 3, by: '임원', reqId: 'm0' }).error === 'bad_input');
   r = S({ action: 'sjSpend', pw: PW, sid: '30901', items: { jelly: 2, jjb: 1 }, by: '임원', reqId: 'm1' });
   ok('물품 기록, 점수는 서버 계산', r.ok && r.point === 5 && r.left === undefined && Rows().find(x => x[0] === 'm1')[5] === 5);
-  ok('물품 칸에 이름', Rows().find(x => x[0] === 'm1')[12] === '마이쮸×2, 쭈쭈바×1 [아이스크림]' && sheets['상점_사용기록'].rows[0][12] === '물품');
+  ok('물품 칸에 이름', Rows().find(x => x[0] === 'm1')[12] === '마이쮸×2, 쭈쭈바×1 [하루1개:jjb]' && sheets['상점_사용기록'].rows[0][12] === '물품');
   ok('최근 기록에 물품', S({ action: 'sjRecent', pw: PW }).rows.find(x => x.id === 'm1').items.includes('쭈쭈바'));
-  ok('오늘 아이스크림 바꾼 학생 조회 표시', S({ action: 'sjCheck', pw: PW, sid: '30901', items: { sr: 1 } }).ice === true);
-  ok('같은 날 아이스크림 두 번째 거부', S({ action: 'sjSpend', pw: PW, sid: '30901', items: { sr: 1 }, by: '임원', reqId: 'm2' }).error === 'ice_today');
+  r = S({ action: 'sjCheck', pw: PW, sid: '30901', items: { jjb: 1 } });
+  ok('오늘 바꾼 하루 1개 물건 조회 표시', r.ice === true && r.item === '쭈쭈바');
+  ok('다른 하루 1개 물건은 오늘도 됨', S({ action: 'sjCheck', pw: PW, sid: '30901', items: { sr: 1 } }).ice === false);
+  r = S({ action: 'sjSpend', pw: PW, sid: '30901', items: { jjb: 1 }, by: '임원', reqId: 'm2' });
+  ok('같은 날 같은 물건 두 번째 거부', r.error === 'ice_today' && r.item === '쭈쭈바');
   ok('같은 요청 재전송은 하루 1개에 안 걸림', S({ action: 'sjSpend', pw: PW, sid: '30901', items: { jelly: 2, jjb: 1 }, by: '임원', reqId: 'm1' }).repeated === true);
   ok('간식은 계속 됨', S({ action: 'sjSpend', pw: PW, sid: '30901', items: { jelly: 1 }, by: '임원', reqId: 'm3' }).ok === true);
   S({ action: 'sjCancel', pw: PW, id: 'm1', by: '임원' });
-  ok('취소하면 아이스크림 다시 가능', S({ action: 'sjCheck', pw: PW, sid: '30901', items: { sr: 1 } }).ice === false);
+  ok('취소하면 하루 1개 물건 다시 가능', S({ action: 'sjCheck', pw: PW, sid: '30901', items: { jjb: 1 } }).ice === false);
   ok('품절 키 없으면 거부', S({ action: 'sjSoldOut', soldOut: ['d10'] }).error === 'no_auth');
   ok('모르는 품절 키 거부', A({ action: 'sjSoldOut', soldOut: ['nope'] }).error === 'bad_input');
   ok('품절 정하기', A({ action: 'sjSoldOut', soldOut: ['d10', 'sr'] }).soldOut.join() === 'd10,sr' && S({ action: 'sjAuth', pw: PW }).soldOut.length === 2);
@@ -219,7 +224,14 @@ ok('깨진 본문 거부', JSON.parse(ctx.doPost({ postData: { contents: '{' } }
   ok('새 메뉴로 기록', r.ok && r.point === 4 && Rows().find(x => x[0] === 'n2')[12] === '볼펜×2');
   load([{ sid: '10101', name: '라마', point: 20 }]); wait();
   A({ action: 'sjAdminSpend', sid: '10101', items: { pop: 1 }, reqId: 'n3' });
-  ok('새 아이스크림도 하루 1개', A({ action: 'sjAdminSpend', sid: '10101', items: { jjb: 1 }, reqId: 'n4' }).error === 'ice_today');
+  ok('새 하루 1개 물건도 하루 1개', A({ action: 'sjAdminSpend', sid: '10101', items: { pop: 1 }, reqId: 'n4' }).error === 'ice_today');
+  ok('다른 하루 1개 물건은 됨', A({ action: 'sjAdminSpend', sid: '10101', items: { jjb: 1 }, reqId: 'n4b' }).ok === true);
+  ok('계산대 조회에 오늘 바꾼 물건 키', A({ action: 'sjAdminCheck', sid: '10101' }).done.sort().join() === 'jjb,pop');
+  // 2026-11-16 전 기록(« [아이스크림]» 표시)은 이름으로 그 물건만 센다
+  load([{ sid: '10101', name: '라마', point: 20 }, { sid: '10102', name: '바사', point: 20 }]); wait();
+  Rows().push(['L1', new Date(), '', '10102', '바사', 4, '선생님', '정상', '', '', '', '', '설레임×1 [아이스크림]']);
+  r = A({ action: 'sjAdminCheck', sid: '10102' });
+  ok('옛 표시 기록은 그 물건만', r.done.join() === 'sr' && A({ action: 'sjAdminSpend', sid: '10102', items: { jjb: 1 }, reqId: 'n4c' }).ok === true);
   ok('없는 메뉴 품절 거부', A({ action: 'sjSoldOut', soldOut: ['d10'] }).error === 'bad_input');
   // 검토 지적(2026-11-13)
   let menuNow = A({ action: 'sjAdmin' }).menu;
