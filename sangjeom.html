@@ -119,6 +119,12 @@ input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(91
 #menuEd .row{margin-top:var(--space-2)}
 .mrow>.sub{line-height:40px}
 @media (min-width:600px){.mrow{grid-template-columns:48px 1fr 48px auto auto auto}.mrow .check,.mrow .mini{grid-column:auto}}
+/* 기타(2026-11-16): 메뉴에 없는 물건 — 이름(선택)·점수를 직접 쓰고 담기 */
+.item.etc{border-style:dashed}
+.etcbox{display:grid;grid-template-columns:1fr 64px auto;gap:var(--space-2);align-items:end;margin-top:var(--space-2);padding:var(--space-2);border:1.5px dashed var(--accent);border-radius:12px;animation:toastIn .2s ease-out}
+.etcbox label{margin:0 0 var(--space-1);font-size:14px}
+.etcbox input{height:40px;font-size:16px;padding:0 var(--space-2)}
+.etcbox .mini{min-height:40px}
 </style>
 </head>
 <body>
@@ -168,9 +174,10 @@ const getAdmin=key=>call({action:'sjAdmin',key});
 const errText=e=>e==='net'?NET:e==='not_ready'?NOT_READY:(ERR[e]||'문제가 생겼어요. 다시 해 주세요.');
 
 /* ── 교환소 메뉴 ── 서버가 준 메뉴(sjAuth·sjAdmin의 menu)를 쓴다. 아래는 서버 응답 전 기본값(서버 SJ_MENU와 같게) */
-const DEF_IC={jelly:'🍬',jjb:'🍡',sr:'🍦',d6:'🧸',d8:'🧸',d10:'🧸'};
+const DEF_IC={jelly:'🍬',straw:'🍭',jjb:'🍡',sr:'🍦',d6:'🧸',d8:'🧸',d10:'🧸'};
 let MENU=[
-  {k:'jelly',name:'마이쮸·젤리스트로우',p:1,ic:'🍬'},
+  {k:'jelly',name:'마이쮸',p:1,ic:'🍬'},
+  {k:'straw',name:'젤리스트로우',p:2,ic:'🍭'},
   {k:'jjb',name:'쭈쭈바',p:3,ic:'🍡',ice:true},
   {k:'sr',name:'설레임',p:4,ic:'🍦',ice:true},
   {k:'d6',name:'인형 소',p:6,ic:'🧸'},
@@ -192,12 +199,14 @@ const MENU_CHANGED='메뉴가 바뀌었어요. 합계를 확인하고 다시 눌
    선생님(teacher): 학번 5자리를 다 치면 이름·남은 상점이 바로 보이고 → 계산하기 */
 const S={pw:'',by:'',event:''};
 const GATE=['locked','wrong_pw'];
-const P={mode:'',sid:'',cart:{},sold:[],stu:null,looking:false,busy:false,retry:null,seq:0,draft:[]};
+// etc: 기타 물건 {name,p} 또는 null(2026-11-16). 메뉴가 아니라 장바구니(P.cart)와 따로 둔다. 서버에는 items.etc=점수, etcName=이름으로 보낸다.
+const P={mode:'',sid:'',cart:{},etc:null,etcOpen:false,sold:[],stu:null,looking:false,busy:false,retry:null,seq:0,draft:[]};
 const isT=()=>P.mode==='teacher';
-const total=()=>Object.keys(P.cart).reduce((a,k)=>a+MK[k].p*P.cart[k],0);
+const total=()=>Object.keys(P.cart).reduce((a,k)=>a+MK[k].p*P.cart[k],0)+(P.etc?P.etc.p:0);
 const iceIn=()=>Object.keys(P.cart).reduce((a,k)=>a+(MK[k].ice?P.cart[k]:0),0);
-const sig=()=>P.sid+'|'+Object.keys(P.cart).sort().map(k=>k+P.cart[k]).join(',');
-const itemText=c=>Object.keys(c).map(k=>MK[k].name+'×'+c[k]).join(', ');
+const sig=()=>P.sid+'|'+Object.keys(P.cart).sort().map(k=>k+P.cart[k]).join(',')+(P.etc?'|etc'+P.etc.p+':'+P.etc.name:'');
+const sendItems=()=>Object.assign({},P.cart,P.etc?{etc:P.etc.p}:{});
+const etcName=()=>P.etc?P.etc.name:'';
 const todayKey=t=>{const d=new Date(t);return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
 
 function viewLogin(msg){
@@ -230,7 +239,7 @@ function backToLogin(error){S.pw='';viewLogin(errText(error))}
 function backToTeacherLogin(error){T.key='';T.data=null;keySet('');viewTeacherLogin(errText(error))}
 
 function viewPos(mode){
-  Object.assign(P,{mode,sid:'',cart:{},stu:null,looking:false,busy:false,retry:null});
+  Object.assign(P,{mode,sid:'',cart:{},etc:null,etcOpen:false,stu:null,looking:false,busy:false,retry:null});
   const t=isT();
   app.className='wrap pos';
   app.innerHTML=`<div class="top"><div><h1>${t?'🧾 상점 계산대':(esc(S.event)||'상점 교환소')}</h1><p class="sub">${t?'선생님 · 남은 상점이 바로 보여요':'기록하는 사람: '+esc(S.by)}</p></div>
@@ -246,6 +255,7 @@ function viewPos(mode){
     <section class="card">
       <h2>메뉴 <small class="sub">눌러서 담기 · 한 번에 ${MAX_ONE}점까지</small></h2>
       <div class="menu" id="menu"></div>
+      <form class="etcbox" id="etcBox" autocomplete="off" hidden><div><label for="etcName">물건 이름 <small class="sub">(안 써도 돼요)</small></label><input type="text" id="etcName" maxlength="20" placeholder="예: 빼빼로"></div><div><label for="etcP">점수</label><input type="text" id="etcP" inputmode="numeric" maxlength="2" placeholder="1~${MAX_ONE}"></div><button class="mini go" type="submit">담기</button></form>
       <p class="hint" id="hint" role="status"></p>
       ${t?'<details class="sold"><summary>품절 표시하기</summary><p class="sub">누르면 품절 ↔ 판매 중이 바뀌어요. 담당 학생 화면에는 다음 새로고침 때 보여요.</p><div class="soldlist" id="soldList"></div></details><details class="sold" id="menuEd"><summary>메뉴 고치기·추가</summary><p class="sub">이름·점수(1~10)를 고치고 «저장»을 눌러요. 담당 학생 화면에는 다음 새로고침 때 보여요.</p><div id="menuRows"></div><div class="row"><button class="mini" type="button" id="menuAdd">＋ 메뉴 추가</button><button class="mini go" type="button" id="menuSave">저장</button></div><p class="msg" id="menuMsg" role="alert"></p></details>':''}
     </section>
@@ -265,8 +275,10 @@ function viewPos(mode){
     const k=b.dataset.key;
     setSid(k==='clear'?'':k==='back'?P.sid.slice(0,-1):(P.sid+k).slice(0,5));
   };
-  document.getElementById('menu').onclick=e=>{const b=e.target.closest('[data-add]');if(b)addItem(b.dataset.add)};
+  document.getElementById('menu').onclick=e=>{if(e.target.closest('[data-etc]'))return toggleEtc();const b=e.target.closest('[data-add]');if(b)addItem(b.dataset.add)};
+  document.getElementById('etcBox').onsubmit=e=>{e.preventDefault();addEtc()};
   document.getElementById('cart').onclick=e=>{
+    if(e.target.closest('[data-etcdel]')){P.etc=null;cartChanged();return}
     const b=e.target.closest('[data-dec],[data-inc]');if(!b)return;
     if(b.dataset.inc)addItem(b.dataset.inc);else{const k=b.dataset.dec;P.cart[k]--;if(P.cart[k]<=0)delete P.cart[k];cartChanged()}
   };
@@ -314,6 +326,20 @@ function addItem(k){
   if(m.ice&&P.stu&&P.stu.ice){setHint('이 학생은 오늘 아이스크림을 이미 바꿨어요.');return}
   P.cart[k]=(P.cart[k]||0)+1;cartChanged();
 }
+// 기타: 칸을 열고 닫는다. 이미 담겨 있으면 그 값을 채워 고칠 수 있게 한다(한 번에 하나).
+function toggleEtc(){
+  P.etcOpen=!P.etcOpen;
+  const box=document.getElementById('etcBox');box.hidden=!P.etcOpen;
+  if(P.etcOpen){document.getElementById('etcName').value=P.etc?P.etc.name:'';document.getElementById('etcP').value=P.etc?P.etc.p:'';document.getElementById(P.etc?'etcP':'etcName').focus()}
+  setHint('');renderMenu();
+}
+function addEtc(){
+  const name=document.getElementById('etcName').value.replace(/[×,()\[\]]/g,' ').replace(/ +/g,' ').trim().slice(0,20);
+  const p=Number(document.getElementById('etcP').value.trim());
+  if(!Number.isInteger(p)||p<1||p>MAX_ONE){setHint('기타 점수는 1~'+MAX_ONE+' 사이 숫자로 써 주세요.');document.getElementById('etcP').focus();return}
+  if(total()-(P.etc?P.etc.p:0)+p>MAX_ONE){setHint('한 번에 '+MAX_ONE+'점까지예요. 나머지는 계산한 뒤 한 번 더 해요.');return}
+  P.etc={name,p};P.etcOpen=false;document.getElementById('etcBox').hidden=true;cartChanged();
+}
 function cartChanged(){
   setHint('');setMsg('');
   if(!isT()&&P.stu&&!P.stu.err)P.stu=null; // 담당: 물품이 바뀌면 다시 확인
@@ -349,12 +375,14 @@ function renderMenu(){
     const off=sold||tot+m.p>MAX_ONE||(m.ice&&(ice>=1||stuIce));
     return `<button type="button" class="item${off?' off':''}${n?' has':''}${sold?' soldout':''}" data-add="${m.k}" aria-disabled="${off}" aria-label="${esc(m.name)} ${m.p}점${sold?' 품절':''}${n?' 담음 '+n+'개':''}">
       <span class="ic" aria-hidden="true">${m.ic}</span><span class="nm">${esc(m.name)}</span><span class="pt">${sold?'품절':m.p+'점'}</span>${n?`<span class="cnt" aria-hidden="true">${n}</span>`:''}</button>`;
-  }).join('');
+  }).join('')+`<button type="button" class="item etc${P.etc?' has':''}" data-etc="1" aria-expanded="${P.etcOpen}" aria-controls="etcBox" aria-label="기타 물건 점수 직접 쓰기${P.etc?' 담음 '+P.etc.p+'점':''}">
+      <span class="ic" aria-hidden="true">✏️</span><span class="nm">기타</span><span class="pt">${P.etc?P.etc.p+'점':'직접 쓰기'}</span></button>`;
 }
 function renderCart(){
   const ul=document.getElementById('cart');if(!ul)return;
   const ks=Object.keys(P.cart),tot=total();
-  ul.innerHTML=ks.length?ks.map(k=>`<li><span>${MK[k].ic} ${esc(MK[k].name)} <small>×${P.cart[k]}</small></span><span class="row" style="align-items:center"><b>${MK[k].p*P.cart[k]}점</b><button class="mini q" type="button" data-dec="${k}" aria-label="${esc(MK[k].name)} 하나 빼기">−</button><button class="mini q" type="button" data-inc="${k}" aria-label="${esc(MK[k].name)} 하나 더">＋</button></span></li>`).join('')
+  const etcLi=P.etc?`<li><span>✏️ 기타${P.etc.name?' · '+esc(P.etc.name):''}</span><span class="row" style="align-items:center"><b>${P.etc.p}점</b><button class="mini q" type="button" data-etcdel="1" aria-label="기타 빼기">−</button></span></li>`:'';
+  ul.innerHTML=ks.length||P.etc?ks.map(k=>`<li><span>${MK[k].ic} ${esc(MK[k].name)} <small>×${P.cart[k]}</small></span><span class="row" style="align-items:center"><b>${MK[k].p*P.cart[k]}점</b><button class="mini q" type="button" data-dec="${k}" aria-label="${esc(MK[k].name)} 하나 빼기">−</button><button class="mini q" type="button" data-inc="${k}" aria-label="${esc(MK[k].name)} 하나 더">＋</button></span></li>`).join('')+etcLi
     :'<li class="sub">메뉴를 눌러 담아 주세요.</li>';
   document.getElementById('total').textContent=tot+'점';
   const b=document.getElementById('payBtn'),t=isT(),s=P.stu,okSid=/^[1-3]\d{4}$/.test(P.sid);
@@ -416,10 +444,10 @@ async function onPay(){
   const b=document.getElementById('payBtn');if(b.disabled)return;
   const t=isT(),s=P.stu;
   if(!t&&!(s&&!s.err&&s.enough&&!s.ice))return helperCheck();
-  const items=Object.assign({},P.cart),sid=P.sid,point=total(),key=sig();
+  const items=sendItems(),en=etcName(),sid=P.sid,point=total(),key=sig();
   const reqId=P.retry&&P.retry.sig===key?P.retry.reqId:uid();
   P.busy=true;b.disabled=true;b.textContent='기록하는 중…';setMsg('');
-  const r=await call(t?{action:'sjAdminSpend',key:T.key,sid,items,point,reqId}:{action:'sjSpend',pw:S.pw,sid,items,point,by:S.by,reqId});
+  const r=await call(t?{action:'sjAdminSpend',key:T.key,sid,items,etcName:en,point,reqId}:{action:'sjSpend',pw:S.pw,sid,items,etcName:en,point,by:S.by,reqId});
   P.busy=false;
   if(r.ok){
     P.retry=null;
@@ -446,7 +474,7 @@ const name0=s=>(s&&s.name)||'';
 async function helperCheck(){
   const b=document.getElementById('payBtn'),seq=P.seq,key=sig();
   P.busy=true;b.disabled=true;b.textContent='확인하는 중…';setMsg('');
-  const r=await call({action:'sjCheck',pw:S.pw,sid:P.sid,items:P.cart,point:total()});
+  const r=await call({action:'sjCheck',pw:S.pw,sid:P.sid,items:sendItems(),etcName:etcName(),point:total()});
   P.busy=false;
   if(seq!==P.seq||key!==sig()){renderAll();return}
   if(!r.ok){
@@ -457,7 +485,7 @@ async function helperCheck(){
   }
   P.stu={sid:P.sid,name:r.name,enough:r.enough,ice:r.ice,point:total()};renderAll();
 }
-function resetSale(){P.sid='';P.cart={};P.stu=null;P.seq++;const el=document.getElementById('sid');if(el){el.value='';el.focus()}setHint('');setMsg('');renderAll()}
+function resetSale(){P.sid='';P.cart={};P.etc=null;P.etcOpen=false;const eb=document.getElementById('etcBox');if(eb)eb.hidden=true;P.stu=null;P.seq++;const el=document.getElementById('sid');if(el){el.value='';el.focus()}setHint('');setMsg('');renderAll()}
 async function refreshSold(){
   if(isT()){const r=await getAdmin(T.key);if(r.ok){T.data=r;P.sold=r.soldOut||[];setMenu(r.menu)}}
   else{const r=await call({action:'sjAuth',pw:S.pw});if(r.ok){P.sold=r.soldOut||[];setMenu(r.menu)}}

@@ -36,7 +36,8 @@ const SJ_STATUS_OK = '정상';
 const SJ_STATUS_CANCEL = '취소';
 // 기본 메뉴(메뉴판 그림과 같음). 선생님이 화면에서 메뉴를 고치면 설정 cfg.menu가 대신한다.
 const SJ_MENU = {
-  jelly: { name: '마이쮸·젤리스트로우', point: 1 },
+  jelly: { name: '마이쮸', point: 1 },
+  straw: { name: '젤리스트로우', point: 2 }, // 2026-11-16 효니: 마이쮸와 따로 2점
   jjb: { name: '쭈쭈바', point: 3, ice: true },
   sr: { name: '설레임', point: 4, ice: true },
   d6: { name: '인형 소', point: 6 },
@@ -44,6 +45,9 @@ const SJ_MENU = {
   d10: { name: '인형 대', point: 10 }
 };
 const SJ_MENU_MAX = 24;
+// 기타(2026-11-16 효니): 메뉴에 없는 물건은 계산대에서 이름(선택)과 점수를 직접 쓴다. items.etc = 점수, data.etcName = 물건 이름.
+// 메뉴 키로는 못 쓰고 품절 표시도 없다. 물품 칸에는 «기타(이름) N점»으로 남는다.
+const SJ_ETC = 'etc';
 const SJ_ICE_MARK = ' [아이스크림]'; // 아이스크림이 든 기록의 물품 칸 끝 표시. 하루 1개는 이것으로 센다
 const SJ_PROP = 'SANGJEOM_EVENT_JSON';       // {open, hash, event, eventId, snapAt, adminHash, soldOut:[메뉴 키], menu:[{k,name,point,ice,ic}]}
 const SJ_ADMIN_NAME = '선생님';
@@ -126,7 +130,7 @@ function sjMenuList_(cfg) {
 }
 function sjMenuMap_(cfg) { const m = Object.create(null); sjMenuList_(cfg).forEach(function (x) { m[x.k] = x; }); return m; }
 // 물품 {키: 개수} → {point, text, ice} 또는 오류 코드. 모르는 키·0개·소수는 bad_input.
-function sjItems_(raw, cfg) {
+function sjItems_(raw, cfg, etcName) {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return { error: 'bad_input' };
   const sold = sjSoldSet_(cfg), menu = sjMenuMap_(cfg);
   let point = 0, ice = 0;
@@ -134,6 +138,13 @@ function sjItems_(raw, cfg) {
   const keys = Object.keys(raw);
   for (let i = 0; i < keys.length; i++) {
     const k = keys[i], n = Number(raw[k]);
+    if (k === SJ_ETC) { // 기타: 개수가 아니라 점수
+      if (!Number.isInteger(n) || n < 1 || n > SJ_MAX_POINT) return { error: 'bad_input' };
+      const nm = sjPlain_(etcName, 20).replace(/[×,()\[\]]/g, ' ').replace(/ +/g, ' ').trim();
+      point += n;
+      parts.push('기타' + (nm ? '(' + nm + ')' : '') + ' ' + n + '점');
+      continue;
+    }
     const m = menu[k];
     if (!m || !Number.isInteger(n) || n < 1 || n > SJ_MAX_POINT) return { error: 'bad_input' };
     if (sold[k]) return { error: 'sold_out', item: m.name };
@@ -165,7 +176,7 @@ function sjIceToday_(rows, sid, cfg) {
 // 점수만 보내면 예전처럼, 물품을 보내면 물품으로 점수를 계산한다(둘 다 보내면 같아야 한다).
 function sjAmount_(data, cfg) {
   if (data.items == null) { const p = sjPoint_(data.point); return p ? { point: p, text: '', ice: false } : { error: 'bad_input' }; }
-  const it = sjItems_(data.items, cfg);
+  const it = sjItems_(data.items, cfg, data.etcName);
   if (it.error) return it;
   if (data.point != null && Number(data.point) !== it.point) return { error: 'bad_input' };
   return it;
@@ -558,7 +569,7 @@ function sjMenuPost_(data) {
     const x = raw[i] || {};
     const k = String(x.k == null ? '' : x.k), name = sjPlain_(x.name, 20), point = Number(x.point);
     const ic = Array.from(String(x.ic == null ? '' : x.ic).trim()).slice(0, 8).join('');
-    if (!/^[a-z0-9]{1,12}$/.test(k) || keys[k] || !name || /[×,\[\]]/.test(name) || names[name] || !Number.isInteger(point) || point < 1 || point > SJ_MAX_POINT) return sjErr_('bad_input', { at: i });
+    if (!/^[a-z0-9]{1,12}$/.test(k) || k === SJ_ETC || keys[k] || !name || /[×,\[\]]/.test(name) || names[name] || !Number.isInteger(point) || point < 1 || point > SJ_MAX_POINT) return sjErr_('bad_input', { at: i });
     keys[k] = true; names[name] = true;
     menu.push({ k: k, name: name, point: point, ice: x.ice === true, ic: ic });
   }
