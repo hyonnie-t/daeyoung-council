@@ -114,11 +114,18 @@ input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(91
 .mrow{display:grid;grid-template-columns:48px 1fr 48px auto;gap:var(--space-2);align-items:center;padding:var(--space-2) 0;border-top:1px solid var(--surface2)}
 .mrow input[type=text]{height:40px;font-size:16px;padding:0 var(--space-2)}
 .mrow [data-f=ic],.mrow [data-f=p]{text-align:center;padding:0}
-.mrow .check{grid-column:1/3;margin:0}
-.mrow .mini{grid-column:3/5;justify-self:end}
+.mrow [data-f=name]{min-width:0}
+.mrow .check{grid-area:2/1/3/3;margin:0}
+.mrow .macts{grid-area:2/2/3/5;justify-self:end;display:flex;gap:var(--space-1)} /* 순서 ▲▼ + 지우기(2026-11-16). 둘째 줄 오른쪽 */
+.mrow .mv{min-width:40px;padding:0}
+.mrow .mv:disabled{opacity:.35;cursor:default}
+.mrow.moved{animation:moved .6s ease-out}
+@keyframes moved{from{background:var(--accent-soft)}to{background:transparent}}
+@media (prefers-reduced-motion:reduce){.mrow.moved{animation:none}}
 #menuEd .row{margin-top:var(--space-2)}
 .mrow>.sub{line-height:40px}
-@media (min-width:600px){.mrow{grid-template-columns:48px 1fr 48px auto auto auto}.mrow .check,.mrow .mini{grid-column:auto}}
+/* 한 줄 배치는 메뉴 칸이 넓을 때만(두 칸 계산대에서 1000px부터). 그보다 좁으면 이름 칸이 눌려서 두 줄로 둔다 */
+@media (min-width:1000px){.mrow{grid-template-columns:48px 1fr 48px auto auto auto}.mrow .check,.mrow .macts{grid-area:auto}}
 /* 기타(2026-11-16): 메뉴에 없는 물건 — 이름(선택)·점수를 직접 쓰고 담기 */
 .item.etc{border-style:dashed}
 .etcbox{display:grid;grid-template-columns:1fr 64px auto;gap:var(--space-2);align-items:end;margin-top:var(--space-2);padding:var(--space-2);border:1.5px dashed var(--accent);border-radius:12px;animation:toastIn .2s ease-out}
@@ -261,7 +268,7 @@ function viewPos(mode){
       <div class="menu" id="menu"></div>
       <form class="etcbox" id="etcBox" autocomplete="off" hidden><div><label for="etcName">물건 이름 <small class="sub">(안 써도 돼요)</small></label><input type="text" id="etcName" maxlength="20" placeholder="예: 빼빼로"></div><div><label for="etcP">점수</label><input type="text" id="etcP" inputmode="numeric" maxlength="2" placeholder="1~${MAX_ONE}"></div><button class="mini go" type="submit">담기</button></form>
       <p class="hint" id="hint" role="status"></p>
-      ${t?'<details class="sold"><summary>품절 표시하기</summary><p class="sub">누르면 품절 ↔ 판매 중이 바뀌어요. 담당 학생 화면에는 다음 새로고침 때 보여요.</p><div class="soldlist" id="soldList"></div></details><details class="sold" id="menuEd"><summary>메뉴 고치기·추가</summary><p class="sub">이름·점수(1~10)를 고치고 «저장»을 눌러요. 담당 학생 화면에는 다음 새로고침 때 보여요.</p><div id="menuRows"></div><div class="row"><button class="mini" type="button" id="menuAdd">＋ 메뉴 추가</button><button class="mini go" type="button" id="menuSave">저장</button></div><p class="msg" id="menuMsg" role="alert"></p></details>':''}
+      ${t?'<details class="sold"><summary>품절 표시하기</summary><p class="sub">누르면 품절 ↔ 판매 중이 바뀌어요. 담당 학생 화면에는 다음 새로고침 때 보여요.</p><div class="soldlist" id="soldList"></div></details><details class="sold" id="menuEd"><summary>메뉴 고치기·추가</summary><p class="sub">이름·점수(1~10)를 고치고, ▲▼로 순서를 바꾼 뒤 «저장»을 눌러요. 담당 학생 화면에는 다음 새로고침 때 보여요.</p><div id="menuRows"></div><div class="row"><button class="mini" type="button" id="menuAdd">＋ 메뉴 추가</button><button class="mini go" type="button" id="menuSave">저장</button></div><p class="msg" id="menuMsg" role="alert"></p></details>':''}
     </section>
     <section class="card">
       <ul class="cart" id="cart"></ul>
@@ -295,7 +302,16 @@ function viewPos(mode){
     document.getElementById('soldList').onclick=onSoldClick;
     document.getElementById('menuEd').ontoggle=e=>{if(e.target.open){P.draft=MENU.map(m=>({k:m.k,name:m.name,p:m.p,ice:m.ice,ic:m.ic}));renderMenuEd()}};
     document.getElementById('menuAdd').onclick=()=>{syncDraft();P.draft.push({k:newKey(),name:'',p:1,ice:false,ic:''});renderMenuEd();const ins=document.querySelectorAll('#menuRows [data-f=name]');ins[ins.length-1].focus()};
-    document.getElementById('menuRows').onclick=e=>{const b=e.target.closest('[data-del]');if(!b)return;syncDraft();P.draft.splice(+b.dataset.del,1);renderMenuEd()};
+    document.getElementById('menuRows').onclick=e=>{
+      const mv=e.target.closest('[data-mv]');
+      if(mv){ // 순서 바꾸기(2026-11-16): 초안 배열에서 이웃과 자리를 바꾼다. 서버(sjMenu)는 보낸 순서 그대로 저장한다
+        const i=+mv.dataset.i,d=+mv.dataset.mv,j=i+d;if(j<0||j>=P.draft.length)return;
+        syncDraft();const x=P.draft[i];P.draft[i]=P.draft[j];P.draft[j]=x;renderMenuEd();
+        const row=document.querySelector('#menuRows .mrow[data-i="'+j+'"]');
+        if(row){row.classList.add('moved');const nb=row.querySelector('[data-mv="'+d+'"]:not(:disabled)')||row.querySelector('[data-mv]:not(:disabled)');if(nb)nb.focus()}
+        return;
+      }
+      const b=e.target.closest('[data-del]');if(!b)return;syncDraft();P.draft.splice(+b.dataset.del,1);renderMenuEd()};
     document.getElementById('menuSave').onclick=saveMenu;
   }
   renderAll();loadPosRecent();
@@ -404,7 +420,7 @@ function renderCart(){
 const newKey=()=>{const c='abcdefghjkmnpqrstuvwxyz23456789',a=new Uint32Array(6);crypto.getRandomValues(a);return 'm'+Array.from(a,n=>c[n%c.length]).join('')};
 function renderMenuEd(){
   const el=document.getElementById('menuRows');if(!el)return;
-  el.innerHTML=P.draft.map((m,i)=>`<div class="mrow" data-i="${i}"><input type="text" data-f="ic" maxlength="8" value="${esc(m.ic)}" aria-label="그림 글자" placeholder="🎁"><input type="text" data-f="name" maxlength="20" value="${esc(m.name)}" aria-label="메뉴 이름" placeholder="이름"><input type="text" data-f="p" inputmode="numeric" maxlength="2" value="${m.p}" aria-label="점수"><span class="sub">점</span><label class="check"><input type="checkbox" data-f="ice"${m.ice?' checked':''}>하루 1개</label><button class="mini" type="button" data-del="${i}" aria-label="${esc(m.name||'새 메뉴')} 지우기">지우기</button></div>`).join('');
+  el.innerHTML=P.draft.map((m,i)=>`<div class="mrow" data-i="${i}"><input type="text" data-f="ic" maxlength="8" value="${esc(m.ic)}" aria-label="그림 글자" placeholder="🎁"><input type="text" data-f="name" maxlength="20" value="${esc(m.name)}" aria-label="메뉴 이름" placeholder="이름"><input type="text" data-f="p" inputmode="numeric" maxlength="2" value="${m.p}" aria-label="점수"><span class="sub">점</span><label class="check"><input type="checkbox" data-f="ice"${m.ice?' checked':''}>하루 1개</label><span class="macts"><button class="mini mv" type="button" data-mv="-1" data-i="${i}"${i?'':' disabled'} aria-label="${esc(m.name||'새 메뉴')} 위로">▲</button><button class="mini mv" type="button" data-mv="1" data-i="${i}"${i<P.draft.length-1?'':' disabled'} aria-label="${esc(m.name||'새 메뉴')} 아래로">▼</button><button class="mini" type="button" data-del="${i}" aria-label="${esc(m.name||'새 메뉴')} 지우기">지우기</button></span></div>`).join('');
   document.getElementById('menuMsg').textContent='';
 }
 function syncDraft(){
