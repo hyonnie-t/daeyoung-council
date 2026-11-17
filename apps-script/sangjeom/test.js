@@ -169,7 +169,7 @@ ok('깨진 본문 거부', JSON.parse(ctx.doPost({ postData: { contents: '{' } }
   r = S({ action: 'sjCheck', pw: PW, sid: '30901', items: { jelly: 2, jjb: 1 } });
   ok('물품으로 조회', r.ok && r.enough === true && r.ice === false && r.left === undefined);
   ok('모르는 물품·0개·소수 거부', [{ x: 1 }, { jelly: 0 }, { jelly: 1.5 }, [], {}].every(it => S({ action: 'sjCheck', pw: PW, sid: '30901', items: it }).error === 'bad_input'));
-  ok('10점 넘는 한 번 계산 거부', S({ action: 'sjCheck', pw: PW, sid: '30901', items: { d10: 1, jelly: 1 } }).error === 'bad_input');
+  ok('10점 넘는 한 번 계산 거부', S({ action: 'sjCheck', pw: PW, sid: '30901', items: { d10: 1, d8: 1, jelly: 1 } }).error === 'bad_input');
   r = S({ action: 'sjCheck', pw: PW, sid: '30901', items: { jjb: 2 } });
   ok('하루 1개 물건 한 번에 2개 거부', r.error === 'ice_today' && r.item === '쭈쭈바');
   ok('하루 1개 물건이 서로 다르면 같이 됨(따로)', S({ action: 'sjCheck', pw: PW, sid: '30901', items: { jjb: 1, sr: 1 } }).ice === false);
@@ -200,7 +200,7 @@ ok('깨진 본문 거부', JSON.parse(ctx.doPost({ postData: { contents: '{' } }
   ok('계산대 조회는 남은 점수', r.ok && r.name === '가나' && r.left === 19 && r.ice === false);
   ok('계산대 없는 학번', A({ action: 'sjAdminCheck', sid: '39998' }).error === 'not_found');
   r = A({ action: 'sjAdminSpend', sid: '30901', items: { d8: 1 }, reqId: 't1' });
-  ok('계산대 기록', r.ok && r.point === 8 && r.left === 11 && Rows().find(x => x[0] === 't1')[6] === '선생님');
+  ok('계산대 기록', r.ok && r.point === 4 && r.left === 15 && Rows().find(x => x[0] === 't1')[6] === '선생님');
   ok('계산대 키 없으면 기록 안 됨', S({ action: 'sjAdminSpend', sid: '30901', items: { jelly: 1 }, reqId: 't2', by: '선생님' }).error === 'no_auth');
   ok('계산대 잔액 부족', A({ action: 'sjAdminSpend', sid: '20202', items: { jjb: 1 }, reqId: 't3' }).error === 'short');
   A({ action: 'sjSetup', open: false });

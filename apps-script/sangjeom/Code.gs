@@ -40,9 +40,9 @@ const SJ_MENU = {
   straw: { name: '젤리스트로우', point: 2 }, // 2026-11-16 효니: 마이쮸와 따로 2점
   jjb: { name: '쭈쭈바', point: 3, ice: true },
   sr: { name: '설레임', point: 4, ice: true },
-  d6: { name: '인형 소', point: 6 },
-  d8: { name: '인형 중', point: 8 },
-  d10: { name: '인형 대', point: 10 }
+  d6: { name: '인형 소', point: 2 }, // 2026-11-17 효니: 인형 소2·중4·대6 (키 d6·d8·d10은 지난 기록·품절이 이어져 그대로)
+  d8: { name: '인형 중', point: 4 },
+  d10: { name: '인형 대', point: 6 }
 };
 const SJ_MENU_MAX = 24;
 // 기타(2026-11-16 효니): 메뉴에 없는 물건은 계산대에서 이름(선택)과 점수를 직접 쓴다. items.etc = 점수, data.etcName = 물건 이름.
