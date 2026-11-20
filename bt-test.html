@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>프린터 찾기 시험</title>
+<style>
+/* 1회성 시험 페이지(2026-11-20): PeriPage C1이 크롬 블루투스(Web Bluetooth)로 보이는지, 어떤 통로(서비스·특성)가 있는지 본다. 결과로 «바로 인쇄»를 만들 수 있는지 정하고, 끝나면 지운다. */
+:root{--space-1:4px;--space-2:8px;--space-3:16px;--space-4:24px;--bg:#f5f6f8;--card:#fff;--text:#212529;--sub:#6c757d;--accent:#5b5bd6;--bad:#d6336c;--ok:#2b8a3e}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Pretendard","Noto Sans KR",system-ui,sans-serif;font-size:16px}
+.wrap{max-width:40rem;margin:0 auto;padding:var(--space-3)}
+.card{background:var(--card);border-radius:14px;padding:var(--space-3);margin-bottom:var(--space-3);box-shadow:0 1px 4px #0001}
+h1{font-size:20px;margin:0 0 var(--space-2)}
+ol{margin:0;padding-left:20px;line-height:1.7}
+button{display:block;width:100%;height:48px;border:0;border-radius:11px;background:var(--accent);color:#fff;font:inherit;font-weight:700;cursor:pointer;margin-top:var(--space-2)}
+button.sub{background:#fff;color:var(--text);border:1px solid #ccc}
+pre{white-space:pre-wrap;word-break:break-all;font-size:13px;background:#f1f3f5;border-radius:8px;padding:var(--space-2);margin:var(--space-2) 0 0;min-height:48px}
+.st{font-weight:700;margin-top:var(--space-2)}
+.st.bad{color:var(--bad)}.st.ok{color:var(--ok)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="card">
+    <h1>🖨️ 프린터 찾기 시험</h1>
+    <ol>
+      <li><b>디벗(갤럭시) 크롬</b>에서 열어요. 아이폰은 브라우저 블루투스가 막혀 있어 안 돼요.</li>
+      <li>PeriPage 앱을 완전히 끄고, C1을 켜 둬요(앱이 붙잡고 있으면 안 보여요).</li>
+      <li>«프린터 찾기» → 목록에서 C1(또는 PeriPage)을 골라 «연결».</li>
+      <li>아래 결과를 «복사»해서 Claude에게 보내 주세요. 화면을 찍어도 돼요.</li>
+    </ol>
+    <button type="button" id="go">프린터 찾기</button>
+    <p class="st" id="st" role="status"></p>
+  </section>
+  <section class="card">
+    <b>결과</b>
+    <pre id="out">아직 없어요.</pre>
+    <button type="button" class="sub" id="copy">결과 복사</button>
+  </section>
+</div>
+<script>
+// 감열 프린터들이 흔히 쓰는 서비스 번호. Web Bluetooth는 여기 적은 서비스만 열어 볼 수 있다.
+const SV=[0xff00,0xffe0,0xfff0,0xae30,0xae00,0x18f0,0xfee7,0xff80,0xffb0,0x49535343,
+  'e7810a71-73ae-499d-8c15-faa9aef0c3f2','49535343-fe7d-4ae5-8fa9-9fafd205e455','0000ff00-0000-1000-8000-00805f9b34fb',
+  '000018f0-0000-1000-8000-00805f9b34fb','0000ae30-0000-1000-8000-00805f9b34fb','6e400001-b5a3-f393-e0a9-e50e24dcca9e']
+  .map(x=>typeof x==='number'?(x>0xffff?null:x):x).filter(x=>x!=null);
+const out=document.getElementById('out'),st=document.getElementById('st');
+const log=[];const add=t=>{log.push(t);out.textContent=log.join('\n')};
+const say=(t,c)=>{st.textContent=t;st.className='st '+(c||'')};
+function props(p){return ['read','write','writeWithoutResponse','notify','indicate'].filter(k=>p[k]).join(',')}
+document.getElementById('go').onclick=async()=>{
+  log.length=0;add('브라우저: '+navigator.userAgent);
+  if(!navigator.bluetooth){say('이 브라우저는 블루투스 연결을 못 해요. 디벗 크롬에서 열어 주세요.','bad');add('navigator.bluetooth 없음');return}
+  try{
+    say('목록에서 프린터를 골라 주세요…');
+    const dev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:SV});
+    add('기기 이름: '+(dev.name||'(이름 없음)')+' / id: '+dev.id);
+    say('연결하는 중…');
+    const g=await dev.gatt.connect();
+    const ss=await g.getPrimaryServices();
+    add('서비스 '+ss.length+'개');
+    for(const s of ss){
+      add('■ '+s.uuid);
+      try{for(const c of await s.getCharacteristics())add('   - '+c.uuid+'  ['+props(c.properties)+']')}catch(e){add('   (특성 못 읽음: '+e.message+')')}
+    }
+    g.disconnect();
+    say(ss.length?'찾았어요! 결과를 복사해서 보내 주세요.':'연결은 됐는데 아는 통로가 없어요. 결과를 보내 주세요.',ss.length?'ok':'bad');
+  }catch(e){
+    add('오류: '+e.name+' / '+e.message);
+    say(e.name==='NotFoundError'?'목록에 안 보였거나 취소했어요. 앱을 끄고 다시 해 주세요.':'연결하지 못했어요. 결과를 보내 주세요.','bad');
+  }
+};
+document.getElementById('copy').onclick=()=>navigator.clipboard.writeText(out.textContent).then(()=>say('복사했어요','ok'),()=>say('복사하지 못했어요. 화면을 찍어 주세요.','bad'));
+</script>
+</body>
+</html>

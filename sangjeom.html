@@ -532,19 +532,19 @@ function renderRcpt(){
   const bar=document.getElementById('rcptBar');if(!bar)return;
   const L=P.last;bar.hidden=!L;
   if(!L){bar.innerHTML='';return}
-  bar.innerHTML=`<span>방금 기록 · ${esc(sidLabel(L.sid))} ${L.point}점</span><span class="row"><button class="mini go" type="button" data-rcpt="share">🧾 영수증</button><button class="mini" type="button" data-rcpt="save">저장</button></span>`;
+  bar.innerHTML=`<span>방금 기록 · ${esc(sidLabel(L.sid))} ${L.point}점</span><span class="row"><button class="mini go" type="button" data-rcpt="share">🧾 영수증</button><button class="mini" type="button" data-rcpt="save">저장</button></span>`; // 공유 창에서 «이미지 저장»(아이폰 사진첩) 뒤 PeriPage 앱에서 고른다. 저장 단추는 파일로 받기
 }
 function receiptCanvas(L){
   const W=384,PAD=12,F='"Noto Sans KR","Malgun Gothic","Apple SD Gothic Neo",sans-serif';
   const d=new Date(L.at),ds=d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0')+'('+'일월화수목금토'[d.getDay()]+') '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
   const ice=L.lines.filter(x=>x.ice).map(x=>x.name);
-  const rows=[{c:'★ 대영중 학생회 ★',s:18},{c:'상점 교환소',s:34,b:1},{c:ds,s:16},{hr:'dash'},{l:'학번',r:sidLabel(L.sid),s:20},{hr:'dash'}]
+  const rows=[{c:'★ 대영중 학생회 ★',s:18},{c:'상점 교환소',s:34,b:1},{c:ds,s:16},{hr:'dash'},{l:'학번',r:String(L.sid),s:20},{hr:'dash'}]
     .concat(L.lines.map(x=>({l:x.name+' ×'+x.n,r:x.p+'점',s:22,fit:1})))
     .concat([{hr:'solid'},{l:'쓴 상점',r:L.point+'점',s:24,b:1}])
     .concat(L.left!=null?[{l:'남은 상점',r:L.left+'점',s:20}]:[])
     .concat([{hr:'dash'}])
     .concat(ice.length?[{inv:'교환권 · '+ice.join(', '),s:20,b:1,h:34,fit:1},{c:'오늘 하루 1인 1개',s:16,h:30}]:[])
-    .concat([{c:'좋은 일 해 줘서 고마워요!',s:20,b:1},{c:'— 학생회 드림 —',s:16}]);
+    .concat([{c:'교환 완료',s:20,b:1}]); // 맺음말은 학생회 이름이 위와 겹치지 않게 짧게(2026-11-20 효니)
   const cv=document.createElement('canvas'),ctx=cv.getContext('2d');
   const go=real=>{let y=PAD;for(const R of rows){const s=R.s||16,h=R.h||(R.hr?16:Math.round(s*1.45));
     if(real){ctx.fillStyle='#000';ctx.strokeStyle='#000';ctx.textBaseline='top';let fs=s;
