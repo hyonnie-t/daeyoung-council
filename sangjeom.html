@@ -132,6 +132,18 @@ input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(91
 .etcbox label{margin:0 0 var(--space-1);font-size:14px}
 .etcbox input{height:40px;font-size:16px;padding:0 var(--space-2)}
 .etcbox .mini{min-height:40px}
+/* 표지 그림(2026-11-20): 상점 교환소 처음 화면(담당 학생 로그인·선생님 로그인)에만 둔다. 계산대·관리 화면은 공간을 쓰므로 넣지 않는다. 글자 없는 장식 그림이라 alt="".
+ * election.html .cover-banner와 같은 틀: 폰은 2:1, 768px 이상은 폭 720px 가운데에 12:5(낮은 가로 화면은 3:1)로 위아래를 조금 자른다.
+ * 움직임: 처음 보일 때 한 번 살짝 떠오름(opacity·transform만). 움직임 줄이기 설정이면 끈다. */
+.cover-banner{margin:0 0 var(--space-3); border-radius:14px; overflow:hidden; aspect-ratio:2/1;
+  background:#efe4cf; border:1px solid rgba(80,60,30,.14); box-shadow:0 2px 10px rgba(60,40,20,.10);
+  animation:coverIn .5s ease-out both;}
+.cover-banner img{display:block; width:100%; height:100%; object-fit:cover;}
+@media (min-width:768px){ .cover-banner{aspect-ratio:12/5; max-width:720px; margin-inline:auto;} }
+@media (min-width:768px) and (max-height:860px){ .cover-banner{aspect-ratio:3/1;} }
+@keyframes coverIn{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;}}
+@media (prefers-reduced-motion: reduce){ .cover-banner{animation:none;} }
+@media print{ .cover-banner{display:none} }
 </style>
 </head>
 <body>
@@ -220,9 +232,11 @@ const sendItems=()=>Object.assign({},P.cart,P.etc?{etc:P.etc.p}:{});
 const etcName=()=>P.etc?P.etc.name:'';
 const todayKey=t=>{const d=new Date(t);return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
 
+// 표지 그림: 로그인 화면(viewLogin·viewTeacherLogin)에서만 부른다. 계산대(viewPos)·관리(viewTeacher)엔 넣지 않는다.
+const coverBanner=()=>'<figure class="cover-banner"><img src="council-sangjeom-banner.webp" width="1200" height="675" alt="" decoding="async"></figure>';
 function viewLogin(msg){
   app.className='wrap';
-  app.innerHTML=`<div class="top"><h1>🔒 상점 교환소</h1></div>
+  app.innerHTML=`${coverBanner()}<div class="top"><h1>🔒 상점 교환소</h1></div>
   <form class="card" id="loginForm" autocomplete="off">
     <p class="sub" style="margin-bottom:var(--space-3)">선생님께 비밀번호를 받은 담당자만 쓸 수 있어요.</p>
     <label for="by">내 이름</label><input type="text" id="by" maxlength="20" value="${esc(S.by)}">
@@ -577,7 +591,7 @@ function randomPw(){
 }
 function viewTeacherLogin(msg){
   app.className='wrap';
-  app.innerHTML=`<div class="top"><h1>${T.goPos?'🧾 상점 계산대':'행사 상점 · 선생님'}</h1><button class="link" type="button" id="toStudent">담당자 화면</button></div>
+  app.innerHTML=`${coverBanner()}<div class="top"><h1>${T.goPos?'🧾 상점 계산대':'행사 상점 · 선생님'}</h1><button class="link" type="button" id="toStudent">담당자 화면</button></div>
   <form class="card" id="tForm" autocomplete="off">
     <label for="tk">관리 비밀번호</label><input type="password" id="tk" autocomplete="current-password">
     <label class="check"><input type="checkbox" id="remember"${T.goPos?' checked':''}>이 기기에서 자동 로그인(선생님 기기만)</label>

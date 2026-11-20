@@ -31,8 +31,21 @@ h2{font-size:1.05rem;margin:0 0 var(--space-2)}
 .note{color:var(--sub);font-size:.85rem;margin-top:var(--space-2)}
 .tags{display:flex;flex-wrap:wrap;gap:var(--space-2)}.tag{background:var(--bar2);border-radius:999px;padding:var(--space-1) var(--space-2);font-size:.88rem}
 @media (max-width:480px){.row{grid-template-columns:1fr auto}.row .track{grid-column:1/-1;order:3}}
+/* 표지 그림(2026-11-20): «학생회 앱으로» 링크와 제목 사이에 둔다. 글자 없는 장식 그림이라 alt="".
+ * election.html .cover-banner와 같은 틀: 폰은 2:1, 768px 이상은 폭 720px 가운데에 12:5(낮은 가로 화면은 3:1)로 위아래를 조금 자른다.
+ * 움직임: 처음 보일 때 한 번 살짝 떠오름(opacity·transform만). 움직임 줄이기 설정이면 끈다. */
+.cover-banner{margin:0 0 var(--space-3); border-radius:14px; overflow:hidden; aspect-ratio:2/1;
+  background:#efe4cf; border:1px solid rgba(80,60,30,.14); box-shadow:0 2px 10px rgba(60,40,20,.10);
+  animation:coverIn .5s ease-out both;}
+.cover-banner img{display:block; width:100%; height:100%; object-fit:cover;}
+@media (min-width:768px){ .cover-banner{aspect-ratio:12/5; max-width:720px; margin-inline:auto;} }
+@media (min-width:768px) and (max-height:860px){ .cover-banner{aspect-ratio:3/1;} }
+@keyframes coverIn{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;}}
+@media (prefers-reduced-motion: reduce){ .cover-banner{animation:none;} }
+@media print{ .cover-banner{display:none} }
 </style></head><body><main>
 <a class="back" href="./">‹ 학생회 앱으로</a>
+<figure class="cover-banner"><img src="council-survey-banner.webp" width="1200" height="675" alt="" decoding="async"></figure>
 <h1>🎉 학생의 날 학생회 설문 결과</h1>
 <div class="meta">응답 259명(전교생의 약 42%) · 2026-11-12(목) 아침 200명 + 오후·저녁 59명 · 학생회 설문</div>
 
