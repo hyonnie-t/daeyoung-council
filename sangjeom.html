@@ -71,6 +71,7 @@ input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(91
 .wrap.pos{max-width:28rem}
 @media (min-width:760px){.wrap.pos{max-width:72rem}.posgrid{display:grid;grid-template-columns:minmax(16rem,2fr) 3fr;gap:var(--space-3);align-items:start}}
 .sidin{font-size:26px!important;font-weight:900;letter-spacing:.2em;text-align:center;height:56px!important}
+.rcpt{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-2);margin-top:var(--space-2);padding:var(--space-2);border:1px dashed var(--border);border-radius:10px;font-size:14px;color:var(--text2);animation:rise .2s ease-out}
 .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-2);margin-top:var(--space-2)}
 .keypad button{height:48px;border:1px solid var(--border);border-radius:10px;background:var(--surface2);font:inherit;font-size:22px;font-weight:700;color:var(--text);cursor:pointer;touch-action:manipulation}
 .keypad button:active{background:var(--accent-soft)}
@@ -264,7 +265,7 @@ function backToLogin(error){S.pw='';viewLogin(errText(error))}
 function backToTeacherLogin(error){T.key='';T.data=null;keySet('');viewTeacherLogin(errText(error))}
 
 function viewPos(mode){
-  Object.assign(P,{mode,sid:'',cart:{},etc:null,etcOpen:false,stu:null,looking:false,busy:false,retry:null});
+  Object.assign(P,{mode,sid:'',cart:{},etc:null,etcOpen:false,stu:null,looking:false,busy:false,retry:null,last:null});
   const t=isT();
   app.className='wrap pos';
   app.innerHTML=`<div class="top"><div><h1>${t?'🧾 상점 계산대':(esc(S.event)||'상점 교환소')}</h1><p class="sub">${t?'선생님 · 남은 상점이 바로 보여요':'기록하는 사람: '+esc(S.by)}</p></div>
@@ -289,6 +290,7 @@ function viewPos(mode){
       <div class="sum"><span>합계</span><output id="total">0점</output></div>
       <p class="msg" id="mainMsg" role="alert"></p>
       <button class="btn" type="button" id="payBtn" disabled></button>
+      <div class="rcpt" id="rcptBar" hidden></div>
     </section>
   </div></div>
   <section class="card"><div class="top" style="margin-bottom:var(--space-1)"><h2 style="margin:0">${t?'오늘 기록':'이번 행사 기록'}</h2><button class="mini" type="button" id="reload">새로고침</button></div><ul class="list" id="recent"><li class="sub">불러오는 중…</li></ul></section>`;
@@ -308,6 +310,7 @@ function viewPos(mode){
     if(b.dataset.inc)addItem(b.dataset.inc);else{const k=b.dataset.dec;P.cart[k]--;if(P.cart[k]<=0)delete P.cart[k];cartChanged()}
   };
   document.getElementById('payBtn').onclick=onPay;
+  document.getElementById('rcptBar').onclick=e=>{const b=e.target.closest('[data-rcpt]');if(b)receiptOut(b.dataset.rcpt==='save')};
   document.getElementById('reload').onclick=()=>loadPosRecent(true);
   document.getElementById('recent').onclick=onPosRecentClick;
   document.getElementById('logout').onclick=()=>{if(t)teacherOut();else{S.pw='';viewLogin()}};
@@ -330,7 +333,7 @@ function viewPos(mode){
   }
   renderAll();loadPosRecent();
 }
-function renderAll(){renderStu();renderMenu();renderCart();renderSold()}
+function renderAll(){renderStu();renderMenu();renderCart();renderSold();renderRcpt()}
 function setSid(v){
   if(v===P.sid)return;
   P.sid=v;P.stu=null;P.retry=null;P.seq++;
@@ -480,6 +483,8 @@ async function onPay(){
   if(!t&&!(s&&!s.err&&s.enough&&!s.ice))return helperCheck();
   const items=sendItems(),en=etcName(),sid=P.sid,point=total(),key=sig();
   const reqId=P.retry&&P.retry.sig===key?P.retry.reqId:uid();
+  // 영수증용 담은 것 사본(기록 뒤 resetSale이 장바구니를 비우므로 미리 떠 둔다)
+  const snap={id:reqId,sid,point,lines:Object.keys(P.cart).map(k=>({name:MK[k].name,n:P.cart[k],p:MK[k].p*P.cart[k],ice:!!MK[k].ice})).concat(P.etc?[{name:'기타'+(P.etc.name?' '+P.etc.name:''),n:1,p:P.etc.p}]:[])};
   P.busy=true;b.disabled=true;b.textContent='기록하는 중…';setMsg('');
   const r=await call(t?{action:'sjAdminSpend',key:T.key,sid,items,etcName:en,point,reqId}:{action:'sjSpend',pw:S.pw,sid,items,etcName:en,point,by:S.by,reqId});
   P.busy=false;
@@ -487,6 +492,7 @@ async function onPay(){
     P.retry=null;
     const name=r.name||(s&&s.name)||'';
     toast(r.repeated?'이미 기록돼 있어요':name+' '+point+'점 기록했어요'+(t&&r.left!=null?' · 남은 '+r.left+'점':''));
+    P.last=Object.assign(snap,{id:r.id||reqId,at:Date.now(),left:t&&r.left!=null?r.left:null});
     resetSale();loadPosRecent();return;
   }
   if(t&&r.error==='no_auth')return backToTeacherLogin(r.error);
@@ -495,7 +501,7 @@ async function onPay(){
     P.retry={sig:key,reqId}; // 응답만 못 받았을 수 있다. 같은 reqId라 다시 눌러도 두 번 기록되지 않는다
     setMsg(errText(r.error));renderCart();
     const rows=await loadPosRecent();
-    if(rows&&rows.some(x=>x.id===reqId)){P.retry=null;toast(name0(s)+' '+point+'점 기록돼 있어요');resetSale()}
+    if(rows&&rows.some(x=>x.id===reqId)){P.retry=null;toast(name0(s)+' '+point+'점 기록돼 있어요');P.last=Object.assign(snap,{at:Date.now(),left:null});resetSale()}
     return;
   }
   if(r.error==='sold_out'||r.error==='bad_input')await refreshSold();
@@ -520,6 +526,52 @@ async function helperCheck(){
   P.stu={sid:P.sid,name:r.name,enough:r.enough,ice:r.ice,item:r.item,point:total()};renderAll();
 }
 function resetSale(){P.sid='';P.cart={};P.etc=null;P.etcOpen=false;const eb=document.getElementById('etcBox');if(eb)eb.hidden=true;P.stu=null;P.seq++;const el=document.getElementById('sid');if(el){el.value='';el.focus()}setHint('');setMsg('');renderAll()}
+/* ── 영수증(2026-11-20) ── 방금 기록 하나를 58mm 감열지 폭(384점) 흑백 그림으로 만들어 공유 창(PeriPage 앱 등)으로 넘기거나 저장한다.
+   글자를 프린터로 직접 보내지 않고 그림으로 넘기므로 한글이 깨지지 않는다. 이름은 넣지 않고 학번만, 남은 상점은 선생님 계산대에서만(담당 화면은 점수를 안 보여 준다). */
+function renderRcpt(){
+  const bar=document.getElementById('rcptBar');if(!bar)return;
+  const L=P.last;bar.hidden=!L;
+  if(!L){bar.innerHTML='';return}
+  bar.innerHTML=`<span>방금 기록 · ${esc(sidLabel(L.sid))} ${L.point}점</span><span class="row"><button class="mini go" type="button" data-rcpt="share">🧾 영수증</button><button class="mini" type="button" data-rcpt="save">저장</button></span>`;
+}
+function receiptCanvas(L){
+  const W=384,PAD=12,F='"Noto Sans KR","Malgun Gothic","Apple SD Gothic Neo",sans-serif';
+  const d=new Date(L.at),ds=d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0')+'('+'일월화수목금토'[d.getDay()]+') '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  const ice=L.lines.filter(x=>x.ice).map(x=>x.name);
+  const rows=[{c:'★ 대영중 학생회 ★',s:18},{c:'상점 교환소',s:34,b:1},{c:ds,s:16},{hr:'dash'},{l:'학번',r:sidLabel(L.sid),s:20},{hr:'dash'}]
+    .concat(L.lines.map(x=>({l:x.name+' ×'+x.n,r:x.p+'점',s:22,fit:1})))
+    .concat([{hr:'solid'},{l:'쓴 상점',r:L.point+'점',s:24,b:1}])
+    .concat(L.left!=null?[{l:'남은 상점',r:L.left+'점',s:20}]:[])
+    .concat([{hr:'dash'}])
+    .concat(ice.length?[{inv:'교환권 · '+ice.join(', '),s:20,b:1,h:34,fit:1},{c:'오늘 하루 1인 1개',s:16,h:30}]:[])
+    .concat([{c:'좋은 일 해 줘서 고마워요!',s:20,b:1},{c:'— 학생회 드림 —',s:16}]);
+  const cv=document.createElement('canvas'),ctx=cv.getContext('2d');
+  const go=real=>{let y=PAD;for(const R of rows){const s=R.s||16,h=R.h||(R.hr?16:Math.round(s*1.45));
+    if(real){ctx.fillStyle='#000';ctx.strokeStyle='#000';ctx.textBaseline='top';let fs=s;
+      const font=()=>ctx.font=(R.b?'700 ':'400 ')+fs+'px '+F;font();
+      if(R.fit){const room=W-PAD*2-(R.r?ctx.measureText(R.r).width+12:0);while(fs>12&&ctx.measureText(R.l||R.inv).width>room){fs--;font()}} // 긴 물건 이름은 글자를 줄여 한 줄에
+      if(R.hr){ctx.setLineDash(R.hr==='dash'?[6,4]:[]);ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(PAD,y+h/2);ctx.lineTo(W-PAD,y+h/2);ctx.stroke();ctx.setLineDash([])}
+      if(R.c){ctx.textAlign='center';ctx.fillText(R.c,W/2,y)}
+      if(R.l){ctx.textAlign='left';ctx.fillText(R.l,PAD,y)}
+      if(R.r){ctx.textAlign='right';ctx.fillText(R.r,W-PAD,y)}
+      if(R.inv){ctx.fillRect(PAD,y-2,W-PAD*2,h);ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText(R.inv,W/2,y+2)}}
+    y+=h}return y+PAD+24};
+  cv.width=W;cv.height=go(false);ctx.fillStyle='#fff';ctx.fillRect(0,0,W,cv.height);go(true);
+  return cv;
+}
+function receiptOut(save){
+  const L=P.last;if(!L)return;
+  const d=new Date(L.at),name='상점영수증_'+L.sid+'_'+d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'_'+String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0')+'.png';
+  receiptCanvas(L).toBlob(async blob=>{
+    if(!blob){toast('영수증을 만들지 못했어요');return}
+    const file=new File([blob],name,{type:'image/png'});
+    if(!save&&navigator.canShare&&navigator.canShare({files:[file]})){
+      try{await navigator.share({files:[file]});return}catch(e){if(e.name==='AbortError')return}
+    }
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+    toast(save?'영수증 그림을 저장했어요':'공유가 안 돼서 그림으로 저장했어요');
+  },'image/png');
+}
 async function refreshSold(){
   if(isT()){const r=await getAdmin(T.key);if(r.ok){T.data=r;P.sold=r.soldOut||[];setMenu(r.menu)}}
   else{const r=await call({action:'sjAuth',pw:S.pw});if(r.ok){P.sold=r.soldOut||[];setMenu(r.menu)}}
@@ -563,6 +615,7 @@ async function onPosRecentClick(e){
   const r=await call(t?{action:'sjAdminCancel',key:T.key,id:b.dataset.cancel}:{action:'sjCancel',pw:S.pw,id:b.dataset.cancel,by:S.by});
   if(!r.ok){if(t&&r.error==='no_auth')return backToTeacherLogin(r.error);if(!t&&GATE.includes(r.error))return backToLogin(r.error);b.disabled=false;b.dataset.armed='';b.textContent='취소';b.classList.remove('warn');toast(errText(r.error));return}
   if(P.retry&&P.retry.reqId===b.dataset.cancel)P.retry=null;
+  if(P.last&&P.last.id===b.dataset.cancel){P.last=null;renderRcpt()} // 취소한 기록의 영수증 단추는 거둔다
   toast('취소했어요');
   if(t&&P.stu&&!P.stu.err)lookup();
   loadPosRecent();
