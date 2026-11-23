@@ -21,13 +21,18 @@
     return {h:c.height,data:out};
   }
   function job(cv,feed){
+    const parts=jobParts(cv,feed);
+    const all=new Uint8Array(parts.reduce((s,p)=>s+p.length,0));let o=0;for(const p of parts){all.set(p,o);o+=p.length}
+    return all;
+  }
+  // 조각으로: 초기화 / 그림 머리 / 그림 줄들(묶음마다) / 끝 줄바꿈. 블루투스는 조각마다 따로 보내 그림 줄이 늘 줄 첫머리에서 시작하게 한다
+  function jobParts(cv,feed){
     const {h,data}=canvasRows(cv),parts=[];
     // 초기화(10 ff fe 01…)는 맨 처음 한 번만. 묶음(255줄)마다 다시 보내면 A6이 종이를 살짝 되돌려 다음 묶음이 앞 묶음 위에 겹쳐 찍혔다(11-23 효니 «중간에 한 번 롤백»)
     parts.push(hex('10fffe01000000000000000000000000'));
     for(let y=0;y<h;y+=255){const n=Math.min(255,h-y);parts.push(Uint8Array.of(0x1d,0x76,0x30,0x00,0x30,0x00,n,0x00),data.subarray(y*48,(y+n)*48))}
     parts.push(Uint8Array.of(0x1b,0x4a,feed==null?0x60:feed));
-    const all=new Uint8Array(parts.reduce((s,p)=>s+p.length,0));let o=0;for(const p of parts){all.set(p,o);o+=p.length}
-    return all;
+    return parts;
   }
 
   // 고르기(11-23 효니 «알 수 없는 기기만 빼도 빠르겠다»): 이름이 PPG·PeriPage·A6로 시작하는 기기만 목록에 띄운다.
@@ -58,13 +63,14 @@
     // 그래서 응답 받는 쓰기가 되는 통로(A6 ff02는 됨)면 받았다는 답을 듣고 다음 묶음을 보낸다 — 놓치지 않는다.
     // 묶음은 120바이트(긴 쓰기). 그 크기를 못 받는 기기면 20바이트로 줄여 이어 보낸다.
     if(c.properties.write){
-      let size=120;
+      // 묶음 96바이트 = 그림 2줄(한 줄 48바이트). 120바이트(2.5줄)로 끊으니 한 줄 왼쪽·오른쪽이 위아래로 어긋나 찍혔다(11-23 효니 사진: «학번»과 «30602»가 다른 높이)
+      let size=96;
       while(i<bytes.length){
         const part=bytes.subarray(i,i+size);
         // 속도 상한 초당 약 2KB(1바이트에 0.5ms): 응답 받는 쓰기만으로는 프린터 칩이 받기만 하고 찍는 속도를 못 따라가
         // 긴 영수증 아래쪽 줄이 버려져 겹쳐 찍혔다(11-23 효니 사진). 성공한 시험 종이(20바이트·8ms≈2.5KB/s)보다 조금 느리게.
         const t0=performance.now();
-        try{await c.writeValueWithResponse(part)}catch(e){if(size>20){size=20;continue}throw e}
+        try{await c.writeValueWithResponse(part)}catch(e){if(size>24){size=24;continue}throw e} // 못 받으면 반 줄(24)씩
         i+=part.length;await sleep(Math.max(2,part.length*RATE-(performance.now()-t0)));
       }
       return;
@@ -99,7 +105,7 @@
     if(st.busy)throw new Error('인쇄 중이에요');st.busy=true;
     try{
       const how=await connect(opt&&opt.via),bytes=job(cv,opt&&opt.feed);
-      if(how==='ble')await bleWrite(bytes);
+      if(how==='ble'){for(const p of jobParts(cv,opt&&opt.feed))await bleWrite(p)}
       else try{for(let i=0;i<bytes.length;i+=512){await st.writer.write(bytes.subarray(i,i+512));await sleep(10)}}catch(e){serialReset();throw e} // 끊기면 다음에 다시 고르게(검토 D)
       return how;
     }finally{st.busy=false}
