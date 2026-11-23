@@ -10,12 +10,14 @@
   const SPP='00001101-0000-1000-8000-00805f9b34fb';
   const st={dev:null,ch:null,port:null,writer:null,size:20,busy:false};
   const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+  const ASPECT=0.8; // 인쇄 세로 비율. 아직 눌려 보이면 줄이고(0.7), 납작하면 키운다(0.9)
   const RATE=0.3; // 1바이트당 ms — 보내기 속도 상한(초당 약 3KB). 11-23: 겹침의 주원인은 묶음마다 보낸 초기화였고, 너무 느리면 프린터가 쉬다 되돌려 더 겹쳤다
   const hex=s=>Uint8Array.from(s.match(/../g).map(h=>parseInt(h,16)));
 
   function canvasRows(cv){ // 384점 폭으로 맞춘 뒤 흑백 비트로
     let c=cv;
-    if(cv.width!==384){c=document.createElement('canvas');c.width=384;c.height=Math.round(cv.height*384/cv.width);const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,384,c.height);x.drawImage(cv,0,0,384,c.height)}
+    // 세로 0.8배: A6은 세로로 점을 길게 찍어 글자가 옆으로 눌려(위아래로 늘어나) 보였다(11-23 효니). 인쇄할 때만 줄이고 화면·공유 그림은 그대로
+    if(cv.width!==384||ASPECT!==1){c=document.createElement('canvas');c.width=384;c.height=Math.round(cv.height*384/cv.width*ASPECT);const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,384,c.height);x.drawImage(cv,0,0,384,c.height)}
     const px=c.getContext('2d').getImageData(0,0,384,c.height).data,out=new Uint8Array(48*c.height);
     for(let y=0;y<c.height;y++)for(let x=0;x<384;x++){const i=(y*384+x)*4,a=px[i+3]/255,l=(px[i]*.299+px[i+1]*.587+px[i+2]*.114)*a+255*(1-a);if(l<128)out[y*48+(x>>3)]|=0x80>>(x&7)}
     return {h:c.height,data:out};
