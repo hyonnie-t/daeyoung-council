@@ -10,7 +10,7 @@
   const SPP='00001101-0000-1000-8000-00805f9b34fb';
   const st={dev:null,ch:null,port:null,writer:null,size:20,busy:false};
   const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-  const ASPECT=1.2; // 인쇄 세로 비율. 11-23 0.8은 효니 «세로가 더 짧아짐» → 효니 «1.2로 해봐»
+  const ASPECT=1; // 인쇄 세로 비율. 11-23 0.8·1.2 해 봤는데 납작함은 비율이 아니라 둘째 묶음 문제였다(위쪽은 1에서 멀쩡) → 1
   const RATE=0.3; // 1바이트당 ms — 보내기 속도 상한(초당 약 3KB). 11-23: 겹침의 주원인은 묶음마다 보낸 초기화였고, 너무 느리면 프린터가 쉬다 되돌려 더 겹쳤다
   const hex=s=>Uint8Array.from(s.match(/../g).map(h=>parseInt(h,16)));
 
@@ -32,7 +32,8 @@
     const {h,data}=canvasRows(cv),parts=[];
     // 초기화(10 ff fe 01…)는 맨 처음 한 번만. 묶음(255줄)마다 다시 보내면 A6이 종이를 살짝 되돌려 다음 묶음이 앞 묶음 위에 겹쳐 찍혔다(11-23 효니 «중간에 한 번 롤백»)
     parts.push(hex('10fffe01000000000000000000000000'));
-    for(let y=0;y<h;y+=255){const n=Math.min(255,h-y);parts.push(Uint8Array.of(0x1d,0x76,0x30,0x00,0x30,0x00,n,0x00),data.subarray(y*48,(y+n)*48))}
+    // 한 묶음으로(높이 2바이트 yL·yH). 255줄씩 나누면 A6이 첫 묶음(상품명 즈음까지)만 제대로 찍고 둘째 묶음부터 납작하게·어긋나게 찍었다(11-23 효니 «상품명까진 잘 나오는데»)
+    parts.push(Uint8Array.of(0x1d,0x76,0x30,0x00,0x30,0x00,h&0xff,h>>8),data.subarray(0,h*48));
     parts.push(Uint8Array.of(0x1b,0x4a,feed==null?0x60:feed));
     return parts;
   }
