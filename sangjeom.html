@@ -547,7 +547,7 @@ function receiptCanvas(L){
     .concat(ice.length?[{inv:'교환권 · '+ice.join(', '),s:20,b:1,h:34,fit:1},{c:'오늘 하루 1인 1개',s:16,h:30}]:[])
     .concat([{c:'교환 완료',s:20,b:1}]); // 맺음말은 학생회 이름이 위와 겹치지 않게 짧게(2026-11-20 효니)
   const cv=document.createElement('canvas'),ctx=cv.getContext('2d');
-  const go=real=>{let y=PAD;for(const R of rows){const s=R.s||16,h=R.h||(R.hr?16:Math.round(s*1.45));
+  const go=real=>{let y=PAD;for(const R of rows){const s=R.s||16,h=R.h?R.h+8:(R.hr?28:Math.round(s*1.9)); // 줄 간격: 감열지에서 좁아 보여 1.45→1.9배, 구분선 칸 16→28(2026-11-23 효니 «문단 간격이 좁아»)
     if(real){ctx.fillStyle='#000';ctx.strokeStyle='#000';ctx.textBaseline='top';let fs=s;
       const font=()=>ctx.font=(R.b?'700 ':'400 ')+fs+'px '+F;font();
       if(R.fit){const room=W-PAD*2-(R.r?ctx.measureText(R.r).width+12:0);while(fs>12&&ctx.measureText(R.l||R.inv).width>room){fs--;font()}} // 긴 물건 이름은 글자를 줄여 한 줄에
