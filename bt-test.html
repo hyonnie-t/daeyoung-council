@@ -36,6 +36,7 @@ pre{white-space:pre-wrap;word-break:break-all;font-size:13px;background:#f1f3f5;
     <button type="button" class="sub" id="tps">직렬로 시험(목록에 프린터가 안 뜰 때)</button>
     <button type="button" class="sub" id="chs">통로마다 시험(보냈는데 종이가 안 나올 때)</button>
     <div id="chl"></div>
+    <label style="display:block;margin-top:8px"><input type="checkbox" id="allDev"> 목록에 모든 기기 보기(프린터가 안 뜰 때만)</label>
     <p class="st" id="st" role="status"></p>
   </section>
   <section class="card">
@@ -60,7 +61,7 @@ document.getElementById('go').onclick=async()=>{
   if(!navigator.bluetooth){say('이 브라우저는 블루투스 연결을 못 해요. 디벗 크롬에서 열어 주세요.','bad');add('navigator.bluetooth 없음');return}
   try{
     say('목록에서 프린터를 골라 주세요…');
-    const dev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:SV});
+    const dev=await A6Print.pick({fresh:true,all:document.getElementById('allDev').checked});
     add('기기 이름: '+(dev.name||'(이름 없음)')+' / id: '+dev.id);
     say('연결하는 중…');
     const g=await dev.gatt.connect();
@@ -108,7 +109,8 @@ document.getElementById('chs').onclick=async()=>{
   if(!navigator.bluetooth){say('이 브라우저는 블루투스 연결을 못 해요.','bad');return}
   try{
     say('목록에서 PPG_A6_..._BLE 를 골라 주세요…');
-    chDev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:SV});
+    chDev=await A6Print.pick({all:document.getElementById('allDev').checked});
+    addEventListener('pagehide',()=>{try{chDev&&chDev.gatt.connected&&chDev.gatt.disconnect()}catch(e){}});
     add('기기 이름: '+(chDev.name||'(이름 없음)'));
     say('연결하는 중…');
     const g=await chDev.gatt.connect();const cs=[];

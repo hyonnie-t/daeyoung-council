@@ -27,6 +27,17 @@
     return all;
   }
 
+  // 고르기(11-23 효니 «알 수 없는 기기만 빼도 빠르겠다»): 이름이 PPG·PeriPage·A6로 시작하는 기기만 목록에 띄운다.
+  // 전에 이 페이지에서 허락한 프린터가 있으면(getDevices) 창 없이 그걸 쓴다. 이름 거르기로 안 뜨는 기종이면 all:true로 전체 목록.
+  async function pick(opt){
+    if(!(opt&&opt.fresh)&&navigator.bluetooth.getDevices){
+      try{const ds=(await navigator.bluetooth.getDevices()).filter(d=>/^(PPG|PeriPage|A6)/i.test(d.name||''));if(ds.length)return ds[0]}catch(e){}
+    }
+    return navigator.bluetooth.requestDevice(opt&&opt.all?{acceptAllDevices:true,optionalServices:SV}
+      :{filters:[{namePrefix:'PPG'},{namePrefix:'PeriPage'},{namePrefix:'A6'}],optionalServices:SV});
+  }
+  // 페이지를 닫거나 떠나면 연결을 놓는다 — 열어 둔 옛 탭이 프린터를 붙잡아 새 탭 고르기 창의 PAIR가 안 켜지던 일(11-23)
+  addEventListener('pagehide',()=>{try{st.dev&&st.dev.gatt.connected&&st.dev.gatt.disconnect()}catch(e){}});
   async function bleFind(dev){
     const g=dev.gatt.connected?dev.gatt:await dev.gatt.connect();
     const found=[];
@@ -54,7 +65,7 @@
     if(st.writer)return 'serial';
     if(via!=='serial'&&navigator.bluetooth){ // 취소하면 여기서 끝(두 번째 창은 손가락 누름이 없어 막힌다, 검토 C). 옛 방식만 되는 기기는 진단 페이지 «직렬로 시험»
       try{
-        st.dev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:SV});
+        st.dev=await pick();
         st.dev.addEventListener('gattserverdisconnected',()=>{st.ch=null});
         st.ch=await bleFind(st.dev);return 'ble';
       }catch(e){st.dev=null;st.ch=null;throw e}
@@ -75,5 +86,5 @@
     }finally{st.busy=false}
   }
   function info(){return st.ch?{how:'ble',name:st.dev&&st.dev.name,ch:st.ch.uuid,svc:st.ch.service.uuid,size:st.size}:st.writer?{how:'serial'}:null}
-  window.A6Print={supported:!!(navigator.bluetooth||navigator.serial),get busy(){return st.busy},print,connect,info,job};
+  window.A6Print={supported:!!(navigator.bluetooth||navigator.serial),get busy(){return st.busy},print,connect,info,job,pick};
 })();
