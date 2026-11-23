@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>프린터 찾기 시험</title>
 <style>
-/* 1회성 시험 페이지(2026-11-20): PeriPage C1이 크롬 블루투스(Web Bluetooth)로 보이는지, 어떤 통로(서비스·특성)가 있는지 본다. 결과로 «바로 인쇄»를 만들 수 있는지 정하고, 끝나면 지운다. */
+/* 1회성 시험 페이지(2026-11-20): PeriPage A6(11-23 효니 확인, 처음엔 C1로 앎)이 크롬 블루투스(Web Bluetooth)로 보이는지, 어떤 통로(서비스·특성)가 있는지 본다. 결과로 «바로 인쇄»를 만들 수 있는지 정하고, 끝나면 지운다. */
 :root{--space-1:4px;--space-2:8px;--space-3:16px;--space-4:24px;--bg:#f5f6f8;--card:#fff;--text:#212529;--sub:#6c757d;--accent:#5b5bd6;--bad:#d6336c;--ok:#2b8a3e}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:"Pretendard","Noto Sans KR",system-ui,sans-serif;font-size:16px}
@@ -28,10 +28,12 @@ pre{white-space:pre-wrap;word-break:break-all;font-size:13px;background:#f1f3f5;
     <ol>
       <li><b>디벗(갤럭시) 크롬</b>에서 열어요. 아이폰은 브라우저 블루투스가 막혀 있어 안 돼요.</li>
       <li>PeriPage 앱을 완전히 끄고, C1을 켜 둬요(앱이 붙잡고 있으면 안 보여요).</li>
-      <li>«프린터 찾기» → 목록에서 C1(또는 PeriPage)을 골라 «연결».</li>
-      <li>아래 결과를 «복사»해서 Claude에게 보내 주세요. 화면을 찍어도 돼요.</li>
+      <li>먼저 아래 «시험 인쇄»를 눌러 목록에서 A6(또는 PeriPage)을 골라요. 종이가 나오면 끝! 계산대 «🖨️ 바로 인쇄»도 돼요.</li>
+      <li>안 나오면 «프린터 찾기»를 눌러 결과를 «복사»해서 Claude에게 보내 주세요. 화면을 찍어도 돼요.</li>
     </ol>
-    <button type="button" id="go">프린터 찾기</button>
+    <button type="button" id="tp">🖨️ 시험 인쇄</button>
+    <button type="button" class="sub" id="go">프린터 찾기(안 될 때)</button>
+    <button type="button" class="sub" id="tps">직렬로 시험(목록에 프린터가 안 뜰 때)</button>
     <p class="st" id="st" role="status"></p>
   </section>
   <section class="card">
@@ -40,6 +42,7 @@ pre{white-space:pre-wrap;word-break:break-all;font-size:13px;background:#f1f3f5;
     <button type="button" class="sub" id="copy">결과 복사</button>
   </section>
 </div>
+<script src="a6print.js"></script>
 <script>
 // 감열 프린터들이 흔히 쓰는 서비스 번호. Web Bluetooth는 여기 적은 서비스만 열어 볼 수 있다.
 const SV=[0xff00,0xffe0,0xfff0,0xae30,0xae00,0x18f0,0xfee7,0xff80,0xffb0,0x49535343,
@@ -72,6 +75,19 @@ document.getElementById('go').onclick=async()=>{
     say(e.name==='NotFoundError'?'목록에 안 보였거나 취소했어요. 앱을 끄고 다시 해 주세요.':'연결하지 못했어요. 결과를 보내 주세요.','bad');
   }
 };
+const testPrint=async via=>{
+  log.length=0;add('브라우저: '+navigator.userAgent+' / 통로: '+(via||'ble'));
+  if(!window.A6Print||!A6Print.supported){say('이 브라우저는 프린터에 바로 연결할 수 없어요. 디벗 크롬에서 열어 주세요.','bad');return}
+  if(via==='serial'&&!navigator.serial){say('이 크롬은 직렬 연결을 못 해요. «프린터 찾기» 결과를 보내 주세요.','bad');add('navigator.serial 없음');return}
+  const cv=document.createElement('canvas');cv.width=384;cv.height=200;const x=cv.getContext('2d');
+  x.fillStyle='#fff';x.fillRect(0,0,384,200);x.fillStyle='#000';x.textAlign='center';x.textBaseline='top';
+  x.font='700 30px sans-serif';x.fillText('프린터 시험 인쇄',192,20);x.font='400 20px sans-serif';x.fillText('대영중 학생회 상점 교환소',192,70);
+  x.fillText(new Date().toLocaleString('ko-KR'),192,104);for(let i=0;i<24;i++)x.fillRect(16+i*15,150,i%3?4:8,36);
+  try{say('목록에서 프린터를 골라 주세요…');const how=await A6Print.print(cv,{via});add('보냄: '+JSON.stringify(A6Print.info()));say(how==='ble'?'보냈어요! 종이가 나왔나 봐 주세요.':'보냈어요(직렬 연결). 종이가 나왔나 봐 주세요.','ok')}
+  catch(e){add('오류: '+e.name+' / '+e.message);say('시험 인쇄가 안 됐어요. «프린터 찾기»도 눌러 결과를 보내 주세요.','bad')}
+};
+document.getElementById('tp').onclick=()=>testPrint();
+document.getElementById('tps').onclick=()=>testPrint('serial');
 document.getElementById('copy').onclick=()=>navigator.clipboard.writeText(out.textContent).then(()=>say('복사했어요','ok'),()=>say('복사하지 못했어요. 화면을 찍어 주세요.','bad'));
 </script>
 </body>
