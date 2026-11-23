@@ -44,7 +44,9 @@
     for(const s of await g.getPrimaryServices()){let cs=[];try{cs=await s.getCharacteristics()}catch(e){}
       for(const c of cs)if(c.properties.writeWithoutResponse||c.properties.write)found.push(c)}
     if(!found.length)throw new Error('쓸 수 있는 통로를 못 찾았어요');
-    found.sort((a,b)=>(b.properties.writeWithoutResponse?1:0)-(a.properties.writeWithoutResponse?1:0)); // 응답 없는 쓰기가 빠르다
+    // 인쇄 통로는 ff00 서비스의 ff02(11-23 효니 디벗 «통로마다 시험»에서 통로 4=ff02 그림만 나옴. 49535343-8841로는 안 나옴). 없으면 응답 없는 쓰기 통로부터
+    const rank=c=>c.uuid.startsWith('0000ff02')?2:c.properties.writeWithoutResponse?1:0;
+    found.sort((a,b)=>rank(b)-rank(a));
     return found[0];
   }
   async function bleWrite(bytes){
