@@ -34,6 +34,8 @@ pre{white-space:pre-wrap;word-break:break-all;font-size:13px;background:#f1f3f5;
     <button type="button" id="tp">🖨️ 시험 인쇄</button>
     <button type="button" class="sub" id="go">프린터 찾기(안 될 때)</button>
     <button type="button" class="sub" id="tps">직렬로 시험(목록에 프린터가 안 뜰 때)</button>
+    <button type="button" class="sub" id="chs">통로마다 시험(보냈는데 종이가 안 나올 때)</button>
+    <div id="chl"></div>
     <p class="st" id="st" role="status"></p>
   </section>
   <section class="card">
@@ -88,6 +90,45 @@ const testPrint=async via=>{
 };
 document.getElementById('tp').onclick=()=>testPrint();
 document.getElementById('tps').onclick=()=>testPrint('serial');
+// 통로마다 시험(2026-11-23): A6(PPG_A6_..._BLE)은 쓰기 통로가 4개라 어느 것이 인쇄 통로인지 종이로 가린다.
+// 한 번 연결해 두고 통로별로 «그림»(지금 계산대 방식)·«글자»(ESC/POS 글자) 두 가지를 보낸다. 종이에 통로 번호가 찍힌다.
+let chDev=null;
+const chSleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function chSend(c,bytes){
+  for(let i=0;i<bytes.length;i+=20){const p=bytes.subarray(i,i+20);
+    c.properties.writeWithoutResponse?await c.writeValueWithoutResponse(p):await c.writeValueWithResponse(p);await chSleep(8)}
+}
+function chPic(n){const cv=document.createElement('canvas');cv.width=384;cv.height=140;const x=cv.getContext('2d');
+  x.fillStyle='#fff';x.fillRect(0,0,384,140);x.fillStyle='#000';x.textAlign='center';x.textBaseline='top';
+  x.font='700 40px sans-serif';x.fillText('통로 '+n+' 그림',192,16);for(let i=0;i<24;i++)x.fillRect(16+i*15,90,i%3?4:8,36);return cv}
+function chText(n){const t='CH '+n+' TEXT OK\n\n\n\n';return Uint8Array.from([0x1b,0x40,...Array.from(t,ch=>ch.charCodeAt(0))])}
+document.getElementById('chs').onclick=async()=>{
+  log.length=0;add('브라우저: '+navigator.userAgent+' / 통로마다 시험');
+  const box=document.getElementById('chl');box.textContent='';
+  if(!navigator.bluetooth){say('이 브라우저는 블루투스 연결을 못 해요.','bad');return}
+  try{
+    say('목록에서 PPG_A6_..._BLE 를 골라 주세요…');
+    chDev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:SV});
+    add('기기 이름: '+(chDev.name||'(이름 없음)'));
+    say('연결하는 중…');
+    const g=await chDev.gatt.connect();const cs=[];
+    for(const sv of await g.getPrimaryServices()){let l=[];try{l=await sv.getCharacteristics()}catch(e){}
+      for(const c of l)if(c.properties.write||c.properties.writeWithoutResponse)cs.push(c)}
+    if(!cs.length){say('쓸 수 있는 통로가 없어요. 결과를 보내 주세요.','bad');return}
+    cs.forEach((c,i)=>{const n=i+1;add('통로 '+n+': '+c.service.uuid.slice(0,8)+' / '+c.uuid.slice(0,8));
+      const row=document.createElement('div');row.style.cssText='display:flex;gap:8px;margin-top:8px';
+      for(const kind of ['그림','글자']){const b=document.createElement('button');b.type='button';b.className='sub';
+        b.textContent='통로 '+n+' '+kind+' ('+c.uuid.slice(4,8)+')';
+        b.onclick=async()=>{if(b.disabled)return;b.disabled=true;
+          try{if(!chDev.gatt.connected)await chDev.gatt.connect();say('통로 '+n+' '+kind+' 보내는 중…');
+            await chSend(c,kind==='그림'?A6Print.job(chPic(n)):chText(n));add('보냄: 통로 '+n+' '+kind);say('통로 '+n+' '+kind+' 보냈어요. 종이가 나왔나 봐 주세요.','ok')}
+          catch(e){add('오류(통로 '+n+' '+kind+'): '+e.name+' / '+e.message);say('통로 '+n+' 보내기 실패 — 다음 통로를 눌러 보세요.','bad')}
+          finally{b.disabled=false}};
+        row.appendChild(b)}
+      box.appendChild(row)});
+    say('연결됐어요. 아래 단추를 위에서부터 하나씩 눌러 보고, 종이가 나온 단추를 알려 주세요.','ok');
+  }catch(e){add('오류: '+e.name+' / '+e.message);say(e.name==='NotFoundError'?'목록에서 고르지 않았거나 취소했어요.':'연결하지 못했어요. 결과를 보내 주세요.','bad')}
+};
 document.getElementById('copy').onclick=()=>navigator.clipboard.writeText(out.textContent).then(()=>say('복사했어요','ok'),()=>say('복사하지 못했어요. 화면을 찍어 주세요.','bad'));
 </script>
 </body>
