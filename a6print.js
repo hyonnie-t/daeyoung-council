@@ -10,7 +10,7 @@
   const SPP='00001101-0000-1000-8000-00805f9b34fb';
   const st={dev:null,ch:null,port:null,writer:null,size:20,busy:false};
   const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-  const ASPECT=0.8; // 인쇄 세로 비율. 아직 눌려 보이면 줄이고(0.7), 납작하면 키운다(0.9)
+  const ASPECT=1; // 인쇄 세로 비율. 11-23 0.8로 줄였더니 효니 «오히려 세로가 더 짧아졌다» → 1로 되돌림
   const RATE=0.3; // 1바이트당 ms — 보내기 속도 상한(초당 약 3KB). 11-23: 겹침의 주원인은 묶음마다 보낸 초기화였고, 너무 느리면 프린터가 쉬다 되돌려 더 겹쳤다
   const hex=s=>Uint8Array.from(s.match(/../g).map(h=>parseInt(h,16)));
 
