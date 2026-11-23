@@ -562,6 +562,7 @@ function receiptCanvas(L){
 }
 async function receiptPrint(btn){ // 디벗 크롬: 페리페이지 A6에 바로(a6print.js). 처음 한 번만 프린터 고르는 창이 뜬다. 아이폰은 단추가 안 보인다
   const L=P.last;if(!L)return;
+  if(A6Print.busy){toast('앞 영수증을 찍는 중이에요');return} // 인쇄 중 바가 다시 그려져 단추가 살아나도 겹쳐 보내지 않게
   btn.disabled=true;const was=btn.textContent;btn.textContent='인쇄 중…';
   try{await A6Print.print(receiptCanvas(L));toast('영수증을 보냈어요')}
   catch(e){toast(e.name==='NotFoundError'?'프린터를 고르지 않았어요. 페리페이지 앱을 끄고 다시 눌러 주세요':'바로 인쇄가 안 됐어요 — 🧾 영수증으로 해 주세요 ('+e.message+')')}
