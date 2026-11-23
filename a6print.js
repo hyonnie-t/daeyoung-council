@@ -10,6 +10,7 @@
   const SPP='00001101-0000-1000-8000-00805f9b34fb';
   const st={dev:null,ch:null,port:null,writer:null,size:20,busy:false};
   const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+  const RATE=0.5; // 1바이트당 ms — 프린터가 찍는 속도에 맞춘 보내기 속도(초당 약 2KB). 줄이 겹치면 더 키운다
   const hex=s=>Uint8Array.from(s.match(/../g).map(h=>parseInt(h,16)));
 
   function canvasRows(cv){ // 384점 폭으로 맞춘 뒤 흑백 비트로
@@ -58,15 +59,18 @@
       let size=120;
       while(i<bytes.length){
         const part=bytes.subarray(i,i+size);
+        // 속도 상한 초당 약 2KB(1바이트에 0.5ms): 응답 받는 쓰기만으로는 프린터 칩이 받기만 하고 찍는 속도를 못 따라가
+        // 긴 영수증 아래쪽 줄이 버려져 겹쳐 찍혔다(11-23 효니 사진). 성공한 시험 종이(20바이트·8ms≈2.5KB/s)보다 조금 느리게.
+        const t0=performance.now();
         try{await c.writeValueWithResponse(part)}catch(e){if(size>20){size=20;continue}throw e}
-        i+=part.length;await sleep(2);
+        i+=part.length;await sleep(Math.max(2,part.length*RATE-(performance.now()-t0)));
       }
       return;
     }
     while(i<bytes.length){ // 응답 받는 쓰기가 없는 통로: 20바이트씩 천천히(12ms)
       const part=bytes.subarray(i,i+st.size);
       await c.writeValueWithoutResponse(part);
-      i+=part.length;await sleep(12);
+      i+=part.length;await sleep(Math.max(12,part.length*RATE));
     }
   }
   function serialReset(){try{st.writer&&st.writer.releaseLock()}catch(e){}try{st.port&&st.port.close()}catch(e){}st.writer=null;st.port=null}
