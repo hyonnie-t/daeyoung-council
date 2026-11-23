@@ -51,11 +51,22 @@
   }
   async function bleWrite(bytes){
     const c=st.ch;let i=0;
-    while(i<bytes.length){
-      // 20바이트씩: 기본 블루투스 묶음(MTU 23)에서도 잘리지 않는 크기. 4ms씩 쉬면 초당 약 5KB로 원본(줄마다 10ms)과 비슷해 프린터 버퍼가 넘치지 않는다(11-23 검토 A·B)
+    // 11-23 효니 디벗: 응답 없이 20바이트·4ms로 보내니 짧은 시험 종이는 나오고 긴 영수증은 «나오다가 맒»(프린터가 받다 놓침).
+    // 그래서 응답 받는 쓰기가 되는 통로(A6 ff02는 됨)면 받았다는 답을 듣고 다음 묶음을 보낸다 — 놓치지 않는다.
+    // 묶음은 120바이트(긴 쓰기). 그 크기를 못 받는 기기면 20바이트로 줄여 이어 보낸다.
+    if(c.properties.write){
+      let size=120;
+      while(i<bytes.length){
+        const part=bytes.subarray(i,i+size);
+        try{await c.writeValueWithResponse(part)}catch(e){if(size>20){size=20;continue}throw e}
+        i+=part.length;await sleep(2);
+      }
+      return;
+    }
+    while(i<bytes.length){ // 응답 받는 쓰기가 없는 통로: 20바이트씩 천천히(12ms)
       const part=bytes.subarray(i,i+st.size);
-      c.properties.writeWithoutResponse?await c.writeValueWithoutResponse(part):await c.writeValueWithResponse(part);
-      i+=part.length;if(c.properties.writeWithoutResponse)await sleep(4);
+      await c.writeValueWithoutResponse(part);
+      i+=part.length;await sleep(12);
     }
   }
   function serialReset(){try{st.writer&&st.writer.releaseLock()}catch(e){}try{st.port&&st.port.close()}catch(e){}st.writer=null;st.port=null}
