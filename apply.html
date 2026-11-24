@@ -227,10 +227,14 @@ table.dt{width:100%;border-collapse:collapse;font-size:15px}
 const API='https://script.google.com/macros/s/AKfycbwRshPtn7P5sr_kedozgPopixxQhZiDsWqCZqUg4HXJmPJRZA-HLkFXPiRzePgV55e7TQ/exec';
 const DEADLINE_TEXT='12월 4일(금)';
 const SCHEDULE=[
-  ['온라인 신청(이 화면)','지금 ~ 12. 4.(금)'],
-  ['종이 지원서 내기','12. 4.(금)까지 학생회 담당 선생님께'],
-  ['1차 서류 심사','12월 중순 이후(날짜는 따로 알려요)'],
-  ['2차 면접(선생님·회장단) · 3차 부서별 면접(실습 등)','2027년 1월(날짜는 따로 알려요)'],
+  // 2026-11-24 효니: 신청이 적으면 1주(12. 11.) 연장 — 연장하면 여기·DEADLINE_TEXT·Apply.gs AP_DEADLINE을 같이 고친다
+  ['온라인 신청(이 화면)','지금 ~ 12. 4.(금) (신청이 적으면 12. 11.(금)까지 늘어날 수 있어요)'],
+  ['종이 지원서 내기','12. 4.(금)까지 창의인성교육부(학생회 담당 선생님)에'],
+  ['1차 서류 심사','12월 중순'],
+  ['면접 볼 사람 안내','12. 21.~12. 24. 중'],
+  ['2차 면접(선생님·회장단) · 3차 부서별 면접(실습 등)','2027. 1. 4.(월)~1. 5.(화) 중 (지금 임원과 새로 지원한 학생은 다른 날)'],
+  ['결과 알림','2027. 1. 6.(수) 한 사람씩 알린 뒤, 이름 일부를 가린 포스터로 전교생에게 알려요'],
+  ['첫 학생회 회의','2027. 1. 7.(목) 합격자 모두 참석'],
   ['임명','2027년 3월 초']
 ];
 // 부서별 하는 일 — 실제 기준(2026-11-02 정리). 자율질서부·행사진행부 설명은 초안이라 효니 확인 필요
@@ -260,7 +264,7 @@ const FORM={
     {id:'promise_meet',type:'check',label:'회의와 행사에 빠지지 않고 참여할게요.',required:true},
     {id:'promise_rule',type:'check',label:'학생회 공통 규칙을 지킬게요.',required:true},
     {id:'know_review',type:'check',label:'서류 심사 때 생활 태도(벌점 등)를 참고한다는 것을 알아요.',required:true},
-    {id:'privacy',type:'check',label:'개인정보 수집·이용에 동의해요: 학번·이름·성별·지원 내용을 2027학년도 임원 선발에만 쓰고, 선발이 끝나면(2027. 3. 임명 뒤) 뽑히지 않은 학생의 자료는 지워요.',required:true}
+    {id:'privacy',type:'check',label:'개인정보 수집·이용에 동의해요: 학번·이름·성별·지원 내용을 2027학년도 임원 선발·합격 안내(포스터에는 이름 일부를 가림)에만 쓰고, 선발이 끝나면(2027. 3. 임명 뒤) 뽑히지 않은 학생의 자료는 지워요.',required:true}
   ]
 };
 const ERR={
@@ -537,7 +541,7 @@ async function onSubmit(e){
     <p>${esc(sidLabel(v.sid))} ${esc(v.name)} · ${esc(TRACKS[v.track].label)} · ${esc(v.d1)}</p>
     <p class="sub" style="margin-top:var(--space-3)">고칠 때 쓰는 확인 번호예요. 잊지 않게 적어 두세요.</p>
     <div class="pinbox">${esc(v.pin)}</div>
-    <p class="muted">이제 <b>종이 지원서</b>를 손으로 써서 12. 4.(금)까지 학생회 담당 선생님께 내 주세요. 결과와 면접 날짜는 한 사람씩 따로 알려 줘요.</p>
+    <p class="muted">이제 <b>종이 지원서</b>를 손으로 써서 12. 4.(금)까지 창의인성교육부(학생회 담당 선생님)에 내 주세요. 면접 볼 사람은 12. 21.~12. 24. 중에, 결과는 2027. 1. 6.에 한 사람씩 알려 줘요.</p>
     <div class="row" style="margin-top:var(--space-4)"><button type="button" class="btn line" data-act="again">처음 화면으로</button></div></div>`;
   document.getElementById('doneCard').focus();
 }
