@@ -250,7 +250,10 @@ body.stu .stu-main .card{margin-bottom:0}
 .tl li:last-child::before{display:none}
 .tl li::after{content:'';position:absolute;left:0;top:6px;width:12px;height:12px;border-radius:50%;background:#fff;border:3px solid var(--cob)}
 .tl li.now::after{background:var(--tang);border-color:var(--tang);box-shadow:0 0 0 4px #FFE3CF}
-.tl .when{display:block;font-size:14px;font-weight:700;color:var(--cob)}
+.tl .when{display:block;font-size:14px;font-weight:700;color:var(--cob);overflow-wrap:anywhere}
+/* 고정 «내기» 막대가 Tab 포커스를 가리지 않게(검토 2026-11-24). 폰 가로·낮은 화면은 막대를 고정하지 않음 */
+html{scroll-padding-bottom:140px}
+@media (max-height:600px){body.stu .submitbar{position:static}html{scroll-padding-bottom:0}}
 .tl li.now .when{color:#B44A00}
 .tl b{display:block;font-size:17px;color:var(--text)}
 .tl small{display:block;font-size:14px;color:var(--text2)}
@@ -402,7 +405,10 @@ const FORM={
     {id:'rec',type:'choice',label:'선생님께 학생회 지원을 권유(추천)받았나요?',hint:'추천을 받은 학생도 같은 지원서를 내고 같은 과정(서류·면접)을 거쳐요.',options:['네','아니요'],inline:true,required:true},
     {id:'paper',type:'check',label:'지원서는 종이에 직접 손으로 써서 12. 4.(금)까지 따로 내요. 생성형 AI로 대신 쓰면 불이익이 있다는 것을 알아요.',required:true},
     {id:'promise_meet',type:'check',label:'회의와 행사에 빠지지 않고, 사정이 있으면 미리 알릴게요.',required:true},
+    {id:'promise_contact',type:'check',label:'휴대 전화를 꺼 두는 등 연락이 닿지 않는 일이 없도록 할게요.',required:true},
+    {id:'promise_helper',type:'check',label:'학교 행사의 진행 도우미로 자주, 배우는 자세로 참여할게요.',required:true},
     {id:'promise_rule',type:'check',label:'학생 대표로서 학교 규칙과 학생회 약속을 지킬게요.',required:true},
+    {id:'promise_kind',type:'check',label:'친구들과 사이좋게 지내고, 다른 사람에게 피해를 주거나 선생님께 무례하게 행동하지 않을게요.',required:true},
     {id:'know_review',type:'check',label:'서류 심사 때 생활 태도(벌점 등)를 참고한다는 것을 알아요.',required:true},
     {id:'privacy',type:'check',label:'개인정보 수집·이용에 동의해요.',required:true,box:[
       ['수집 항목','학번, 이름, 성별, 지원 부서·자리, 교사 추천 여부, 회장단 후보 여부'],
@@ -708,8 +714,14 @@ function onFormInput(e){
   // 지원 자리: 신규 임원 1학년은 부원만(종이 지원서 «지금 2학년만»). 서버도 다시 본다
   const seats=[...f.querySelectorAll('input[name=roles]')];
   const lock=t==='new'&&g==='1';
-  seats.forEach(x=>{if(x.value!=='부원'){x.disabled=lock;if(lock)x.checked=false}});
-  if(lock&&!seats.some(x=>x.checked))seats.find(x=>x.value==='부원').checked=true;
+  // 잠글 때 고른 부장·차장을 기억했다가, 학번·구분을 되돌려 풀리면 다시 체크한다(검토 2026-11-24)
+  seats.forEach(x=>{if(x.value==='부원')return;
+    if(lock&&!x.disabled){x.dataset.was=x.checked?'1':'';x.checked=false}
+    else if(!lock&&x.disabled){if(x.dataset.was==='1')x.checked=true;delete x.dataset.was}
+    x.disabled=lock});
+  const bu=seats.find(x=>x.value==='부원');
+  if(lock&&!seats.some(x=>x.checked)){bu.checked=true;bu.dataset.auto='1'}
+  else if(!lock&&bu.dataset.auto){if(seats.some(x=>x!==bu&&x.checked))bu.checked=false;delete bu.dataset.auto}
   document.getElementById('seatHint').textContent=lock?'신규 임원 1학년은 «부원»으로 지원해요. 부장·차장은 지금 2학년만 고를 수 있어요.'
     :t==='new'?'지금 2학년은 부장·차장도 고를 수 있어요. 여러 개 골라도 돼요.':t==='member'?'부장·차장·부원 중 여러 개 골라도 돼요.':'여러 개 골라도 돼요.';
   const none=!seats.some(x=>x.checked);
