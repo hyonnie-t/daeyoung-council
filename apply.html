@@ -227,9 +227,10 @@ table.dt{width:100%;border-collapse:collapse;font-size:15px}
 const API='https://script.google.com/macros/s/AKfycbwRshPtn7P5sr_kedozgPopixxQhZiDsWqCZqUg4HXJmPJRZA-HLkFXPiRzePgV55e7TQ/exec';
 const DEADLINE_TEXT='12월 4일(금)';
 const SCHEDULE=[
-  ['신청','지금 ~ 12. 4.(금)'],
-  ['서류 심사','12. 7.~12. 11.'],
-  ['면접','2027년 1월 초(날짜는 따로 알려요)'],
+  ['온라인 신청(이 화면)','지금 ~ 12. 4.(금)'],
+  ['종이 지원서 내기','12. 4.(금)까지 학생회 담당 선생님께'],
+  ['1차 서류 심사','12월 중순 이후(날짜는 따로 알려요)'],
+  ['2차 면접(선생님·회장단) · 3차 부서별 면접(실습 등)','2027년 1월(날짜는 따로 알려요)'],
   ['임명','2027년 3월 초']
 ];
 // 부서별 하는 일 — 실제 기준(2026-11-02 정리). 자율질서부·행사진행부 설명은 초안이라 효니 확인 필요
@@ -245,26 +246,21 @@ const TRACKS={
   lead:{label:'부장·차장',desc:'지금 2학년이면 누구나(임원이 아니어도 돼요)'}
 };
 // type: long(긴 글) / short(한 줄) / choice(하나 고르기, options) / check(동의 상자)
+// 2026-11-24: 지원 글은 손으로 쓰는 종이 지원서로 받는다(효니 «투트랙»). 온라인은 명단·부서·지원 자리·확인만.
+// 예전 긴 글 문항 id(motive·plan·strength·review·next·lead_exp·lead_plan·lead_team)는 이미 낸 답이 있을 수 있어 다시 쓰지 않는다.
 const FORM={
-  new:[
-    {id:'motive',type:'long',label:'학생회 임원에 지원하는 까닭',hint:'왜 해 보고 싶은지 내 말로 써 주세요.',required:true,max:800},
-    {id:'plan',type:'long',label:'학생회에서 해 보고 싶은 일',hint:'행사, 캠페인, 바꾸고 싶은 학교생활 등 무엇이든 좋아요.',required:true,max:800},
-    {id:'strength',type:'long',label:'나의 장점이나 해 본 경험',hint:'반 활동, 동아리, 봉사 등. 없으면 비워 둬도 돼요.',required:false,max:600}
-  ],
-  member:[
-    {id:'review',type:'long',label:'올해 학생회 활동 돌아보기',hint:'잘한 일 하나, 아쉬웠던 일 하나를 써 주세요.',required:true,max:800},
-    {id:'next',type:'long',label:'내년에 더 해 보고 싶은 일',required:true,max:800}
-  ],
+  new:[],
+  member:[],
   lead:[
-    {id:'now_member',type:'choice',label:'지금 학생회 임원인가요?',options:['네, 지금 임원이에요','아니요'],required:true},
-    {id:'lead_exp',type:'long',label:'학생회나 학급·동아리에서 해 본 일',hint:'임원이었다면 올해 활동을, 아니라면 다른 경험을 써 주세요.',required:true,max:800},
-    {id:'lead_plan',type:'long',label:'부서를 이끌면서 하고 싶은 일',required:true,max:800},
-    {id:'lead_team',type:'long',label:'부원끼리 의견이 다를 때 나는 어떻게 할까요?',required:true,max:600}
+    {id:'now_member',type:'choice',label:'지금 학생회 임원인가요?',options:['네, 지금 임원이에요','아니요'],required:true}
   ],
   end:[
+    {id:'rec',type:'choice',label:'선생님께 학생회 지원을 권유(추천)받았나요?',hint:'추천을 받은 학생도 같은 신청서·지원서를 내고 같은 심사를 받아요.',options:['네','아니요'],required:true},
+    {id:'paper',type:'check',label:'지원 글은 종이 지원서에 손으로 써서 12. 4.(금)까지 따로 내야 한다는 것을 알아요.',required:true},
     {id:'promise_meet',type:'check',label:'회의와 행사에 빠지지 않고 참여할게요.',required:true},
     {id:'promise_rule',type:'check',label:'학생회 공통 규칙을 지킬게요.',required:true},
-    {id:'know_review',type:'check',label:'서류 심사 때 생활 태도(벌점 등)를 참고한다는 것을 알아요.',required:true}
+    {id:'know_review',type:'check',label:'서류 심사 때 생활 태도(벌점 등)를 참고한다는 것을 알아요.',required:true},
+    {id:'privacy',type:'check',label:'개인정보 수집·이용에 동의해요: 학번·이름·성별·지원 내용을 2027학년도 임원 선발에만 쓰고, 선발이 끝나면(2027. 3. 임명 뒤) 뽑히지 않은 학생의 자료는 지워요.',required:true}
   ]
 };
 const ERR={
@@ -416,7 +412,9 @@ function renderStudent(){
   ${INFO.open?'':`<p class="banner" role="status">지금은 신청을 받지 않아요. ${esc(DEADLINE_TEXT)}까지 열려 있을 때 내 주세요.</p>`}
   <section class="card" aria-labelledby="hSched"><h2 id="hSched">일정</h2>
     <ul class="steps">${SCHEDULE.map(s=>`<li><b>${esc(s[0])}</b><span>${esc(s[1])}</span></li>`).join('')}</ul>
+    <p class="note">이 화면은 <b>신청</b>만 받아요. 지원 글은 종이 지원서에 손으로 써서 따로 내요. 서류에 쓴 내용은 2차 면접에서 다시 물어봐요.</p>
     <p class="note">회장·부회장 선거에 나가는 학생도 미리 낼 수 있어요. 당선되면 이 신청은 취소되고, 아니면 그대로 심사해요.</p>
+    <p class="note">학생회는 모두 30명 이내예요. 2학년 신규 임원은 지원 상황을 보고 추가로 모집할 수 있고, 결원이 생기면 추가로 뽑을 수 있어요. 결과는 한 사람씩 따로 알려 줘요.</p>
   </section>
   <section class="card" aria-labelledby="hDept"><h2 id="hDept">부서별로 하는 일</h2>
     <div class="depts">${DEPTS.map(d=>`<div class="dept"><b>${esc(d.name)}</b><span>${esc(d.does)}</span></div>`).join('')}</div>
@@ -452,8 +450,8 @@ function renderStudent(){
     </div>
     <p class="note" id="prNote" hidden>홍보기획부를 고른 학생은 면접 전에 영상·포스터 같은 작품을 따로 낼 수 있어요. 자세한 건 따로 알려 줘요.</p>
     <div class="field"><label class="choice"><input type="checkbox" id="cand" name="cand"><span>12월 학생회장·부회장 선거에도 나가요<small>당선되면 이 신청은 취소돼요. 떨어지면 그대로 심사해요.</small></span></label></div>
-    ${Object.keys(TRACKS).map(k=>`<fieldset class="trackset" data-track="${k}" hidden disabled style="border:0;padding:0;min-width:0"><h3 class="section-title">${esc(TRACKS[k].label)} 질문</h3>${FORM[k].map(qHtml).join('')}</fieldset>`).join('')}
-    <h3 class="section-title">약속</h3>
+    ${Object.keys(TRACKS).map(k=>`<fieldset class="trackset" data-track="${k}" hidden disabled style="border:0;padding:0;min-width:0">${FORM[k].length?`<h3 class="section-title">${esc(TRACKS[k].label)} 질문</h3>`:''}${FORM[k].map(qHtml).join('')}</fieldset>`).join('')}
+    <h3 class="section-title">확인과 약속</h3>
     ${FORM.end.map(qHtml).join('')}
     <div class="field"><label for="pin">확인 번호 4자리 정하기<span class="req" aria-hidden="true">*</span></label>
       <span class="hint">${EDIT?'고친 뒤에는 이 번호가 새 확인 번호가 돼요.':'나중에 신청서를 고칠 때 써요. 친구에게 알려 주지 마세요.'}</span>
@@ -505,6 +503,8 @@ function readForm(raw){
     if(q.type==='check'){const el=f.querySelector('[name="'+q.id+'"]');answers[q.id]=!!(el&&el.checked)}
     else{const v=val(q.id).trim();if(v||q.required)answers[q.id]=v}
     labels[q.id]=q.label});
+  // 2026-11-24 전 긴 글로 낸 신청을 고칠 때: 화면에 없는 옛 답을 그대로 보낸다(서버가 답을 통째로 덮어쓰므로)
+  if(!raw&&EDIT&&EDIT.old)Object.keys(EDIT.old).forEach(k=>{if(!(k in answers)){answers[k]=EDIT.old[k];labels[k]=OLD_LABELS[k]}});
   return {sid:val('sid').trim(),name:val('name').trim(),gender:val('gender'),track:t,role:t==='lead'?val('role'):'',d1:val('d1'),d2:val('d2'),cand:!!f.querySelector('#cand').checked,pin:val('pin'),answers,labels};
 }
 function fillForm(d){
@@ -537,7 +537,7 @@ async function onSubmit(e){
     <p>${esc(sidLabel(v.sid))} ${esc(v.name)} · ${esc(TRACKS[v.track].label)} · ${esc(v.d1)}</p>
     <p class="sub" style="margin-top:var(--space-3)">고칠 때 쓰는 확인 번호예요. 잊지 않게 적어 두세요.</p>
     <div class="pinbox">${esc(v.pin)}</div>
-    <p class="muted">서류 심사는 12. 7.~12. 11.에 해요. 결과와 면접 날짜는 따로 알려 줘요.</p>
+    <p class="muted">이제 <b>종이 지원서</b>를 손으로 써서 12. 4.(금)까지 학생회 담당 선생님께 내 주세요. 결과와 면접 날짜는 한 사람씩 따로 알려 줘요.</p>
     <div class="row" style="margin-top:var(--space-4)"><button type="button" class="btn line" data-act="again">처음 화면으로</button></div></div>`;
   document.getElementById('doneCard').focus();
 }
@@ -552,7 +552,8 @@ document.getElementById('editDlg').addEventListener('close',async()=>{
   const sid=document.getElementById('eSid').value.trim(),pin=document.getElementById('ePin').value.trim();
   const r=await call({action:'apMine',sid,pin});
   if(!r.ok){err.textContent=errText(r.error);dlg.showModal();return}
-  EDIT={sid};renderStudent();fillForm(r.app);
+  const prev=(r.app&&r.app.answers)||{};
+  EDIT={sid,old:Object.fromEntries(Object.keys(prev).filter(k=>k in OLD_LABELS).map(k=>[k,prev[k]]))};renderStudent();fillForm(r.app);
   document.getElementById('pin').value='';
   toast('낸 신청서를 불러왔어요. 고친 뒤 다시 내 주세요.');
   document.getElementById('hForm').scrollIntoView({block:'start'});
@@ -561,7 +562,10 @@ document.getElementById('editDlg').addEventListener('close',async()=>{
 /* ═════════════ 교사 심사판 ═════════════ */
 let KEY=sess.get('apply-admin')||'';
 let BOARD=null;let VIEW={by:'dept',status:'',q:''};
-const qLabel=Object.fromEntries(Object.keys(FORM).flatMap(k=>FORM[k]).map(q=>[q.id,q.label]));
+// 2026-11-24 전 옛 긴 글 문항(이미 낸 답이 있으면 심사판에 이 이름으로 보임)
+const OLD_LABELS={motive:'학생회 임원에 지원하는 까닭',plan:'학생회에서 해 보고 싶은 일',strength:'나의 장점이나 해 본 경험',review:'올해 학생회 활동 돌아보기',next:'내년에 더 해 보고 싶은 일',lead_exp:'학생회나 학급·동아리에서 해 본 일',lead_plan:'부서를 이끌면서 하고 싶은 일',lead_team:'부원끼리 의견이 다를 때 나는 어떻게 할까요?'};
+const qLabel=Object.assign({},OLD_LABELS,Object.fromEntries(Object.keys(FORM).flatMap(k=>FORM[k]).map(q=>[q.id,q.label])));
+const isRec=r=>!!(r.answers&&r.answers.rec==='네');
 function renderLogin(msg){
   app.innerHTML=`${MOCK?'<p class="banner">시험 모드예요. 비밀번호는 test1이에요.</p>':''}
   <header class="top"><h1>임원 신청 심사판</h1><a class="link" href="apply.html${MOCK?'?mock=1':''}">학생 화면</a></header>
@@ -607,6 +611,7 @@ function renderBoard(){
       ${tile('부장·차장',by('부장·차장'))}
       ${tile('신규 남학생',male,false,'신규 남학생 '+pct+'%')}
       ${tile('회장 후보도 함',act.filter(r=>r.cand),false,'회장 후보도 함')}
+      ${tile('교사 추천',act.filter(isRec),false,'교사 추천')}
       ${tile('서류 통과',act.filter(r=>r.status==='서류 통과'))}
       ${tile('취소',all.filter(r=>r.status==='취소'))}
     </div>
@@ -640,7 +645,7 @@ function apCard(r){
   const ans=Object.keys(r.answers||{}).map(k=>{const v=r.answers[k];return `<dt>${esc(qLabel[k]||k)}</dt><dd>${esc(v===true?'예':v===false?'아니오':v)}</dd>`}).join('');
   return `<article class="ap reveal st-${esc(r.status)}" data-id="${esc(r.id)}">
     <header><div><b>${esc(r.name)}</b> <span class="muted">${esc(sidLabel(r.sid))} · ${esc(r.gender)}</span></div>
-      <div class="badges">${r.cand?'<span class="bd cand">회장 후보</span>':''}<span class="bd ${r.track==='부장·차장'?'lead':''}">${esc(r.track)}${r.role?' · '+esc(r.role==='부장·차장 모두'?'둘 다':r.role):''}</span>${r.status==='서류 통과'?'<span class="bd pass">서류 통과</span>':''}</div></header>
+      <div class="badges">${r.cand?'<span class="bd cand">회장 후보</span>':''}${isRec(r)?'<span class="bd">교사 추천</span>':''}<span class="bd ${r.track==='부장·차장'?'lead':''}">${esc(r.track)}${r.role?' · '+esc(r.role==='부장·차장 모두'?'둘 다':r.role):''}</span>${r.status==='서류 통과'?'<span class="bd pass">서류 통과</span>':''}</div></header>
     <div class="prefs">1지망 <b>${esc(r.d1)}</b>${r.d2?' · 2지망 '+esc(r.d2):''} <span class="muted">· ${esc(fmtTime(r.at))}${r.edits?' · 고침 '+r.edits+'번':''}</span></div>
     <div class="ctl"><label class="visually-hidden" for="st-${esc(r.id)}">${esc(r.name)} 심사 상태</label>
       <select id="st-${esc(r.id)}" data-status="${esc(r.id)}">${BOARD.statuses.map(s=>`<option ${s===r.status?'selected':''}>${esc(s)}</option>`).join('')}</select>
@@ -661,8 +666,8 @@ function renderGroups(){
   // 인쇄·전체 화면 캡처처럼 스크롤 없이 보는 경우에도 카드가 투명하게 남지 않게
   setTimeout(()=>box.querySelectorAll('.reveal:not(.show)').forEach(el=>el.classList.add('show')),1500);
 }
-const rowText=r=>[r.sid,r.name,r.gender,r.track+(r.role?'('+r.role+')':''),r.d1,r.d2||'',r.cand?'회장 후보':'',r.status].join('\t');
-const HEAD='학번\t이름\t성별\t구분\t1지망\t2지망\t회장 후보\t상태';
+const rowText=r=>[r.sid,r.name,r.gender,r.track+(r.role?'('+r.role+')':''),r.d1,r.d2||'',r.cand?'회장 후보':'',isRec(r)?'추천':'',r.status].join('\t');
+const HEAD='학번\t이름\t성별\t구분\t1지망\t2지망\t회장 후보\t교사 추천\t상태';
 function oneText(r){return rowText(r).split('\t').filter(Boolean).join(' / ')+'\n'+Object.keys(r.answers||{}).map(k=>'['+(qLabel[k]||k)+'] '+(r.answers[k]===true?'예':r.answers[k]===false?'아니오':r.answers[k])).join('\n')}
 let OPEN_LIST=null;
 function showList(i){
