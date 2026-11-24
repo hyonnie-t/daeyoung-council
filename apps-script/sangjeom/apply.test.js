@@ -103,6 +103,38 @@ A({ action: 'apAdminMark', id, status: '취소' });
 ok('취소된 신청은 못 고침', POST(base({ edit: true, pin: '5678' })).error === 'closed');
 ok('닫기', A({ action: 'apAdminSet', open: false }).accepting === false && POST(base({ sid: '10101' })).error === 'closed');
 
+/* ── 심사위원별 점수(2026-11-24) ── */
+const J = b => POST(b);
+ok('심사위원 더하기는 관리 비밀번호 필요', POST({ action: 'apAdminJudge', key: 'nope1', op: 'add', name: '회장' }).error === 'no_auth');
+const ja = A({ action: 'apAdminJudge', op: 'add', name: '회장' });
+const jb = A({ action: 'apAdminJudge', op: 'add', name: '=부회장' });
+ok('심사위원 더하기(번호는 응답에만)', ja.ok && /^[a-z2-9]{4}-[a-z2-9]{4}$/.test(ja.code) && ja.code !== jb.code && !JSON.stringify(props).includes(ja.code.replace('-', '')) && !ja.judges.some(j => 'hash' in j));
+ok('같은 이름 거부', A({ action: 'apAdminJudge', op: 'add', name: '회장' }).error === 'exists');
+ok('번호 틀리면 no_auth', J({ action: 'apJudge', jkey: 'aaaa-aaaa' }).error === 'no_auth');
+r = J({ action: 'apJudge', jkey: ja.code.toUpperCase().replace('-', ' ') });
+ok('대문자·띄어 써도 들어감, 심사용 칸만', r.ok && r.judge.name === '회장' && r.rows.length > 0 && r.rows.every(x => x.status === undefined && x.memo === undefined && x.answers === undefined) && !r.rows.some(x => x.id === id));
+const app2 = r.rows[0].id;
+ok('항목 빠지면 거부', J({ action: 'apJudgeScore', jkey: ja.code, app: app2, stage: 'doc', scores: { motive: 4, plan: 4, solve: 4 } }).error === 'bad_input');
+ok('만점 넘으면 거부', J({ action: 'apJudgeScore', jkey: ja.code, app: app2, stage: 'doc', scores: { motive: 6, plan: 4, solve: 4, drive: 4 } }).error === 'bad_input');
+ok('없는 단계 거부', J({ action: 'apJudgeScore', jkey: ja.code, app: app2, stage: 'x', scores: {} }).error === 'bad_input');
+ok('취소된 신청은 못 매김', J({ action: 'apJudgeScore', jkey: ja.code, app: id, stage: 'doc', scores: { motive: 4, plan: 4, solve: 4, drive: 4 } }).error === 'not_found');
+r = J({ action: 'apJudgeScore', jkey: ja.code, app: app2, stage: 'doc', scores: { motive: 4, plan: 5, solve: 3, drive: 4 }, memo: '구체적' });
+ok('점수 저장', r.ok && r.score.total === 16 && r.score.full);
+r = J({ action: 'apJudgeScore', jkey: ja.code, app: app2, stage: 'doc', scores: { motive: 5, plan: 5, solve: 3, drive: 4 } });
+ok('같은 단계 다시 저장은 덮어씀', r.ok && r.score.total === 17 && sheets['임원_심사점수'].rows.length === 2);
+J({ action: 'apJudgeScore', jkey: jb.code, app: app2, stage: 'doc', scores: { motive: 3, plan: 3, solve: 3, drive: 3 } });
+ok('다른 심사위원 점수는 안 보임', J({ action: 'apJudge', jkey: ja.code }).mine.length === 1);
+r = A({ action: 'apAdmin' });
+ok('관리 심사판에 사람별 점수·단계', r.judges.length === 2 && r.scores.filter(s => s.app === app2 && s.stage === 'doc').map(s => s.total).sort().join() === '12,17' && r.stages.length === 3);
+ok('심사위원 이름 수식 막음(시트)', sheets['임원_심사점수'].rows.some(x => String(x[2]).startsWith("'=")));
+const oldCode = ja.code;
+const re = A({ action: 'apAdminJudge', op: 'reissue', id: ja.judge.id });
+ok('번호 새로 만들면 옛 번호 막힘', re.ok && re.code !== oldCode && J({ action: 'apJudge', jkey: oldCode }).error === 'no_auth' && J({ action: 'apJudge', jkey: re.code }).ok);
+A({ action: 'apAdminJudge', op: 'toggle', id: jb.judge.id, on: false });
+ok('끈 심사위원은 못 들어옴, 점수는 남음', J({ action: 'apJudge', jkey: jb.code }).error === 'no_auth' && A({ action: 'apAdmin' }).scores.length === 2);
+for (let k = 0; k < 30; k++) J({ action: 'apJudge', jkey: 'zzzz-zz' + k });
+ok('틀린 번호 30번이면 잠시 막음', J({ action: 'apJudge', jkey: re.code }).error === 'busy');
+
 const fail = results.filter(x => x.startsWith('FAIL'));
 console.log(results.join('\n'));
 console.log(fail.length ? fail.length + ' FAIL' : 'ALL PASS ' + results.length);

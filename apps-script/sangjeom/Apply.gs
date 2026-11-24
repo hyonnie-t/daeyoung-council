@@ -7,6 +7,7 @@
  *  - 심사판 apply.html?teacher=1: 상점 관리 비밀번호(sjAdminGate_)로 연다(효니 결정 2026-11-14). 신청 열기·닫기, 2학년 신규 추가 모집,
  *    심사 상태·메모를 고친다. 벌점은 시트에 넣지 않는다(심사 때 e알리미에서 성실성 참고로만 본다, 2026-11-11 결정).
  *  - 문항은 apply.html의 FORM이 정한다(효니 «나중에 다시 고칠 수 있게»). 서버는 공통 칸만 검사하고 답은 JSON으로 그대로 둔다.
+ *  - 심사위원별 점수(2026-11-24): 심사위원마다 다른 입장 번호로 apply.html?judge=1에서 자기 점수만 매긴다(아래 «심사위원별 점수»).
  *  - 기본은 닫힘. 효니가 심사판에서 열 때만 받는다. AP_DEADLINE이 지나면 열어 둬도 받지 않는다(고치기도 막힘).
  * 응답: {ok:true, ...} 또는 {ok:false, error}
  *   error = closed / bad_input / grade(학년이 지원 구분과 안 맞음) / pin(확인 번호 틀림) / busy(틀린 횟수 상한) / exists(이미 낸 학번, 고치기로)
@@ -166,7 +167,10 @@ function apAdminPost_(data) {
   if (blocked) return blocked;
   const cfg = apConfig_();
   const rows = apRows_().rows.map(function (r) { return apView_(r, true); });
-  return json_({ ok: true, now: Date.now(), open: !!cfg.open, accepting: apAccepting_(cfg), past: apPastDeadline_(), deadline: AP_DEADLINE, g2New: !!cfg.g2New, rows: rows, statuses: AP_STATUSES });
+  // 심사위원별 점수 모아 보기(2026-11-24): 심사위원 목록(번호 HMAC는 빼고)과 모든 점수
+  const judges = apJudges_().map(apJudgePublic_);
+  const scores = apScoreRows_().rows.map(apScoreView_);
+  return json_({ ok: true, now: Date.now(), open: !!cfg.open, accepting: apAccepting_(cfg), past: apPastDeadline_(), deadline: AP_DEADLINE, g2New: !!cfg.g2New, rows: rows, statuses: AP_STATUSES, judges: judges, scores: scores, stages: AP_STAGES });
 }
 
 /* action=apAdminSet {key, open?, g2New?} → 신청 열기·닫기, 2학년 신규 추가 모집 */
@@ -206,4 +210,152 @@ function apAdminMarkPost_(data) {
   } finally { lock.releaseLock(); }
 }
 
-const AP_ROUTES = { apInfo: apInfoPost_, apSubmit: apSubmitPost_, apMine: apMinePost_, apAdmin: apAdminPost_, apAdminSet: apAdminSetPost_, apAdminMark: apAdminMarkPost_ };
+/* ═════════════ 심사위원별 점수(2026-11-24 효니 «심사위원판 인원별로 나눠서, 비번은 다르게») ═════════════
+ *  - 심사위원은 효니가 심사판에서 이름으로 더한다. 서버가 사람마다 다른 입장 번호를 만들어 한 번만 보여 주고 HMAC만 남긴다.
+ *    잊으면 «번호 새로 만들기»(옛 번호는 바로 막힘). 빼려면 «끄기»(매긴 점수는 남는다).
+ *  - 심사위원은 apply.html?judge=1에서 입장 번호로 들어와 자기 점수만 보고 매긴다. 다른 사람 점수·심사 상태·메모·교사 추천·확인 번호는 안 보인다.
+ *  - 점수는 «임원_심사점수» 시트에 (신청ID, 심사위원ID, 단계)마다 한 줄. 효니 심사판이 사람별 합계·평균으로 모아 보여 준다.
+ *  - 단계·항목·만점은 AP_STAGES가 정한다(화면은 서버가 준 대로 그린다). 항목을 바꾸면 이미 매긴 점수의 옛 항목은 합계에서 빠진다. */
+const AP_JUDGE_PROP = 'APPLY_2027_JUDGES';   // [{id, name, hash, on}]
+const AP_SCORE_SHEET = '임원_심사점수';
+const AP_SCORE_HEADERS = ['신청ID', '심사위원ID', '심사위원', '단계', '점수(JSON)', '합계', '메모', '고친 시각', '학번', '이름'];
+const APS = { APP: 0, JID: 1, JNAME: 2, STAGE: 3, JSON: 4, TOTAL: 5, MEMO: 6, AT: 7, SID: 8, NAME: 9 };
+const AP_STAGES = [
+  { id: 'doc', label: '1차 서류', items: [
+    { id: 'motive', label: '지원 동기·포부', max: 5 },
+    { id: 'plan', label: '행사 기획(우리 학교에 맞게)', max: 5 },
+    { id: 'solve', label: '갈등 해소·문제 해결', max: 5 },
+    { id: 'drive', label: '주도성·성실성 사례', max: 5 }] },
+  { id: 'talk', label: '2차 면접', items: [
+    { id: 'real', label: '서류 내용 확인(진정성)', max: 5 },
+    { id: 'speak', label: '말하기·소통', max: 5 },
+    { id: 'solve', label: '문제 해결', max: 5 },
+    { id: 'duty', label: '책임감·태도', max: 5 }] },
+  { id: 'dept', label: '3차 부서 면접', items: [
+    { id: 'task', label: '부서 실습', max: 5 },
+    { id: 'know', label: '부서 일 이해', max: 5 },
+    { id: 'team', label: '협력', max: 5 }] }
+];
+const AP_JUDGE_MAX = 12;
+const AP_JUDGE_WRONG_KEY = 'ap_judge_wrong';
+const AP_JUDGE_WRONG_MAX = 30;                // 모든 심사위원 합쳐 30분에 30번 틀리면 잠시 막는다
+const AP_CODE_CHARS = 'abcdefghjkmnpqrstuvwxyz23456789'; // 헷갈리는 0·o·1·l·i 뺌
+
+function apJudges_() {
+  const raw = PropertiesService.getScriptProperties().getProperty(AP_JUDGE_PROP);
+  if (raw) { try { const a = JSON.parse(raw); if (Array.isArray(a)) return a; } catch (e) { /* 깨졌으면 빈 목록 */ } }
+  return [];
+}
+function apSaveJudges_(a) { PropertiesService.getScriptProperties().setProperty(AP_JUDGE_PROP, JSON.stringify(a)); }
+function apJudgeHash_(code) { return saHmac_('apjudge:' + String(code == null ? '' : code).trim().toLowerCase().replace(/[\s-]/g, '')); }
+function apNewCode_() {
+  const b = Utilities.getUuid().replace(/-/g, '') + Utilities.getUuid().replace(/-/g, '');
+  let s = '';
+  for (let i = 0; i < 8; i++) s += AP_CODE_CHARS.charAt(parseInt(b.substr(i * 4, 4), 16) % AP_CODE_CHARS.length);
+  return s.slice(0, 4) + '-' + s.slice(4);
+}
+function apJudgePublic_(j) { return { id: j.id, name: j.name, on: j.on !== false }; }
+/* 심사위원 관문: 켜진 심사위원 중 번호가 맞는 사람. 틀리면 공통 횟수를 센다 */
+function apJudgeGate_(data) {
+  if ((Number(CacheService.getScriptCache().get(AP_JUDGE_WRONG_KEY)) || 0) >= AP_JUDGE_WRONG_MAX) return { err: sjErr_('busy') };
+  const code = String(data.jkey == null ? '' : data.jkey).trim();
+  if (!code) return { err: sjErr_('no_auth') };
+  const h = apJudgeHash_(code);
+  const j = apJudges_().filter(function (x) { return x.on !== false && x.hash === h; })[0];
+  if (!j) { sjCount_(AP_JUDGE_WRONG_KEY, AP_WRONG_SEC); return { err: sjErr_('no_auth') }; }
+  return { judge: j };
+}
+function apStage_(id) { return AP_STAGES.filter(function (s) { return s.id === id; })[0] || null; }
+function apScoreRows_() {
+  const sh = sjSheet_(AP_SCORE_SHEET, AP_SCORE_HEADERS);
+  const last = sh.getLastRow();
+  return { sh: sh, rows: last < 2 ? [] : sh.getRange(2, 1, last - 1, AP_SCORE_HEADERS.length).getValues() };
+}
+function apScoreView_(r) {
+  let sc = {};
+  try { sc = JSON.parse(r[APS.JSON] || '{}'); } catch (e) { sc = {}; }
+  const st = apStage_(String(r[APS.STAGE]));
+  // 합계는 지금 항목 기준으로 다시 센다(항목을 바꾼 뒤에도 화면과 맞게)
+  const total = st ? st.items.reduce(function (a, it) { const n = Number(sc[it.id]); return a + (Number.isInteger(n) ? n : 0); }, 0) : 0;
+  const full = !!st && st.items.every(function (it) { return Number.isInteger(Number(sc[it.id])) && sc[it.id] !== '' && sc[it.id] != null; });
+  return { app: String(r[APS.APP]), judge: String(r[APS.JID]), stage: String(r[APS.STAGE]), scores: sc, total: total, full: full, memo: String(r[APS.MEMO] || ''), at: sjTime_(r[APS.AT]) };
+}
+// 심사위원에게 보여 줄 신청서: 심사에 필요한 칸만(교사 추천·심사 상태·메모·확인 번호·답은 빼고), 취소는 빼고
+function apJudgeApp_(r) {
+  return { id: String(r[APC.ID]), sid: String(r[APC.SID]), name: String(r[APC.NAME]), gender: String(r[APC.GENDER]), track: String(r[APC.TRACK]),
+    cand: r[APC.CAND] === true || r[APC.CAND] === 'TRUE' || r[APC.CAND] === '예', d1: String(r[APC.D1]), d2: String(r[APC.D2]), role: String(r[APC.ROLE]) };
+}
+
+/* action=apJudge {jkey} → 내 이름, 단계·항목, 신청서(심사용 칸만), 내가 매긴 점수 */
+function apJudgePost_(data) {
+  const g = apJudgeGate_(data);
+  if (g.err) return g.err;
+  const apps = apRows_().rows.filter(function (r) { return String(r[APC.STATUS]) !== '취소'; }).map(apJudgeApp_);
+  const mine = apScoreRows_().rows.filter(function (r) { return String(r[APS.JID]) === g.judge.id; }).map(apScoreView_);
+  return json_({ ok: true, now: Date.now(), judge: apJudgePublic_(g.judge), stages: AP_STAGES, rows: apps, mine: mine });
+}
+
+/* action=apJudgeScore {jkey, app, stage, scores:{항목:점수}, memo} → 내 점수 저장(같은 신청서·단계면 덮어씀). 항목은 모두 채워야 한다 */
+function apJudgeScorePost_(data) {
+  const st = apStage_(String(data.stage || ''));
+  const raw = data.scores && typeof data.scores === 'object' && !Array.isArray(data.scores) ? data.scores : null;
+  if (!st || !raw) return sjErr_('bad_input');
+  const sc = {};
+  for (let i = 0; i < st.items.length; i++) {
+    const it = st.items[i], n = Number(raw[it.id]);
+    if (!Number.isInteger(n) || n < 1 || n > it.max) return sjErr_('bad_input');
+    sc[it.id] = n;
+  }
+  const memo = sjText_(data.memo == null ? '' : String(data.memo), 300);
+  const lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    const g = apJudgeGate_(data);
+    if (g.err) return g.err;
+    const a = apRows_().rows.filter(function (r) { return String(r[APC.ID]) === String(data.app); })[0];
+    if (!a || String(a[APC.STATUS]) === '취소') return sjErr_('not_found');
+    const t = apScoreRows_();
+    let i = -1;
+    for (let j = 0; j < t.rows.length; j++) {
+      const r = t.rows[j];
+      if (String(r[APS.APP]) === String(data.app) && String(r[APS.JID]) === g.judge.id && String(r[APS.STAGE]) === st.id) { i = j; break; }
+    }
+    const total = st.items.reduce(function (s, it) { return s + sc[it.id]; }, 0);
+    const row = [String(data.app), g.judge.id, sjText_(g.judge.name, 20), st.id, JSON.stringify(sc), total, memo, new Date(), String(a[APC.SID]), String(a[APC.NAME])];
+    if (i < 0) t.sh.appendRow(row);
+    else t.sh.getRange(i + 2, 1, 1, row.length).setValues([row]);
+    return json_({ ok: true, score: apScoreView_(row) });
+  } finally { lock.releaseLock(); }
+}
+
+/* action=apAdminJudge {key, op:add|reissue|toggle, name?, id?, on?} → 심사위원 더하기·번호 새로 만들기·끄고 켜기.
+ * add·reissue는 새 입장 번호를 이 응답에서만 돌려준다(시트·속성엔 HMAC만) */
+function apAdminJudgePost_(data) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    const blocked = sjAdminGate_(data, sjConfig_());
+    if (blocked) return blocked;
+    const list = apJudges_();
+    let code = null, j = null;
+    if (data.op === 'add') {
+      const name = sjText_(data.name, 20).replace(/^'/, '');
+      if (name.length < 1) return sjErr_('bad_input');
+      if (list.length >= AP_JUDGE_MAX) return sjErr_('bad_input');
+      if (list.some(function (x) { return x.name === name; })) return sjErr_('exists');
+      code = apNewCode_();
+      j = { id: 'j' + Utilities.getUuid().replace(/-/g, '').slice(0, 10), name: name, hash: apJudgeHash_(code), on: true };
+      list.push(j);
+    } else {
+      j = list.filter(function (x) { return x.id === String(data.id); })[0];
+      if (!j) return sjErr_('not_found');
+      if (data.op === 'reissue') { code = apNewCode_(); j.hash = apJudgeHash_(code); } // 켜고 끄기는 따로(꺼진 사람 번호를 새로 만들어도 꺼진 채, 검토에서 짚음)
+      else if (data.op === 'toggle' && typeof data.on === 'boolean') j.on = data.on;
+      else return sjErr_('bad_input');
+    }
+    apSaveJudges_(list);
+    return json_({ ok: true, judge: apJudgePublic_(j), code: code, judges: list.map(apJudgePublic_) });
+  } finally { lock.releaseLock(); }
+}
+
+const AP_ROUTES = { apInfo: apInfoPost_, apSubmit: apSubmitPost_, apMine: apMinePost_, apAdmin: apAdminPost_, apAdminSet: apAdminSetPost_, apAdminMark: apAdminMarkPost_, apAdminJudge: apAdminJudgePost_, apJudge: apJudgePost_, apJudgeScore: apJudgeScorePost_ };
