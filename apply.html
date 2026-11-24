@@ -6,7 +6,9 @@
 <meta name="robots" content="noindex">
 <title>2027 학생회 임원 신청</title>
 <link rel="icon" href="icon-32.png">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
 <style>
 /* 학생회 앱(index.html·sangjeom.html)과 같은 색. 학생은 폰 세로로 쓸 가능성이 높아 칸·버튼을 크게 둔다 */
 :root{
@@ -187,18 +189,136 @@ table.dt{width:100%;border-collapse:collapse;font-size:15px}
 .dt td.dim{color:var(--text3)}
 @media (prefers-reduced-motion:reduce){.pts span{transition:none}.pts input:checked+span{transform:none}}
 @media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}.toast{animation:none}.tip{transition:none}}
-/* 표지 그림(2026-11-20): 학생 신청서 화면 맨 위에만 둔다. 선생님 심사판엔 넣지 않는다. 글자 없는 장식 그림이라 alt="".
- * election.html .cover-banner와 같은 틀: 폰은 2:1, 768px 이상은 폭 720px 가운데에 12:5(낮은 가로 화면은 3:1)로 위아래를 조금 자른다.
- * 움직임: 처음 보일 때 한 번 살짝 떠오름(opacity·transform만). 움직임 줄이기 설정이면 끈다. */
-.cover-banner{margin:0 0 var(--space-3); border-radius:14px; overflow:hidden; aspect-ratio:2/1;
-  background:#efe4cf; border:1px solid rgba(80,60,30,.14); box-shadow:0 2px 10px rgba(60,40,20,.10);
-  animation:coverIn .5s ease-out both;}
-.cover-banner img{display:block; width:100%; height:100%; object-fit:cover;}
-@media (min-width:768px){ .cover-banner{aspect-ratio:12/5; max-width:720px; margin-inline:auto;} }
-@media (min-width:768px) and (max-height:860px){ .cover-banner{aspect-ratio:3/1;} }
-@keyframes coverIn{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;}}
-@media (prefers-reduced-motion: reduce){ .cover-banner{animation:none;} }
-@media print{ .cover-banner{display:none} }
+/* ═════ 학생 신청 화면(2026-11-24 새 옷, 효니 «너무 칙칙해») ═════
+ * 학교 모집 공고와 같은 색: 코발트 #203FFC 바탕 + 레몬 #FFE14D + 귤색 #FF7A1A + 흰색. 제목은 Black Han Sans, 본문은 Noto Sans KR.
+ * 신청서는 흰 카드 위에 두어 믿음 가게. 그림은 힉스필드로 만든 부서 점토 그림 4장(dept-*.webp)만 쓴다(코드로 그리지 않음).
+ * 선생님 심사판·심사위원판은 body.stu가 없어 예전 밝은 화면 그대로다.
+ * 움직임: 표지 글·그림이 처음 한 번 떠오름 / 일정·부서 카드는 보일 때 한 장씩(Scroll-triggered) / «내기» 단추는 아래 고정(Sticky).
+ * 움직임 줄이기 설정이면 모두 끈다. */
+body.stu{--cob:#203FFC;--cob-d:#1631D6;--ink:#0B1A66;--lemon:#FFE14D;--tang:#FF7A1A;
+  --accent:#203FFC;--accent-soft:#EEF1FF;--bg:#203FFC;background:var(--cob);color:#fff}
+body.stu .wrap{max-width:72rem;padding:var(--space-3) var(--space-3) var(--space-7)}
+@media (min-width:768px){body.stu .wrap{padding:var(--space-5) var(--space-5) var(--space-7)}}
+body.stu .card{color:var(--text);border:0;border-radius:20px;box-shadow:0 8px 0 var(--cob-d),0 16px 32px rgba(8,20,110,.35)}
+body.stu .banner{background:var(--lemon);color:var(--ink);font-weight:700}
+.display{font-family:'Black Han Sans','Noto Sans KR',sans-serif;font-weight:400;letter-spacing:-.01em;line-height:1.12}
+/* 표지 */
+.hero{display:grid;gap:var(--space-4);align-items:center;padding:var(--space-3) 0 var(--space-6)}
+.hero .kicker{display:inline-block;font-size:14px;font-weight:700;color:var(--ink);background:#fff;border-radius:999px;padding:var(--space-1) var(--space-3)}
+.hero h1{font-size:clamp(40px,11vw,76px);margin-top:var(--space-3);color:#fff;font-weight:400}
+.hero h1 .hl{color:var(--lemon)}
+.hero .hook{font-size:clamp(18px,4.6vw,24px);font-weight:700;margin-top:var(--space-3);color:#fff}
+.chips{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-top:var(--space-4)}
+.chip{display:inline-flex;align-items:center;gap:var(--space-1);min-height:40px;padding:0 var(--space-3);border-radius:999px;font-size:15px;font-weight:700;background:rgba(255,255,255,.14);color:#fff;border:2px solid rgba(255,255,255,.55)}
+.chip.lemon{background:var(--lemon);color:var(--ink);border-color:var(--lemon)}
+.chip.shut{background:#fff;color:var(--bad);border-color:#fff}
+.hero-cta{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-top:var(--space-4)}
+.hero-cta .btn{flex:1 1 12rem;min-height:56px;font-size:18px;border-radius:16px}
+.btn.cta{background:var(--lemon);color:var(--ink);box-shadow:0 4px 0 #C9A800}
+.btn.cta:active{transform:translateY(2px);box-shadow:0 2px 0 #C9A800}
+.btn.on-blue{background:transparent;color:#fff;border:2px solid #fff}
+body.stu .btn:focus-visible{outline:3px solid var(--lemon);outline-offset:3px}
+body.stu .card .btn:focus-visible{outline-color:var(--tang)}
+/* 표지 그림: 코발트 바탕 그림을 둥글게 잘라 바탕에 녹인다 */
+.hero-art{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--space-2);order:-1;max-width:28rem;width:100%;justify-self:center}
+.blob{display:block;width:100%;height:auto;aspect-ratio:1;border-radius:50%;object-fit:cover;-webkit-mask-image:radial-gradient(circle at 50% 50%,#000 60%,transparent 71%);mask-image:radial-gradient(circle at 50% 50%,#000 60%,transparent 71%)}
+.hero-art .blob{background:var(--cob)}
+.hero-art .blob:nth-child(odd){transform:rotate(-6deg)}
+.hero-art .blob:nth-child(even){transform:rotate(6deg) translateY(var(--space-2))}
+@media (min-width:768px){
+  .hero{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:var(--space-5)}
+  .hero-art{order:0;grid-template-columns:repeat(2,minmax(0,1fr));gap:0}
+  .hero-art .blob:nth-child(even){transform:rotate(6deg) translateY(var(--space-5))}
+}
+/* 첫 화면 한 번 떠오르기 */
+.rise{animation:heroIn .6s cubic-bezier(.2,.7,.3,1.2) both}
+.rise.d1{animation-delay:.08s}.rise.d2{animation-delay:.16s}.rise.d3{animation-delay:.24s}
+@keyframes heroIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+/* 본문 배치: 넓은 화면은 왼쪽 안내·오른쪽 신청서 */
+.stu-main{display:grid;gap:var(--space-4)}
+@media (min-width:1024px){.stu-main{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:var(--space-5);align-items:start}}
+.stu-side{display:grid;gap:var(--space-4);min-width:0}
+body.stu .stu-main .card{margin-bottom:0}
+.sec-h{display:flex;align-items:center;gap:var(--space-2);margin-bottom:var(--space-3)}
+.sec-h h2{font-family:'Black Han Sans','Noto Sans KR',sans-serif;font-weight:400;font-size:24px;color:var(--ink)}
+.sec-h .tag{flex:none;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:var(--tang);color:var(--ink);font-weight:900;font-size:15px}
+/* 일정: 세로 줄 */
+.tl{list-style:none;padding:0;position:relative}
+.tl li{position:relative;padding:0 0 var(--space-3) var(--space-5)}
+.tl li:last-child{padding-bottom:0}
+.tl li::before{content:'';position:absolute;left:5px;top:24px;bottom:0;width:2px;background:#D5DCFF}
+.tl li:last-child::before{display:none}
+.tl li::after{content:'';position:absolute;left:0;top:6px;width:12px;height:12px;border-radius:50%;background:#fff;border:3px solid var(--cob)}
+.tl li.now::after{background:var(--tang);border-color:var(--tang);box-shadow:0 0 0 4px #FFE3CF}
+.tl .when{display:block;font-size:14px;font-weight:700;color:var(--cob);overflow-wrap:anywhere}
+/* 고정 «내기» 막대가 Tab 포커스를 가리지 않게(검토 2026-11-24). 폰 가로·낮은 화면은 막대를 고정하지 않음 */
+html{scroll-padding-bottom:140px}
+@media (max-height:600px){body.stu .submitbar{position:static}html{scroll-padding-bottom:0}}
+.tl li.now .when{color:#B44A00}
+.tl b{display:block;font-size:17px;color:var(--text)}
+.tl small{display:block;font-size:14px;color:var(--text2)}
+.fine{font-size:14px;color:var(--text2);margin-top:var(--space-3)}
+/* 부서 카드 */
+.dgrid{display:grid;gap:var(--space-2)}
+@media (min-width:600px){.dgrid{grid-template-columns:1fr 1fr}}
+@media (min-width:1024px){.stu-side .dgrid{grid-template-columns:1fr}}
+.dcard{display:flex;align-items:center;gap:var(--space-3);background:var(--accent-soft);border-radius:16px;padding:var(--space-2) var(--space-3) var(--space-2) var(--space-2)}
+.dcard .blob{flex:none;width:72px;background:var(--cob)}
+.dcard b{display:block;font-size:17px;color:var(--ink)}
+.dcard span{display:block;font-size:14px;color:var(--text2);line-height:1.5}
+/* 꼭 알아 두세요 */
+.notes{list-style:none;padding:0;display:grid;gap:var(--space-2)}
+.notes li{display:flex;gap:var(--space-2);font-size:15px;line-height:1.55}
+.notes li>span:first-child{flex:none;width:24px;text-align:center}
+.notes b{color:var(--ink)}
+/* 신청서 */
+body.stu #applyForm{padding:var(--space-4) var(--space-3) 0}
+@media (min-width:768px){body.stu #applyForm{padding:var(--space-5) var(--space-5) 0}}
+.fstep{margin-top:var(--space-5);padding-top:var(--space-4);border-top:2px dashed #DDE2FF}
+.fstep.first{margin-top:var(--space-4);padding-top:0;border-top:0}
+.fstep>.sec-h{margin-bottom:var(--space-2)}
+.fstep>.sec-h h3{font-size:19px;font-weight:900;color:var(--ink)}
+.fstep>.sec-h .tag{width:32px;height:32px;font-size:14px;background:var(--cob);color:#fff}
+body.stu .choice{border-width:2px;border-radius:14px;padding:var(--space-2) var(--space-3);align-items:center;min-height:56px}
+body.stu .choice input{margin-top:0}
+body.stu .choice:has(input:checked){box-shadow:0 0 0 1px var(--cob) inset}
+.choice.big{min-height:64px;align-items:center;font-weight:700}
+.choice.big small{font-weight:400}
+.choices.seats{grid-template-columns:repeat(3,1fr)}
+.choices.seats .choice{justify-content:center;align-items:center;font-weight:700}
+.choice:has(input:disabled){opacity:.45;cursor:not-allowed;background:var(--surface2)}
+/* 그림 있는 부서 고르기 */
+.dpick{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2)}
+@media (min-width:600px){.dpick.four{grid-template-columns:repeat(4,1fr)}}
+.dopt{position:relative;display:flex;flex-direction:column;align-items:center;gap:var(--space-1);padding:var(--space-2);border:2px solid var(--border);border-radius:16px;background:#fff;cursor:pointer;text-align:center;min-height:48px;transition:transform .15s ease-out,border-color .15s ease-out}
+.dopt input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.dopt .blob{width:min(88px,70%);background:var(--cob)}
+.dopt b{font-size:15px;color:var(--ink);line-height:1.3}
+.dopt.none{justify-content:center;font-weight:700;color:var(--text2)}
+.dopt:has(input:checked){border-color:var(--cob);background:var(--accent-soft);box-shadow:0 0 0 1px var(--cob) inset}
+.dopt:has(input:checked)::after{content:'✓';position:absolute;top:var(--space-2);right:var(--space-2);width:24px;height:24px;border-radius:50%;background:var(--tang);color:var(--ink);font-weight:900;font-size:14px;line-height:24px}
+.dopt:has(input:focus-visible){outline:3px solid var(--cob);outline-offset:2px}
+.dopt:has(input:disabled){opacity:.4;cursor:not-allowed}
+.dopt .rank{font-size:12px;color:var(--text2)}
+.dopt .rank:empty{display:none}
+.dpick.five .dopt.none{grid-column:1/-1;flex-direction:row}
+@media (min-width:600px){.dpick.five{grid-template-columns:repeat(4,1fr)}}
+html:has(body.stu){scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html:has(body.stu){scroll-behavior:auto}}
+.field:has(:user-invalid) .dopt,.field.inv .dopt{border-color:var(--bad)}
+.privacy{font-size:14px;color:var(--text2);background:var(--surface2);border-radius:12px;padding:var(--space-2) var(--space-3);margin:0 0 var(--space-2);list-style:none}
+.privacy li{padding:var(--space-1) 0}
+.privacy b{color:var(--text)}
+body.stu .submitbar{background:rgba(255,255,255,.96);margin:var(--space-5) calc(-1*var(--space-3)) 0;border-radius:0 0 20px 20px;border-top:1px solid #DDE2FF}
+@media (min-width:768px){body.stu .submitbar{margin-inline:calc(-1*var(--space-5));padding-inline:var(--space-5)}}
+body.stu .submitbar .btn[type=submit]{background:var(--tang);color:var(--ink);min-height:56px;font-size:18px;border-radius:16px;box-shadow:0 4px 0 #C45500}
+body.stu .done{max-width:36rem;margin:var(--space-6) auto 0}
+body.stu .done h2{font-family:'Black Han Sans','Noto Sans KR',sans-serif;font-weight:400;font-size:28px;color:var(--ink)}
+.done .blob{width:120px;margin:0 auto;background:var(--cob)}
+.foot{text-align:center;color:#fff;font-size:13px;margin-top:var(--space-5);opacity:.85}
+@media (hover:hover){.dopt:hover{transform:translateY(-2px)}}
+@media (prefers-reduced-motion:reduce){.rise{animation:none}.dopt{transition:none}.dopt:hover{transform:none}.btn.cta:active{transform:none}}
+@media print{.hero-art,.submitbar{display:none}body.stu{background:#fff;color:#000}}
 </style>
 </head>
 <body>
@@ -248,50 +368,60 @@ table.dt{width:100%;border-collapse:collapse;font-size:15px}
 const API='https://script.google.com/macros/s/AKfycbwRshPtn7P5sr_kedozgPopixxQhZiDsWqCZqUg4HXJmPJRZA-HLkFXPiRzePgV55e7TQ/exec';
 const DEADLINE_TEXT='12월 4일(금)';
 const SCHEDULE=[
-  // 2026-11-24 효니: 신청이 적으면 1주(12. 11.) 연장 — 연장하면 여기·DEADLINE_TEXT·Apply.gs AP_DEADLINE을 같이 고친다
-  ['온라인 신청(이 화면)','지금 ~ 12. 4.(금) (신청이 적으면 12. 11.(금)까지 늘어날 수 있어요)'],
-  ['종이 지원서 내기','12. 4.(금)까지 창의인성교육부(학생회 담당 선생님)에'],
-  ['1차 서류 심사','12월 중순'],
-  ['면접 볼 사람 안내','12. 21.~12. 24. 중'],
-  ['2차 면접(선생님·회장단) · 3차 부서별 면접(실습 등)','2027. 1. 4.(월)~1. 5.(화) 중 (지금 임원과 새로 지원한 학생은 다른 날)'],
-  ['결과 알림','2027. 1. 6.(수) 한 사람씩 알린 뒤, 이름 일부를 가린 포스터로 전교생에게 알려요'],
-  ['첫 학생회 회의','2027. 1. 7.(목) 합격자 모두 참석'],
-  ['임명','2027년 3월 초']
+  // 2026-11-24 종이 지원서 수정본과 같은 글. 신청이 적으면 1주(12. 11.) 연장 — 연장하면 여기·DEADLINE_TEXT·Apply.gs AP_DEADLINE을 같이 고친다
+  // [무엇, 언제, 덧붙임]. 첫 줄이 «지금»(귤색 점)
+  ['온라인 신청·지원서 내기','11. 25.(수)~12. 4.(금)','신청이 적으면 12. 11.(금)까지 연장'],
+  ['1차 서류 심사','12월 중순',''],
+  ['면접 대상 안내','12. 21.(월)~12. 24.(목) 중',''],
+  ['2차 면접·3차 부서별 면접','2027. 1. 4.(월)~1. 5.(화) 중','3차는 실습이 있을 수 있음'],
+  ['결과 알림','1. 6.(수)','지원자에게 개별 알림 후 합격자 명단을 전교생에게 게시'],
+  ['첫 회의','1. 7.(목)','합격자 모두 참석']
 ];
-// 부서별 하는 일 — 실제 기준(2026-11-02 정리). 자율질서부·행사진행부 설명은 초안이라 효니 확인 필요
+// 부서별 하는 일 — 2026-11-24 종이 지원서 수정본 그대로. 순서도 지원서와 같게. img는 부서 점토 그림(힉스필드, 2026-11-24)
 const DEPTS=[
-  {name:'자율질서부',does:'질서 캠페인, 학교 규칙을 함께 지키는 활동'},
-  {name:'알림부',does:'«대영알리미»로 학생회 소식 전하기'},
-  {name:'행사진행부',does:'학생의 날·축제 같은 학생회 행사 준비와 진행'},
-  {name:'홍보기획부',does:'행사 홍보 영상·포스터 만들기, 학생회 SNS'}
+  {name:'알림부',does:'학교 소식과 행사를 «대영알리미»로 알리는 부서',img:'dept-alrim.webp'},
+  {name:'행사진행부',does:'학생회 행사를 계획하고 진행하는 부서',img:'dept-event.webp'},
+  {name:'홍보기획부',does:'행사 홍보 영상·포스터를 만들고 SNS를 관리하는 부서',img:'dept-pr.webp'},
+  {name:'자율질서부',does:'학생회 행사를 진행할 때 각종 질서 유지를 담당하는 부서',img:'dept-order.webp'}
 ];
+// 지원 구분(2026-11-24 종이 지원서 수정본): 신규 임원 / 기존 임원 둘. stored는 시트에 적히는 이름(Apply.gs AP_TRACKS, 이미 받은 신청과 묶으려고 그대로 둠).
+// lead(부장·차장)는 없어진 옛 구분 — 학생 화면엔 안 보이고, 이미 받은 신청을 심사판에서 보이게·고치기에서 새 구분으로 옮기려고만 남긴다.
 const TRACKS={
-  new:{label:'신규 임원',desc:'지금 학생회 임원이 아닌 1학년'},
-  member:{label:'기존 임원 계속',desc:'지금 학생회 임원이고 내년에도 계속 할래요'},
-  lead:{label:'부장·차장',desc:'지금 2학년이면 누구나(임원이 아니어도 돼요)'}
+  new:{label:'신규 임원',stored:'신규 임원',desc:'지금 학생회 임원이 아닌 1·2학년'},
+  member:{label:'기존 임원',stored:'기존 임원 계속',desc:'지금 학생회 임원'},
+  lead:{label:'부장·차장(옛 구분)',stored:'부장·차장',legacy:true}
 };
-// type: long(긴 글) / short(한 줄) / choice(하나 고르기, options) / check(동의 상자)
+const SEATS=['부장','차장','부원']; // 지원 자리, 여러 개 고름. 시트엔 «부장·차장·부원»처럼 이어 적는다(Apply.gs AP_SEATS)
+// type: long(긴 글) / short(한 줄) / choice(하나 고르기, options, inline이면 옆으로) / check(동의 상자, box면 위에 안내 목록)
 // 2026-11-24: 지원 글은 손으로 쓰는 종이 지원서로 받는다(효니 «투트랙»). 온라인은 명단·부서·지원 자리·확인만.
-// 예전 긴 글 문항 id(motive·plan·strength·review·next·lead_exp·lead_plan·lead_team)는 이미 낸 답이 있을 수 있어 다시 쓰지 않는다.
+// 예전 문항 id(motive·plan·strength·review·next·lead_exp·lead_plan·lead_team·now_member)는 이미 낸 답이 있을 수 있어 다시 쓰지 않는다.
 const FORM={
   new:[],
-  member:[],
-  lead:[
-    {id:'now_member',type:'choice',label:'지금 학생회 임원인가요?',options:['네, 지금 임원이에요','아니요'],required:true}
+  member:[
+    {id:'now_dept',type:'choice',label:'지금 부서',options:DEPTS.map(d=>d.name),inline:true,required:true}
   ],
+  lead:[],
   end:[
-    {id:'rec',type:'choice',label:'선생님께 학생회 지원을 권유(추천)받았나요?',hint:'추천을 받은 학생도 같은 신청서·지원서를 내고 같은 심사를 받아요.',options:['네','아니요'],required:true},
-    {id:'paper',type:'check',label:'지원 글은 종이 지원서에 손으로 써서 12. 4.(금)까지 따로 내야 한다는 것을 알아요.',required:true},
-    {id:'promise_meet',type:'check',label:'회의와 행사에 빠지지 않고 참여할게요.',required:true},
-    {id:'promise_rule',type:'check',label:'학생회 공통 규칙을 지킬게요.',required:true},
+    {id:'rec',type:'choice',label:'선생님께 학생회 지원을 권유(추천)받았나요?',hint:'추천을 받은 학생도 같은 지원서를 내고 같은 과정(서류·면접)을 거쳐요.',options:['네','아니요'],inline:true,required:true},
+    {id:'paper',type:'check',label:'지원서는 종이에 직접 손으로 써서 12. 4.(금)까지 따로 내요. 생성형 AI로 대신 쓰면 불이익이 있다는 것을 알아요.',required:true},
+    {id:'promise_meet',type:'check',label:'회의와 행사에 빠지지 않고, 사정이 있으면 미리 알릴게요.',required:true},
+    {id:'promise_contact',type:'check',label:'휴대 전화를 꺼 두는 등 연락이 닿지 않는 일이 없도록 할게요.',required:true},
+    {id:'promise_helper',type:'check',label:'학교 행사의 진행 도우미로 자주, 배우는 자세로 참여할게요.',required:true},
+    {id:'promise_rule',type:'check',label:'학생 대표로서 학교 규칙과 학생회 약속을 지킬게요.',required:true},
+    {id:'promise_kind',type:'check',label:'친구들과 사이좋게 지내고, 다른 사람에게 피해를 주거나 선생님께 무례하게 행동하지 않을게요.',required:true},
     {id:'know_review',type:'check',label:'서류 심사 때 생활 태도(벌점 등)를 참고한다는 것을 알아요.',required:true},
-    {id:'privacy',type:'check',label:'개인정보 수집·이용에 동의해요: 학번·이름·성별·지원 내용을 2027학년도 임원 선발·합격 안내(포스터에는 이름 일부를 가림)에만 쓰고, 선발이 끝나면(2027. 3. 임명 뒤) 뽑히지 않은 학생의 자료는 지워요.',required:true}
+    {id:'privacy',type:'check',label:'개인정보 수집·이용에 동의해요.',required:true,box:[
+      ['수집 항목','학번, 이름, 성별, 지원 부서·자리, 교사 추천 여부, 회장단 후보 여부'],
+      ['이용 목적','2027학년도 학생회 임원 선발, 합격 안내(전체 공고에는 이름 일부를 가려 게시)'],
+      ['보관 기간','선발이 끝나면(2027. 3. 임명 뒤) 선발되지 않은 학생의 자료는 파기해요.'],
+      ['동의하지 않으면','동의하지 않을 수 있지만, 동의하지 않으면 지원할 수 없어요.']
+    ]}
   ]
 };
 const ERR={
   closed:'지금은 신청을 받지 않아요(마감했거나 아직 열리지 않았어요).',
   bad_input:'빠진 칸이 있어요. 다시 확인해 주세요.',
-  grade:'학번 학년과 지원 구분이 맞지 않아요. 신규 임원은 1학년, 부장·차장은 2학년이에요.',
+  grade:'학번 학년과 지원 구분·자리가 맞지 않아요. 지금 1·2학년만 낼 수 있고, 신규 임원 중 부장·차장은 지금 2학년만 골라요.',
   pin:'확인 번호가 맞지 않아요.',
   busy:'확인 번호를 여러 번 틀렸어요. 30분 뒤에 다시 하거나 선생님께 말씀드려 주세요.',
   exists:'이 학번으로 이미 낸 신청서가 있어요. 위의 «낸 신청서 고치기»로 고쳐 주세요.',
@@ -303,6 +433,13 @@ const ERR={
   not_ready:'아직 준비 중이에요. 선생님께 말씀드려 주세요.'
 };
 const errText=e=>ERR[e]||'문제가 생겼어요. 다시 해 주세요.';
+// 시트에 적힌 구분 → 화면 이름, 자리 글 → 짧게(옛 «부장·차장 모두»도), 부장·차장을 바라는지
+const trackKey=stored=>Object.keys(TRACKS).find(k=>TRACKS[k].stored===stored)||'';
+const tName=r=>{const k=trackKey(r.track);return k?TRACKS[k].label:r.track};
+const roleShort=t=>t==='부장·차장 모두'?'부장·차장':String(t||'');
+const wantsLead=r=>/부장|차장/.test(String(r.role||''));
+// 시트 자리 글 → 배열(Apply.gs apSeatsOf_와 같게)
+const seatsOf=t=>{t=String(t||'');if(t==='부장·차장 모두')return ['부장','차장'];const p=t.split('·');return SEATS.filter(x=>p.includes(x))};
 const Q=new URLSearchParams(location.search);
 const IS_TEACHER=Q.has('teacher'), IS_JUDGE=Q.has('judge'), MOCK=Q.has('mock');
 const app=document.getElementById('app');
@@ -327,11 +464,15 @@ async function call(body,timeout=30000){
 }
 
 /* ── 시험 모드(?mock=1): Apply.gs와 같은 규칙을 이 브라우저 안에서 흉내 낸다. 가짜 학생만 들어 있다 ── */
-const MOCK_KEY='apply2027-mock';
+const MOCK_KEY='apply2027-mock2'; // 2026-11-24 새 지원서로 가짜 데이터를 바꿔 키도 바꿈(옛 키는 그냥 남음)
 function mockDb(){let d=null;try{d=JSON.parse(store.get(MOCK_KEY)||'null')}catch(e){}
-  if(!d){d={open:true,g2New:false,rows:[]};
-    const fake=[['10101','시험학생가','여','new','알림부','홍보기획부',false],['10215','시험학생나','남','new','자율질서부','행사진행부',false],['10322','시험학생다','여','new','홍보기획부','',true],['10408','시험학생라','남','new','행사진행부','자율질서부',false],['10630','시험학생마','여','member','알림부','',false],['20107','시험학생바','여','lead','행사진행부','홍보기획부',true],['20211','시험학생사','남','lead','자율질서부','',false],['20519','시험학생아','여','member','홍보기획부','알림부',false]];
-    fake.forEach((f,i)=>d.rows.push({id:'m'+i,at:Date.now()-86400000*(8-i),edit:0,sid:f[0],name:f[1],gender:f[2],track:TRACKS[f[3]].label,cand:f[6],d1:f[4],d2:f[5],role:f[3]==='lead'?(i%2?'부장':'부장·차장 모두'):'',answers:f[3]==='new'?{motive:'친구들이 즐거운 학교를 만들고 싶어요.',plan:'점심시간 음악 신청 방송',promise_meet:true,promise_rule:true,know_review:true}:f[3]==='member'?{review:'캠페인 준비를 끝까지 했어요. 회의 기록이 아쉬웠어요.',next:'학생의 날 부스',promise_meet:true,promise_rule:true,know_review:true}:{now_member:i===6?'아니요':'네, 지금 임원이에요',lead_exp:'학급 회장',lead_plan:'부서 회의를 짧고 자주',lead_team:'모두 말해 보고 투표해요',promise_meet:true,promise_rule:true,know_review:true},pin:'1234',status:i===1?'서류 통과':'접수',memo:'',edits:0}));
+  if(!d){d={open:true,rows:[]};
+    // [학번, 이름, 성별, 구분, 1지망, 2지망, 회장 후보, 자리, 지금 부서] — 마지막 줄은 옛 «부장·차장» 구분(긴 글 답 포함)
+    const fake=[['10101','시험학생가','여','new','알림부','홍보기획부',false,'부원'],['10215','시험학생나','남','new','자율질서부','행사진행부',false,'부원'],['10322','시험학생다','여','new','홍보기획부','',true,'부원'],['20408','시험학생라','남','new','행사진행부','자율질서부',false,'부장·차장·부원'],['10630','시험학생마','여','member','알림부','',false,'부원','알림부'],['20107','시험학생바','여','member','행사진행부','홍보기획부',true,'부장','행사진행부'],['20519','시험학생아','여','member','홍보기획부','알림부',false,'차장·부원','홍보기획부'],['20211','시험학생사','남','lead','자율질서부','',false,'부장·차장 모두']];
+    const ok={paper:true,promise_meet:true,promise_rule:true,know_review:true,privacy:true};
+    fake.forEach((f,i)=>d.rows.push({id:'m'+i,at:Date.now()-86400000*(8-i),edit:0,sid:f[0],name:f[1],gender:f[2],track:TRACKS[f[3]].stored,cand:f[6],d1:f[4],d2:f[5],role:f[7],
+      answers:f[3]==='lead'?{now_member:'아니요',lead_exp:'학급 회장',lead_plan:'부서 회의를 짧고 자주',lead_team:'모두 말해 보고 투표해요',promise_meet:true,promise_rule:true,know_review:true}:Object.assign(f[8]?{now_dept:f[8]}:{},{rec:i===2?'네':'아니요'},ok),
+      pin:'1234',status:i===1?'서류 통과':'접수',memo:'',edits:0}));
   }return d}
 function mockSave(d){store.set(MOCK_KEY,JSON.stringify(d))}
 const MOCK_STAGES=[{id:'doc',label:'1차 서류',items:[{id:'motive',label:'지원 동기·포부',max:5},{id:'plan',label:'행사 기획(우리 학교에 맞게)',max:5},{id:'solve',label:'갈등 해소·문제 해결',max:5},{id:'drive',label:'주도성·성실성 사례',max:5}]},{id:'talk',label:'2차 면접',items:[{id:'real',label:'서류 내용 확인(진정성)',max:5},{id:'speak',label:'말하기·소통',max:5},{id:'solve',label:'문제 해결',max:5},{id:'duty',label:'책임감·태도',max:5}]},{id:'dept',label:'3차 부서 면접',items:[{id:'task',label:'부서 실습',max:5},{id:'know',label:'부서 일 이해',max:5},{id:'team',label:'협력',max:5}]}];
@@ -353,24 +494,30 @@ async function mockCall(b){
   }
   const view=(r,priv)=>{const o=Object.assign({},r);delete o.pin;if(!priv){delete o.status;delete o.memo}else o.pinless=!r.pin;return o};
   const tk=Object.keys(TRACKS),rk={'':'',head:'부장',vice:'차장',any:'부장·차장 모두'};
-  if(A==='apInfo')return {ok:true,open:d.open,g2New:d.g2New};
+  if(A==='apInfo')return {ok:true,open:d.open};
   if(A==='apSubmit'){
     if(!d.open)return {ok:false,error:'closed'};
     const g=String(b.sid)[0];
-    if(!/^[1-3]\d{4}$/.test(b.sid)||!/^\d{4}$/.test(b.pin)||!b.name||!b.d1||b.d1===b.d2)return {ok:false,error:'bad_input'};
-    if(!(b.track==='new'?(g==='1'||(g==='2'&&d.g2New)):b.track==='lead'?g==='2':(g==='1'||g==='2')))return {ok:false,error:'grade'};
+    if(!/^[1-3]\d{4}$/.test(b.sid)||!/^\d{4}$/.test(b.pin)||!b.name||!TRACKS[b.track]||!b.d1||b.d1===b.d2)return {ok:false,error:'bad_input'};
+    // 자리: 새 화면은 roles 배열, 옛 화면(lead)은 role 키 — Apply.gs와 같게
+    let role;
+    if(b.track==='lead'||b.roles==null){if(!((b.role||'') in rk)||(b.track==='lead'&&!b.role))return {ok:false,error:'bad_input'};role=rk[b.role||'']}
+    else{if(!Array.isArray(b.roles)||!b.roles.length||b.roles.some(x=>!SEATS.includes(x)))return {ok:false,error:'bad_input'};
+      const seats=SEATS.filter(x=>b.roles.includes(x));if(b.track==='new'&&g!=='2'&&seats.some(x=>x!=='부원'))return {ok:false,error:'grade'};role=seats.join('·')}
     const r=d.rows.find(x=>x.sid===b.sid);
-    const val={sid:b.sid,name:b.name,gender:b.gender,track:TRACKS[b.track].label,cand:b.cand===true,d1:b.d1,d2:b.d2||'',role:rk[b.role||''],answers:b.answers};
+    const gradeOk=b.track==='lead'?g==='2':(g==='1'||g==='2');
+    if(!(r&&b.edit&&r.track===TRACKS[b.track].stored)&&!gradeOk)return {ok:false,error:'grade'};
+    const val={sid:b.sid,name:b.name,gender:b.gender,track:TRACKS[b.track].stored,cand:b.cand===true,d1:b.d1,d2:b.d2||'',role,answers:b.answers};
     if(!r){if(b.edit)return {ok:false,error:'not_found'};d.rows.push(Object.assign({id:'m'+Date.now(),at:Date.now(),edit:0,pin:b.pin,status:'접수',memo:'',edits:0},val));mockSave(d);return {ok:true,created:true}}
     if(!b.edit)return {ok:false,error:'exists'};
     if(r.pin&&r.pin!==b.pin)return {ok:false,error:'pin'};
     if(r.status==='취소')return {ok:false,error:'closed'};
     Object.assign(r,val,{edit:Date.now(),pin:b.pin,edits:r.edits+1});mockSave(d);return {ok:true,created:false}}
   if(A==='apMine'){const r=d.rows.find(x=>x.sid===b.sid);if(!r)return {ok:false,error:'not_found'};if(r.pin&&r.pin!==b.pin)return {ok:false,error:'pin'};
-    const v=view(r,false);v.track=tk.find(k=>TRACKS[k].label===v.track)||'';v.role=Object.keys(rk).find(k=>k&&rk[k]===v.role)||'';return {ok:true,app:v,open:d.open}}
+    const v=view(r,false);v.track=tk.find(k=>TRACKS[k].stored===v.track)||'';v.roles=seatsOf(v.role);v.role=Object.keys(rk).find(k=>k&&rk[k]===v.role)||'';return {ok:true,app:v,open:d.open}}
   if(!adminOk)return {ok:false,error:'no_auth'};
   const pub=j=>({id:j.id,name:j.name,on:j.on});
-  if(A==='apAdmin')return {ok:true,now:Date.now(),open:d.open,accepting:d.open,g2New:d.g2New,rows:d.rows.map(r=>view(r,true)),statuses:['접수','서류 통과','보류','불합격','취소'],judges:d.judges.map(pub),scores:d.scores.map(sv),stages:MOCK_STAGES};
+  if(A==='apAdmin')return {ok:true,now:Date.now(),open:d.open,accepting:d.open,rows:d.rows.map(r=>view(r,true)),statuses:['접수','서류 통과','보류','불합격','취소'],judges:d.judges.map(pub),scores:d.scores.map(sv),stages:MOCK_STAGES};
   if(A==='apAdminJudge'){
     const mk=()=>{let c='';for(let i=0;i<8;i++)c+='abcdefghjkmnpqrstuvwxyz23456789'[Math.floor(Math.random()*31)];return c};
     let code=null,j;
@@ -378,7 +525,7 @@ async function mockCall(b){
     else{j=d.judges.find(x=>x.id===b.id);if(!j)return {ok:false,error:'not_found'};if(b.op==='reissue'){code=mk();j.code=code}else if(b.op==='toggle'&&typeof b.on==='boolean')j.on=b.on;else return {ok:false,error:'bad_input'}}
     mockSave(d);return {ok:true,judge:pub(j),code:code&&code.slice(0,4)+'-'+code.slice(4),judges:d.judges.map(pub)};
   }
-  if(A==='apAdminSet'){if(typeof b.open==='boolean')d.open=b.open;if(typeof b.g2New==='boolean')d.g2New=b.g2New;mockSave(d);return {ok:true,open:d.open,accepting:d.open,g2New:d.g2New}}
+  if(A==='apAdminSet'){if(typeof b.open==='boolean')d.open=b.open;mockSave(d);return {ok:true,open:d.open,accepting:d.open}}
   if(A==='apAdminMark'){const r=d.rows.find(x=>x.id===b.id);if(!r)return {ok:false,error:'not_found'};if(b.status!=null)r.status=b.status;if(b.memo!=null)r.memo=b.memo;if(b.resetPin)r.pin='';mockSave(d);return {ok:true,row:view(r,true)}}
   return {ok:false,error:'bad_input'};
 }
@@ -434,79 +581,121 @@ document.addEventListener('change',e=>{const f=e.target.closest&&e.target.closes
 document.addEventListener('invalid',e=>{const f=e.target.closest&&e.target.closest('.field');if(f)f.dataset.touched='1';syncAria(e.target)},true);
 
 /* ═════════════ 학생 화면 ═════════════ */
-let INFO={open:false,g2New:false};
-let EDIT=null; // {sid} 고치는 중
+let INFO={open:false};
+let EDIT=null; // {sid, old} 고치는 중
 const DRAFT_KEY='apply2027-draft';
 const fid=q=>'q_'+q.id;
+const errP=t=>`<span role="img" aria-label="오류">⚠️</span> ${t}`;
+// 부서 점토 그림. 바탕이 코발트라 둥글게 잘라(.blob) 파란 바탕·카드에 녹인다. 장식이라 alt=""(부서 이름은 옆 글자로 읽힘)
+const blob=(src,lazy=true)=>`<img class="blob" src="${esc(src)}" width="400" height="400" alt="" decoding="async"${lazy?' loading="lazy"':''}>`;
 function qHtml(q){
   const req=q.required?'<span class="req" aria-hidden="true">*</span>':'';
-  const err=`<p class="err" id="${fid(q)}-err"><span role="img" aria-label="오류">⚠️</span> ${q.type==='check'?'이 약속에 동의해야 낼 수 있어요.':q.type==='choice'?'하나를 골라 주세요.':'이 칸을 채워 주세요.'}</p>`;
+  const err=`<p class="err" id="${fid(q)}-err">${errP(q.type==='check'?'이 약속에 동의해야 낼 수 있어요.':q.type==='choice'?'하나를 골라 주세요.':'이 칸을 채워 주세요.')}</p>`;
   const hint=q.hint?`<span class="hint">${esc(q.hint)}</span>`:'';
   if(q.type==='long')return `<div class="field"><label for="${fid(q)}">${esc(q.label)}${req}</label>${hint}<textarea id="${fid(q)}" name="${q.id}" maxlength="${q.max||800}" ${q.required?'required':''} data-error="${fid(q)}-err" data-q="${q.id}"></textarea><span class="count" aria-hidden="true" data-count="${fid(q)}">0 / ${q.max||800}</span>${err}</div>`;
   if(q.type==='short')return `<div class="field"><label for="${fid(q)}">${esc(q.label)}${req}</label>${hint}<input type="text" id="${fid(q)}" name="${q.id}" maxlength="${q.max||100}" ${q.required?'required':''} data-error="${fid(q)}-err" data-q="${q.id}">${err}</div>`;
-  if(q.type==='choice')return `<fieldset class="field"><legend>${esc(q.label)}${req}</legend>${hint}<div class="choices">${q.options.map((o,i)=>`<label class="choice"><input type="radio" name="${q.id}" value="${esc(o)}" ${q.required?'required':''} data-error="${fid(q)}-err" data-q="${q.id}">${esc(o)}</label>`).join('')}</div>${err}</fieldset>`;
-  if(q.type==='check')return `<div class="field"><label class="choice"><input type="checkbox" id="${fid(q)}" name="${q.id}" ${q.required?'required':''} data-error="${fid(q)}-err" data-q="${q.id}"><span>${esc(q.label)}${req}</span></label>${err}</div>`;
+  if(q.type==='choice')return `<fieldset class="field"><legend>${esc(q.label)}${req}</legend>${hint}<div class="choices${q.inline?' inline':''}">${q.options.map(o=>`<label class="choice"><input type="radio" name="${q.id}" value="${esc(o)}" ${q.required?'required':''} data-error="${fid(q)}-err" data-q="${q.id}">${esc(o)}</label>`).join('')}</div>${err}</fieldset>`;
+  if(q.type==='check'){
+    const box=q.box?`<ul class="privacy" id="${fid(q)}-box">${q.box.map(b=>`<li><b>${esc(b[0])}</b> · ${esc(b[1])}</li>`).join('')}</ul>`:'';
+    return `<div class="field">${box}<label class="choice"><input type="checkbox" id="${fid(q)}" name="${q.id}" ${q.required?'required':''} data-error="${fid(q)}-err" data-q="${q.id}"${q.box?` aria-describedby="${fid(q)}-box"`:''}><span>${esc(q.label)}${req}</span></label>${err}</div>`;
+  }
   return '';
 }
+// 그림 있는 부서 고르기(라디오). 2지망은 «없음»을 맨 끝에 두고, 1지망으로 고른 부서는 막는다
+function deptPick(name){
+  const two=name==='d2';
+  const opts=DEPTS.map(d=>`<label class="dopt"><input type="radio" name="${name}" value="${esc(d.name)}" ${two?'':'required'} data-error="${name}Err">${blob(d.img)}<b>${esc(d.name)}</b>${two?`<span class="rank" data-rank="${esc(d.name)}"></span>`:''}</label>`).join('');
+  return `<div class="dpick ${two?'five':'four'}">${opts}${two?`<label class="dopt none"><input type="radio" name="d2" value="" data-error="d2Err" checked><b>2지망 없음</b></label>`:''}</div>`;
+}
 function renderStudent(){
-  const trackOpts=Object.keys(TRACKS).map(k=>{const t=TRACKS[k];const desc=k==='new'&&INFO.g2New?'지금 학생회 임원이 아닌 1학년(2학년 추가 모집 중)':t.desc;
-    return `<label class="choice"><input type="radio" name="track" value="${k}" required data-error="trackErr"><span>${esc(t.label)}<small>${esc(desc)}</small></span></label>`}).join('');
-  const deptOpts=DEPTS.map(d=>`<option value="${esc(d.name)}">${esc(d.name)}</option>`).join('');
+  document.body.classList.add('stu');app.className='wrap';
+  const open=INFO.open;
+  const trackOpts=Object.keys(TRACKS).filter(k=>!TRACKS[k].legacy).map(k=>{const t=TRACKS[k];
+    return `<label class="choice big"><input type="radio" name="track" value="${k}" required data-error="trackErr"><span>${esc(t.label)}<small>${esc(t.desc)}</small></span></label>`}).join('');
+  const shut=`<p class="banner" role="status">지금은 신청을 받지 않아요. ${esc(DEADLINE_TEXT)}까지 열려 있을 때 내 주세요.</p>`;
   app.innerHTML=`
   ${MOCK?'<p class="banner">시험 모드예요. 가짜 데이터로만 움직이고 실제로 내지지 않아요.</p>':''}
-  <figure class="cover-banner"><img src="council-apply-banner.webp" width="1200" height="675" alt="" decoding="async"></figure>
-  <header class="top"><h1>2027 학생회 집행부<br>임원 신청서</h1></header>
-  ${INFO.open?'':`<p class="banner" role="status">지금은 신청을 받지 않아요. ${esc(DEADLINE_TEXT)}까지 열려 있을 때 내 주세요.</p>`}
-  <section class="card" aria-labelledby="hSched"><h2 id="hSched">일정</h2>
-    <ul class="steps">${SCHEDULE.map(s=>`<li><b>${esc(s[0])}</b><span>${esc(s[1])}</span></li>`).join('')}</ul>
-    <p class="note">이 화면은 <b>신청</b>만 받아요. 지원 글은 종이 지원서에 손으로 써서 따로 내요. 서류에 쓴 내용은 2차 면접에서 다시 물어봐요.</p>
-    <p class="note">회장·부회장 선거에 나가는 학생도 미리 낼 수 있어요. 당선되면 이 신청은 취소되고, 아니면 그대로 심사해요.</p>
-    <p class="note">학생회는 모두 30명 이내예요. 2학년 신규 임원은 지원 상황을 보고 추가로 모집할 수 있고, 결원이 생기면 추가로 뽑을 수 있어요. 결과는 한 사람씩 따로 알려 줘요.</p>
-  </section>
-  <section class="card" aria-labelledby="hDept"><h2 id="hDept">부서별로 하는 일</h2>
-    <div class="depts">${DEPTS.map(d=>`<div class="dept"><b>${esc(d.name)}</b><span>${esc(d.does)}</span></div>`).join('')}</div>
-  </section>
-  <div class="row" style="margin-bottom:var(--space-3)"><button type="button" class="btn line" data-act="openEdit">이미 냈어요 · 낸 신청서 고치기</button></div>
+  <header class="hero">
+    <div class="hero-txt">
+      <p class="kicker rise">대영중학교 학생자치회</p>
+      <h1 class="display rise d1">2027<br>학생회 <span class="hl">임원</span> 신청</h1>
+      <p class="hook rise d2">우리 학교 행사, 직접 만들어 볼 사람!</p>
+      <div class="chips rise d2">${open?`<span class="chip lemon"><span aria-hidden="true">⏰</span> 마감 ${esc(DEADLINE_TEXT)}</span>`:'<span class="chip shut">지금은 신청을 받지 않아요</span>'}<span class="chip">1·2학년 누구나</span></div>
+      <div class="hero-cta rise d3"><a class="btn cta" href="#applyForm">신청서 쓰기</a><button type="button" class="btn on-blue" data-act="openEdit">이미 냈어요 · 고치기</button></div>
+    </div>
+    <div class="hero-art rise d1" aria-hidden="true">${DEPTS.map(d=>blob(d.img,false)).join('')}</div>
+  </header>
+  <div class="stu-main">
+  <div class="stu-side">
+    <section class="card" aria-labelledby="hSched"><div class="sec-h"><span class="tag" aria-hidden="true">1</span><h2 id="hSched">이렇게 진행돼요</h2></div>
+      <ol class="tl">${SCHEDULE.map((s,i)=>`<li class="reveal${i===0?' now':''}"><span class="when">${esc(s[1])}</span><b>${esc(s[0])}</b>${s[2]?`<small>${esc(s[2])}</small>`:''}</li>`).join('')}</ol>
+      <p class="fine">온라인 신청을 먼저 하고, 종이 지원서는 마감일까지 창의인성교육부(학생회 담당 선생님)에 내요. 일정은 학교 사정에 따라 바뀔 수 있어요.</p>
+    </section>
+    <section class="card" aria-labelledby="hDept"><div class="sec-h"><span class="tag" aria-hidden="true">2</span><h2 id="hDept">어떤 부서가 있나요?</h2></div>
+      <div class="dgrid">${DEPTS.map(d=>`<div class="dcard reveal">${blob(d.img)}<div><b>${esc(d.name)}</b><span>${esc(d.does)}</span></div></div>`).join('')}</div>
+      <p class="fine">부서 이름과 맡는 일은 2027학년도 초에 학생회 회의로 조정될 수 있어요.</p>
+    </section>
+    <section class="card" aria-labelledby="hNote"><div class="sec-h"><span class="tag" aria-hidden="true">3</span><h2 id="hNote">꼭 알아 두세요</h2></div>
+      <ul class="notes">
+        <li><span aria-hidden="true">✍️</span><span>이 화면은 <b>신청</b>만 받아요. <b>지원서는 종이에 직접 손으로</b> 써서 따로 내요.</span></li>
+        <li><span aria-hidden="true">🎤</span><span>서류에 쓴 내용은 <b>면접에서 다시 물어봐요.</b></span></li>
+        <li><span aria-hidden="true">🚫</span><span>생성형 AI 등으로 대신 쓴 것이 확인되면 <b>불이익</b>이 있어요.</span></li>
+        <li><span aria-hidden="true">🙋</span><span>선생님 추천을 받은 학생도 같은 지원서를 내고 같은 과정(서류·면접)을 거쳐요.</span></li>
+        <li><span aria-hidden="true">🗳️</span><span>12월 회장·부회장 선거에 나가는 학생도 미리 낼 수 있어요. 당선되면 이 신청은 취소되고, 아니면 그대로 심사해요.</span></li>
+        <li><span aria-hidden="true">👥</span><span>학생회는 모두 30명 이내예요. 결원이 생기면 추가로 뽑을 수 있어요. 결과는 한 사람씩 따로 알려 줘요.</span></li>
+      </ul>
+    </section>
+  </div>
   <form id="applyForm" class="card" aria-labelledby="hForm">
-    <h2 id="hForm">${EDIT?'신청서 고치기':'신청서 쓰기'}</h2>
-    <p class="muted" style="margin-bottom:var(--space-3)"><span aria-hidden="true">*</span> 표시는 꼭 채워야 해요.</p>
-    <div class="two">
-      <div class="field"><label for="sid">학번 5자리<span class="req" aria-hidden="true">*</span></label><span class="hint">예: 1학년 3반 5번이면 10305</span>
-        <input type="text" id="sid" name="sid" inputmode="numeric" maxlength="5" pattern="[12](0[1-9]|1[0-5])(0[1-9]|[1-3][0-9]|40)" required autocomplete="off" data-error="sidErr" ${EDIT?'readonly':''}>
-        <p class="err" id="sidErr"><span role="img" aria-label="오류">⚠️</span> 학번 5자리를 숫자로 써 주세요(1·2학년).</p></div>
-      <div class="field"><label for="name">이름<span class="req" aria-hidden="true">*</span></label>
-        <input type="text" id="name" name="name" maxlength="20" minlength="2" required autocomplete="off" data-error="nameErr">
-        <p class="err" id="nameErr"><span role="img" aria-label="오류">⚠️</span> 이름을 써 주세요.</p></div>
+    <div class="sec-h"><span class="tag" aria-hidden="true">4</span><h2 id="hForm">${EDIT?'신청서 고치기':'신청서 쓰기'}</h2></div>
+    ${open?'':shut}
+    <p class="muted"><span aria-hidden="true">*</span> 표시는 꼭 채워야 해요.</p>
+    <div class="fstep first"><div class="sec-h"><span class="tag" aria-hidden="true">1</span><h3>나는 누구?</h3></div>
+      <div class="two">
+        <div class="field"><label for="sid">학번 5자리<span class="req" aria-hidden="true">*</span></label><span class="hint">예: 1학년 3반 5번이면 10305</span>
+          <input type="text" id="sid" name="sid" inputmode="numeric" maxlength="5" pattern="[12](0[1-9]|1[0-5])(0[1-9]|[1-3][0-9]|40)" required autocomplete="off" data-error="sidErr" ${EDIT?'readonly':''}>
+          <p class="err" id="sidErr">${errP('학번 5자리를 숫자로 써 주세요(1·2학년).')}</p></div>
+        <div class="field"><label for="name">이름<span class="req" aria-hidden="true">*</span></label><span class="hint">성까지 모두 써요</span>
+          <input type="text" id="name" name="name" maxlength="20" minlength="2" required autocomplete="off" data-error="nameErr">
+          <p class="err" id="nameErr">${errP('이름을 써 주세요.')}</p></div>
+      </div>
+      <fieldset class="field"><legend>성별<span class="req" aria-hidden="true">*</span></legend>
+        <div class="choices inline">${['남','여'].map(g=>`<label class="choice"><input type="radio" name="gender" value="${g}" required data-error="genderErr">${g}</label>`).join('')}</div>
+        <p class="err" id="genderErr">${errP('하나를 골라 주세요.')}</p></fieldset>
     </div>
-    <fieldset class="field"><legend>성별<span class="req" aria-hidden="true">*</span></legend>
-      <div class="choices inline">${['남','여'].map(g=>`<label class="choice"><input type="radio" name="gender" value="${g}" required data-error="genderErr">${g}</label>`).join('')}</div>
-      <p class="err" id="genderErr"><span role="img" aria-label="오류">⚠️</span> 하나를 골라 주세요.</p></fieldset>
-    <fieldset class="field"><legend>지원 구분<span class="req" aria-hidden="true">*</span></legend>
-      <div class="choices">${trackOpts}</div>
-      <p class="err" id="trackErr"><span role="img" aria-label="오류">⚠️</span> <span id="trackErrText">하나를 골라 주세요.</span></p></fieldset>
-    <div id="roleBox" hidden><fieldset class="field" id="roleField"><legend>부장·차장 중 희망<span class="req" aria-hidden="true">*</span></legend>
-      <div class="choices inline">${[['head','부장'],['vice','차장'],['any','둘 다 좋아요']].map(r=>`<label class="choice"><input type="radio" name="role" value="${r[0]}" data-error="roleErr">${r[1]}</label>`).join('')}</div>
-      <p class="err" id="roleErr"><span role="img" aria-label="오류">⚠️</span> 하나를 골라 주세요.</p></fieldset></div>
-    <div class="two" style="margin-top:var(--space-4)">
-      <div class="field"><label for="d1">1지망 부서<span class="req" aria-hidden="true">*</span></label>
-        <select id="d1" name="d1" required data-error="d1Err"><option value="">고르기</option>${deptOpts}</select>
-        <p class="err" id="d1Err"><span role="img" aria-label="오류">⚠️</span> 1지망 부서를 골라 주세요.</p></div>
-      <div class="field"><label for="d2">2지망 부서</label>
-        <select id="d2" name="d2" data-error="d2Err"><option value="">없음</option>${deptOpts}</select>
-        <p class="err" id="d2Err"><span role="img" aria-label="오류">⚠️</span> 1지망과 다른 부서를 골라 주세요.</p></div>
+    <div class="fstep"><div class="sec-h"><span class="tag" aria-hidden="true">2</span><h3>지원 구분</h3></div>
+      <fieldset class="field"><legend>나는 어디에 해당하나요?<span class="req" aria-hidden="true">*</span></legend>
+        <div class="choices">${trackOpts}</div>
+        <p class="err" id="trackErr">${errP('<span id="trackErrText">하나를 골라 주세요.</span>')}</p></fieldset>
+      ${Object.keys(TRACKS).filter(k=>FORM[k]&&FORM[k].length).map(k=>`<fieldset class="trackset" data-track="${k}" hidden disabled style="border:0;padding:0;min-width:0">${FORM[k].map(qHtml).join('')}</fieldset>`).join('')}
     </div>
-    <p class="note" id="prNote" hidden>홍보기획부를 고른 학생은 면접 전에 영상·포스터 같은 작품을 따로 낼 수 있어요. 자세한 건 따로 알려 줘요.</p>
-    <div class="field"><label class="choice"><input type="checkbox" id="cand" name="cand"><span>12월 학생회장·부회장 선거에도 나가요<small>당선되면 이 신청은 취소돼요. 떨어지면 그대로 심사해요.</small></span></label></div>
-    ${Object.keys(TRACKS).map(k=>`<fieldset class="trackset" data-track="${k}" hidden disabled style="border:0;padding:0;min-width:0">${FORM[k].length?`<h3 class="section-title">${esc(TRACKS[k].label)} 질문</h3>`:''}${FORM[k].map(qHtml).join('')}</fieldset>`).join('')}
-    <h3 class="section-title">확인과 약속</h3>
-    ${FORM.end.map(qHtml).join('')}
-    <div class="field"><label for="pin">확인 번호 4자리 정하기<span class="req" aria-hidden="true">*</span></label>
-      <span class="hint">${EDIT?'고친 뒤에는 이 번호가 새 확인 번호가 돼요.':'나중에 신청서를 고칠 때 써요. 친구에게 알려 주지 마세요.'}</span>
-      <input type="password" id="pin" name="pin" class="pin" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" required autocomplete="off" data-error="pinErr">
-      <p class="err" id="pinErr"><span role="img" aria-label="오류">⚠️</span> 숫자 4자리로 정해 주세요.</p></div>
+    <div class="fstep"><div class="sec-h"><span class="tag" aria-hidden="true">3</span><h3>지원 자리</h3></div>
+      <fieldset class="field" id="seatField"><legend>하고 싶은 자리<span class="req" aria-hidden="true">*</span></legend><span class="hint" id="seatHint">여러 개 골라도 돼요.</span>
+        <div class="choices seats">${SEATS.map(s=>`<label class="choice"><input type="checkbox" name="roles" value="${s}" data-error="seatErr">${s}</label>`).join('')}</div>
+        <p class="err" id="seatErr">${errP('하나 이상 골라 주세요.')}</p></fieldset>
+    </div>
+    <div class="fstep"><div class="sec-h"><span class="tag" aria-hidden="true">4</span><h3>부서 고르기</h3></div>
+      <fieldset class="field"><legend>1지망 부서<span class="req" aria-hidden="true">*</span></legend>${deptPick('d1')}
+        <p class="err" id="d1Err">${errP('1지망 부서를 골라 주세요.')}</p></fieldset>
+      <fieldset class="field"><legend>2지망 부서</legend><span class="hint">1지망과 다른 부서를 골라요. 없어도 돼요.</span>${deptPick('d2')}
+        <p class="err" id="d2Err">${errP('1지망과 다른 부서를 골라 주세요.')}</p></fieldset>
+      <p class="note" id="prNote" hidden>홍보기획부를 고른 학생은 면접 전에 영상·포스터 같은 작품을 따로 낼 수 있어요. 자세한 건 따로 알려 줘요.</p>
+    </div>
+    <div class="fstep"><div class="sec-h"><span class="tag" aria-hidden="true">5</span><h3>확인과 약속</h3></div>
+      <div class="field"><label class="choice"><input type="checkbox" id="cand" name="cand"><span>12월 학생회장·부회장 선거에도 나가요<small>당선되면 이 신청은 취소돼요. 떨어지면 그대로 심사해요.</small></span></label></div>
+      ${FORM.end.map(qHtml).join('')}
+    </div>
+    <div class="fstep"><div class="sec-h"><span class="tag" aria-hidden="true">6</span><h3>확인 번호</h3></div>
+      <div class="field"><label for="pin">확인 번호 4자리 정하기<span class="req" aria-hidden="true">*</span></label>
+        <span class="hint">${EDIT?'고친 뒤에는 이 번호가 새 확인 번호가 돼요.':'나중에 신청서를 고칠 때 써요. 친구에게 알려 주지 마세요.'}</span>
+        <input type="password" id="pin" name="pin" class="pin" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" required autocomplete="off" data-error="pinErr">
+        <p class="err" id="pinErr">${errP('숫자 4자리로 정해 주세요.')}</p></div>
+    </div>
     <div class="submitbar"><div class="row">${EDIT?'<button type="button" class="btn ghost" data-act="cancelEdit">고치기 그만</button>':''}<button type="submit" class="btn">${EDIT?'고친 신청서 내기':'신청서 내기'}</button></div>
-      <p class="muted" style="text-align:center;margin-top:var(--space-1)">쓰던 글은 이 기기에 잠깐 저장돼요.${EDIT?'':' 같이 쓰는 기기라면 <button type="button" class="link" data-act="clearDraft">저장된 글 지우기</button>'}</p></div>
-  </form>`;
+      <p class="muted" style="text-align:center;margin-top:var(--space-1)">쓰던 내용은 이 기기에 잠깐 저장돼요.${EDIT?'':' 같이 쓰는 기기라면 <button type="button" class="link" data-act="clearDraft">저장된 내용 지우기</button>'}</p></div>
+  </form>
+  </div>
+  <p class="foot">대영중학교 학생자치회 · 창의인성교육부</p>`;
   const form=document.getElementById('applyForm');
   form.querySelectorAll('input,select,textarea').forEach(el=>el.setAttribute('aria-invalid','false'));
   form.addEventListener('submit',onSubmit);
@@ -514,27 +703,36 @@ function renderStudent(){
   form.addEventListener('change',onFormInput);
   if(!EDIT)restoreDraft();
   onFormInput();
+  observeReveal(app);
 }
 function curTrack(){const r=document.querySelector('input[name=track]:checked');return r?r.value:''}
 function onFormInput(e){
   const f=document.getElementById('applyForm');if(!f)return;
   const t=curTrack();
   f.querySelectorAll('.trackset').forEach(s=>{const on=s.dataset.track===t;s.hidden=!on;s.disabled=!on});
-  const roleBox=document.getElementById('roleBox');roleBox.hidden=t!=='lead';
-  roleBox.querySelectorAll('input').forEach(x=>{x.required=t==='lead';x.disabled=t!=='lead'});
-  // 학번 학년과 지원 구분이 맞는지(서버도 다시 본다)
   const g=(document.getElementById('sid').value||'')[0];
-  let msg='';
-  if(t&&(g==='1'||g==='2')){
-    if(t==='new'&&g==='2'&&!INFO.g2New)msg='신규 임원은 지금 1학년만 낼 수 있어요.';
-    if(t==='lead'&&g!=='2')msg='부장·차장은 지금 2학년만 낼 수 있어요.';
-  }
-  document.querySelectorAll('input[name=track]').forEach(x=>x.setCustomValidity(msg));
-  document.getElementById('trackErrText').textContent=msg||'하나를 골라 주세요.';
-  if(msg){const fs=document.querySelector('input[name=track]').closest('.field');fs.dataset.touched='1';document.querySelectorAll('input[name=track]').forEach(x=>{if(!HAS_UI)x.classList.add('ui-fb');syncAria(x)})}
-  const d1=document.getElementById('d1').value,d2=document.getElementById('d2');
-  d2.setCustomValidity(d2.value&&d2.value===d1?'같은 부서':'');
-  document.getElementById('prNote').hidden=!(d1==='홍보기획부'||d2.value==='홍보기획부');
+  // 지원 자리: 신규 임원 1학년은 부원만(종이 지원서 «지금 2학년만»). 서버도 다시 본다
+  const seats=[...f.querySelectorAll('input[name=roles]')];
+  const lock=t==='new'&&g==='1';
+  // 잠글 때 고른 부장·차장을 기억했다가, 학번·구분을 되돌려 풀리면 다시 체크한다(검토 2026-11-24)
+  seats.forEach(x=>{if(x.value==='부원')return;
+    if(lock&&!x.disabled){x.dataset.was=x.checked?'1':'';x.checked=false}
+    else if(!lock&&x.disabled){if(x.dataset.was==='1')x.checked=true;delete x.dataset.was}
+    x.disabled=lock});
+  const bu=seats.find(x=>x.value==='부원');
+  if(lock&&!seats.some(x=>x.checked)){bu.checked=true;bu.dataset.auto='1'}
+  else if(!lock&&bu.dataset.auto){if(seats.some(x=>x!==bu&&x.checked))bu.checked=false;delete bu.dataset.auto}
+  document.getElementById('seatHint').textContent=lock?'신규 임원 1학년은 «부원»으로 지원해요. 부장·차장은 지금 2학년만 고를 수 있어요.'
+    :t==='new'?'지금 2학년은 부장·차장도 고를 수 있어요. 여러 개 골라도 돼요.':t==='member'?'부장·차장·부원 중 여러 개 골라도 돼요.':'여러 개 골라도 돼요.';
+  const none=!seats.some(x=>x.checked);
+  seats.forEach(x=>{x.setCustomValidity(none?'하나 이상':'');if(x.hasAttribute('aria-invalid'))syncAria(x)});
+  // 2지망: 1지망으로 고른 부서는 막고, 겹치면 «없음»으로
+  const pick=n=>{const el=f.querySelector('input[name="'+n+'"]:checked');return el?el.value:''};
+  const d1=pick('d1');
+  f.querySelectorAll('input[name=d2]').forEach(x=>{if(!x.value)return;const same=x.value===d1;x.disabled=same;if(same&&x.checked){x.checked=false;f.querySelector('input[name=d2][value=""]').checked=true}});
+  f.querySelectorAll('[data-rank]').forEach(s=>{s.textContent=s.dataset.rank===d1?'1지망으로 고름':''});
+  const d2=pick('d2');
+  document.getElementById('prNote').hidden=!(d1==='홍보기획부'||d2==='홍보기획부');
   f.querySelectorAll('[data-count]').forEach(c=>{const ta=document.getElementById(c.dataset.count);c.textContent=ta.value.length+' / '+ta.maxLength});
   if(e&&!EDIT)saveDraftSoon();
 }
@@ -550,16 +748,23 @@ function readForm(raw){
     if(q.type==='check'){const el=f.querySelector('[name="'+q.id+'"]');answers[q.id]=!!(el&&el.checked)}
     else{const v=val(q.id).trim();if(v||q.required)answers[q.id]=v}
     labels[q.id]=q.label});
-  // 2026-11-24 전 긴 글로 낸 신청을 고칠 때: 화면에 없는 옛 답을 그대로 보낸다(서버가 답을 통째로 덮어쓰므로)
+  // 2026-11-24 전 문항으로 낸 신청을 고칠 때: 화면에 없는 옛 답을 그대로 보낸다(서버가 답을 통째로 덮어쓰므로)
   if(!raw&&EDIT&&EDIT.old)Object.keys(EDIT.old).forEach(k=>{if(!(k in answers)){answers[k]=EDIT.old[k];labels[k]=OLD_LABELS[k]}});
-  return {sid:val('sid').trim(),name:val('name').trim(),gender:val('gender'),track:t,role:t==='lead'?val('role'):'',d1:val('d1'),d2:val('d2'),cand:!!f.querySelector('#cand').checked,pin:val('pin'),answers,labels};
+  const roles=[...f.querySelectorAll('input[name=roles]:checked')].map(x=>x.value);
+  return {sid:val('sid').trim(),name:val('name').trim(),gender:val('gender'),track:t,roles,d1:val('d1'),d2:val('d2'),cand:!!f.querySelector('#cand').checked,pin:val('pin'),answers,labels};
 }
+// 임시저장·고치기 둘 다 여기로. 옛 구분 «부장·차장»(lead)은 «지금 임원인가요?» 답으로 신규/기존 임원에 옮기고, 옛 자리 키(head·vice·any)도 읽는다
 function fillForm(d){
   const f=document.getElementById('applyForm');if(!f||!d)return;
   const set=(n,v)=>{f.querySelectorAll('[name="'+n+'"]').forEach(el=>{if(el.type==='radio')el.checked=el.value===v;else if(el.type==='checkbox')el.checked=!!v;else if(v!=null)el.value=v})};
-  ['sid','name','gender','track','d1','d2'].forEach(n=>set(n,d[n]||''));
-  set('role',d.role||'');set('cand',!!d.cand);
-  Object.keys(d.answers||{}).forEach(k=>set(k,d.answers[k]));
+  const ans=d.answers||{};
+  let track=d.track||'';
+  if(TRACKS[track]&&TRACKS[track].legacy)track=String(ans.now_member||'').startsWith('네')?'member':'new';
+  const roles=Array.isArray(d.roles)?d.roles:({head:['부장'],vice:['차장'],any:['부장','차장']}[d.role]||[]);
+  ['sid','name','gender','d1'].forEach(n=>set(n,d[n]||''));
+  set('track',track);set('d2',d.d2||'');set('cand',!!d.cand);
+  f.querySelectorAll('input[name=roles]').forEach(x=>{x.checked=roles.includes(x.value)});
+  Object.keys(ans).forEach(k=>{if(f.querySelector('[name="'+k+'"]'))set(k,ans[k])});
   onFormInput();
 }
 async function onSubmit(e){
@@ -568,7 +773,8 @@ async function onSubmit(e){
   const dept=v.d1+(v.d2?' → '+v.d2:'');
   const yes=await ask(EDIT?'이렇게 고쳐서 낼까요?':'이렇게 낼까요?',`<ul class="sum">
     <li><b>학번·이름</b><span>${esc(sidLabel(v.sid))} ${esc(v.name)}</span></li>
-    <li><b>지원 구분</b><span>${esc(TRACKS[v.track].label)}${v.role?' ('+esc({head:'부장',vice:'차장',any:'부장·차장'}[v.role])+')':''}</span></li>
+    <li><b>지원 구분</b><span>${esc(TRACKS[v.track].label)}${v.answers.now_dept?' (지금 '+esc(v.answers.now_dept)+')':''}</span></li>
+    <li><b>지원 자리</b><span>${esc(v.roles.join('·'))}</span></li>
     <li><b>부서</b><span>${esc(dept)}</span></li>
     <li><b>회장 선거</b><span>${v.cand?'나가요':'안 나가요'}</span></li></ul>
     <p class="muted" style="margin-top:var(--space-2)">${esc(DEADLINE_TEXT)}까지는 확인 번호로 다시 고칠 수 있어요.</p>`,EDIT?'고쳐서 내기':'내기');
@@ -579,14 +785,16 @@ async function onSubmit(e){
   if(!r.ok){toast(errText(r.error));if(r.error==='exists')document.querySelector('[data-act=openEdit]').focus();return}
   store.del(DRAFT_KEY);
   const wasEdit=!!EDIT;EDIT=null;
-  app.innerHTML=`<div class="card done" tabindex="-1" id="doneCard"><div class="big" aria-hidden="true">📮</div>
+  const dp=DEPTS.find(d=>d.name===v.d1);
+  app.innerHTML=`<div class="card done" tabindex="-1" id="doneCard">${dp?blob(dp.img,false):'<div class="big" aria-hidden="true">📮</div>'}
     <h2>${wasEdit?'고친 신청서를 받았어요':'신청서를 받았어요'}</h2>
-    <p>${esc(sidLabel(v.sid))} ${esc(v.name)} · ${esc(TRACKS[v.track].label)} · ${esc(v.d1)}</p>
+    <p>${esc(sidLabel(v.sid))} ${esc(v.name)} · ${esc(TRACKS[v.track].label)} · ${esc(v.roles.join('·'))} · ${esc(v.d1)}</p>
     <p class="sub" style="margin-top:var(--space-3)">고칠 때 쓰는 확인 번호예요. 잊지 않게 적어 두세요.</p>
     <div class="pinbox">${esc(v.pin)}</div>
-    <p class="muted">이제 <b>종이 지원서</b>를 손으로 써서 12. 4.(금)까지 창의인성교육부(학생회 담당 선생님)에 내 주세요. 면접 볼 사람은 12. 21.~12. 24. 중에, 결과는 2027. 1. 6.에 한 사람씩 알려 줘요.</p>
+    <p class="muted">이제 <b>종이 지원서</b>를 직접 손으로 써서 12. 4.(금)까지 창의인성교육부(학생회 담당 선생님)에 내 주세요. 면접 대상은 12. 21.(월)~12. 24.(목) 중에, 결과는 2027. 1. 6.(수)에 한 사람씩 알려 줘요.</p>
     <div class="row" style="margin-top:var(--space-4)"><button type="button" class="btn line" data-act="again">처음 화면으로</button></div></div>`;
-  document.getElementById('doneCard').focus();
+  window.scrollTo(0,0);
+  document.getElementById('doneCard').focus({preventScroll:true});
 }
 async function openEdit(){
   const dlg=document.getElementById('editDlg');const err=document.getElementById('editErr');err.textContent='';
@@ -602,9 +810,19 @@ document.getElementById('editDlg').addEventListener('close',async()=>{
   const prev=(r.app&&r.app.answers)||{};
   EDIT={sid,old:Object.fromEntries(Object.keys(prev).filter(k=>k in OLD_LABELS).map(k=>[k,prev[k]]))};renderStudent();fillForm(r.app);
   document.getElementById('pin').value='';
-  toast('낸 신청서를 불러왔어요. 고친 뒤 다시 내 주세요.');
+  const legacy=TRACKS[r.app.track]&&TRACKS[r.app.track].legacy;
+  toast(legacy?'지원 구분이 «신규 임원·기존 임원» 둘로 바뀌었어요. 구분과 자리를 확인하고 다시 내 주세요.':'낸 신청서를 불러왔어요. 고친 뒤 다시 내 주세요.');
   document.getElementById('hForm').scrollIntoView({block:'start'});
 });
+// 여러 장 이어지는 카드는 보일 때 한 장씩 떠오른다(움직임 표 «Scroll-triggered»). 학생 화면·심사판 같이 씀
+let revealObs=null;
+function observeReveal(box){
+  if(revealObs)revealObs.disconnect();
+  if('IntersectionObserver' in window){let n=0;revealObs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){const el=e.target;el.style.transitionDelay=Math.min(n++%6,5)*0.05+'s';el.classList.add('show');revealObs.unobserve(el)}})},{rootMargin:'0px 0px -5% 0px'});box.querySelectorAll('.reveal').forEach(el=>revealObs.observe(el))}
+  else box.querySelectorAll('.reveal').forEach(el=>el.classList.add('show'));
+  // 인쇄·전체 화면 캡처처럼 스크롤 없이 보는 경우에도 카드가 투명하게 남지 않게
+  setTimeout(()=>box.querySelectorAll('.reveal:not(.show)').forEach(el=>el.classList.add('show')),1500);
+}
 
 
 /* ═════════════ 심사위원판(?judge=1, 2026-11-24) ═════════════
@@ -664,7 +882,7 @@ function jCard(r){
   const m=dr?Object.assign({},saved,dr):saved;
   return `<article class="ap${saved.full?' scored':''}" data-app="${esc(r.id)}" data-stage="${esc(st.id)}">
     <header><div><b>${esc(r.name)}</b> <span class="muted">${esc(sidLabel(r.sid))} · ${esc(r.gender)}</span></div>
-      <div class="badges">${r.cand?'<span class="bd cand">회장 후보</span>':''}<span class="bd ${r.track==='부장·차장'?'lead':''}">${esc(r.track)}${r.role?' · '+esc(r.role==='부장·차장 모두'?'둘 다':r.role):''}</span><span class="bd${dr?' dirty':saved.full?' pass':''}" data-state>${dr?'저장 안 함':saved.full?'저장함 '+saved.total+'점':'안 매김'}</span></div></header>
+      <div class="badges">${r.cand?'<span class="bd cand">회장 후보</span>':''}${trackBadge(r)}<span class="bd${dr?' dirty':saved.full?' pass':''}" data-state>${dr?'저장 안 함':saved.full?'저장함 '+saved.total+'점':'안 매김'}</span></div></header>
     <div class="prefs">1지망 <b>${esc(r.d1)}</b>${r.d2?' · 2지망 '+esc(r.d2):''}</div>
     ${st.items.map(it=>`<div class="sc" role="radiogroup" aria-label="${esc(r.name)} ${esc(it.label)}"><span class="sl">${esc(it.label)}</span><span class="pts">${Array.from({length:it.max},(_,k)=>k+1).map(n=>`<label><input type="radio" name="s-${esc(r.id)}-${esc(it.id)}" value="${n}" ${m.scores[it.id]===n?'checked':''}><span>${n}</span></label>`).join('')}</span></div>`).join('')}
     <div class="memo"><label class="visually-hidden" for="jm-${esc(r.id)}">${esc(r.name)} 메모</label><input type="text" id="jm-${esc(r.id)}" maxlength="300" placeholder="메모(선택)" value="${esc(m.memo)}"><button type="button" class="btn xs" data-act="jSave" data-app="${esc(r.id)}">저장</button></div>
@@ -697,9 +915,12 @@ async function jSave(id,btn){
 let KEY=sess.get('apply-admin')||'';
 let BOARD=null;let VIEW={by:'dept',status:'',q:''};
 // 2026-11-24 전 옛 긴 글 문항(이미 낸 답이 있으면 심사판에 이 이름으로 보임)
-const OLD_LABELS={motive:'학생회 임원에 지원하는 까닭',plan:'학생회에서 해 보고 싶은 일',strength:'나의 장점이나 해 본 경험',review:'올해 학생회 활동 돌아보기',next:'내년에 더 해 보고 싶은 일',lead_exp:'학생회나 학급·동아리에서 해 본 일',lead_plan:'부서를 이끌면서 하고 싶은 일',lead_team:'부원끼리 의견이 다를 때 나는 어떻게 할까요?'};
+const OLD_LABELS={motive:'학생회 임원에 지원하는 까닭',plan:'학생회에서 해 보고 싶은 일',strength:'나의 장점이나 해 본 경험',review:'올해 학생회 활동 돌아보기',next:'내년에 더 해 보고 싶은 일',lead_exp:'학생회나 학급·동아리에서 해 본 일',lead_plan:'부서를 이끌면서 하고 싶은 일',lead_team:'부원끼리 의견이 다를 때 나는 어떻게 할까요?',now_member:'지금 학생회 임원인가요?'};
 const qLabel=Object.assign({},OLD_LABELS,Object.fromEntries(Object.keys(FORM).flatMap(k=>FORM[k]).map(q=>[q.id,q.label])));
 const isRec=r=>!!(r.answers&&r.answers.rec==='네');
+// 구분·자리 배지(부장·차장을 바라면 진하게). 심사판·심사위원판 같이 씀
+const trackBadge=r=>`<span class="bd ${wantsLead(r)?'lead':''}">${esc(tName(r))}${r.role?' · '+esc(roleShort(r.role)):''}</span>`;
+const nowDept=r=>(r.answers&&r.answers.now_dept)?' <span class="muted">· 지금 '+esc(r.answers.now_dept)+'</span>':'';
 function renderLogin(msg){
   app.innerHTML=`${MOCK?'<p class="banner">시험 모드예요. 비밀번호는 test1이에요.</p>':''}
   <header class="top"><h1>임원 신청 심사판</h1><a class="link" href="apply.html${MOCK?'?mock=1':''}">학생 화면</a></header>
@@ -721,10 +942,10 @@ function tile(title,rows,hi,sub){const i=LISTS.push(listOf(title,rows))-1;return
 function renderBoard(){
   LISTS=[];
   const all=BOARD.rows,act=live(all);
-  const by=k=>act.filter(r=>r.track===k);
-  const newer=by('신규 임원'),male=newer.filter(r=>r.gender==='남');
+  const by=k=>act.filter(r=>r.track===TRACKS[k].stored);
+  const newer=by('new'),male=newer.filter(r=>r.gender==='남'),oldLead=by('lead');
   const pct=newer.length?Math.round(male.length*100/newer.length):0;
-  const deptRows=DEPTS.map(d=>{const f=act.filter(r=>r.d1===d.name);return `<tr><td>${esc(d.name)}</td><td>${numBtn(d.name+' 1지망 · 1학년',f.filter(r=>r.sid[0]==='1'))}</td><td>${numBtn(d.name+' 1지망 · 2학년',f.filter(r=>r.sid[0]==='2'))}</td><td>${numBtn(d.name+' 1지망 · 부장·차장',f.filter(r=>r.track==='부장·차장'))}</td><td>${numBtn(d.name+' 2지망',act.filter(r=>r.d2===d.name))}</td></tr>`}).join('');
+  const deptRows=DEPTS.map(d=>{const f=act.filter(r=>r.d1===d.name);return `<tr><td>${esc(d.name)}</td><td>${numBtn(d.name+' 1지망 · 1학년',f.filter(r=>r.sid[0]==='1'))}</td><td>${numBtn(d.name+' 1지망 · 2학년',f.filter(r=>r.sid[0]==='2'))}</td><td>${numBtn(d.name+' 1지망 · 부장·차장 희망',f.filter(wantsLead))}</td><td>${numBtn(d.name+' 2지망',act.filter(r=>r.d2===d.name))}</td></tr>`}).join('');
   app.className='wrap wide';
   app.innerHTML=`${MOCK?'<p class="banner">시험 모드예요. 가짜 학생만 있어요.</p>':''}
   <div class="tbar"><div class="top" style="margin:0"><h1>임원 신청 심사판</h1>
@@ -733,7 +954,6 @@ function renderBoard(){
     <div class="row">
       <span style="flex:1;min-width:12rem">${BOARD.accepting?'<b style="color:var(--good)">받는 중</b>':'<b style="color:var(--bad)">닫힘</b>'} <span class="muted">· 마감 ${esc(DEADLINE_TEXT)}${BOARD.past?' (지남)':''}</span></span>
       <button type="button" class="btn sm ${BOARD.open?'ghost':''}" data-act="toggleOpen">${BOARD.open?'신청 닫기':'신청 열기'}</button>
-      <button type="button" class="btn sm ghost" data-act="toggleG2" aria-pressed="${BOARD.g2New?'true':'false'}">2학년 신규 추가 모집 ${BOARD.g2New?'켜짐':'꺼짐'}</button>
     </div>
     <p class="muted" style="margin-top:var(--space-2)">벌점은 시트에 넣지 않았어요. 서류 심사 때 e알리미에서 성실성 참고로만 봐요.</p>
   </section>
@@ -741,18 +961,19 @@ function renderBoard(){
     <div class="tiles">
       ${tile('전체 신청(취소 빼고)',act,true,'전체')}
       ${tile('신규 임원',newer)}
-      ${tile('기존 임원 계속',by('기존 임원 계속'))}
-      ${tile('부장·차장',by('부장·차장'))}
+      ${tile('기존 임원',by('member'))}
+      ${tile('부장·차장 희망',act.filter(wantsLead))}
+      ${oldLead.length?tile('옛 구분 부장·차장(고치기 전)',oldLead,false,'옛 구분 부장·차장'):''}
       ${tile('신규 남학생',male,false,'신규 남학생 '+pct+'%')}
       ${tile('회장 후보도 함',act.filter(r=>r.cand),false,'회장 후보도 함')}
       ${tile('교사 추천',act.filter(isRec),false,'교사 추천')}
       ${tile('서류 통과',act.filter(r=>r.status==='서류 통과'))}
       ${tile('취소',all.filter(r=>r.status==='취소'))}
     </div>
-    <p class="muted" style="margin-top:var(--space-2)">신규 남학생 비율을 보고 2학년 신규 추가 모집을 켜요(2026-11-11 결정).</p>
+    <p class="muted" style="margin-top:var(--space-2)">2026-11-24부터 2학년도 «신규 임원»으로 내고 부장·차장을 고를 수 있어요(종이 지원서 수정본). «부장·차장 희망»은 자리에 부장이나 차장을 고른 사람이에요.</p>
   </section>
   <section class="card" aria-labelledby="hDeptT"><h2 id="hDeptT">부서별</h2>
-    <div style="overflow-x:auto"><table class="dt"><thead><tr><th>부서</th><th>1지망 1학년</th><th>1지망 2학년</th><th>그중 부장·차장</th><th>2지망</th></tr></thead><tbody>${deptRows}</tbody></table></div>
+    <div style="overflow-x:auto"><table class="dt"><thead><tr><th>부서</th><th>1지망 1학년</th><th>1지망 2학년</th><th>그중 부장·차장 희망</th><th>2지망</th></tr></thead><tbody>${deptRows}</tbody></table></div>
   </section>
   ${judgeSection()}
   ${scoreSection()}
@@ -774,15 +995,16 @@ function filtered(){
 function groupsOf(rows,by=VIEW.by){
   const sortR=a=>a.slice().sort((x,y)=>x.sid.localeCompare(y.sid));
   if(by==='grade')return ['1','2'].map(g=>[g+'학년',sortR(rows.filter(r=>r.sid[0]===g))]);
-  if(by==='track')return Object.keys(TRACKS).map(k=>[TRACKS[k].label,sortR(rows.filter(r=>r.track===TRACKS[k].label))]);
+  // 옛 구분(부장·차장)은 그 신청이 남아 있을 때만 묶음을 보인다
+  if(by==='track')return Object.keys(TRACKS).map(k=>[TRACKS[k].label,sortR(rows.filter(r=>r.track===TRACKS[k].stored))]).filter((g,i)=>!TRACKS[Object.keys(TRACKS)[i]].legacy||g[1].length);
   return DEPTS.map(d=>[d.name+' (1지망)',sortR(rows.filter(r=>r.d1===d.name))]);
 }
 function apCard(r){
   const ans=Object.keys(r.answers||{}).map(k=>{const v=r.answers[k];return `<dt>${esc(qLabel[k]||k)}</dt><dd>${esc(v===true?'예':v===false?'아니오':v)}</dd>`}).join('');
   return `<article class="ap reveal st-${esc(r.status)}" data-id="${esc(r.id)}">
     <header><div><b>${esc(r.name)}</b> <span class="muted">${esc(sidLabel(r.sid))} · ${esc(r.gender)}</span></div>
-      <div class="badges">${r.cand?'<span class="bd cand">회장 후보</span>':''}${isRec(r)?'<span class="bd">교사 추천</span>':''}<span class="bd ${r.track==='부장·차장'?'lead':''}">${esc(r.track)}${r.role?' · '+esc(r.role==='부장·차장 모두'?'둘 다':r.role):''}</span>${r.status==='서류 통과'?'<span class="bd pass">서류 통과</span>':''}</div></header>
-    <div class="prefs">1지망 <b>${esc(r.d1)}</b>${r.d2?' · 2지망 '+esc(r.d2):''} <span class="muted">· ${esc(fmtTime(r.at))}${r.edits?' · 고침 '+r.edits+'번':''}</span></div>
+      <div class="badges">${r.cand?'<span class="bd cand">회장 후보</span>':''}${isRec(r)?'<span class="bd">교사 추천</span>':''}${trackBadge(r)}${r.status==='서류 통과'?'<span class="bd pass">서류 통과</span>':''}</div></header>
+    <div class="prefs">1지망 <b>${esc(r.d1)}</b>${r.d2?' · 2지망 '+esc(r.d2):''}${nowDept(r)} <span class="muted">· ${esc(fmtTime(r.at))}${r.edits?' · 고침 '+r.edits+'번':''}</span></div>
     <div class="ctl"><label class="visually-hidden" for="st-${esc(r.id)}">${esc(r.name)} 심사 상태</label>
       <select id="st-${esc(r.id)}" data-status="${esc(r.id)}">${BOARD.statuses.map(s=>`<option ${s===r.status?'selected':''}>${esc(s)}</option>`).join('')}</select>
       <span class="copy"><button type="button" class="btn xs ghost" data-copy="one" data-id="${esc(r.id)}" aria-label="${esc(r.name)} 신청서 복사">복사</button><span class="tip" role="status"></span></span>
@@ -791,25 +1013,21 @@ function apCard(r){
     <details><summary>답 보기</summary><dl class="ans">${ans||'<dd>답이 없어요</dd>'}</dl></details>
   </article>`;
 }
-let revealObs=null;
 function renderGroups(){
   const box=document.getElementById('groups');if(!box)return;
   const rows=filtered();
   box.innerHTML=groupsOf(rows).map(([name,list])=>`<div class="group"><h3>${esc(name)} <span class="bd">${list.length}명</span></h3>${list.length?`<div class="cards">${list.map(apCard).join('')}</div>`:'<p class="empty">없어요</p>'}</div>`).join('');
-  if(revealObs)revealObs.disconnect();
-  if('IntersectionObserver' in window){let n=0;revealObs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){const el=e.target;el.style.transitionDelay=Math.min(n++%6,5)*0.05+'s';el.classList.add('show');revealObs.unobserve(el)}})},{rootMargin:'0px 0px -5% 0px'});box.querySelectorAll('.reveal').forEach(el=>revealObs.observe(el))}
-  else box.querySelectorAll('.reveal').forEach(el=>el.classList.add('show'));
-  // 인쇄·전체 화면 캡처처럼 스크롤 없이 보는 경우에도 카드가 투명하게 남지 않게
-  setTimeout(()=>box.querySelectorAll('.reveal:not(.show)').forEach(el=>el.classList.add('show')),1500);
+  observeReveal(box);
 }
-const rowText=r=>[r.sid,r.name,r.gender,r.track+(r.role?'('+r.role+')':''),r.d1,r.d2||'',r.cand?'회장 후보':'',isRec(r)?'추천':'',r.status].join('\t');
-const HEAD='학번\t이름\t성별\t구분\t1지망\t2지망\t회장 후보\t교사 추천\t상태';
+// HEAD와 rowText 칸 수를 같게(10칸). 지금 부서는 «답»에 있어 한 명 복사(oneText)에 나온다
+const rowText=r=>[r.sid,r.name,r.gender,tName(r),roleShort(r.role),r.d1,r.d2||'',r.cand?'회장 후보':'',isRec(r)?'추천':'',r.status].join('\t');
+const HEAD='학번\t이름\t성별\t구분\t지원 자리\t1지망\t2지망\t회장 후보\t교사 추천\t상태';
 function oneText(r){return rowText(r).split('\t').filter(Boolean).join(' / ')+'\n'+Object.keys(r.answers||{}).map(k=>'['+(qLabel[k]||k)+'] '+(r.answers[k]===true?'예':r.answers[k]===false?'아니오':r.answers[k])).join('\n')}
 let OPEN_LIST=null;
 function showList(i){
   const L=LISTS[i];if(!L)return;OPEN_LIST=L;document.querySelector('#listDlg .dfoot .copy').style.display='';
   document.getElementById('listTitle').textContent=L.title+' · '+L.rows.length+'명';
-  document.getElementById('listBody').innerHTML=L.rows.slice().sort((a,b)=>a.sid.localeCompare(b.sid)).map(r=>`<li><span><b>${esc(r.name)}</b> <span class="muted">${esc(sidLabel(r.sid))} · ${esc(r.gender)}</span></span><span class="muted">${esc(r.track)} · ${esc(r.d1)}${r.d2?'→'+esc(r.d2):''}${r.cand?' · 후보':''}</span></li>`).join('')||'<li class="empty">없어요</li>';
+  document.getElementById('listBody').innerHTML=L.rows.slice().sort((a,b)=>a.sid.localeCompare(b.sid)).map(r=>`<li><span><b>${esc(r.name)}</b> <span class="muted">${esc(sidLabel(r.sid))} · ${esc(r.gender)}</span></span><span class="muted">${esc(tName(r))}${r.role?'('+esc(roleShort(r.role))+')':''} · ${esc(r.d1)}${r.d2?'→'+esc(r.d2):''}${r.cand?' · 후보':''}</span></li>`).join('')||'<li class="empty">없어요</li>';
   document.getElementById('listDlg').showModal();
 }
 
@@ -858,7 +1076,7 @@ function renderScores(){
 function scoreTsv(){
   const m=scoreModel();if(!m)return '';
   return ['학번\t이름\t구분\t1지망\t2지망\t'+m.cols.map(j=>j.name).join('\t')+(m.cols.length?'\t':'')+'평균\t매긴 사람']
-    .concat(m.rows.map(x=>[x.r.sid,x.r.name,x.r.track,x.r.d1,x.r.d2||'',...x.per.map(p=>p?p.total:''),x.avg==null?'':avgText(x.avg),x.n].join('\t'))).join('\n');
+    .concat(m.rows.map(x=>[x.r.sid,x.r.name,tName(x.r)+(x.r.role?'('+roleShort(x.r.role)+')':''),x.r.d1,x.r.d2||'',...x.per.map(p=>p?p.total:''),x.avg==null?'':avgText(x.avg),x.n].join('\t'))).join('\n');
 }
 function showScoreDetail(id){
   const m=scoreModel();if(!m)return;const x=m.rows.find(y=>y.r.id===id);if(!x)return;
@@ -926,12 +1144,6 @@ document.addEventListener('click',async e=>{
     const r=await call({action:'apAdminSet',key:KEY,open:to});if(!r.ok){toast(errText(r.error));return}
     return loadBoard(true).then(()=>toast(to?'신청을 열었어요.':'신청을 닫았어요.'));
   }
-  if(act==='toggleG2'){
-    const to=!BOARD.g2New;
-    if(!await ask(to?'2학년 신규 추가 모집을 켤까요?':'2학년 신규 추가 모집을 끌까요?',to?'<p>지금 2학년도 «신규 임원»으로 낼 수 있게 돼요.</p>':'<p>이미 낸 2학년 신청서는 그대로 남아요.</p>',to?'켜기':'끄기'))return;
-    const r=await call({action:'apAdminSet',key:KEY,g2New:to});if(!r.ok){toast(errText(r.error));return}
-    return loadBoard(true).then(()=>toast(to?'2학년 추가 모집을 켰어요.':'2학년 추가 모집을 껐어요.'));
-  }
   if(act==='memo'){const v=document.getElementById('mm-'+b.dataset.id).value;b.disabled=true;await mark(b.dataset.id,{memo:v},'메모를 저장했어요.');b.disabled=false;return}
   if(act==='resetPin'){
     const r=BOARD.rows.find(x=>x.id===b.dataset.id);if(!r)return;
@@ -966,7 +1178,7 @@ document.addEventListener('keydown',e=>{if(e.key!=='Enter'&&e.key!==' ')return;c
   if(IS_JUDGE){if(JKEY)await loadJudge(true);else renderJudgeLogin('');return}
   if(IS_TEACHER){if(KEY)await loadBoard(true);else renderLogin('');return}
   const r=await call({action:'apInfo'});
-  if(r.ok)INFO={open:!!r.open,g2New:!!r.g2New};else if(r.error==='net')toast(ERR.net);
+  if(r.ok)INFO={open:!!r.open};else if(r.error==='net')toast(ERR.net);
   renderStudent();
 })();
 </script>
