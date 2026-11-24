@@ -166,6 +166,26 @@ table.dt{width:100%;border-collapse:collapse;font-size:15px}
 /* 카드가 여러 장 이어지면 보일 때 한 장씩 살짝 떠오른다(움직임 표 «Scroll-triggered») */
 .reveal{opacity:0;transform:translateY(8px);transition:opacity .3s ease-out,transform .3s ease-out}
 .reveal.show{opacity:1;transform:none}
+/* ── 심사위원판·점수 모아 보기(2026-11-24) ── */
+.sc{display:flex;align-items:center;justify-content:space-between;gap:var(--space-2);flex-wrap:wrap}
+.sc .sl{font-size:14px;color:var(--text2);flex:1;min-width:8rem}
+.pts{display:inline-flex;gap:var(--space-1)}
+.pts label{position:relative;display:inline-flex}
+.pts input[type=radio]{position:absolute;opacity:0;width:1px;height:1px;margin:0;pointer-events:none}
+.pts span{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:8px;background:var(--surface2);font-weight:700;color:var(--text2);cursor:pointer;transition:background .15s ease-out,color .15s ease-out,transform .15s ease-out}
+.pts input:checked+span{background:var(--accent);color:#fff;transform:scale(1.06)}
+.pts input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+.ap.scored{border-color:var(--good)}
+.bd.dirty{background:var(--warn-soft);color:var(--warn);font-weight:700}
+.prog{font-size:15px;margin-top:var(--space-2)}
+.prog b{font-size:20px;color:var(--accent)}
+.jlist{list-style:none;padding:0;font-size:15px}
+.jlist li{display:flex;justify-content:space-between;align-items:center;gap:var(--space-2);flex-wrap:wrap;padding:var(--space-2) 0;border-top:1px solid var(--surface2)}
+.jlist li:first-child{border-top:0}
+.dt tbody tr.pick{cursor:pointer}
+.dt tbody tr.pick:hover{background:var(--surface2)}
+.dt td.dim{color:var(--text3)}
+@media (prefers-reduced-motion:reduce){.pts span{transition:none}.pts input:checked+span{transform:none}}
 @media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}.toast{animation:none}.tip{transition:none}}
 /* 표지 그림(2026-11-20): 학생 신청서 화면 맨 위에만 둔다. 선생님 심사판엔 넣지 않는다. 글자 없는 장식 그림이라 alt="".
  * election.html .cover-banner와 같은 틀: 폰은 2:1, 768px 이상은 폭 720px 가운데에 12:5(낮은 가로 화면은 3:1)로 위아래를 조금 자른다.
@@ -219,6 +239,7 @@ table.dt{width:100%;border-collapse:collapse;font-size:15px}
 /* ═════════════════════════════════════════════════
  * 2027 학생회 집행부 임원 신청서 + 교사 심사판 (2026-11-14)
  *  - 학생: apply.html — 로그인 없이 학번·이름 + 확인 번호 4자리. 마감 전 «고치기»로 다시 낸다.
+ *  - 심사위원: apply.html?judge=1 — 심사위원마다 다른 입장 번호(효니가 심사판에서 만든다). 자기 점수만 매긴다(2026-11-24).
  *  - 선생님: apply.html?teacher=1 — 상점 관리 비밀번호로 연다(sangjeom과 같은 앱스크립트, apps-script/sangjeom/Apply.gs).
  *  - 시험: ?mock=1 을 붙이면 서버 대신 이 브라우저 안의 가짜 데이터로 돈다(실제 시트에 안 씀).
  *  - 문항은 아래 FORM만 고치면 된다(효니 «초안, 나중에 고칠 수 있게»). 서버는 답을 그대로 저장하므로 문항을 바꿔도 서버는 안 고쳐도 된다.
@@ -283,7 +304,7 @@ const ERR={
 };
 const errText=e=>ERR[e]||'문제가 생겼어요. 다시 해 주세요.';
 const Q=new URLSearchParams(location.search);
-const IS_TEACHER=Q.has('teacher'), MOCK=Q.has('mock');
+const IS_TEACHER=Q.has('teacher'), IS_JUDGE=Q.has('judge'), MOCK=Q.has('mock');
 const app=document.getElementById('app');
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const sidLabel=s=>{s=String(s);return s[0]+'-'+Number(s.slice(1,3))+' '+Number(s.slice(3))+'번'};
@@ -313,9 +334,23 @@ function mockDb(){let d=null;try{d=JSON.parse(store.get(MOCK_KEY)||'null')}catch
     fake.forEach((f,i)=>d.rows.push({id:'m'+i,at:Date.now()-86400000*(8-i),edit:0,sid:f[0],name:f[1],gender:f[2],track:TRACKS[f[3]].label,cand:f[6],d1:f[4],d2:f[5],role:f[3]==='lead'?(i%2?'부장':'부장·차장 모두'):'',answers:f[3]==='new'?{motive:'친구들이 즐거운 학교를 만들고 싶어요.',plan:'점심시간 음악 신청 방송',promise_meet:true,promise_rule:true,know_review:true}:f[3]==='member'?{review:'캠페인 준비를 끝까지 했어요. 회의 기록이 아쉬웠어요.',next:'학생의 날 부스',promise_meet:true,promise_rule:true,know_review:true}:{now_member:i===6?'아니요':'네, 지금 임원이에요',lead_exp:'학급 회장',lead_plan:'부서 회의를 짧고 자주',lead_team:'모두 말해 보고 투표해요',promise_meet:true,promise_rule:true,know_review:true},pin:'1234',status:i===1?'서류 통과':'접수',memo:'',edits:0}));
   }return d}
 function mockSave(d){store.set(MOCK_KEY,JSON.stringify(d))}
+const MOCK_STAGES=[{id:'doc',label:'1차 서류',items:[{id:'motive',label:'지원 동기·포부',max:5},{id:'plan',label:'행사 기획(우리 학교에 맞게)',max:5},{id:'solve',label:'갈등 해소·문제 해결',max:5},{id:'drive',label:'주도성·성실성 사례',max:5}]},{id:'talk',label:'2차 면접',items:[{id:'real',label:'서류 내용 확인(진정성)',max:5},{id:'speak',label:'말하기·소통',max:5},{id:'solve',label:'문제 해결',max:5},{id:'duty',label:'책임감·태도',max:5}]},{id:'dept',label:'3차 부서 면접',items:[{id:'task',label:'부서 실습',max:5},{id:'know',label:'부서 일 이해',max:5},{id:'team',label:'협력',max:5}]}];
 async function mockCall(b){
   await new Promise(r=>setTimeout(r,250));
   const d=mockDb(),A=b.action,adminOk=b.key==='test1';
+  d.judges=d.judges||[];d.scores=d.scores||[];
+  const norm=k=>String(k||'').trim().toLowerCase().replace(/[\s-]/g,'');
+  const jOf=k=>d.judges.find(j=>j.on&&j.code===norm(k));
+  const sv=x=>{const st=MOCK_STAGES.find(t=>t.id===x.stage);const ok=it=>Number.isInteger(x.scores[it.id]);return Object.assign({},x,{total:st?st.items.reduce((a,it)=>a+(ok(it)?x.scores[it.id]:0),0):0,full:!!st&&st.items.every(ok)})};
+  if(A==='apJudge'||A==='apJudgeScore'){
+    const j=jOf(b.jkey);if(!j)return {ok:false,error:'no_auth'};
+    if(A==='apJudge')return {ok:true,now:Date.now(),judge:{id:j.id,name:j.name,on:true},stages:MOCK_STAGES,rows:d.rows.filter(r=>r.status!=='취소').map(r=>({id:r.id,sid:r.sid,name:r.name,gender:r.gender,track:r.track,cand:r.cand,d1:r.d1,d2:r.d2,role:r.role})),mine:d.scores.filter(x=>x.judge===j.id).map(sv)};
+    const st=MOCK_STAGES.find(t=>t.id===b.stage);if(!st||!b.scores||typeof b.scores!=='object')return {ok:false,error:'bad_input'};
+    const sc={};for(const it of st.items){const n=Number(b.scores[it.id]);if(!Number.isInteger(n)||n<1||n>it.max)return {ok:false,error:'bad_input'};sc[it.id]=n}
+    const a=d.rows.find(r=>r.id===b.app);if(!a||a.status==='취소')return {ok:false,error:'not_found'};
+    let x=d.scores.find(y=>y.app===b.app&&y.judge===j.id&&y.stage===st.id);if(!x){x={app:b.app,judge:j.id,stage:st.id};d.scores.push(x)}
+    Object.assign(x,{scores:sc,memo:String(b.memo||'').slice(0,300),at:Date.now()});mockSave(d);return {ok:true,score:sv(x)};
+  }
   const view=(r,priv)=>{const o=Object.assign({},r);delete o.pin;if(!priv){delete o.status;delete o.memo}else o.pinless=!r.pin;return o};
   const tk=Object.keys(TRACKS),rk={'':'',head:'부장',vice:'차장',any:'부장·차장 모두'};
   if(A==='apInfo')return {ok:true,open:d.open,g2New:d.g2New};
@@ -334,7 +369,15 @@ async function mockCall(b){
   if(A==='apMine'){const r=d.rows.find(x=>x.sid===b.sid);if(!r)return {ok:false,error:'not_found'};if(r.pin&&r.pin!==b.pin)return {ok:false,error:'pin'};
     const v=view(r,false);v.track=tk.find(k=>TRACKS[k].label===v.track)||'';v.role=Object.keys(rk).find(k=>k&&rk[k]===v.role)||'';return {ok:true,app:v,open:d.open}}
   if(!adminOk)return {ok:false,error:'no_auth'};
-  if(A==='apAdmin')return {ok:true,now:Date.now(),open:d.open,accepting:d.open,g2New:d.g2New,rows:d.rows.map(r=>view(r,true)),statuses:['접수','서류 통과','보류','불합격','취소']};
+  const pub=j=>({id:j.id,name:j.name,on:j.on});
+  if(A==='apAdmin')return {ok:true,now:Date.now(),open:d.open,accepting:d.open,g2New:d.g2New,rows:d.rows.map(r=>view(r,true)),statuses:['접수','서류 통과','보류','불합격','취소'],judges:d.judges.map(pub),scores:d.scores.map(sv),stages:MOCK_STAGES};
+  if(A==='apAdminJudge'){
+    const mk=()=>{let c='';for(let i=0;i<8;i++)c+='abcdefghjkmnpqrstuvwxyz23456789'[Math.floor(Math.random()*31)];return c};
+    let code=null,j;
+    if(b.op==='add'){const name=String(b.name||'').trim().slice(0,20);if(!name||d.judges.length>=12)return {ok:false,error:'bad_input'};if(d.judges.some(x=>x.name===name))return {ok:false,error:'exists'};code=mk();j={id:'j'+Date.now(),name,code,on:true};d.judges.push(j)}
+    else{j=d.judges.find(x=>x.id===b.id);if(!j)return {ok:false,error:'not_found'};if(b.op==='reissue'){code=mk();j.code=code}else if(b.op==='toggle'&&typeof b.on==='boolean')j.on=b.on;else return {ok:false,error:'bad_input'}}
+    mockSave(d);return {ok:true,judge:pub(j),code:code&&code.slice(0,4)+'-'+code.slice(4),judges:d.judges.map(pub)};
+  }
   if(A==='apAdminSet'){if(typeof b.open==='boolean')d.open=b.open;if(typeof b.g2New==='boolean')d.g2New=b.g2New;mockSave(d);return {ok:true,open:d.open,accepting:d.open,g2New:d.g2New}}
   if(A==='apAdminMark'){const r=d.rows.find(x=>x.id===b.id);if(!r)return {ok:false,error:'not_found'};if(b.status!=null)r.status=b.status;if(b.memo!=null)r.memo=b.memo;if(b.resetPin)r.pin='';mockSave(d);return {ok:true,row:view(r,true)}}
   return {ok:false,error:'bad_input'};
@@ -563,6 +606,93 @@ document.getElementById('editDlg').addEventListener('close',async()=>{
   document.getElementById('hForm').scrollIntoView({block:'start'});
 });
 
+
+/* ═════════════ 심사위원판(?judge=1, 2026-11-24) ═════════════
+ * 심사위원마다 다른 입장 번호로 들어와 자기 점수만 매긴다. 다른 심사위원 점수·심사 상태·교사 추천은 안 보인다. */
+let JKEY=sess.get('apply-judge')||'';let JB=null;let JV={stage:'',by:'dept',q:'',only:''};
+function renderJudgeLogin(msg){
+  app.className='wrap';
+  app.innerHTML=`${MOCK?'<p class="banner">시험 모드예요. 심사판(?teacher=1&mock=1, 비밀번호 test1)에서 심사위원을 더하면 나오는 번호로 들어와요.</p>':''}
+  <header class="top"><h1>임원 심사위원판</h1></header>
+  <form class="card" id="judgeForm"><div class="field"><label for="jkey">입장 번호</label><input type="password" id="jkey" required autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+  <p class="muted">선생님께 받은 번호를 넣어요. 심사위원마다 번호가 달라요. 내 점수만 보이고, 다른 심사위원 점수는 보이지 않아요.</p>
+  <p class="err" style="display:block" role="status">${esc(msg||'')}</p><button class="btn block" style="margin-top:var(--space-3)">들어가기</button></form>`;
+  document.getElementById('judgeForm').addEventListener('submit',async e=>{e.preventDefault();JKEY=document.getElementById('jkey').value.trim();await loadJudge()});
+}
+async function loadJudge(silent){
+  const r=await call({action:'apJudge',jkey:JKEY});
+  if(!r.ok){if(r.error==='no_auth'){sess.del('apply-judge');JKEY='';JB=null;renderJudgeLogin('번호가 맞지 않거나 꺼진 번호예요. 선생님께 받은 번호를 다시 넣어 주세요.')}else if(!JB)renderJudgeLogin(errText(r.error));else toast(errText(r.error));return}
+  sess.set('apply-judge',JKEY);JB=r;if(!r.stages.some(x=>x.id===JV.stage))JV.stage=r.stages[0].id;renderJudge();if(silent!==true)toast('새로 불러왔어요 · '+fmtTime(Date.now()));
+}
+const jStage=()=>JB.stages.find(x=>x.id===JV.stage);
+const myScore=(app,stage)=>JB.mine.find(x=>x.app===app&&x.stage===stage);
+function jProgress(){const st=jStage();return JB.rows.filter(r=>{const m=myScore(r.id,st.id);return m&&m.full}).length}
+// 저장 안 한 점수·메모(검토에서 재현: 찾기·거르기·단계를 바꾸면 고른 점수가 사라졌다). 다시 그리기 전에 화면에서 떠 둔다
+let JDRAFT={};
+function keepDrafts(){
+  document.querySelectorAll('#jgroups article[data-app]').forEach(card=>{
+    if(!card.querySelector('[data-state].dirty'))return;
+    const id=card.dataset.app,sc={};
+    card.querySelectorAll('.pts input:checked').forEach(x=>{sc[x.name.slice(('s-'+id+'-').length)]=+x.value});
+    JDRAFT[card.dataset.stage+'|'+id]={scores:sc,memo:(card.querySelector('.memo input')||{}).value||''};
+  });
+}
+function renderJudge(){
+  keepDrafts();
+  const st=jStage();
+  app.className='wrap wide';
+  app.innerHTML=`${MOCK?'<p class="banner">시험 모드예요. 가짜 학생만 있어요.</p>':''}
+  <div class="tbar"><div class="top" style="margin:0"><h1>심사위원판 · ${esc(JB.judge.name)}</h1>
+    <div class="row" style="flex:none"><button type="button" class="btn sm line" data-act="jReload">새로고침</button><button type="button" class="btn sm ghost" data-act="jOut">나가기</button></div></div></div>
+  <section class="card" aria-labelledby="hStage"><h2 id="hStage">심사 단계</h2>
+    <div class="seg" role="group" aria-label="심사 단계">${JB.stages.map(x=>`<button type="button" data-jstage="${esc(x.id)}" aria-pressed="${x.id===st.id}">${esc(x.label)}</button>`).join('')}</div>
+    <p class="muted" style="margin-top:var(--space-2)">${st.items.map(it=>esc(it.label)+' '+it.max+'점').join(' · ')} (합계 ${st.items.reduce((a,it)=>a+it.max,0)}점). 항목마다 점수를 고르고 «저장»을 눌러요. 저장한 뒤에도 고쳐서 다시 저장할 수 있어요.</p>
+    <p class="prog" role="status"><b id="jDone">${jProgress()}</b> / ${JB.rows.length}명 매김</p>
+  </section>
+  <section class="card" aria-labelledby="hJList"><h2 id="hJList">지원자</h2>
+    <div class="filters">
+      <div class="seg" role="group" aria-label="묶어 보기">${[['dept','부서별'],['grade','학년별'],['track','구분별']].map(b=>`<button type="button" data-jby="${b[0]}" aria-pressed="${JV.by===b[0]}">${b[1]}</button>`).join('')}</div>
+      <label class="visually-hidden" for="jOnly">매긴 것</label><select id="jOnly"><option value="">모두</option><option value="todo" ${JV.only==='todo'?'selected':''}>아직 안 매김</option><option value="done" ${JV.only==='done'?'selected':''}>매김</option></select>
+      <label class="visually-hidden" for="jQ">이름·학번 찾기</label><input type="search" id="jQ" placeholder="이름·학번" value="${esc(JV.q)}">
+    </div>
+    <div id="jgroups"></div>
+  </section>`;
+  renderJudgeGroups();
+}
+function jCard(r){
+  const st=jStage(),saved=myScore(r.id,st.id)||{scores:{},memo:'',full:false,total:0},dr=JDRAFT[st.id+'|'+r.id];
+  const m=dr?Object.assign({},saved,dr):saved;
+  return `<article class="ap${saved.full?' scored':''}" data-app="${esc(r.id)}" data-stage="${esc(st.id)}">
+    <header><div><b>${esc(r.name)}</b> <span class="muted">${esc(sidLabel(r.sid))} · ${esc(r.gender)}</span></div>
+      <div class="badges">${r.cand?'<span class="bd cand">회장 후보</span>':''}<span class="bd ${r.track==='부장·차장'?'lead':''}">${esc(r.track)}${r.role?' · '+esc(r.role==='부장·차장 모두'?'둘 다':r.role):''}</span><span class="bd${dr?' dirty':saved.full?' pass':''}" data-state>${dr?'저장 안 함':saved.full?'저장함 '+saved.total+'점':'안 매김'}</span></div></header>
+    <div class="prefs">1지망 <b>${esc(r.d1)}</b>${r.d2?' · 2지망 '+esc(r.d2):''}</div>
+    ${st.items.map(it=>`<div class="sc" role="radiogroup" aria-label="${esc(r.name)} ${esc(it.label)}"><span class="sl">${esc(it.label)}</span><span class="pts">${Array.from({length:it.max},(_,k)=>k+1).map(n=>`<label><input type="radio" name="s-${esc(r.id)}-${esc(it.id)}" value="${n}" ${m.scores[it.id]===n?'checked':''}><span>${n}</span></label>`).join('')}</span></div>`).join('')}
+    <div class="memo"><label class="visually-hidden" for="jm-${esc(r.id)}">${esc(r.name)} 메모</label><input type="text" id="jm-${esc(r.id)}" maxlength="300" placeholder="메모(선택)" value="${esc(m.memo)}"><button type="button" class="btn xs" data-act="jSave" data-app="${esc(r.id)}">저장</button></div>
+  </article>`;
+}
+function renderJudgeGroups(){
+  const box=document.getElementById('jgroups');if(!box)return;
+  keepDrafts();
+  const st=jStage(),q=JV.q.trim();
+  const rows=JB.rows.filter(r=>(!q||r.name.includes(q)||r.sid.includes(q))&&(!JV.only||((myScore(r.id,st.id)||{}).full?'done':'todo')===JV.only));
+  box.innerHTML=groupsOf(rows,JV.by).map(([name,list])=>`<div class="group"><h3>${esc(name)} <span class="bd">${list.length}명</span></h3>${list.length?`<div class="cards">${list.map(jCard).join('')}</div>`:'<p class="empty">없어요</p>'}</div>`).join('');
+}
+async function jSave(id,btn){
+  const st=jStage(),card=btn.closest('article[data-app]'),r=JB.rows.find(x=>x.id===id);if(!card||!r)return;
+  const sc={},miss=[];
+  st.items.forEach(it=>{const c=card.querySelector('input[name="s-'+CSS.escape(id)+'-'+it.id+'"]:checked');if(c)sc[it.id]=+c.value;else miss.push(it.label)});
+  if(miss.length){toast('아직 안 고른 항목: '+miss.join(', '));return}
+  btn.disabled=true;
+  const res=await call({action:'apJudgeScore',jkey:JKEY,app:id,stage:st.id,scores:sc,memo:document.getElementById('jm-'+id).value});
+  btn.disabled=false;
+  if(!res.ok){if(res.error==='no_auth'){sess.del('apply-judge');JKEY='';JB=null;renderJudgeLogin('번호가 바뀌었거나 꺼졌어요. 선생님께 확인해 주세요.');return}toast(res.error==='not_found'?'신청이 취소됐거나 없어요. 새로고침해 주세요.':errText(res.error));return}
+  const i=JB.mine.findIndex(x=>x.app===id&&x.stage===st.id);if(i>=0)JB.mine[i]=res.score;else JB.mine.push(res.score);
+  delete JDRAFT[st.id+'|'+id];
+  const tmp=document.createElement('div');tmp.innerHTML=jCard(r).trim();card.replaceWith(tmp.firstElementChild);
+  document.getElementById('jDone').textContent=jProgress();
+  toast(r.name+' '+res.score.total+'점 저장했어요.');
+}
+
 /* ═════════════ 교사 심사판 ═════════════ */
 let KEY=sess.get('apply-admin')||'';
 let BOARD=null;let VIEW={by:'dept',status:'',q:''};
@@ -624,6 +754,8 @@ function renderBoard(){
   <section class="card" aria-labelledby="hDeptT"><h2 id="hDeptT">부서별</h2>
     <div style="overflow-x:auto"><table class="dt"><thead><tr><th>부서</th><th>1지망 1학년</th><th>1지망 2학년</th><th>그중 부장·차장</th><th>2지망</th></tr></thead><tbody>${deptRows}</tbody></table></div>
   </section>
+  ${judgeSection()}
+  ${scoreSection()}
   <section class="card" aria-labelledby="hList"><h2 id="hList">신청서</h2>
     <div class="filters">
       <div class="seg" role="group" aria-label="묶어 보기">${[['dept','부서별'],['grade','학년별'],['track','구분별']].map(b=>`<button type="button" data-by="${b[0]}" aria-pressed="${VIEW.by===b[0]}">${b[1]}</button>`).join('')}</div>
@@ -633,16 +765,16 @@ function renderBoard(){
     </div>
     <div id="groups"></div>
   </section>`;
-  renderGroups();
+  renderGroups();renderScores();
 }
 function filtered(){
   const q=VIEW.q.trim();
   return BOARD.rows.filter(r=>(!VIEW.status||r.status===VIEW.status)&&(!q||r.name.includes(q)||r.sid.includes(q)));
 }
-function groupsOf(rows){
+function groupsOf(rows,by=VIEW.by){
   const sortR=a=>a.slice().sort((x,y)=>x.sid.localeCompare(y.sid));
-  if(VIEW.by==='grade')return ['1','2'].map(g=>[g+'학년',sortR(rows.filter(r=>r.sid[0]===g))]);
-  if(VIEW.by==='track')return Object.keys(TRACKS).map(k=>[TRACKS[k].label,sortR(rows.filter(r=>r.track===TRACKS[k].label))]);
+  if(by==='grade')return ['1','2'].map(g=>[g+'학년',sortR(rows.filter(r=>r.sid[0]===g))]);
+  if(by==='track')return Object.keys(TRACKS).map(k=>[TRACKS[k].label,sortR(rows.filter(r=>r.track===TRACKS[k].label))]);
   return DEPTS.map(d=>[d.name+' (1지망)',sortR(rows.filter(r=>r.d1===d.name))]);
 }
 function apCard(r){
@@ -675,10 +807,79 @@ const HEAD='학번\t이름\t성별\t구분\t1지망\t2지망\t회장 후보\t교
 function oneText(r){return rowText(r).split('\t').filter(Boolean).join(' / ')+'\n'+Object.keys(r.answers||{}).map(k=>'['+(qLabel[k]||k)+'] '+(r.answers[k]===true?'예':r.answers[k]===false?'아니오':r.answers[k])).join('\n')}
 let OPEN_LIST=null;
 function showList(i){
-  const L=LISTS[i];if(!L)return;OPEN_LIST=L;
+  const L=LISTS[i];if(!L)return;OPEN_LIST=L;document.querySelector('#listDlg .dfoot .copy').style.display='';
   document.getElementById('listTitle').textContent=L.title+' · '+L.rows.length+'명';
   document.getElementById('listBody').innerHTML=L.rows.slice().sort((a,b)=>a.sid.localeCompare(b.sid)).map(r=>`<li><span><b>${esc(r.name)}</b> <span class="muted">${esc(sidLabel(r.sid))} · ${esc(r.gender)}</span></span><span class="muted">${esc(r.track)} · ${esc(r.d1)}${r.d2?'→'+esc(r.d2):''}${r.cand?' · 후보':''}</span></li>`).join('')||'<li class="empty">없어요</li>';
   document.getElementById('listDlg').showModal();
+}
+
+/* ── 효니 심사판: 심사위원 관리·점수 모아 보기(2026-11-24) ── */
+let SV={stage:'',dept:''};
+const JUDGE_URL=location.origin+location.pathname+'?judge=1'+(MOCK?'&mock=1':'');
+function judgeSection(){
+  const js=BOARD.judges||[],sc=BOARD.scores||[],liveIds=new Set(live(BOARD.rows).map(r=>r.id));
+  return `<section class="card" aria-labelledby="hJudge"><h2 id="hJudge">심사위원 <span class="muted">(사람마다 입장 번호가 달라요)</span></h2>
+    <ul class="jlist">${js.map(j=>`<li><span><b>${esc(j.name)}</b> ${j.on?'':'<span class="bd">꺼짐</span>'} <span class="muted">· 매김 ${sc.filter(x=>x.judge===j.id&&x.full&&liveIds.has(x.app)).length}건</span></span>
+      <span class="row" style="flex:none"><button type="button" class="btn xs ghost" data-act="jReissue" data-id="${esc(j.id)}">번호 새로 만들기</button><button type="button" class="btn xs ghost" data-act="jToggle" data-id="${esc(j.id)}">${j.on?'끄기':'켜기'}</button></span></li>`).join('')||'<li class="empty">아직 없어요. 아래에서 더해 주세요.</li>'}</ul>
+    <form id="jAddForm" class="row" style="margin-top:var(--space-2)"><label class="visually-hidden" for="jName">심사위원 이름</label><input id="jName" maxlength="20" required placeholder="예: 회장, 3학년 부회장, ○○ 선생님" style="flex:1;min-width:12rem;height:40px"><button class="btn sm" style="flex:none">더하기</button></form>
+    <p class="muted" style="margin-top:var(--space-2)">심사위원판 주소는 <b>apply.html?judge=1</b>이에요. 번호는 만들 때 한 번만 보여요. 잊으면 «번호 새로 만들기»를 누르면 옛 번호는 바로 막혀요. «끄기»를 해도 매긴 점수는 남아요.</p>
+  </section>`;
+}
+function scoreSection(){
+  const st=BOARD.stages||[];if(!st.length)return '';
+  if(!st.some(x=>x.id===SV.stage))SV.stage=st[0].id;
+  return `<section class="card" aria-labelledby="hScore"><h2 id="hScore">점수 모아 보기</h2>
+    <div class="filters">
+      <div class="seg" role="group" aria-label="심사 단계">${st.map(x=>`<button type="button" data-sstage="${esc(x.id)}" aria-pressed="${x.id===SV.stage}">${esc(x.label)}</button>`).join('')}</div>
+      <label class="visually-hidden" for="sDept">부서</label><select id="sDept"><option value="">부서 전체</option>${DEPTS.map(d=>`<option value="${esc(d.name)}" ${SV.dept===d.name?'selected':''}>${esc(d.name)} 1지망</option>`).join('')}</select>
+      <span class="copy"><button type="button" class="btn sm line" data-copy="scores" aria-label="점수표 복사(엑셀에 붙여 넣기)">점수표 복사</button><span class="tip" role="status"></span></span>
+    </div>
+    <div style="overflow-x:auto;margin-top:var(--space-2)"><table class="dt" id="scoreTable"></table></div>
+    <p class="muted" style="margin-top:var(--space-2)">평균은 그 단계 항목을 다 매긴 심사위원만으로 내요. 평균 높은 순이에요. 줄을 누르면 항목별 점수와 메모가 보여요.</p>
+  </section>`;
+}
+function scoreModel(){
+  const st=(BOARD.stages||[]).find(x=>x.id===SV.stage);if(!st)return null;
+  const sc=(BOARD.scores||[]).filter(x=>x.stage===st.id&&x.full);
+  const cols=(BOARD.judges||[]).filter(j=>j.on||sc.some(x=>x.judge===j.id));
+  const rows=live(BOARD.rows).filter(r=>!SV.dept||r.d1===SV.dept).map(r=>{
+    const per=cols.map(j=>sc.find(x=>x.app===r.id&&x.judge===j.id)||null);
+    const got=per.filter(Boolean);
+    return {r,per,n:got.length,avg:got.length?got.reduce((a,x)=>a+x.total,0)/got.length:null};
+  }).sort((a,b)=>(b.avg==null?-1:b.avg)-(a.avg==null?-1:a.avg)||a.r.sid.localeCompare(b.r.sid));
+  return {st,cols,rows,max:st.items.reduce((a,it)=>a+it.max,0)};
+}
+const avgText=v=>v==null?'–':(Math.round(v*10)/10).toString();
+function renderScores(){
+  const t=document.getElementById('scoreTable');if(!t)return;
+  const m=scoreModel();if(!m){t.innerHTML='';return}
+  t.innerHTML=`<thead><tr><th>이름</th><th>1지망</th>${m.cols.map(j=>`<th>${esc(j.name)}</th>`).join('')}<th>평균 (${m.max}점)</th><th>매긴 사람</th></tr></thead><tbody>${m.rows.map(x=>`<tr class="pick" data-sapp="${esc(x.r.id)}" tabindex="0"><td><b>${esc(x.r.name)}</b> <span class="muted">${esc(sidLabel(x.r.sid))}</span></td><td>${esc(x.r.d1)}</td>${x.per.map(p=>p?`<td>${p.total}</td>`:'<td class="dim">–</td>').join('')}<td><b>${avgText(x.avg)}</b></td><td>${x.n}/${m.cols.length}</td></tr>`).join('')||`<tr><td colspan="${m.cols.length+4}" class="empty">없어요</td></tr>`}</tbody>`;
+}
+function scoreTsv(){
+  const m=scoreModel();if(!m)return '';
+  return ['학번\t이름\t구분\t1지망\t2지망\t'+m.cols.map(j=>j.name).join('\t')+(m.cols.length?'\t':'')+'평균\t매긴 사람']
+    .concat(m.rows.map(x=>[x.r.sid,x.r.name,x.r.track,x.r.d1,x.r.d2||'',...x.per.map(p=>p?p.total:''),x.avg==null?'':avgText(x.avg),x.n].join('\t'))).join('\n');
+}
+function showScoreDetail(id){
+  const m=scoreModel();if(!m)return;const x=m.rows.find(y=>y.r.id===id);if(!x)return;
+  OPEN_LIST=null;document.querySelector('#listDlg .dfoot .copy').style.display='none';
+  document.getElementById('listTitle').textContent=x.r.name+' · '+m.st.label+' · 평균 '+avgText(x.avg);
+  const all=(BOARD.scores||[]).filter(s=>s.app===id&&s.stage===m.st.id);
+  document.getElementById('listBody').innerHTML=(BOARD.judges||[]).filter(j=>all.some(s=>s.judge===j.id)).map(j=>{const s=all.find(y=>y.judge===j.id);
+    return `<li><span><b>${esc(j.name)}</b> <span class="muted">${s.full?s.total+'점':'덜 매김'}</span></span><span class="muted">${m.st.items.map(it=>esc(it.label)+' '+(s.scores[it.id]??'–')).join(' · ')}${s.memo?'<br>메모: '+esc(s.memo):''}</span></li>`}).join('')||'<li class="empty">아직 매긴 사람이 없어요</li>';
+  document.getElementById('listDlg').showModal();
+}
+async function showCode(name,code){
+  const msg='임원 심사위원판 '+JUDGE_URL+'\n'+name+' 입장 번호: '+code;
+  // 번호 창엔 «취소»가 뜻이 없어 닫는 단추 하나만 둔다
+  const no=document.getElementById('askNo');no.style.display='none';
+  try{await ask(name+' 입장 번호',`<p class="pinbox" style="letter-spacing:.12em">${esc(code)}</p><p>이 번호와 주소를 ${esc(name)}에게만 따로 전해 주세요. 이 창을 닫으면 번호를 다시 볼 수 없어요.</p>
+    <p class="muted">${esc(JUDGE_URL)}</p><span class="copy"><button type="button" class="btn sm line" data-copy="code" data-text="${esc(msg)}">주소와 번호 복사</button><span class="tip" role="status"></span></span>`,'다 전했어요')}finally{no.style.display=''}
+}
+async function judgeOp(body){
+  const r=await call(Object.assign({action:'apAdminJudge',key:KEY},body));
+  if(!r.ok){toast(r.error==='exists'?'같은 이름이 이미 있어요.':r.error==='bad_input'?'이름을 확인해 주세요(심사위원은 12명까지).':errText(r.error));return null}
+  BOARD.judges=r.judges;return r;
 }
 async function mark(id,body,okMsg){
   const r=await call(Object.assign({action:'apAdminMark',key:KEY,id},body));
@@ -695,6 +896,23 @@ document.addEventListener('click',async e=>{
   if(b.dataset.by){VIEW.by=b.dataset.by;document.querySelectorAll('[data-by]').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'));renderGroups();return}
   if(b.dataset.copy==='list'&&OPEN_LIST){copyText(b,HEAD+'\n'+OPEN_LIST.rows.map(rowText).join('\n'));return}
   if(b.dataset.copy==='filtered'){copyText(b,HEAD+'\n'+filtered().map(rowText).join('\n'));return}
+  if(b.dataset.copy==='code'){copyText(b,b.dataset.text||'');return}
+  if(b.dataset.copy==='scores'){copyText(b,scoreTsv());return}
+  if(b.dataset.sstage){SV.stage=b.dataset.sstage;document.querySelectorAll('[data-sstage]').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'));renderScores();return}
+  if(b.dataset.jstage){JV.stage=b.dataset.jstage;renderJudge();return}
+  if(b.dataset.jby){JV.by=b.dataset.jby;document.querySelectorAll('[data-jby]').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'));renderJudgeGroups();return}
+  if(act==='jSave')return jSave(b.dataset.app,b);
+  if(act==='jReload')return loadJudge();
+  if(act==='jOut'){sess.del('apply-judge');JKEY='';JB=null;JDRAFT={};renderJudgeLogin('');return}
+  if(act==='jReissue'||act==='jToggle'){
+    const j=(BOARD.judges||[]).find(x=>x.id===b.dataset.id);if(!j)return;
+    if(act==='jReissue'){
+      if(!await ask(j.name+' 번호를 새로 만들까요?','<p>옛 번호는 바로 막혀요. 새 번호를 '+esc(j.name)+'에게 다시 전해 주세요. 매긴 점수는 그대로 남아요.</p>','새로 만들기',true))return;
+      const r=await judgeOp({op:'reissue',id:j.id});if(!r)return;await showCode(j.name,r.code);renderBoard();return;
+    }
+    if(j.on&&!await ask(j.name+' 심사위원을 끌까요?','<p>끄면 이 번호로 들어올 수 없어요. 매긴 점수는 남아 점수표에 그대로 보여요. 다시 켤 수 있어요.</p>','끄기',true))return;
+    const r=await judgeOp({op:'toggle',id:j.id,on:!j.on});if(!r)return;toast(j.on?'껐어요.':'켰어요.');renderBoard();return;
+  }
   if(b.dataset.copy==='one'){const r=BOARD.rows.find(x=>x.id===b.dataset.id);if(r)copyText(b,oneText(r));return}
   if(act==='openEdit')return openEdit();
   if(act==='closeEdit'){document.getElementById('editDlg').close('');return}
@@ -724,11 +942,28 @@ document.addEventListener('click',async e=>{
 document.addEventListener('change',async e=>{
   const s=e.target.closest('select[data-status]');if(s){s.disabled=true;const ok=await mark(s.dataset.status,{status:s.value},'«'+s.value+'»로 바꿨어요.');s.disabled=false;if(ok)renderBoard();return}
   if(e.target.id==='fStatus'){VIEW.status=e.target.value;renderGroups()}
+  if(e.target.id==='sDept'){SV.dept=e.target.value;renderScores()}
+  if(e.target.id==='jOnly'){JV.only=e.target.value;renderJudgeGroups()}
+  // 점수를 고르거나 메모를 바꾸면 «저장 안 함»을 보여 준다
+  const jc=e.target.closest('.pts')&&e.target.closest('[data-app]');if(jc){const t=jc.querySelector('[data-state]');t.textContent='저장 안 함';t.className='bd dirty'}
 });
-document.addEventListener('input',e=>{if(e.target.id==='fQ'){VIEW.q=e.target.value;renderGroups()}});
+document.addEventListener('input',e=>{if(e.target.id==='fQ'){VIEW.q=e.target.value;renderGroups()}
+  if(e.target.id==='jQ'){JV.q=e.target.value;renderJudgeGroups()}
+  if(e.target.id&&e.target.id.startsWith('jm-')){const t=e.target.closest('[data-app]').querySelector('[data-state]');t.textContent='저장 안 함';t.className='bd dirty'}});
+// 심사위원 더하기(효니 심사판)
+document.addEventListener('submit',async e=>{
+  if(e.target.id!=='jAddForm')return;e.preventDefault();
+  const inp=document.getElementById('jName'),name=inp.value.trim();if(!name)return;
+  const btn=e.target.querySelector('button');btn.disabled=true;const r=await judgeOp({op:'add',name});btn.disabled=false;if(!r)return;
+  await showCode(r.judge.name,r.code);renderBoard();
+});
+// 점수표 줄을 누르거나 Enter → 항목별 점수
+document.addEventListener('click',e=>{const tr=e.target.closest('tr[data-sapp]');if(tr)showScoreDetail(tr.dataset.sapp)});
+document.addEventListener('keydown',e=>{if(e.key!=='Enter'&&e.key!==' ')return;const tr=e.target.closest&&e.target.closest('tr[data-sapp]');if(tr){e.preventDefault();showScoreDetail(tr.dataset.sapp)}});
 
 /* ── 시작 ── */
 (async function(){
+  if(IS_JUDGE){if(JKEY)await loadJudge(true);else renderJudgeLogin('');return}
   if(IS_TEACHER){if(KEY)await loadBoard(true);else renderLogin('');return}
   const r=await call({action:'apInfo'});
   if(r.ok)INFO={open:!!r.open,g2New:!!r.g2New};else if(r.error==='net')toast(ERR.net);
