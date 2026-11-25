@@ -144,7 +144,7 @@ table.dt{width:100%;border-collapse:collapse;font-size:15px}
 @media (min-width:768px){.cards{grid-template-columns:1fr 1fr}}
 @media (min-width:1100px){.cards{grid-template-columns:1fr 1fr 1fr}}
 .ap{background:#fff;border:1px solid var(--border);border-radius:12px;padding:var(--space-3);display:flex;flex-direction:column;gap:var(--space-2)}
-.ap.st-불합격,.ap.st-취소{opacity:.6}
+.ap.st-불합격,.ap.st-취소,.ap.st-보관{opacity:.6}
 .ap header{display:flex;justify-content:space-between;gap:var(--space-2);align-items:flex-start}
 .ap header b{font-size:17px}
 .badges{display:flex;flex-wrap:wrap;gap:var(--space-1)}
@@ -500,10 +500,10 @@ async function mockCall(b){
   const sv=x=>{const st=MOCK_STAGES.find(t=>t.id===x.stage);const ok=it=>Number.isInteger(x.scores[it.id]);return Object.assign({},x,{total:st?st.items.reduce((a,it)=>a+(ok(it)?x.scores[it.id]:0),0):0,full:!!st&&st.items.every(ok)})};
   if(A==='apJudge'||A==='apJudgeScore'){
     const j=jOf(b.jkey);if(!j)return {ok:false,error:'no_auth'};
-    if(A==='apJudge')return {ok:true,now:Date.now(),judge:{id:j.id,name:j.name,on:true},stages:MOCK_STAGES,rows:d.rows.filter(r=>r.status!=='취소').map(r=>({id:r.id,sid:r.sid,name:r.name,gender:r.gender,track:r.track,cand:r.cand,d1:r.d1,d2:r.d2,role:r.role})),mine:d.scores.filter(x=>x.judge===j.id).map(sv)};
+    if(A==='apJudge')return {ok:true,now:Date.now(),judge:{id:j.id,name:j.name,on:true},stages:MOCK_STAGES,rows:d.rows.filter(r=>!hidden(r)).map(r=>({id:r.id,sid:r.sid,name:r.name,gender:r.gender,track:r.track,cand:r.cand,d1:r.d1,d2:r.d2,role:r.role})),mine:d.scores.filter(x=>x.judge===j.id).map(sv)};
     const st=MOCK_STAGES.find(t=>t.id===b.stage);if(!st||!b.scores||typeof b.scores!=='object')return {ok:false,error:'bad_input'};
     const sc={};for(const it of st.items){const n=Number(b.scores[it.id]);if(!Number.isInteger(n)||n<1||n>it.max)return {ok:false,error:'bad_input'};sc[it.id]=n}
-    const a=d.rows.find(r=>r.id===b.app);if(!a||a.status==='취소')return {ok:false,error:'not_found'};
+    const a=d.rows.find(r=>r.id===b.app);if(!a||hidden(a))return {ok:false,error:'not_found'};
     let x=d.scores.find(y=>y.app===b.app&&y.judge===j.id&&y.stage===st.id);if(!x){x={app:b.app,judge:j.id,stage:st.id};d.scores.push(x)}
     Object.assign(x,{scores:sc,memo:String(b.memo||'').slice(0,300),at:Date.now()});mockSave(d);return {ok:true,score:sv(x)};
   }
@@ -519,7 +519,7 @@ async function mockCall(b){
     if(b.track==='lead'||b.roles==null){if(!((b.role||'') in rk)||(b.track==='lead'&&!b.role))return {ok:false,error:'bad_input'};role=rk[b.role||'']}
     else{if(!Array.isArray(b.roles)||!b.roles.length||b.roles.some(x=>!SEATS.includes(x)))return {ok:false,error:'bad_input'};
       const seats=SEATS.filter(x=>b.roles.includes(x));if(b.track==='new'&&g!=='2'&&seats.some(x=>x!=='부원'))return {ok:false,error:'grade'};role=seats.join('·')}
-    const r=d.rows.find(x=>x.sid===b.sid);
+    const r=d.rows.find(x=>x.sid===b.sid&&x.status!=='보관');
     const gradeOk=b.track==='lead'?g==='2':(g==='1'||g==='2');
     if(!(r&&b.edit&&r.track===TRACKS[b.track].stored)&&!gradeOk)return {ok:false,error:'grade'};
     const val={sid:b.sid,name:b.name,gender:b.gender,track:TRACKS[b.track].stored,cand:b.cand===true,d1:b.d1,d2:b.d2||'',role,answers:b.answers};
@@ -528,11 +528,11 @@ async function mockCall(b){
     if(r.pin&&r.pin!==b.pin)return {ok:false,error:'pin'};
     if(r.status==='취소')return {ok:false,error:'closed'};
     Object.assign(r,val,{edit:Date.now(),pin:b.pin,edits:r.edits+1});mockSave(d);return {ok:true,created:false}}
-  if(A==='apMine'){const r=d.rows.find(x=>x.sid===b.sid);if(!r)return {ok:false,error:'not_found'};if(r.pin&&r.pin!==b.pin)return {ok:false,error:'pin'};
+  if(A==='apMine'){const r=d.rows.find(x=>x.sid===b.sid&&x.status!=='보관');if(!r)return {ok:false,error:'not_found'};if(r.pin&&r.pin!==b.pin)return {ok:false,error:'pin'};
     const v=view(r,false);v.track=tk.find(k=>TRACKS[k].stored===v.track)||'';v.roles=seatsOf(v.role);v.role=Object.keys(rk).find(k=>k&&rk[k]===v.role)||'';return {ok:true,app:v,open:d.open}}
   if(!adminOk)return {ok:false,error:'no_auth'};
   const pub=j=>({id:j.id,name:j.name,on:j.on});
-  if(A==='apAdmin')return {ok:true,now:Date.now(),open:d.open,accepting:d.open,rows:d.rows.map(r=>view(r,true)),statuses:['접수','서류 통과','보류','불합격','취소'],judges:d.judges.map(pub),scores:d.scores.map(sv),stages:MOCK_STAGES};
+  if(A==='apAdmin')return {ok:true,now:Date.now(),open:d.open,accepting:d.open,rows:d.rows.map(r=>view(r,true)),statuses:['접수','서류 통과','보류','불합격','취소','보관'],judges:d.judges.map(pub),scores:d.scores.map(sv),stages:MOCK_STAGES};
   if(A==='apAdminJudge'){
     const mk=()=>{let c='';for(let i=0;i<8;i++)c+='abcdefghjkmnpqrstuvwxyz23456789'[Math.floor(Math.random()*31)];return c};
     let code=null,j;
@@ -541,7 +541,7 @@ async function mockCall(b){
     mockSave(d);return {ok:true,judge:pub(j),code:code&&code.slice(0,4)+'-'+code.slice(4),judges:d.judges.map(pub)};
   }
   if(A==='apAdminSet'){if(typeof b.open==='boolean')d.open=b.open;mockSave(d);return {ok:true,open:d.open,accepting:d.open}}
-  if(A==='apAdminMark'){const r=d.rows.find(x=>x.id===b.id);if(!r)return {ok:false,error:'not_found'};if(b.status!=null)r.status=b.status;if(b.memo!=null)r.memo=b.memo;if(b.resetPin)r.pin='';mockSave(d);return {ok:true,row:view(r,true)}}
+  if(A==='apAdminMark'){const r=d.rows.find(x=>x.id===b.id);if(!r)return {ok:false,error:'not_found'};if(b.status!=null&&b.status!=='보관'&&r.status==='보관'&&d.rows.some(x=>x!==r&&x.sid===r.sid&&x.status!=='보관'))return {ok:false,error:'exists'};if(b.status!=null)r.status=b.status;if(b.memo!=null)r.memo=b.memo;if(b.resetPin)r.pin='';mockSave(d);return {ok:true,row:view(r,true)}}
   return {ok:false,error:'bad_input'};
 }
 
@@ -951,7 +951,9 @@ async function loadBoard(silent){
   sess.set('apply-admin',KEY);BOARD=r;renderBoard();if(silent!==true)toast('새로 불러왔어요 · '+fmtTime(Date.now()));
 }
 const grade=r=>r.sid[0]+'학년';
-const live=rows=>rows.filter(r=>r.status!=='취소');
+// 취소·보관은 숫자·심사에서 뺀다(보관은 잘못 낸 신청 — 학생이 같은 학번으로 새로 낼 수 있음, 2026-11-25)
+const hidden=r=>r.status==='취소'||r.status==='보관';
+const live=rows=>rows.filter(r=>!hidden(r));
 function listOf(title,rows){return {title,rows}}
 let LISTS=[];
 function numBtn(title,rows){const i=LISTS.push(listOf(title,rows))-1;return `<button type="button" class="num" data-list="${i}" ${rows.length?'':'disabled'} aria-label="${esc(title)} ${rows.length}명 명단 보기">${rows.length}</button>`}
@@ -976,7 +978,7 @@ function renderBoard(){
   </section>
   <section class="card" aria-labelledby="hNum"><h2 id="hNum">한눈에 보기 <span class="muted">(숫자를 누르면 명단)</span></h2>
     <div class="tiles">
-      ${tile('전체 신청(취소 빼고)',act,true,'전체')}
+      ${tile('전체 신청(취소·보관 빼고)',act,true,'전체')}
       ${tile('신규 임원',newer)}
       ${tile('기존 임원',by('member'))}
       ${tile('부장·차장 희망',act.filter(wantsLead))}
@@ -986,8 +988,10 @@ function renderBoard(){
       ${tile('교사 추천',act.filter(isRec),false,'교사 추천')}
       ${tile('서류 통과',act.filter(r=>r.status==='서류 통과'))}
       ${tile('취소',all.filter(r=>r.status==='취소'))}
+      ${tile('보관',all.filter(r=>r.status==='보관'))}
     </div>
     <p class="muted" style="margin-top:var(--space-2)">2026-11-24부터 2학년도 «신규 임원»으로 내고 부장·차장을 고를 수 있어요(종이 지원서 수정본). «부장·차장 희망»은 자리에 부장이나 차장을 고른 사람이에요.</p>
+    <p class="muted" style="margin-top:var(--space-1)">잘못 낸 신청은 카드의 상태를 <b>«보관»</b>으로 바꾸면 숫자·심사위원판에서 빠지고, 학생이 같은 학번으로 처음부터 새로 낼 수 있어요(원래 신청은 시트에 남아요). <b>«취소»</b>는 다시 못 내요.</p>
   </section>
   <section class="card" aria-labelledby="hDeptT"><h2 id="hDeptT">부서별</h2>
     <div style="overflow-x:auto"><table class="dt"><thead><tr><th>부서</th><th>1지망 1학년</th><th>1지망 2학년</th><th>그중 부장·차장 희망</th><th>2지망</th></tr></thead><tbody>${deptRows}</tbody></table></div>
@@ -1118,7 +1122,7 @@ async function judgeOp(body){
 }
 async function mark(id,body,okMsg){
   const r=await call(Object.assign({action:'apAdminMark',key:KEY,id},body));
-  if(!r.ok){toast(errText(r.error));return false}
+  if(!r.ok){toast(r.error==='exists'?'같은 학번으로 새로 낸 신청서가 있어서 되돌릴 수 없어요. 새 신청서를 먼저 «보관»해 주세요.':errText(r.error));return false}
   const i=BOARD.rows.findIndex(x=>x.id===id);if(i>=0)BOARD.rows[i]=r.row;
   toast(okMsg);return true;
 }
@@ -1169,7 +1173,7 @@ document.addEventListener('click',async e=>{
   }
 });
 document.addEventListener('change',async e=>{
-  const s=e.target.closest('select[data-status]');if(s){s.disabled=true;const ok=await mark(s.dataset.status,{status:s.value},'«'+s.value+'»로 바꿨어요.');s.disabled=false;if(ok)renderBoard();return}
+  const s=e.target.closest('select[data-status]');if(s){s.disabled=true;const ok=await mark(s.dataset.status,{status:s.value},s.value==='보관'?'보관했어요. 이 학생은 같은 학번으로 새로 낼 수 있어요.':'«'+s.value+'»로 바꿨어요.');s.disabled=false;renderBoard();return}
   if(e.target.id==='fStatus'){VIEW.status=e.target.value;renderGroups()}
   if(e.target.id==='sDept'){SV.dept=e.target.value;renderScores()}
   if(e.target.id==='jOnly'){JV.only=e.target.value;renderJudgeGroups()}
