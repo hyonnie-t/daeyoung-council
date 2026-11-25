@@ -113,6 +113,23 @@ A({ action: 'apAdminMark', id, status: '취소' });
 ok('취소된 신청은 못 고침', POST(base({ edit: true, pin: '5678' })).error === 'closed');
 ok('닫기', A({ action: 'apAdminSet', open: false }).accepting === false && POST(base({ sid: '10101' })).error === 'closed');
 
+/* ── 보관(2026-11-25): 잘못 낸 신청을 빼 두고 같은 학번으로 새로 내기 ── */
+A({ action: 'apAdminSet', open: true });
+POST(base({ sid: '10811', pin: '1111' }));
+const arcId = rows().find(x => x[3] === '10811')[0];
+ok('보관 상태 받음', A({ action: 'apAdminMark', id: arcId, status: '보관' }).ok);
+ok('보관한 학번은 고치기·불러오기에서 없음', POST(base({ sid: '10811', pin: '1111', edit: true })).error === 'not_found' && POST({ action: 'apMine', sid: '10811', pin: '1111' }).error === 'not_found');
+ok('보관한 학번으로 새로 냄(옛 줄은 남음)', POST(base({ sid: '10811', pin: '2222', d1: '행사진행부' })).ok && rows().filter(x => x[3] === '10811').length === 2);
+const newId = rows().filter(x => x[3] === '10811')[1][0];
+ok('새 신청은 새 번호로 불러옴', POST({ action: 'apMine', sid: '10811', pin: '2222' }).app.d1 === '행사진행부');
+ok('같은 학번 새 신청이 있으면 두 번째 새로 내기는 exists', POST(base({ sid: '10811', pin: '3333' })).error === 'exists');
+ok('새 신청이 있으면 보관 되돌리기 막음', A({ action: 'apAdminMark', id: arcId, status: '접수' }).error === 'exists' && rows().find(x => x[0] === arcId)[14] === '보관');
+ok('보관 줄 메모는 고칠 수 있음', A({ action: 'apAdminMark', id: arcId, memo: '학번 잘못 씀' }).ok);
+ok('보관 줄을 다시 보관(그대로)은 됨', A({ action: 'apAdminMark', id: arcId, status: '보관' }).ok);
+A({ action: 'apAdminMark', id: newId, status: '보관' });
+ok('새 신청도 보관하면 옛 줄 되돌리기 됨', A({ action: 'apAdminMark', id: arcId, status: '접수' }).ok && POST({ action: 'apMine', sid: '10811', pin: '1111' }).ok);
+ok('심사판에 보관 상태 목록', A({ action: 'apAdmin' }).statuses.includes('보관'));
+
 /* ── 심사위원별 점수(2026-11-24) ── */
 const J = b => POST(b);
 ok('심사위원 더하기는 관리 비밀번호 필요', POST({ action: 'apAdminJudge', key: 'nope1', op: 'add', name: '회장' }).error === 'no_auth');
@@ -127,6 +144,7 @@ const app2 = r.rows[0].id;
 ok('항목 빠지면 거부', J({ action: 'apJudgeScore', jkey: ja.code, app: app2, stage: 'doc', scores: { motive: 4, plan: 4, solve: 4 } }).error === 'bad_input');
 ok('만점 넘으면 거부', J({ action: 'apJudgeScore', jkey: ja.code, app: app2, stage: 'doc', scores: { motive: 6, plan: 4, solve: 4, drive: 4 } }).error === 'bad_input');
 ok('없는 단계 거부', J({ action: 'apJudgeScore', jkey: ja.code, app: app2, stage: 'x', scores: {} }).error === 'bad_input');
+ok('보관한 신청은 심사위원판에 안 보이고 못 매김', !J({ action: 'apJudge', jkey: ja.code }).rows.some(x => x.id === newId) && J({ action: 'apJudgeScore', jkey: ja.code, app: newId, stage: 'doc', scores: { motive: 4, plan: 4, solve: 4, drive: 4 } }).error === 'not_found');
 ok('취소된 신청은 못 매김', J({ action: 'apJudgeScore', jkey: ja.code, app: id, stage: 'doc', scores: { motive: 4, plan: 4, solve: 4, drive: 4 } }).error === 'not_found');
 r = J({ action: 'apJudgeScore', jkey: ja.code, app: app2, stage: 'doc', scores: { motive: 4, plan: 5, solve: 3, drive: 4 }, memo: '구체적' });
 ok('점수 저장', r.ok && r.score.total === 16 && r.score.full);

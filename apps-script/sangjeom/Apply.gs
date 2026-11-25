@@ -11,6 +11,8 @@
  *  - 지원 구분(2026-11-24 종이 지원서 수정본에 맞춤): 신규 임원(지금 임원이 아닌 1·2학년, 자리는 부원 — 지금 2학년만 부장·차장도) /
  *    기존 임원(지금 임원, 부장·차장·부원). 자리는 여러 개 골라 roles 배열로 보내고 시트엔 «부장·차장·부원»처럼 적는다.
  *    옛 구분 «부장·차장»(lead)과 옛 자리 키(head·vice·any)는 이미 받은 신청·열어 둔 옛 화면 때문에 그대로 받는다.
+ *  - «보관»(2026-11-25 효니 «잘못 신청한 애 … 보관이 나을 거 같아»): 잘못 낸 신청을 시트에 남긴 채 빼 둔다. «취소»처럼 숫자·심사위원판에서 빠지고,
+ *    «취소»와 달리 그 학번을 비워 학생이 같은 학번으로 새로 낼 수 있다(apFind_가 보관 줄을 건너뜀). 같은 학번에 보관 아닌 줄이 있으면 보관을 되돌리지 못한다.
  *  - 기본은 닫힘. 효니가 심사판에서 열 때만 받는다. AP_DEADLINE이 지나면 열어 둬도 받지 않는다(고치기도 막힘).
  * 응답: {ok:true, ...} 또는 {ok:false, error}
  *   error = closed / bad_input / grade(학년이 지원 구분과 안 맞음) / pin(확인 번호 틀림) / busy(틀린 횟수 상한) / exists(이미 낸 학번, 고치기로)
@@ -27,7 +29,8 @@ const AP_DEPTS = ['자율질서부', '알림부', '행사진행부', '홍보기�
 const AP_ROLES = { '': '', head: '부장', vice: '차장', any: '부장·차장 모두' }; // 옛 화면(lead)용 한 개 고르기
 const AP_SEATS = ['부장', '차장', '부원']; // 2026-11-24 새 지원서: 여러 개 고르기(이 순서로 이어 적음)
 const AP_GENDERS = ['남', '여'];
-const AP_STATUSES = ['접수', '서류 통과', '보류', '불합격', '취소'];
+const AP_STATUSES = ['접수', '서류 통과', '보류', '불합격', '취소', '보관'];
+const AP_ARCHIVED = '보관';
 const AP_WRONG_SEC = 30 * 60;
 const AP_WRONG_MAX = 5;
 const AP_TEXT_MAX = 1500;
@@ -50,10 +53,13 @@ function apRows_() {
   const last = sh.getLastRow();
   return { sh: sh, rows: last < 2 ? [] : sh.getRange(2, 1, last - 1, AP_HEADERS.length).getValues() };
 }
-function apFind_(rows, sid) {
-  for (let i = 0; i < rows.length; i++) if (String(rows[i][APC.SID]) === sid) return i;
+// 보관한 줄은 없는 것처럼 건너뛴다(학생이 같은 학번으로 새로 낼 수 있게). skip은 이 줄 번호를 빼고 찾을 때
+function apFind_(rows, sid, skip) {
+  for (let i = 0; i < rows.length; i++) if (i !== skip && String(rows[i][APC.SID]) === sid && String(rows[i][APC.STATUS]) !== AP_ARCHIVED) return i;
   return -1;
 }
+// 심사에서 빠지는 신청(취소·보관)
+function apHidden_(r) { const s = String(r[APC.STATUS]); return s === '취소' || s === AP_ARCHIVED; }
 function apParseAnswers_(raw) {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
   const keys = Object.keys(raw);
@@ -230,6 +236,8 @@ function apAdminMarkPost_(data) {
     let i = -1;
     for (let j = 0; j < t.rows.length; j++) if (String(t.rows[j][APC.ID]) === String(data.id)) { i = j; break; }
     if (i < 0) return sjErr_('not_found');
+    // 보관을 되돌리면 그 학번이 다시 차므로, 같은 학번으로 새로 낸 신청(보관 아닌 줄)이 있으면 막는다
+    if (status !== null && status !== AP_ARCHIVED && String(t.rows[i][APC.STATUS]) === AP_ARCHIVED && apFind_(t.rows, String(t.rows[i][APC.SID]), i) >= 0) return sjErr_('exists');
     if (status !== null) t.sh.getRange(i + 2, APC.STATUS + 1).setValue(status);
     if (data.resetPin === true) { t.sh.getRange(i + 2, APC.PIN + 1).setValue(''); t.rows[i][APC.PIN] = ''; CacheService.getScriptCache().remove('ap_wrong_' + String(t.rows[i][APC.SID])); }
     if (data.memo != null) t.sh.getRange(i + 2, APC.MEMO + 1).setValue(sjText_(String(data.memo), 300));
@@ -309,7 +317,7 @@ function apScoreView_(r) {
   const full = !!st && st.items.every(function (it) { return Number.isInteger(Number(sc[it.id])) && sc[it.id] !== '' && sc[it.id] != null; });
   return { app: String(r[APS.APP]), judge: String(r[APS.JID]), stage: String(r[APS.STAGE]), scores: sc, total: total, full: full, memo: String(r[APS.MEMO] || ''), at: sjTime_(r[APS.AT]) };
 }
-// 심사위원에게 보여 줄 신청서: 심사에 필요한 칸만(교사 추천·심사 상태·메모·확인 번호·답은 빼고), 취소는 빼고
+// 심사위원에게 보여 줄 신청서: 심사에 필요한 칸만(교사 추천·심사 상태·메모·확인 번호·답은 빼고), 취소·보관은 빼고
 function apJudgeApp_(r) {
   return { id: String(r[APC.ID]), sid: String(r[APC.SID]), name: String(r[APC.NAME]), gender: String(r[APC.GENDER]), track: String(r[APC.TRACK]),
     cand: r[APC.CAND] === true || r[APC.CAND] === 'TRUE' || r[APC.CAND] === '예', d1: String(r[APC.D1]), d2: String(r[APC.D2]), role: String(r[APC.ROLE]) };
@@ -319,7 +327,7 @@ function apJudgeApp_(r) {
 function apJudgePost_(data) {
   const g = apJudgeGate_(data);
   if (g.err) return g.err;
-  const apps = apRows_().rows.filter(function (r) { return String(r[APC.STATUS]) !== '취소'; }).map(apJudgeApp_);
+  const apps = apRows_().rows.filter(function (r) { return !apHidden_(r); }).map(apJudgeApp_);
   const mine = apScoreRows_().rows.filter(function (r) { return String(r[APS.JID]) === g.judge.id; }).map(apScoreView_);
   return json_({ ok: true, now: Date.now(), judge: apJudgePublic_(g.judge), stages: AP_STAGES, rows: apps, mine: mine });
 }
@@ -342,7 +350,7 @@ function apJudgeScorePost_(data) {
     const g = apJudgeGate_(data);
     if (g.err) return g.err;
     const a = apRows_().rows.filter(function (r) { return String(r[APC.ID]) === String(data.app); })[0];
-    if (!a || String(a[APC.STATUS]) === '취소') return sjErr_('not_found');
+    if (!a || apHidden_(a)) return sjErr_('not_found');
     const t = apScoreRows_();
     let i = -1;
     for (let j = 0; j < t.rows.length; j++) {
