@@ -1173,7 +1173,7 @@ document.addEventListener('click',async e=>{
   }
 });
 document.addEventListener('change',async e=>{
-  const s=e.target.closest('select[data-status]');if(s){s.disabled=true;const ok=await mark(s.dataset.status,{status:s.value},s.value==='보관'?'보관했어요. 이 학생은 같은 학번으로 새로 낼 수 있어요.':'«'+s.value+'»로 바꿨어요.');s.disabled=false;renderBoard();return}
+  const s=e.target.closest('select[data-status]');if(s){s.disabled=true;const ok=await mark(s.dataset.status,{status:s.value},s.value==='보관'?'보관했어요. 이 학생은 같은 학번으로 새로 낼 수 있어요.':'«'+s.value+'»로 바꿨어요.');s.disabled=false;if(ok)renderBoard();else{const r=BOARD.rows.find(x=>x.id===s.dataset.status);if(r)s.value=r.status}return}
   if(e.target.id==='fStatus'){VIEW.status=e.target.value;renderGroups()}
   if(e.target.id==='sDept'){SV.dept=e.target.value;renderScores()}
   if(e.target.id==='jOnly'){JV.only=e.target.value;renderJudgeGroups()}
