@@ -983,6 +983,7 @@ const recTodo=r=>saysRec(r)&&!noteOf(r).rec;
 const hasPaper=r=>!!noteOf(r).paper;
 const worry=r=>noteOf(r).ops.some(o=>o.tone==='걱정');
 const histText=h=>`${h.year+1}학년도 모집(${h.sid[0]}학년 ${h.sid}) ${h.dept||'부서 모름'} → ${h.result||'결과 모름'}${h.rec?' · 교사 추천 '+h.rec:''}${h.demerit?' · 벌점 '+h.demerit:''}${h.note?' · '+h.note:''}`;
+const isFail=h=>/탈락|불합격/.test(h.result||''); // 엑셀 표기가 달라도 잡게(검토 지적)
 const histShort=r=>histOf(r).map(h=>(h.year+1)+' '+(h.result||'?')).join(', ');
 const opText=o=>'['+o.tone+'] '+(o.who?o.who+': ':'')+o.text;
 // 구분·자리 배지(부장·차장을 바라면 진하게). 심사판·심사위원판 같이 씀
@@ -1009,7 +1010,16 @@ let LISTS=[];
 function numBtn(title,rows){const i=LISTS.push(listOf(title,rows))-1;return `<button type="button" class="num" data-list="${i}" ${rows.length?'':'disabled'} aria-label="${esc(title)} ${rows.length}명 명단 보기">${rows.length}</button>`}
 function tile(title,rows,hi,sub){const i=LISTS.push(listOf(title,rows))-1;return `<button type="button" class="tile${hi?' hi':''}" data-list="${i}"><b>${rows.length}</b><span>${esc(sub||title)}</span></button>`}
 let OPEN_T=new Set(); // renderBoard가 통째로 다시 그리기 전에 열려 있던 «선생님 기록» 학번
+// 통째로 다시 그려도 아직 저장 안 한 입력(심사 메모·의견 칸·종이 체크)은 남긴다(검토 지적, 2026-11-26)
+function keepInputs(){
+  const v={},p={};
+  document.querySelectorAll('input[id^="mm-"],input[id^="ow-"],input[id^="ox-"],select[id^="ot-"]').forEach(x=>{if(x.tagName==='SELECT'?x.selectedIndex!==0:x.value!==x.defaultValue)v[x.id]=x.value});
+  if(BOARD)paperDirty().forEach(x=>{p[x.dataset.paper]=x.checked});
+  return ()=>{Object.keys(v).forEach(id=>{const x=document.getElementById(id);if(x)x.value=v[id]});
+    document.querySelectorAll('input[data-paper]').forEach(x=>{if(x.dataset.paper in p)x.checked=p[x.dataset.paper]});paperSync()};
+}
 function renderBoard(){
+  const restore=keepInputs();
   LISTS=[];OPEN_T=new Set([...document.querySelectorAll('details[data-tnote][open]')].map(x=>x.dataset.tnote));
   const all=BOARD.rows,act=live(all);
   const by=k=>act.filter(r=>r.track===TRACKS[k].stored);
@@ -1041,7 +1051,7 @@ function renderBoard(){
       ${tile('종이 지원서 냄',act.filter(hasPaper),false,'종이 지원서 냄')}
       ${tile('종이 지원서 아직',act.filter(r=>!hasPaper(r)),false,'종이 지원서 아직')}
       ${tile('작년에도 지원',act.filter(r=>histOf(r).length),false,'작년에도 지원')}
-      ${tile('작년 탈락',act.filter(r=>histOf(r).some(h=>h.result==='탈락')),false,'작년 탈락')}
+      ${tile('작년 탈락',act.filter(r=>histOf(r).some(isFail)),false,'작년 탈락')}
       ${tile('선생님 «걱정» 의견',act.filter(worry),false,'선생님 걱정 의견')}
       ${tile('서류 통과',act.filter(r=>r.status==='서류 통과'))}
       ${tile('취소',all.filter(r=>r.status==='취소'))}
@@ -1065,7 +1075,7 @@ function renderBoard(){
     </div>
     <div id="groups"></div>
   </section>`;
-  renderGroups();renderScores();
+  renderGroups();renderScores();restore();
 }
 function filtered(){
   const q=VIEW.q.trim();
@@ -1096,7 +1106,7 @@ function apCard(r){
 /* ── 선생님 기록·작년 이력(2026-11-26) — 심사판에만 보인다(심사위원판·학생 화면 X) ── */
 function noteBadges(r){
   const n=noteOf(r),h=histOf(r),w=n.ops.filter(o=>o.tone==='걱정').length;
-  return (h.length?h.map(x=>`<span class="bd${x.result==='탈락'?' dirty':''}" title="${esc(histText(x))}">작년 ${esc(x.result||'지원')}</span>`).join(''):'')
+  return (h.length?h.map(x=>`<span class="bd${isFail(x)?' dirty':''}" title="${esc(histText(x))}">작년 ${esc(x.result||'지원')}</span>`).join(''):'')
     +(w?`<span class="bd dirty">걱정 의견 ${w}</span>`:'')
     +`<span class="bd${n.paper?' pass':''}">${n.paper?'종이 ✓':'종이 아직'}</span>`;
 }
@@ -1153,7 +1163,7 @@ const recCell=r=>isRec(r)?'추천':noteOf(r).rec==='아님'?'추천 아님':recT
 const cell=v=>String(v).replace(/[\t\n]+/g,' ');
 const rowText=r=>[r.sid,r.name,r.gender,tName(r),roleShort(r.role),r.d1,r.d2||'',r.cand?'회장 후보':'',recCell(r),r.status,noteOf(r).paper||'',histShort(r),noteOf(r).ops.map(opText).join(' / '),r.memo||''].map(cell).join('\t');
 const HEAD='학번\t이름\t성별\t구분\t지원 자리\t1지망\t2지망\t회장 후보\t교사 추천\t상태\t종이 지원서\t작년 이력\t선생님 의견\t심사 메모';
-function oneText(r){return rowText(r).split('\t').filter(Boolean).join(' / ')+'\n'+histOf(r).map(h=>'[작년] '+histText(h)).concat(noteOf(r).ops.map(o=>'[선생님 의견] '+opText(o))).concat(Object.keys(r.answers||{}).map(k=>'['+(qLabel[k]||k)+'] '+(r.answers[k]===true?'예':r.answers[k]===false?'아니오':r.answers[k]))).join('\n')}
+function oneText(r){return rowText(r).split('\t').slice(0,11).filter(Boolean).join(' / ')+(r.memo?'\n[심사 메모] '+r.memo:'')+'\n'+histOf(r).map(h=>'[작년] '+histText(h)).concat(noteOf(r).ops.map(o=>'[선생님 의견] '+opText(o))).concat(Object.keys(r.answers||{}).map(k=>'['+(qLabel[k]||k)+'] '+(r.answers[k]===true?'예':r.answers[k]===false?'아니오':r.answers[k]))).join('\n')}
 let OPEN_LIST=null;
 function showList(i){
   const L=LISTS[i];if(!L)return;OPEN_LIST=L;document.querySelector('#listDlg .dfoot .copy').style.display='';
@@ -1319,7 +1329,11 @@ document.addEventListener('submit',async e=>{
   const of=e.target.closest('form[data-opform]');
   if(of){e.preventDefault();const sid=of.dataset.opform,who=document.getElementById('ow-'+sid).value.trim(),tone=document.getElementById('ot-'+sid).value,text=document.getElementById('ox-'+sid).value.trim();
     if(!text){toast('들은 내용을 한 줄 적어 주세요.');return}
-    const btn=of.querySelector('button');btn.disabled=true;await noteOp(sid,{addOp:{who,tone,text}},'의견을 더했어요.');btn.disabled=false;return}
+    // 다시 그릴 때 입력이 남지 않게 먼저 비우고, 저장에 실패하면 되돌린다
+    const ids=['ow-','ot-','ox-'].map(k=>k+sid),old=ids.map(id=>document.getElementById(id).value);
+    ids.forEach(id=>{const x=document.getElementById(id);x.value=x.tagName==='SELECT'?x.options[0].value:''});
+    const btn=of.querySelector('button');btn.disabled=true;const ok=await noteOp(sid,{addOp:{who,tone,text}},'의견을 더했어요.');btn.disabled=false;
+    if(!ok)ids.forEach((id,i)=>{const x=document.getElementById(id);if(x)x.value=old[i]});return}
   if(e.target.id!=='jAddForm')return;e.preventDefault();
   const inp=document.getElementById('jName'),name=inp.value.trim();if(!name)return;
   const btn=e.target.querySelector('button');btn.disabled=true;const r=await judgeOp({op:'add',name});btn.disabled=false;if(!r)return;

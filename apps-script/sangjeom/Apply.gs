@@ -444,11 +444,13 @@ function apPastMap_(apps) {
   apps.forEach(function (a) {
     const name = String(a[APC.NAME]).trim(), sid = String(a[APC.SID]);
     if (!name || !sid || out[sid]) return;
+    // 연도 칸에 «2025학년도»처럼 글자가 섞여도 앞 숫자 네 자리를 읽는다(검토 지적)
+    const yearOf = function (v) { const m = String(v).match(/\d{4}/); return m ? Number(m[0]) : 0; };
     const hit = past.filter(function (p) {
-      const y = Number(p[0]), ps = String(p[1]).trim();
+      const y = yearOf(p[0]), ps = String(p[1]).trim();
       return String(p[2]).trim() === name && y && /^[1-3]\d{4}$/.test(ps) && Number(ps.charAt(0)) + (AP_THIS_YEAR - y) === Number(sid.charAt(0));
     }).map(function (p) {
-      return { year: Number(p[0]), sid: String(p[1]), gender: String(p[3] || ''), dept: String(p[4] || ''), result: String(p[5] || ''), rec: String(p[6] || ''), demerit: String(p[7] || ''), note: String(p[8] || '') };
+      return { year: yearOf(p[0]), sid: String(p[1]), gender: String(p[3] || ''), dept: String(p[4] || ''), result: String(p[5] || ''), rec: String(p[6] || ''), demerit: String(p[7] || ''), note: String(p[8] || '') };
     });
     if (hit.length) out[sid] = hit;
   });
