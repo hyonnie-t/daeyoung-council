@@ -201,11 +201,14 @@ function apAdminPost_(data) {
   const blocked = sjAdminGate_(data, sjConfig_());
   if (blocked) return blocked;
   const cfg = apConfig_();
-  const rows = apRows_().rows.map(function (r) { return apView_(r, true); });
+  const raw = apRows_().rows;
+  const rows = raw.map(function (r) { return apView_(r, true); });
+  // 선생님 기록(추천 확인·종이 지원서·선생님 의견)과 작년 이력은 학번으로 따로 준다(2026-11-26). past는 이미 «마감 지남»이라 history로
+  const notes = apNotesMap_(), history = apPastMap_(raw);
   // 심사위원별 점수 모아 보기(2026-11-24): 심사위원 목록(번호 HMAC는 빼고)과 모든 점수
   const judges = apJudges_().map(apJudgePublic_);
   const scores = apScoreRows_().rows.map(apScoreView_);
-  return json_({ ok: true, now: Date.now(), open: !!cfg.open, accepting: apAccepting_(cfg), past: apPastDeadline_(), deadline: AP_DEADLINE, g2New: !!cfg.g2New, rows: rows, statuses: AP_STATUSES, judges: judges, scores: scores, stages: AP_STAGES });
+  return json_({ ok: true, now: Date.now(), open: !!cfg.open, accepting: apAccepting_(cfg), past: apPastDeadline_(), deadline: AP_DEADLINE, g2New: !!cfg.g2New, rows: rows, statuses: AP_STATUSES, judges: judges, scores: scores, stages: AP_STAGES, notes: notes, history: history, tones: AP_TONES });
 }
 
 /* action=apAdminSet {key, open?, g2New?} → 신청 열기·닫기(g2New는 2026-11-24부터 효과 없음, 옛 화면이 보내도 오류 안 나게 둠) */
@@ -395,4 +398,143 @@ function apAdminJudgePost_(data) {
   } finally { lock.releaseLock(); }
 }
 
-const AP_ROUTES = { apInfo: apInfoPost_, apSubmit: apSubmitPost_, apMine: apMinePost_, apAdmin: apAdminPost_, apAdminSet: apAdminSetPost_, apAdminMark: apAdminMarkPost_, apAdminJudge: apAdminJudgePost_, apJudge: apJudgePost_, apJudgeScore: apJudgeScorePost_ };
+/* ═════════════ 선생님 기록·작년 이력(2026-11-26 효니 «교사 추천 아닌데 교사 추천으로 넣은 애들», «작년에 신청했다가 탈락한 애들»,
+ *   «선생님 평판도 꽤 중요한 요소», «서류 신청한 애들도 체크») ═════════════
+ *  - «임원_교사기록»: 학번마다 한 줄. 추천 확인(''=확인 안 함 / 확인 / 아님), 종이 지원서 받은 날, 선생님 의견 목록(JSON).
+ *    학번으로 묶어서 «보관» 뒤 같은 학번으로 새로 내도 기록이 이어진다. 학생 화면(apMine)·심사위원판(apJudge)에는 주지 않는다.
+ *  - 교사 추천은 학생이 고른 답(answers.rec)이 아니라 이 «추천 확인»만 믿는다(효니 2026-11-26: 올해 추천은 아직 아무도 안 함).
+ *  - «임원_작년지원»: 지난 모집 지원자 명단(효니 엑셀에서 옮김, 공개 레포엔 안 넣음). 이름이 같고 학년이 해마다 하나씩 오른 사람을
+ *    심사판에 «작년 이력»으로 붙인다. 동명이인일 수 있어 작년 학번을 같이 보여 준다. */
+const AP_NOTE_SHEET = '임원_교사기록';
+const AP_NOTE_HEADERS = ['학번', '이름', '추천 확인', '종이 지원서', '선생님 의견(JSON)', '고친 시각'];
+const APN = { SID: 0, NAME: 1, REC: 2, PAPER: 3, OPS: 4, AT: 5 };
+const AP_REC_VALUES = ['', '확인', '아님'];
+const AP_TONES = ['좋음', '보통', '걱정'];
+const AP_OPS_MAX = 20;
+const AP_PAST_SHEET = '임원_작년지원';
+const AP_PAST_HEADERS = ['모집 연도', '학번', '이름', '성별', '지원 부서', '결과', '교사 추천', '벌점', '비고'];
+const AP_THIS_YEAR = 2026; // 이번 모집 연도(학번은 이 해 기준)
+
+function apNoteRows_() {
+  const sh = sjSheet_(AP_NOTE_SHEET, AP_NOTE_HEADERS);
+  const last = sh.getLastRow();
+  return { sh: sh, rows: last < 2 ? [] : sh.getRange(2, 1, last - 1, AP_NOTE_HEADERS.length).getValues() };
+}
+function apOps_(raw) {
+  let a = [];
+  try { a = JSON.parse(raw || '[]'); } catch (e) { a = []; }
+  return Array.isArray(a) ? a.filter(function (x) { return x && typeof x === 'object'; }) : [];
+}
+function apNoteView_(r) {
+  const paper = r[APN.PAPER];
+  return { rec: AP_REC_VALUES.indexOf(String(r[APN.REC])) >= 0 ? String(r[APN.REC]) : '', paper: paper ? (paper instanceof Date ? Utilities.formatDate(paper, 'Asia/Seoul', 'yyyy-MM-dd') : String(paper)) : '', ops: apOps_(r[APN.OPS]), at: sjTime_(r[APN.AT]) };
+}
+// 학번 → 기록
+function apNotesMap_() {
+  const m = {};
+  apNoteRows_().rows.forEach(function (r) { const s = String(r[APN.SID]); if (s) m[s] = apNoteView_(r); });
+  return m;
+}
+// 지금 신청한 학번 → 지난 모집 기록 목록. 이름이 같고, 그때 학년 + 지난 햇수 = 지금 학년
+function apPastMap_(apps) {
+  const sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(AP_PAST_SHEET);
+  const out = {};
+  if (!sh || sh.getLastRow() < 2) return out;
+  const past = sh.getRange(2, 1, sh.getLastRow() - 1, AP_PAST_HEADERS.length).getValues();
+  apps.forEach(function (a) {
+    const name = String(a[APC.NAME]).trim(), sid = String(a[APC.SID]);
+    if (!name || !sid || out[sid]) return;
+    const hit = past.filter(function (p) {
+      const y = Number(p[0]), ps = String(p[1]).trim();
+      return String(p[2]).trim() === name && y && /^[1-3]\d{4}$/.test(ps) && Number(ps.charAt(0)) + (AP_THIS_YEAR - y) === Number(sid.charAt(0));
+    }).map(function (p) {
+      return { year: Number(p[0]), sid: String(p[1]), gender: String(p[3] || ''), dept: String(p[4] || ''), result: String(p[5] || ''), rec: String(p[6] || ''), demerit: String(p[7] || ''), note: String(p[8] || '') };
+    });
+    if (hit.length) out[sid] = hit;
+  });
+  return out;
+}
+
+/* action=apAdminNote {key, sid, rec?('', '확인', '아님'), paper?(true=오늘 받음 / false=지움), addOp?{who, tone, text}, delOp?(의견 id)}
+ * → 그 학번 기록. 신청한 학번(취소·보관 포함)만 받는다 */
+function apAdminNotePost_(data) {
+  const sid = apSid_(data.sid);
+  const rec = data.rec == null ? null : (AP_REC_VALUES.indexOf(data.rec) >= 0 ? data.rec : undefined);
+  const paper = data.paper == null ? null : (typeof data.paper === 'boolean' ? data.paper : undefined);
+  let add = null;
+  if (data.addOp != null) {
+    const o = data.addOp;
+    if (typeof o !== 'object') return sjErr_('bad_input');
+    add = { who: sjPlain_(o.who, 20), tone: AP_TONES.indexOf(o.tone) >= 0 ? o.tone : '', text: sjPlain_(o.text, 300) }; // JSON 안이라 수식 막기(')가 필요 없다
+    if (!add.tone || (!add.text && !add.who)) return sjErr_('bad_input');
+  }
+  const del = data.delOp == null ? null : String(data.delOp);
+  if (!sid || rec === undefined || paper === undefined || (rec === null && paper === null && !add && del === null)) return sjErr_('bad_input');
+  const lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    const blocked = sjAdminGate_(data, sjConfig_());
+    if (blocked) return blocked;
+    const apps = apRows_().rows.filter(function (r) { return String(r[APC.SID]) === sid; });
+    if (!apps.length) return sjErr_('not_found');
+    const t = apNoteRows_();
+    let i = -1;
+    for (let j = 0; j < t.rows.length; j++) if (String(t.rows[j][APN.SID]) === sid) { i = j; break; }
+    const row = i >= 0 ? t.rows[i].slice() : [sid, '', '', '', '[]', ''];
+    row[APN.NAME] = String(apps[apps.length - 1][APC.NAME]);
+    if (rec !== null) row[APN.REC] = rec;
+    if (paper !== null) row[APN.PAPER] = paper ? Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd') : '';
+    let ops = apOps_(row[APN.OPS]);
+    if (del !== null) {
+      const n = ops.length;
+      ops = ops.filter(function (x) { return String(x.id) !== del; });
+      if (ops.length === n) return sjErr_('not_found');
+    }
+    if (add) {
+      if (ops.length >= AP_OPS_MAX) return sjErr_('bad_input');
+      ops.push({ id: 'o' + Utilities.getUuid().replace(/-/g, '').slice(0, 8), who: add.who, tone: add.tone, text: add.text, at: Date.now() });
+    }
+    row[APN.OPS] = JSON.stringify(ops);
+    row[APN.AT] = new Date();
+    if (i >= 0) t.sh.getRange(i + 2, 1, 1, AP_NOTE_HEADERS.length).setValues([row]);
+    else t.sh.appendRow(row);
+    return json_({ ok: true, sid: sid, note: apNoteView_(row) });
+  } finally { lock.releaseLock(); }
+}
+
+/* action=apAdminPaper {key, set:{학번: true|false}} → 종이 지원서 받음을 여러 명 한 번에(심사판 «종이 지원서 체크» 표).
+ * 신청한 학번만, 한 번에 60명까지. 이미 같은 값이면 날짜를 바꾸지 않는다. → {notes: 전체 기록} */
+function apAdminPaperPost_(data) {
+  const set = data.set;
+  if (!set || typeof set !== 'object' || Array.isArray(set)) return sjErr_('bad_input');
+  const sids = Object.keys(set);
+  if (!sids.length || sids.length > 60) return sjErr_('bad_input');
+  for (let k = 0; k < sids.length; k++) if (!apSid_(sids[k]) || typeof set[sids[k]] !== 'boolean') return sjErr_('bad_input');
+  const lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    const blocked = sjAdminGate_(data, sjConfig_());
+    if (blocked) return blocked;
+    const names = {};
+    apRows_().rows.forEach(function (r) { names[String(r[APC.SID])] = String(r[APC.NAME]); });
+    for (let k = 0; k < sids.length; k++) if (!(sids[k] in names)) return sjErr_('not_found');
+    const t = apNoteRows_();
+    const today = Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd');
+    sids.forEach(function (sid) {
+      let i = -1;
+      for (let j = 0; j < t.rows.length; j++) if (String(t.rows[j][APN.SID]) === sid) { i = j; break; }
+      const want = set[sid];
+      if (i >= 0 && !!String(t.rows[i][APN.PAPER] || '') === want) return;
+      if (i < 0 && !want) return;
+      const row = i >= 0 ? t.rows[i].slice() : [sid, names[sid], '', '', '[]', ''];
+      row[APN.NAME] = names[sid];
+      row[APN.PAPER] = want ? today : '';
+      row[APN.AT] = new Date();
+      if (i >= 0) { t.sh.getRange(i + 2, 1, 1, AP_NOTE_HEADERS.length).setValues([row]); t.rows[i] = row; }
+      else { t.sh.appendRow(row); t.rows.push(row); }
+    });
+    return json_({ ok: true, notes: apNotesMap_() });
+  } finally { lock.releaseLock(); }
+}
+
+const AP_ROUTES = { apInfo: apInfoPost_, apSubmit: apSubmitPost_, apMine: apMinePost_, apAdmin: apAdminPost_, apAdminSet: apAdminSetPost_, apAdminMark: apAdminMarkPost_, apAdminNote: apAdminNotePost_, apAdminPaper: apAdminPaperPost_, apAdminJudge: apAdminJudgePost_, apJudge: apJudgePost_, apJudgeScore: apJudgeScorePost_ };
