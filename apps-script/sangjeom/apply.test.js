@@ -162,6 +162,52 @@ A({ action: 'apAdminJudge', op: 'toggle', id: jb.judge.id, on: false });
 ok('끈 심사위원은 못 들어옴, 점수는 남음', J({ action: 'apJudge', jkey: jb.code }).error === 'no_auth' && A({ action: 'apAdmin' }).scores.length === 2);
 for (let k = 0; k < 30; k++) J({ action: 'apJudge', jkey: 'zzzz-zz' + k });
 ok('틀린 번호 30번이면 잠시 막음', J({ action: 'apJudge', jkey: re.code }).error === 'busy');
+Object.keys(cacheStore).forEach(k => { delete cacheStore[k]; }); // 아래 시험을 위해 막힘 풀기
+
+// ── 선생님 기록·작년 이력(2026-11-26) ──
+POST(base({ sid: '20901', name: '이력가', answers: { rec: '네', paper: true } }));
+ok('기록: 신청 안 한 학번 거부', A({ action: 'apAdminNote', sid: '20939', rec: '아님' }).error === 'not_found');
+ok('기록: 이상한 추천 값 거부', A({ action: 'apAdminNote', sid: '20901', rec: '추천' }).error === 'bad_input');
+ok('기록: 바꿀 게 없으면 거부', A({ action: 'apAdminNote', sid: '20901' }).error === 'bad_input');
+ok('기록: 비밀번호 없으면 막음', POST({ action: 'apAdminNote', sid: '20901', rec: '아님' }).ok === false);
+r = A({ action: 'apAdminNote', sid: '20901', rec: '아님' });
+ok('기록: 추천 아님 저장', r.ok && r.note.rec === '아님' && sheets['임원_교사기록'].rows[1][0] === '20901' && sheets['임원_교사기록'].rows[1][1] === '이력가');
+r = A({ action: 'apAdminNote', sid: '20901', paper: true });
+ok('기록: 종이 지원서 받은 날 저장, 추천 값은 그대로', r.ok && !!r.note.paper && r.note.rec === '아님');
+r = A({ action: 'apAdminNote', sid: '20901', addOp: { who: '담임', tone: '걱정', text: '=수업 태도 확인 필요' } });
+ok('기록: 의견 더하기(글 앞 = 그대로)', r.ok && r.note.ops.length === 1 && r.note.ops[0].tone === '걱정' && r.note.ops[0].text === '=수업 태도 확인 필요');
+ok('기록: 이상한 평판 값 거부', A({ action: 'apAdminNote', sid: '20901', addOp: { who: '담임', tone: '최고', text: 'x' } }).error === 'bad_input');
+const opId = r.note.ops[0].id;
+A({ action: 'apAdminNote', sid: '20901', addOp: { who: '교과', tone: '좋음', text: '성실함' } });
+ok('기록: 없는 의견 지우기 거부', A({ action: 'apAdminNote', sid: '20901', delOp: 'nope' }).error === 'not_found');
+r = A({ action: 'apAdminNote', sid: '20901', delOp: opId });
+ok('기록: 의견 지우기(다른 의견은 남음)', r.ok && r.note.ops.length === 1 && r.note.ops[0].who === '교과');
+r = A({ action: 'apAdminNote', sid: '20901', paper: false });
+ok('기록: 종이 지원서 지우기, 줄은 하나', r.ok && r.note.paper === '' && sheets['임원_교사기록'].rows.length === 2);
+const adm = A({ action: 'apAdmin' });
+ok('심사판에 학번별 기록이 감', adm.notes['20901'] && adm.notes['20901'].rec === '아님' && adm.notes['20901'].ops.length === 1 && Array.isArray(adm.tones));
+ok('작년 시트가 없으면 이력 빈 칸', adm.history && Object.keys(adm.history).length === 0 && adm.past === false);
+const pastSh = ss.insertSheet('임원_작년지원');
+pastSh.appendRow(['모집 연도', '학번', '이름', '성별', '지원 부서', '결과', '교사 추천', '벌점', '비고']);
+pastSh.appendRow([2025, '10633', '이력가', '여', '알림부', '탈락', '', '2', '']);
+pastSh.appendRow([2025, '20633', '이력가', '여', '알림부', '선발', '', '', '']); // 학년이 안 맞음(지금 3학년이어야 함)
+pastSh.appendRow([2025, '10101', '다른이', '남', '알림부', '선발', '', '', '']);
+const adm2 = A({ action: 'apAdmin' });
+ok('작년 이력: 이름+학년 하나 오른 사람만', adm2.history['20901'] && adm2.history['20901'].length === 1 && adm2.history['20901'][0].result === '탈락' && adm2.history['20901'][0].sid === '10633');
+ok('작년 이력: 다른 학생엔 안 붙음', Object.keys(adm2.history).length === 1);
+POST(base({ sid: '20902', name: '종이나', answers: { rec: '아니요' } }));
+ok('종이 묶음: 신청 안 한 학번 섞이면 거부', A({ action: 'apAdminPaper', set: { '20901': true, '20939': true } }).error === 'not_found');
+ok('종이 묶음: 값이 참·거짓 아니면 거부', A({ action: 'apAdminPaper', set: { '20901': 'yes' } }).error === 'bad_input');
+ok('종이 묶음: 비밀번호 없으면 막음', POST({ action: 'apAdminPaper', set: { '20901': true } }).ok === false);
+r = A({ action: 'apAdminPaper', set: { '20901': true, '20902': true } });
+ok('종이 묶음: 둘 다 받음, 기존 기록(추천·의견) 그대로', r.ok && r.notes['20901'].paper && r.notes['20902'].paper && r.notes['20901'].rec === '아님' && r.notes['20901'].ops.length === 1);
+const nRows = sheets['임원_교사기록'].rows.length;
+r = A({ action: 'apAdminPaper', set: { '20902': false } });
+ok('종이 묶음: 지우기, 줄 수 그대로', r.ok && r.notes['20902'].paper === '' && sheets['임원_교사기록'].rows.length === nRows);
+const jv = J({ action: 'apJudge', jkey: re.code });
+ok('심사위원판엔 기록·이력이 안 감', jv.ok && !('notes' in jv) && !('history' in jv) && !JSON.stringify(jv).includes('성실함'));
+const mine = POST({ action: 'apMine', sid: '20901', pin: '1234' });
+ok('학생 화면엔 기록이 안 감', mine.ok && !JSON.stringify(mine).includes('성실함') && !('note' in mine.app));
 
 const fail = results.filter(x => x.startsWith('FAIL'));
 console.log(results.join('\n'));

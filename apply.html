@@ -158,6 +158,25 @@ table.dt{width:100%;border-collapse:collapse;font-size:15px}
 .ap .memo{display:flex;gap:var(--space-2)}
 .ap .memo input{height:40px;font-size:15px}
 .ap details summary{cursor:pointer;font-size:14px;color:var(--accent);min-height:32px;display:flex;align-items:center}
+/* 선생님 기록·작년 이력·종이 지원서 체크(2026-11-26) */
+.tnote{display:grid;gap:var(--space-2);margin-top:var(--space-2);font-size:14px;background:var(--surface2);border-radius:8px;padding:var(--space-2) var(--space-3)}
+.tnote .trow{display:flex;gap:var(--space-2);align-items:center;flex-wrap:wrap}
+.tnote .tl{font-weight:700;color:var(--text2);min-width:5.5rem}
+.tnote select{height:40px;font-size:15px;width:auto;flex:none}
+.tnote .ops{list-style:none;padding:0;display:grid;gap:var(--space-1)}
+.tnote .ops li{display:flex;gap:var(--space-2);align-items:center}
+.tnote .ops li>span:nth-child(2){flex:1}
+.opform{display:flex;gap:var(--space-2);flex-wrap:wrap}
+.opform input,.opform select{height:40px;font-size:15px}
+.opform input[id^="ow-"]{flex:1 1 8rem}
+.opform input[id^="ox-"]{flex:3 1 12rem}
+.opform select{width:auto;flex:none}
+.warnbox{background:var(--warn-soft);color:var(--warn);border-radius:10px;padding:var(--space-2) var(--space-3);font-size:14px}
+.warnbox .muted{color:var(--warn)}
+.paper{display:grid;grid-template-columns:repeat(auto-fill,minmax(9.5rem,1fr));gap:var(--space-2);margin-top:var(--space-2)}
+.pchk{display:flex;align-items:center;gap:var(--space-2);min-height:40px;padding:0 var(--space-2);border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:14px}
+.pchk input{width:20px;height:20px;flex:none;accent-color:var(--good)}
+.pchk:has(input:checked){background:var(--good-soft);border-color:var(--good)}
 .ans{display:grid;gap:var(--space-2);margin-top:var(--space-2);font-size:14px}
 .ans dt{font-weight:700;color:var(--text2)}
 .ans dd{margin:0;white-space:pre-wrap;background:var(--surface2);border-radius:8px;padding:var(--space-2)}
@@ -532,7 +551,26 @@ async function mockCall(b){
     const v=view(r,false);v.track=tk.find(k=>TRACKS[k].stored===v.track)||'';v.roles=seatsOf(v.role);v.role=Object.keys(rk).find(k=>k&&rk[k]===v.role)||'';return {ok:true,app:v,open:d.open}}
   if(!adminOk)return {ok:false,error:'no_auth'};
   const pub=j=>({id:j.id,name:j.name,on:j.on});
-  if(A==='apAdmin')return {ok:true,now:Date.now(),open:d.open,accepting:d.open,rows:d.rows.map(r=>view(r,true)),statuses:['접수','서류 통과','보류','불합격','취소','보관'],judges:d.judges.map(pub),scores:d.scores.map(sv),stages:MOCK_STAGES};
+  // 선생님 기록(학번별)·작년 이력(가짜, 2026-11-26)
+  d.notes=d.notes||{};
+  const MOCK_HISTORY={'20408':[{year:2025,sid:'10408',gender:'남',dept:'자율질서부',result:'탈락',rec:'',demerit:'2',note:''}],'20519':[{year:2025,sid:'10519',gender:'여',dept:'홍보기획부',result:'선발',rec:'',demerit:'',note:''}]};
+  const noteOf=s=>d.notes[s]||(d.notes[s]={rec:'',paper:'',ops:[],at:0});
+  const today=()=>new Date().toISOString().slice(0,10);
+  if(A==='apAdmin')return {ok:true,now:Date.now(),open:d.open,accepting:d.open,rows:d.rows.map(r=>view(r,true)),statuses:['접수','서류 통과','보류','불합격','취소','보관'],judges:d.judges.map(pub),scores:d.scores.map(sv),stages:MOCK_STAGES,notes:d.notes,history:MOCK_HISTORY,tones:['좋음','보통','걱정']};
+  if(A==='apAdminNote'){
+    if(!d.rows.some(x=>x.sid===b.sid))return {ok:false,error:'not_found'};
+    if(b.rec!=null&&!['','확인','아님'].includes(b.rec))return {ok:false,error:'bad_input'};
+    const n=noteOf(b.sid);
+    if(b.rec!=null)n.rec=b.rec;
+    if(typeof b.paper==='boolean')n.paper=b.paper?today():'';
+    if(b.delOp!=null){const k=n.ops.length;n.ops=n.ops.filter(x=>x.id!==b.delOp);if(n.ops.length===k)return {ok:false,error:'not_found'}}
+    if(b.addOp){if(!['좋음','보통','걱정'].includes(b.addOp.tone))return {ok:false,error:'bad_input'};n.ops.push({id:'o'+Date.now(),who:String(b.addOp.who||'').slice(0,20),tone:b.addOp.tone,text:String(b.addOp.text||'').slice(0,300),at:Date.now()})}
+    n.at=Date.now();mockSave(d);return {ok:true,sid:b.sid,note:n};
+  }
+  if(A==='apAdminPaper'){
+    const s=Object.keys(b.set||{});if(s.some(x=>!d.rows.some(r=>r.sid===x)))return {ok:false,error:'not_found'};
+    s.forEach(x=>{const n=noteOf(x);if(!!n.paper!==b.set[x])n.paper=b.set[x]?today():''});mockSave(d);return {ok:true,notes:d.notes};
+  }
   if(A==='apAdminJudge'){
     const mk=()=>{let c='';for(let i=0;i<8;i++)c+='abcdefghjkmnpqrstuvwxyz23456789'[Math.floor(Math.random()*31)];return c};
     let code=null,j;
@@ -934,7 +972,20 @@ let BOARD=null;let VIEW={by:'dept',status:'',q:''};
 // 2026-11-24 전 옛 긴 글 문항(이미 낸 답이 있으면 심사판에 이 이름으로 보임)
 const OLD_LABELS={motive:'학생회 임원에 지원하는 까닭',plan:'학생회에서 해 보고 싶은 일',strength:'나의 장점이나 해 본 경험',review:'올해 학생회 활동 돌아보기',next:'내년에 더 해 보고 싶은 일',lead_exp:'학생회나 학급·동아리에서 해 본 일',lead_plan:'부서를 이끌면서 하고 싶은 일',lead_team:'부원끼리 의견이 다를 때 나는 어떻게 할까요?',now_member:'지금 학생회 임원인가요?'};
 const qLabel=Object.assign({},OLD_LABELS,Object.fromEntries(Object.keys(FORM).flatMap(k=>FORM[k]).map(q=>[q.id,q.label])));
-const isRec=r=>!!(r.answers&&r.answers.rec==='네');
+// 교사 추천은 선생님이 «추천 확인»한 학생만(2026-11-26 효니: 올해 추천은 아직 아무도 안 함, 학생 답 «네»는 잘못 고른 것).
+// 학생이 고른 답은 지우지 않고 «학생 답»으로만 보여 준다. 기록은 학번으로 묶여 «보관» 뒤 새로 내도 이어진다
+const NOTE0={rec:'',paper:'',ops:[],at:0};
+const noteOf=r=>(BOARD&&BOARD.notes&&BOARD.notes[r.sid])||NOTE0;
+const histOf=r=>(BOARD&&BOARD.history&&BOARD.history[r.sid])||[];
+const saysRec=r=>!!(r.answers&&r.answers.rec==='네');
+const isRec=r=>noteOf(r).rec==='확인';
+const recTodo=r=>saysRec(r)&&!noteOf(r).rec;
+const hasPaper=r=>!!noteOf(r).paper;
+const worry=r=>noteOf(r).ops.some(o=>o.tone==='걱정');
+const histText=h=>`${h.year+1}학년도 모집(${h.sid[0]}학년 ${h.sid}) ${h.dept||'부서 모름'} → ${h.result||'결과 모름'}${h.rec?' · 교사 추천 '+h.rec:''}${h.demerit?' · 벌점 '+h.demerit:''}${h.note?' · '+h.note:''}`;
+const isFail=h=>/탈락|불합격/.test(h.result||''); // 엑셀 표기가 달라도 잡게(검토 지적)
+const histShort=r=>histOf(r).map(h=>(h.year+1)+' '+(h.result||'?')).join(', ');
+const opText=o=>'['+o.tone+'] '+(o.who?o.who+': ':'')+o.text;
 // 구분·자리 배지(부장·차장을 바라면 진하게). 심사판·심사위원판 같이 씀
 const trackBadge=r=>`<span class="bd ${wantsLead(r)?'lead':''}">${esc(tName(r))}${r.role?' · '+esc(roleShort(r.role)):''}</span>`;
 const nowDept=r=>(r.answers&&r.answers.now_dept)?' <span class="muted">· 지금 '+esc(r.answers.now_dept)+'</span>':'';
@@ -958,8 +1009,18 @@ function listOf(title,rows){return {title,rows}}
 let LISTS=[];
 function numBtn(title,rows){const i=LISTS.push(listOf(title,rows))-1;return `<button type="button" class="num" data-list="${i}" ${rows.length?'':'disabled'} aria-label="${esc(title)} ${rows.length}명 명단 보기">${rows.length}</button>`}
 function tile(title,rows,hi,sub){const i=LISTS.push(listOf(title,rows))-1;return `<button type="button" class="tile${hi?' hi':''}" data-list="${i}"><b>${rows.length}</b><span>${esc(sub||title)}</span></button>`}
+let OPEN_T=new Set(); // renderBoard가 통째로 다시 그리기 전에 열려 있던 «선생님 기록» 학번
+// 통째로 다시 그려도 아직 저장 안 한 입력(심사 메모·의견 칸·종이 체크)은 남긴다(검토 지적, 2026-11-26)
+function keepInputs(){
+  const v={},p={};
+  document.querySelectorAll('input[id^="mm-"],input[id^="ow-"],input[id^="ox-"],select[id^="ot-"]').forEach(x=>{if(x.tagName==='SELECT'?x.selectedIndex!==0:x.value!==x.defaultValue)v[x.id]=x.value});
+  if(BOARD)paperDirty().forEach(x=>{p[x.dataset.paper]=x.checked});
+  return ()=>{Object.keys(v).forEach(id=>{const x=document.getElementById(id);if(x)x.value=v[id]});
+    document.querySelectorAll('input[data-paper]').forEach(x=>{if(x.dataset.paper in p)x.checked=p[x.dataset.paper]});paperSync()};
+}
 function renderBoard(){
-  LISTS=[];
+  const restore=keepInputs();
+  LISTS=[];OPEN_T=new Set([...document.querySelectorAll('details[data-tnote][open]')].map(x=>x.dataset.tnote));
   const all=BOARD.rows,act=live(all);
   const by=k=>act.filter(r=>r.track===TRACKS[k].stored);
   const newer=by('new'),male=newer.filter(r=>r.gender==='남'),oldLead=by('lead');
@@ -985,7 +1046,13 @@ function renderBoard(){
       ${oldLead.length?tile('옛 구분 부장·차장(고치기 전)',oldLead,false,'옛 구분 부장·차장'):''}
       ${tile('신규 남학생',male,false,'신규 남학생 '+pct+'%')}
       ${tile('회장 후보도 함',act.filter(r=>r.cand),false,'회장 후보도 함')}
-      ${tile('교사 추천',act.filter(isRec),false,'교사 추천')}
+      ${tile('교사 추천(선생님 확인)',act.filter(isRec),false,'교사 추천(확인)')}
+      ${tile('추천 확인 필요(학생이 «네»를 고름)',act.filter(recTodo),act.some(recTodo),'추천 확인 필요')}
+      ${tile('종이 지원서 냄',act.filter(hasPaper),false,'종이 지원서 냄')}
+      ${tile('종이 지원서 아직',act.filter(r=>!hasPaper(r)),false,'종이 지원서 아직')}
+      ${tile('작년에도 지원',act.filter(r=>histOf(r).length),false,'작년에도 지원')}
+      ${tile('작년 탈락',act.filter(r=>histOf(r).some(isFail)),false,'작년 탈락')}
+      ${tile('선생님 «걱정» 의견',act.filter(worry),false,'선생님 걱정 의견')}
       ${tile('서류 통과',act.filter(r=>r.status==='서류 통과'))}
       ${tile('취소',all.filter(r=>r.status==='취소'))}
       ${tile('보관',all.filter(r=>r.status==='보관'))}
@@ -996,6 +1063,7 @@ function renderBoard(){
   <section class="card" aria-labelledby="hDeptT"><h2 id="hDeptT">부서별</h2>
     <div style="overflow-x:auto"><table class="dt"><thead><tr><th>부서</th><th>1지망 1학년</th><th>1지망 2학년</th><th>그중 부장·차장 희망</th><th>2지망</th></tr></thead><tbody>${deptRows}</tbody></table></div>
   </section>
+  ${teacherSection(act)}
   ${judgeSection()}
   ${scoreSection()}
   <section class="card" aria-labelledby="hList"><h2 id="hList">신청서</h2>
@@ -1007,7 +1075,7 @@ function renderBoard(){
     </div>
     <div id="groups"></div>
   </section>`;
-  renderGroups();renderScores();
+  renderGroups();renderScores();restore();
 }
 function filtered(){
   const q=VIEW.q.trim();
@@ -1024,31 +1092,83 @@ function apCard(r){
   const ans=Object.keys(r.answers||{}).map(k=>{const v=r.answers[k];return `<dt>${esc(qLabel[k]||k)}</dt><dd>${esc(v===true?'예':v===false?'아니오':v)}</dd>`}).join('');
   return `<article class="ap reveal st-${esc(r.status)}" data-id="${esc(r.id)}">
     <header><div><b>${esc(r.name)}</b> <span class="muted">${esc(sidLabel(r.sid))} · ${esc(r.gender)}</span></div>
-      <div class="badges">${r.cand?'<span class="bd cand">회장 후보</span>':''}${isRec(r)?'<span class="bd">교사 추천</span>':''}${trackBadge(r)}${r.status==='서류 통과'?'<span class="bd pass">서류 통과</span>':''}</div></header>
+      <div class="badges">${r.cand?'<span class="bd cand">회장 후보</span>':''}${isRec(r)?'<span class="bd">교사 추천</span>':''}${recTodo(r)?'<span class="bd dirty">추천? 확인 필요</span>':''}${trackBadge(r)}${r.status==='서류 통과'?'<span class="bd pass">서류 통과</span>':''}${noteBadges(r)}</div></header>
     <div class="prefs">1지망 <b>${esc(r.d1)}</b>${r.d2?' · 2지망 '+esc(r.d2):''}${nowDept(r)} <span class="muted">· ${esc(fmtTime(r.at))}${r.edits?' · 고침 '+r.edits+'번':''}</span></div>
     <div class="ctl"><label class="visually-hidden" for="st-${esc(r.id)}">${esc(r.name)} 심사 상태</label>
       <select id="st-${esc(r.id)}" data-status="${esc(r.id)}">${BOARD.statuses.map(s=>`<option ${s===r.status?'selected':''}>${esc(s)}</option>`).join('')}</select>
       <span class="copy"><button type="button" class="btn xs ghost" data-copy="one" data-id="${esc(r.id)}" aria-label="${esc(r.name)} 신청서 복사">복사</button><span class="tip" role="status"></span></span>
       <button type="button" class="btn xs ghost" data-act="resetPin" data-id="${esc(r.id)}" ${r.pinless?'disabled':''}>${r.pinless?'번호 풀림':'확인 번호 풀기'}</button></div>
     <div class="memo"><label class="visually-hidden" for="mm-${esc(r.id)}">${esc(r.name)} 심사 메모</label><input type="text" id="mm-${esc(r.id)}" maxlength="300" placeholder="심사 메모" value="${esc(r.memo)}"><button type="button" class="btn xs line" data-act="memo" data-id="${esc(r.id)}">저장</button></div>
+    <details data-tnote="${esc(r.sid)}"><summary>선생님 기록·작년 이력${noteCount(r)}</summary>${noteBox(r)}</details>
     <details><summary>답 보기</summary><dl class="ans">${ans||'<dd>답이 없어요</dd>'}</dl></details>
   </article>`;
+}
+/* ── 선생님 기록·작년 이력(2026-11-26) — 심사판에만 보인다(심사위원판·학생 화면 X) ── */
+function noteBadges(r){
+  const n=noteOf(r),h=histOf(r),w=n.ops.filter(o=>o.tone==='걱정').length;
+  return (h.length?h.map(x=>`<span class="bd${isFail(x)?' dirty':''}" title="${esc(histText(x))}">작년 ${esc(x.result||'지원')}</span>`).join(''):'')
+    +(w?`<span class="bd dirty">걱정 의견 ${w}</span>`:'')
+    +`<span class="bd${n.paper?' pass':''}">${n.paper?'종이 ✓':'종이 아직'}</span>`;
+}
+const noteCount=r=>{const n=noteOf(r).ops.length,h=histOf(r).length;return n||h?` <span class="muted">(${[h?'이력 '+h:'',n?'의견 '+n:''].filter(Boolean).join(' · ')})</span>`:''};
+function noteBox(r){
+  const n=noteOf(r),h=histOf(r),sid=esc(r.sid),tones=(BOARD.tones||['좋음','보통','걱정']);
+  return `<div class="tnote">
+    <div class="trow"><span class="tl">교사 추천</span>
+      <label class="visually-hidden" for="rec-${sid}">${esc(r.name)} 교사 추천 확인</label>
+      <select id="rec-${sid}" data-rec="${sid}">${[['','확인 안 함'],['확인','추천 맞음'],['아님','추천 아님']].map(o=>`<option value="${o[0]}" ${n.rec===o[0]?'selected':''}>${o[1]}</option>`).join('')}</select>
+      <span class="muted">학생 답: ${esc(r.answers&&r.answers.rec||'없음')}</span></div>
+    <div class="trow"><span class="tl">종이 지원서</span><span>${n.paper?'<b style="color:var(--good)">받음</b> <span class="muted">'+esc(n.paper)+'</span>':'<span class="muted">아직 — 위 «종이 지원서 체크» 표에서 표시해요</span>'}</span></div>
+    <div class="trow"><span class="tl">작년 이력</span><span>${h.length?h.map(x=>esc(histText(x))).join('<br>'):'<span class="muted">작년 지원 명단에 없어요</span>'}</span></div>
+    <div class="tl" style="margin-top:var(--space-2)">선생님 의견 <span class="muted">(누가 · 좋음/보통/걱정 · 한 줄)</span></div>
+    <ul class="ops">${n.ops.map(o=>`<li><span class="bd${o.tone==='걱정'?' dirty':o.tone==='좋음'?' pass':''}">${esc(o.tone)}</span> <span>${o.who?'<b>'+esc(o.who)+'</b> ':''}${esc(o.text)}</span><button type="button" class="btn xs ghost" data-act="delOp" data-sid="${sid}" data-op="${esc(o.id)}" aria-label="이 의견 지우기">지우기</button></li>`).join('')||'<li class="muted">아직 없어요</li>'}</ul>
+    <form class="opform" data-opform="${sid}">
+      <label class="visually-hidden" for="ow-${sid}">누가</label><input id="ow-${sid}" maxlength="20" placeholder="누가(예: 2-6 담임)">
+      <label class="visually-hidden" for="ot-${sid}">평판</label><select id="ot-${sid}">${tones.map(t=>`<option>${esc(t)}</option>`).join('')}</select>
+      <label class="visually-hidden" for="ox-${sid}">의견</label><input id="ox-${sid}" maxlength="300" placeholder="들은 내용 한 줄">
+      <button class="btn xs line">더하기</button></form>
+  </div>`;
+}
+function teacherSection(act){
+  const todo=act.filter(recTodo),rows=act.slice().sort((a,b)=>a.sid.localeCompare(b.sid));
+  return `<section class="card" aria-labelledby="hTeach"><h2 id="hTeach">선생님 기록 <span class="muted">(심사판에만 보여요)</span></h2>
+    ${todo.length?`<div class="warnbox"><p><b>교사 추천 확인 필요 ${todo.length}명</b> — 학생이 «추천받았어요»를 골랐지만 선생님 확인 전이에요: ${todo.map(r=>esc(r.name)).join(', ')}</p>
+      <p class="row" style="margin-top:var(--space-2)"><button type="button" class="btn sm" data-act="recAllNo">이 ${todo.length}명 모두 «추천 아님»</button><span class="muted">한 명씩은 카드의 «선생님 기록»에서 바꿔요. 학생이 고른 답은 그대로 남아요.</span></p></div>`
+      :'<p class="muted">교사 추천은 선생님이 카드에서 «추천 맞음»으로 확인한 학생만 숫자에 들어가요.</p>'}
+    <h3 style="margin-top:var(--space-3)">종이 지원서 체크 <span class="muted">· 낸 ${act.filter(hasPaper).length} / ${act.length}명</span></h3>
+    <div class="paper" id="paperBox">${rows.map(r=>`<label class="pchk"><input type="checkbox" data-paper="${esc(r.sid)}" ${hasPaper(r)?'checked':''}><span><b>${esc(r.name)}</b> <span class="muted">${esc(r.sid)}</span></span></label>`).join('')||'<p class="empty">없어요</p>'}</div>
+    <p class="row" style="margin-top:var(--space-2)"><button type="button" class="btn sm" data-act="paperSave" id="paperSave" disabled>바뀐 것 저장</button><span class="muted" id="paperMsg">받은 학생을 체크하고 한 번에 저장해요. 받은 날은 저장한 날로 적혀요.</span></p>
+  </section>`;
+}
+function paperDirty(){return [...document.querySelectorAll('input[data-paper]')].filter(x=>{const r=BOARD.rows.find(y=>y.sid===x.dataset.paper);return r&&x.checked!==hasPaper(r)})}
+function paperSync(){const d=paperDirty(),b=document.getElementById('paperSave');if(!b)return;b.disabled=!d.length;b.textContent=d.length?'바뀐 '+d.length+'명 저장':'바뀐 것 저장'}
+// 한 학생 기록을 서버에 쓰고, 그 학번 카드만 다시 그린다(열어 둔 «선생님 기록»은 열린 채로)
+async function noteOp(sid,body,okMsg){
+  const r=await call(Object.assign({action:'apAdminNote',key:KEY,sid},body));
+  if(!r.ok){toast(r.error==='not_found'?'신청서나 의견을 찾지 못했어요. 새로고침해 주세요.':errText(r.error));return false}
+  BOARD.notes=BOARD.notes||{};BOARD.notes[sid]=r.note;renderBoard();if(okMsg)toast(okMsg);return true;
 }
 function renderGroups(){
   const box=document.getElementById('groups');if(!box)return;
   const rows=filtered();
+  // 다시 그려도 열어 둔 «선생님 기록»은 열린 채로(의견을 이어 적을 때)
+  const openSids=new Set([...OPEN_T,...[...document.querySelectorAll('details[data-tnote][open]')].map(x=>x.dataset.tnote)]);OPEN_T=new Set();
   box.innerHTML=groupsOf(rows).map(([name,list])=>`<div class="group"><h3>${esc(name)} <span class="bd">${list.length}명</span></h3>${list.length?`<div class="cards">${list.map(apCard).join('')}</div>`:'<p class="empty">없어요</p>'}</div>`).join('');
+  box.querySelectorAll('details[data-tnote]').forEach(x=>{if(openSids.has(x.dataset.tnote))x.open=true});
   observeReveal(box);
 }
-// HEAD와 rowText 칸 수를 같게(10칸). 지금 부서는 «답»에 있어 한 명 복사(oneText)에 나온다
-const rowText=r=>[r.sid,r.name,r.gender,tName(r),roleShort(r.role),r.d1,r.d2||'',r.cand?'회장 후보':'',isRec(r)?'추천':'',r.status].join('\t');
-const HEAD='학번\t이름\t성별\t구분\t지원 자리\t1지망\t2지망\t회장 후보\t교사 추천\t상태';
-function oneText(r){return rowText(r).split('\t').filter(Boolean).join(' / ')+'\n'+Object.keys(r.answers||{}).map(k=>'['+(qLabel[k]||k)+'] '+(r.answers[k]===true?'예':r.answers[k]===false?'아니오':r.answers[k])).join('\n')}
+// HEAD와 rowText 칸 수를 같게(14칸). 지금 부서는 «답»에 있어 한 명 복사(oneText)에 나온다.
+// 교사 추천 칸은 선생님 확인 기준(추천/추천 아님/확인 필요/빈칸), 의견은 한 칸에 « / »로 이어 붙임(2026-11-26)
+const recCell=r=>isRec(r)?'추천':noteOf(r).rec==='아님'?'추천 아님':recTodo(r)?'확인 필요':'';
+const cell=v=>String(v).replace(/[\t\n]+/g,' ');
+const rowText=r=>[r.sid,r.name,r.gender,tName(r),roleShort(r.role),r.d1,r.d2||'',r.cand?'회장 후보':'',recCell(r),r.status,noteOf(r).paper||'',histShort(r),noteOf(r).ops.map(opText).join(' / '),r.memo||''].map(cell).join('\t');
+const HEAD='학번\t이름\t성별\t구분\t지원 자리\t1지망\t2지망\t회장 후보\t교사 추천\t상태\t종이 지원서\t작년 이력\t선생님 의견\t심사 메모';
+function oneText(r){return rowText(r).split('\t').slice(0,11).filter(Boolean).join(' / ')+(r.memo?'\n[심사 메모] '+r.memo:'')+'\n'+histOf(r).map(h=>'[작년] '+histText(h)).concat(noteOf(r).ops.map(o=>'[선생님 의견] '+opText(o))).concat(Object.keys(r.answers||{}).map(k=>'['+(qLabel[k]||k)+'] '+(r.answers[k]===true?'예':r.answers[k]===false?'아니오':r.answers[k]))).join('\n')}
 let OPEN_LIST=null;
 function showList(i){
   const L=LISTS[i];if(!L)return;OPEN_LIST=L;document.querySelector('#listDlg .dfoot .copy').style.display='';
   document.getElementById('listTitle').textContent=L.title+' · '+L.rows.length+'명';
-  document.getElementById('listBody').innerHTML=L.rows.slice().sort((a,b)=>a.sid.localeCompare(b.sid)).map(r=>`<li><span><b>${esc(r.name)}</b> <span class="muted">${esc(sidLabel(r.sid))} · ${esc(r.gender)}</span></span><span class="muted">${esc(tName(r))}${r.role?'('+esc(roleShort(r.role))+')':''} · ${esc(r.d1)}${r.d2?'→'+esc(r.d2):''}${r.cand?' · 후보':''}</span></li>`).join('')||'<li class="empty">없어요</li>';
+  document.getElementById('listBody').innerHTML=L.rows.slice().sort((a,b)=>a.sid.localeCompare(b.sid)).map(r=>`<li><span><b>${esc(r.name)}</b> <span class="muted">${esc(sidLabel(r.sid))} · ${esc(r.gender)}</span></span><span class="muted">${esc(tName(r))}${r.role?'('+esc(roleShort(r.role))+')':''} · ${esc(r.d1)}${r.d2?'→'+esc(r.d2):''}${r.cand?' · 후보':''}${hasPaper(r)?' · 종이 ✓':''}${histOf(r).length?' · 작년 '+esc(histShort(r)):''}</span></li>`).join('')||'<li class="empty">없어요</li>';
   document.getElementById('listDlg').showModal();
 }
 
@@ -1165,6 +1285,24 @@ document.addEventListener('click',async e=>{
     const r=await call({action:'apAdminSet',key:KEY,open:to});if(!r.ok){toast(errText(r.error));return}
     return loadBoard(true).then(()=>toast(to?'신청을 열었어요.':'신청을 닫았어요.'));
   }
+  // 선생님 기록(2026-11-26)
+  if(act==='delOp'){
+    if(!await ask('이 의견을 지울까요?','<p>지우면 되돌릴 수 없어요.</p>','지우기',true))return;
+    b.disabled=true;await noteOp(b.dataset.sid,{delOp:b.dataset.op},'의견을 지웠어요.');b.disabled=false;return;
+  }
+  if(act==='recAllNo'){
+    const todo=live(BOARD.rows).filter(recTodo),sids=[...new Set(todo.map(r=>r.sid))];if(!sids.length)return;
+    if(!await ask(sids.length+'명을 «추천 아님»으로 할까요?','<p>'+todo.map(r=>esc(r.name)+' ('+esc(r.sid)+')').join(', ')+'</p><p>학생이 고른 답은 그대로 남고, 교사 추천 숫자·명단 복사에서만 빠져요. 카드에서 언제든 바꿀 수 있어요.</p>','추천 아님으로'))return;
+    b.disabled=true;let done=0;
+    for(const s of sids){const r=await call({action:'apAdminNote',key:KEY,sid:s,rec:'아님'});if(r.ok){BOARD.notes=BOARD.notes||{};BOARD.notes[s]=r.note;done++}}
+    renderBoard();toast(done===sids.length?done+'명을 «추천 아님»으로 했어요.':done+'명만 바꿨어요. 새로고침 뒤 다시 해 주세요.');return;
+  }
+  if(act==='paperSave'){
+    const d=paperDirty();if(!d.length)return;const set={};d.forEach(x=>{set[x.dataset.paper]=x.checked});
+    b.disabled=true;const r=await call({action:'apAdminPaper',key:KEY,set});b.disabled=false;
+    if(!r.ok){toast(r.error==='not_found'?'신청서를 찾지 못한 학번이 있어요. 새로고침해 주세요.':errText(r.error));return}
+    BOARD.notes=r.notes;renderBoard();toast('종이 지원서 '+d.length+'명 저장했어요.');return;
+  }
   if(act==='memo'){const v=document.getElementById('mm-'+b.dataset.id).value;b.disabled=true;await mark(b.dataset.id,{memo:v},'메모를 저장했어요.');b.disabled=false;return}
   if(act==='resetPin'){
     const r=BOARD.rows.find(x=>x.id===b.dataset.id);if(!r)return;
@@ -1174,6 +1312,8 @@ document.addEventListener('click',async e=>{
 });
 document.addEventListener('change',async e=>{
   const s=e.target.closest('select[data-status]');if(s){s.disabled=true;const ok=await mark(s.dataset.status,{status:s.value},s.value==='보관'?'보관했어요. 이 학생은 같은 학번으로 새로 낼 수 있어요.':'«'+s.value+'»로 바꿨어요.');s.disabled=false;if(ok)renderBoard();else{const r=BOARD.rows.find(x=>x.id===s.dataset.status);if(r)s.value=r.status}return}
+  const rs=e.target.closest('select[data-rec]');if(rs){const sid=rs.dataset.rec,v=rs.value;rs.disabled=true;const ok=await noteOp(sid,{rec:v},v==='확인'?'교사 추천으로 확인했어요.':v==='아님'?'«추천 아님»으로 했어요.':'확인 안 함으로 돌렸어요.');if(!ok){rs.disabled=false;rs.value=(BOARD.notes&&BOARD.notes[sid]||NOTE0).rec}return}
+  if(e.target.matches('input[data-paper]')){paperSync();return}
   if(e.target.id==='fStatus'){VIEW.status=e.target.value;renderGroups()}
   if(e.target.id==='sDept'){SV.dept=e.target.value;renderScores()}
   if(e.target.id==='jOnly'){JV.only=e.target.value;renderJudgeGroups()}
@@ -1185,6 +1325,15 @@ document.addEventListener('input',e=>{if(e.target.id==='fQ'){VIEW.q=e.target.val
   if(e.target.id&&e.target.id.startsWith('jm-')){const t=e.target.closest('[data-app]').querySelector('[data-state]');t.textContent='저장 안 함';t.className='bd dirty'}});
 // 심사위원 더하기(효니 심사판)
 document.addEventListener('submit',async e=>{
+  // 선생님 의견 더하기(2026-11-26)
+  const of=e.target.closest('form[data-opform]');
+  if(of){e.preventDefault();const sid=of.dataset.opform,who=document.getElementById('ow-'+sid).value.trim(),tone=document.getElementById('ot-'+sid).value,text=document.getElementById('ox-'+sid).value.trim();
+    if(!text){toast('들은 내용을 한 줄 적어 주세요.');return}
+    // 다시 그릴 때 입력이 남지 않게 먼저 비우고, 저장에 실패하면 되돌린다
+    const ids=['ow-','ot-','ox-'].map(k=>k+sid),old=ids.map(id=>document.getElementById(id).value);
+    ids.forEach(id=>{const x=document.getElementById(id);x.value=x.tagName==='SELECT'?x.options[0].value:''});
+    const btn=of.querySelector('button');btn.disabled=true;const ok=await noteOp(sid,{addOp:{who,tone,text}},'의견을 더했어요.');btn.disabled=false;
+    if(!ok)ids.forEach((id,i)=>{const x=document.getElementById(id);if(x)x.value=old[i]});return}
   if(e.target.id!=='jAddForm')return;e.preventDefault();
   const inp=document.getElementById('jName'),name=inp.value.trim();if(!name)return;
   const btn=e.target.querySelector('button');btn.disabled=true;const r=await judgeOp({op:'add',name});btn.disabled=false;if(!r)return;
